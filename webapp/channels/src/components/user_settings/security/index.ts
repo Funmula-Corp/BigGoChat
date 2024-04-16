@@ -38,6 +38,7 @@ function mapStateToProps(state: GlobalState, ownProps: Props) {
     const enableSignUpWithEmail = config.EnableSignUpWithEmail === 'true';
     const enableSignUpWithGitLab = config.EnableSignUpWithGitLab === 'true';
     const enableSignUpWithGoogle = config.EnableSignUpWithGoogle === 'true';
+    const enableSignUpWithBiggo = config.EnableSignUpWithBiggo === 'true';
     const enableSignUpWithOpenId = config.EnableSignUpWithOpenId === 'true';
     const enableLdap = config.EnableLdap === 'true';
     const enableSaml = config.EnableSaml === 'true';
@@ -50,6 +51,7 @@ function mapStateToProps(state: GlobalState, ownProps: Props) {
         enableSignUpWithEmail,
         enableSignUpWithGitLab,
         enableSignUpWithGoogle,
+        enableSignUpWithBiggo,
         enableSignUpWithOpenId,
         enableLdap,
         enableSaml,

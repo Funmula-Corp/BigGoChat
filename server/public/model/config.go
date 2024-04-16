@@ -48,6 +48,7 @@ const (
 
 	ServiceGitlab    = "gitlab"
 	ServiceGoogle    = "google"
+	ServiceBiggo     = "biggo"
 	ServiceOffice365 = "office365"
 	ServiceOpenid    = "openid"
 
@@ -242,6 +243,11 @@ const (
 	GoogleSettingsDefaultAuthEndpoint    = "https://accounts.google.com/o/oauth2/v2/auth"
 	GoogleSettingsDefaultTokenEndpoint   = "https://www.googleapis.com/oauth2/v4/token"
 	GoogleSettingsDefaultUserAPIEndpoint = "https://people.googleapis.com/v1/people/me?personFields=names,emailAddresses,nicknames,metadata"
+
+	BiggoSettingsDefaultScope           = "profile email"
+	BiggoSettingsDefaultAuthEndpoint    = "http://kyle.account.biggo.com/"
+	BiggoSettingsDefaultTokenEndpoint   = "https://api-auth.dev.cloud.biggo.com/auth/v1/token"
+	BiggoSettingsDefaultUserAPIEndpoint = "https://api.dev.cloud.biggo.com/api/v1/spa/user/info"
 
 	Office365SettingsDefaultScope           = "User.Read"
 	Office365SettingsDefaultAuthEndpoint    = "https://login.microsoftonline.com/common/oauth2/v2.0/authorize"
@@ -3485,6 +3491,7 @@ type Config struct {
 	ThemeSettings             ThemeSettings
 	GitLabSettings            SSOSettings
 	GoogleSettings            SSOSettings
+	BiggoSettings             SSOSettings
 	Office365Settings         Office365Settings
 	OpenIdSettings            SSOSettings
 	LdapSettings              LdapSettings
@@ -3549,6 +3556,8 @@ func (o *Config) GetSSOService(service string) *SSOSettings {
 		return &o.GitLabSettings
 	case ServiceGoogle:
 		return &o.GoogleSettings
+	case ServiceBiggo:
+		return &o.BiggoSettings
 	case ServiceOffice365:
 		return o.Office365Settings.SSOSettings()
 	case ServiceOpenid:
@@ -3591,6 +3600,7 @@ func (o *Config) SetDefaults() {
 	o.Office365Settings.setDefaults()
 	o.GitLabSettings.setDefaults("", "", "", "", "")
 	o.GoogleSettings.setDefaults(GoogleSettingsDefaultScope, GoogleSettingsDefaultAuthEndpoint, GoogleSettingsDefaultTokenEndpoint, GoogleSettingsDefaultUserAPIEndpoint, "")
+	o.BiggoSettings.setDefaults(BiggoSettingsDefaultScope, BiggoSettingsDefaultAuthEndpoint, BiggoSettingsDefaultTokenEndpoint, BiggoSettingsDefaultUserAPIEndpoint, "")
 	o.OpenIdSettings.setDefaults(OpenidSettingsDefaultScope, "", "", "", "#145DBF")
 	o.ServiceSettings.SetDefaults(isUpdate)
 	o.PasswordSettings.SetDefaults()
@@ -4348,6 +4358,10 @@ func (o *Config) Sanitize() {
 
 	if o.GoogleSettings.Secret != nil && *o.GoogleSettings.Secret != "" {
 		*o.GoogleSettings.Secret = FakeSetting
+	}
+
+	if o.BiggoSettings.Secret != nil && *o.BiggoSettings.Secret != "" {
+		*o.BiggoSettings.Secret = FakeSetting
 	}
 
 	if o.Office365Settings.Secret != nil && *o.Office365Settings.Secret != "" {

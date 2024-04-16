@@ -320,6 +320,7 @@ func GenerateLimitedClientConfig(c *model.Config, telemetryID string, license *m
 	props["SamlLoginButtonBorderColor"] = ""
 	props["SamlLoginButtonTextColor"] = ""
 	props["EnableSignUpWithGoogle"] = "false"
+	props["EnableSignUpWithBiggo"] = strconv.FormatBool(*c.BiggoSettings.Enable)
 	props["EnableSignUpWithOffice365"] = "false"
 	props["EnableSignUpWithOpenId"] = "false"
 	props["OpenIdButtonText"] = ""

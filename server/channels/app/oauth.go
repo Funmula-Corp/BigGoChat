@@ -876,6 +876,12 @@ func (a *App) AuthorizeOAuthUser(c request.CTX, w http.ResponseWriter, r *http.R
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	req.Header.Set("Accept", "application/json")
 
+	// biggo api spec
+	if service == model.ServiceBiggo {
+		basic := fmt.Sprintf("%s:%s", *sso.Id, *sso.Secret)
+		req.Header.Set("Authorization", fmt.Sprintf("Basic %s", b64.StdEncoding.EncodeToString([]byte(basic))))
+	}
+
 	resp, err := a.HTTPService().MakeClient(true).Do(req)
 	if err != nil {
 		return nil, "", stateProps, nil, model.NewAppError("AuthorizeOAuthUser", "api.user.authorize_oauth_user.token_failed.app_error", nil, "", http.StatusInternalServerError).Wrap(err)

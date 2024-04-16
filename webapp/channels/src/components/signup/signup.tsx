@@ -88,6 +88,7 @@ const Signup = ({onCustomizeHeader}: SignupProps) => {
         EnableSignUpWithEmail,
         EnableSignUpWithGitLab,
         EnableSignUpWithGoogle,
+        EnableSignUpWithBiggo,
         EnableSignUpWithOffice365,
         EnableSignUpWithOpenId,
         EnableLdap,
@@ -120,6 +121,7 @@ const Signup = ({onCustomizeHeader}: SignupProps) => {
     const enableSignUpWithEmail = EnableSignUpWithEmail === 'true';
     const enableSignUpWithGitLab = EnableSignUpWithGitLab === 'true';
     const enableSignUpWithGoogle = EnableSignUpWithGoogle === 'true';
+    const enableSignUpWithBiggo = EnableSignUpWithBiggo === 'true';
     const enableSignUpWithOffice365 = EnableSignUpWithOffice365 === 'true';
     const enableSignUpWithOpenId = EnableSignUpWithOpenId === 'true';
     const enableLDAP = EnableLdap === 'true';
@@ -145,7 +147,7 @@ const Signup = ({onCustomizeHeader}: SignupProps) => {
 
     const cwsAvailability = useCWSAvailabilityCheck();
 
-    const enableExternalSignup = enableSignUpWithGitLab || enableSignUpWithOffice365 || enableSignUpWithGoogle || enableSignUpWithOpenId || enableLDAP || enableSAML;
+    const enableExternalSignup = enableSignUpWithGitLab || enableSignUpWithOffice365 || enableSignUpWithGoogle || enableSignUpWithBiggo || enableSignUpWithOpenId || enableLDAP || enableSAML;
     const hasError = Boolean(emailError || nameError || passwordError || serverError || alertBanner);
     const canSubmit = Boolean(email && name && password) && !hasError && !loading;
     const {error: passwordInfo} = isValidPassword('', getPasswordConfig(config), intl);
@@ -187,6 +189,17 @@ const Signup = ({onCustomizeHeader}: SignupProps) => {
                 url,
                 icon: <LoginGoogleIcon/>,
                 label: formatMessage({id: 'login.google', defaultMessage: 'Google'}),
+                onClick: desktopExternalAuth(url),
+            });
+        }
+
+        if (enableSignUpWithBiggo) {
+            const url = `${Client4.getOAuthRoute()}/biggo/signup${search}`;
+            externalLoginOptions.push({
+                id: 'biggo',
+                url,
+                icon: <LoginOpenIDIcon/>,
+                label: formatMessage({id: 'login.biggo', defaultMessage: 'Biggo'}),
                 onClick: desktopExternalAuth(url),
             });
         }

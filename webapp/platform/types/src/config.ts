@@ -97,6 +97,7 @@ export type ClientConfig = {
     EnableSignUpWithEmail: string;
     EnableSignUpWithGitLab: string;
     EnableSignUpWithGoogle: string;
+    EnableSignUpWithBiggo: string;
     EnableSignUpWithOffice365: string;
     EnableSignUpWithOpenId: string;
     EnableSVGs: string;
