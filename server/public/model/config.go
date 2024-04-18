@@ -247,7 +247,7 @@ const (
 	BiggoSettingsDefaultScope           = "profile email"
 	BiggoSettingsDefaultAuthEndpoint    = "http://kyle.account.biggo.com/"
 	BiggoSettingsDefaultTokenEndpoint   = "https://api-auth.dev.cloud.biggo.com/auth/v1/token"
-	BiggoSettingsDefaultUserAPIEndpoint = "https://api.dev.cloud.biggo.com/api/v1/spa/user/info"
+	BiggoSettingsDefaultUserAPIEndpoint = "http://api-auth.dev.cloud.biggo.com/auth/v1/token/user_info"
 
 	Office365SettingsDefaultScope           = "User.Read"
 	Office365SettingsDefaultAuthEndpoint    = "https://login.microsoftonline.com/common/oauth2/v2.0/authorize"

@@ -22,7 +22,6 @@ type BiggoUser struct {
 	Email  string `json:"email"`
 	UserId string `json:"at_userid"`
 	Name   string `json:"name"`
-	Image  string `json:"origin_profileimg"`
 }
 
 func init() {
@@ -41,8 +40,7 @@ func userFromBiggoUser(logger mlog.LoggerIFace, glu *BiggoUser) *model.User {
 	} else {
 		user.FirstName = glu.Name
 	}
-	user.Email = glu.Email
-	user.Email = strings.ToLower(user.Email)
+	user.Email = strings.ToLower(glu.Email)
 	user.AuthData = &glu.Id
 	user.AuthService = UserAuthServiceBiggo
 
