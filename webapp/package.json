@@ -1,7 +1,7 @@
 {
   "name": "@mattermost/webapp",
   "private": true,
-  "engines": {
+  "_engines": {
     "node": "^18.10.0",
     "npm": "^9.0.0 || ^10.0.0"
   },
