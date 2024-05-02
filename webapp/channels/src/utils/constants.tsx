@@ -1510,6 +1510,7 @@ export const Constants = {
     OFFTOPIC_CHANNEL_UI_NAME: 'Off-Topic',
     GITLAB_SERVICE: 'gitlab',
     GOOGLE_SERVICE: 'google',
+    BIGGO_SERVICE: 'biggo',
     OFFICE365_SERVICE: 'office365',
     OAUTH_SERVICES: ['gitlab', 'google', 'office365', 'openid'],
     OPENID_SERVICE: 'openid',
