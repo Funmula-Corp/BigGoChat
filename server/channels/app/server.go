@@ -32,6 +32,7 @@ import (
 	"github.com/mattermost/mattermost/server/public/shared/mlog"
 	"github.com/mattermost/mattermost/server/public/shared/request"
 	"github.com/mattermost/mattermost/server/public/shared/timezones"
+	"github.com/mattermost/mattermost/server/v8/biggo"
 	"github.com/mattermost/mattermost/server/v8/channels/app/email"
 	"github.com/mattermost/mattermost/server/v8/channels/app/platform"
 	"github.com/mattermost/mattermost/server/v8/channels/app/teams"
@@ -179,6 +180,8 @@ func NewServer(options ...Option) (*Server, error) {
 			return nil, errors.Wrap(err, "failed to apply option")
 		}
 	}
+
+	platform.RegisterClusterInterface(biggo.Cluster)
 
 	// Following outlines the specific set of steps
 	// performed during server bootup. They are sensitive to order
