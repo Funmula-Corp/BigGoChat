@@ -83,3 +83,8 @@ func (c *biggoCluster) ConfigChanged(previousConfig *model.Config, newConfig *mo
 	Trace(previousConfig, newConfig, sendToOtherServer)
 	return nil
 }
+
+func WebConnCountForUser(userID string) (int, *model.AppError) {
+	Trace(userID)
+	return 0, nil
+}
