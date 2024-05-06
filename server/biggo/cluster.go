@@ -84,7 +84,7 @@ func (c *biggoCluster) ConfigChanged(previousConfig *model.Config, newConfig *mo
 	return nil
 }
 
-func WebConnCountForUser(userID string) (int, *model.AppError) {
+func (c *biggoCluster) WebConnCountForUser(userID string) (int, *model.AppError) {
 	Trace(userID)
 	return 0, nil
 }
