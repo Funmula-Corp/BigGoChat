@@ -1,4 +1,4 @@
-package biggo
+package biggo_dbg
 
 import (
 	"encoding/json"
@@ -20,7 +20,7 @@ func Trace(params ...interface{}) {
 		}
 	}
 
-	fmt.Fprintf(os.Stdout, "=====TRACE===== [%s] Call: %s%s\r\n", time.Now(), f.Name(), pParams)
+	fmt.Fprintf(os.Stdout, "Call: %s%s\r\n", f.Name(), pParams)
 }
 
 func SlowTrace(timeout uint8, params ...interface{}) {
@@ -35,6 +35,6 @@ func SlowTrace(timeout uint8, params ...interface{}) {
 		}
 	}
 
-	fmt.Fprintf(os.Stdout, "===============\r\n=====SLOW1===== [%s] Call: %s%s\r\n===============\r\n", time.Now(), f.Name(), pParams)
+	fmt.Fprintf(os.Stdout, "Call: %s%s", f.Name(), pParams)
 	time.Sleep(time.Second * time.Duration(timeout))
 }
