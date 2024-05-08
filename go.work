@@ -4,5 +4,6 @@ use (
 	./api/server/
 	./server/
 	./server/public
+	./tools/mmlicense
 	./tools/mmgotool
 )
