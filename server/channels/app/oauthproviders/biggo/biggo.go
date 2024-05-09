@@ -40,6 +40,7 @@ func userFromBiggoUser(logger mlog.LoggerIFace, glu *BiggoUser) *model.User {
 	} else {
 		user.FirstName = glu.Name
 	}
+	user.Id = model.HashId(glu.Id)
 	user.Email = strings.ToLower(glu.Email)
 	user.AuthData = &glu.Id
 	user.AuthService = UserAuthServiceBiggo

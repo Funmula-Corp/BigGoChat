@@ -383,6 +383,15 @@ func NewId() string {
 	return encoding.EncodeToString(uuid.NewRandom())
 }
 
+// generate Id by hashing input
+func HashId(input string) string {
+	var Max = uuid.UUID{
+		0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+		0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+	}
+	return encoding.EncodeToString(uuid.NewSHA1(Max, []byte(input)))
+}
+
 // NewRandomTeamName is a NewId that will be a valid team name.
 func NewRandomTeamName() string {
 	teamName := NewId()
