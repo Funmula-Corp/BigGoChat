@@ -179,11 +179,21 @@ export MM_LICENSE_FEATURE_FUTUREFEATURES=false
 
 - **-h** print help (also invoked if unknown args are passed in)
 
-- **starts_at** set the license start date-time (example: **-starts_at="2000-01-01 00:00:00"**)
-- **starts_at_date** set the license start date (example: **-starts_at_date="2000-01-01"**)
-- **starts_at_time** set the license start time (example: **-starts_at_time="00:00:00"**)
-- **expires_at** set the license expiration date-time (example: **-expires_at="2000-01-01 00:00:00"**)
-- **expires_at_date** set the license expiration date (example: **-expires_at_date="2000-01-01"**)
-- **expires_at_time** set the license expiration time (example: **-expires_at_time="00:00:00"**)
+- **-starts_at** set the license start date-time (example: **-starts_at="2000-01-01 00:00:00"**)
+- **-starts_at_date** set the license start date (example: **-starts_at_date="2000-01-01"**)
+- **-starts_at_time** set the license start time (example: **-starts_at_time="00:00:00"**)
+- **-expires_at** set the license expiration date-time (example: **-expires_at="2000-01-01 00:00:00"**)
+- **-expires_at_date** set the license expiration date (example: **-expires_at_date="2000-01-01"**)
+- **-expires_at_time** set the license expiration time (example: **-expires_at_time="00:00:00"**)
 
-- **days** set the expiration time in days (takes starts_at settings into account)
+- **-days** set the expiration time in days (takes starts_at settings into account)
+
+- **-insert** insert the newly generated license into the datebase
+- **-activate** activate the generated license or the license with the specified license id
+- **-license_id** set the license id and skips license generation (use together with activate license)
+
+- **-pg_username** configure the postgres client connection and set the username
+- **-pg_password** configure the postgres client connection and set the password
+- **-pg_host** configure the postgres client connection and set the host
+- **-pg_db** configure the postgres client connection and set the db
+- **-pg_port** configure the postgres client connection and set the port
