@@ -13,41 +13,38 @@ import (
 )
 
 //go:embed private.pem
-var PrivateKey []byte
+var privateKey []byte
 
 //go:embed public.pem
-var PublicKey []byte
+var publicKey []byte
 
-func ParsePrivateKey() (pKey *rsa.PrivateKey) {
-	privateKey, rest := pem.Decode(PrivateKey)
+func parsePrivateKey() (pKey *rsa.PrivateKey) {
+	privateKey, rest := pem.Decode(privateKey)
 	if len(rest) > 0 {
-		log.Fatalln("failed to decode private key buffer", rest)
+		log.Fatalln("failed to decode private key buffer")
 	}
 
-	var (
-		err error
-		key any
-	)
-	if key, err = x509.ParsePKCS8PrivateKey(privateKey.Bytes); err != nil {
+	if key, err := x509.ParsePKCS8PrivateKey(privateKey.Bytes); err != nil {
 		log.Fatalln("failed to parse private key: ", err)
-	}
-
-	switch key := key.(type) {
-	case *rsa.PrivateKey:
-		pKey = key
-	default:
-		log.Fatalf("invalid private key type: %T", key)
+	} else {
+		switch key := key.(type) {
+		case *rsa.PrivateKey:
+			pKey = key
+		default:
+			log.Fatalf("invalid private key type: %T", key)
+		}
 	}
 	return
 }
 
-func SignBuffer(data []byte) (signature []byte) {
+func SignLicense(license []byte) (signedLicense []byte) {
 	hash := sha512.New()
-	hash.Write(data)
+	hash.Write(license)
 
-	var err error
-	if signature, err = rsa.SignPKCS1v15(rand.Reader, ParsePrivateKey(), crypto.SHA512, hash.Sum(nil)); err != nil {
+	if signature, err := rsa.SignPKCS1v15(rand.Reader, parsePrivateKey(), crypto.SHA512, hash.Sum(nil)); err != nil {
 		log.Fatalln("error generating signature: ", err)
+	} else {
+		signedLicense = append(license, signature...)
 	}
 	return
 }
@@ -72,7 +69,7 @@ func ValidateLicense(signed []byte) {
 	plaintext := decoded[:len(decoded)-256]
 	signature := decoded[len(decoded)-256:]
 
-	block, _ := pem.Decode(PublicKey)
+	block, _ := pem.Decode(publicKey)
 
 	public, err := x509.ParsePKIXPublicKey(block.Bytes)
 	if err != nil {
