@@ -17,33 +17,56 @@ import (
 
 	"mmlicense/cert"
 	"mmlicense/license"
+	"mmlicense/storage"
 
 	"github.com/mattermost/mattermost/server/public/model"
 )
 
 var (
 	Quiet bool = false
+
+	Activate  bool   = false
+	Insert    bool   = false
+	LicenseId string = ""
 )
 
 func init() {
 	flag.BoolVar(&Quiet, "q", false, "quiet mode - print only encoded license")
+	flag.BoolVar(&Activate, "activate", false, "quiet mode - print only encoded license")
+	flag.BoolVar(&Insert, "insert", false, "insert the created license into the database")
+	flag.StringVar(&LicenseId, "license_id", LicenseId, "set license id (!SKIPS LICENSE GENERATION!)")
 	flag.Parse()
 }
 
 func main() {
-	licenceConfig := license.New()
+	if LicenseId == "" {
+		NewLicense()
+	}
 
-	if licenseBuffer, err := json.Marshal(licenceConfig); err != nil {
+	if Activate {
+		storage.ActivateLicense(LicenseId)
+	}
+}
+
+func NewLicense() {
+	licenseConfig := license.New()
+
+	if licenseBuffer, err := json.Marshal(licenseConfig); err != nil {
 		log.Fatalln("error marshalling license model")
 	} else {
 		if !Quiet {
-			PrintDetails(licenceConfig)
+			PrintDetails(licenseConfig)
 		}
 
 		signedLicense := cert.SignLicense(licenseBuffer)
 		signedLicenseString := base64.StdEncoding.EncodeToString(signedLicense)
 		cert.ValidateLicense([]byte(signedLicenseString))
 		fmt.Println(signedLicenseString)
+
+		LicenseId = licenseConfig.Id
+		if Insert {
+			storage.InsertLicense(licenseConfig.Id, licenseConfig.IssuedAt, []byte(signedLicenseString))
+		}
 	}
 }
 
