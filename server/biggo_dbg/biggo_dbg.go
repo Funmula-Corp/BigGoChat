@@ -1,6 +1,7 @@
 package biggo_dbg
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -14,11 +15,9 @@ func Trace(params ...interface{}) {
 	runtime.Callers(2, pc)
 	f := runtime.FuncForPC(pc[0])
 
-	var pParams string
+	pParams := bytes.NewBuffer([]byte{})
 	if len(params) > 0 {
-		if buffer, err := json.Marshal(struct{ Values []interface{} }{Values: params}); err == nil {
-			pParams = fmt.Sprintf(" Params: %s", string(buffer))
-		}
+		json.NewEncoder(pParams).Encode(params)
 	}
 
 	fmt.Fprintf(os.Stdout, "Call: %s%s\r\n", filepath.Base(f.Name()), pParams)
@@ -29,13 +28,11 @@ func SlowTrace(timeout uint8, params ...interface{}) {
 	runtime.Callers(2, pc)
 	f := runtime.FuncForPC(pc[0])
 
-	var pParams string
+	pParams := bytes.NewBuffer([]byte{})
 	if len(params) > 0 {
-		if buffer, err := json.Marshal(struct{ Values []interface{} }{Values: params}); err == nil {
-			pParams = fmt.Sprintf(" Params: %s", string(buffer))
-		}
+		json.NewEncoder(pParams).Encode(params)
 	}
 
-	fmt.Fprintf(os.Stdout, "Call: %s%s", filepath.Base(f.Name()), pParams)
+	fmt.Fprintf(os.Stdout, "Call: %s%s\r\n", filepath.Base(f.Name()), pParams)
 	time.Sleep(time.Second * time.Duration(timeout))
 }
