@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"path/filepath"
 	"runtime"
 	"time"
 )
@@ -20,7 +21,7 @@ func Trace(params ...interface{}) {
 		}
 	}
 
-	fmt.Fprintf(os.Stdout, "Call: %s%s\r\n", f.Name(), pParams)
+	fmt.Fprintf(os.Stdout, "Call: %s%s\r\n", filepath.Base(f.Name()), pParams)
 }
 
 func SlowTrace(timeout uint8, params ...interface{}) {
@@ -35,6 +36,6 @@ func SlowTrace(timeout uint8, params ...interface{}) {
 		}
 	}
 
-	fmt.Fprintf(os.Stdout, "Call: %s%s", f.Name(), pParams)
+	fmt.Fprintf(os.Stdout, "Call: %s%s", filepath.Base(f.Name()), pParams)
 	time.Sleep(time.Second * time.Duration(timeout))
 }
