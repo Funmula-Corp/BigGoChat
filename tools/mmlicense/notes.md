@@ -6,9 +6,9 @@ func: LoadLicense()
 server/channels/app/platform/license.go
 ```
 
-# server license public key info
+## server license public key info
 
-```
+```text
 Algo RSA
 Format X.509
 ```
