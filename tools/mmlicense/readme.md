@@ -1,20 +1,5 @@
 # funmula license generator for biggo-chat (mattermost)
 
-**NOTES**
-
-- **starts_at** and **expires_at** settings are only available via CLI!
-
-- default duration of a license is 365 days
-
-- set environment variables will override values from the configuration file
-- set cli arguments will override values from environment variables and the configuration file
-
-- all settings in the config file are optional
-- all environment variables are optional
-- all cli arguments are optional
-- cli flag args (boolean) have a default value of true when set - to set them to false use assignment notation (example: **-is_trial=false**)
-- string and integer cli arguments support indirect assignment notation (example: **-users 12**)
-
 ## use config file
 
 ```bash
@@ -173,7 +158,7 @@ export MM_LICENSE_FEATURE_FUTUREFEATURES=false
 -future_features
 ```
 
-**Optional CLI args**
+### Optional CLI args
 
 - **-q** quiet mode - to print only the encoded license
 
@@ -197,3 +182,18 @@ export MM_LICENSE_FEATURE_FUTUREFEATURES=false
 - **-pg_host** configure the postgres client connection and set the host
 - **-pg_db** configure the postgres client connection and set the db
 - **-pg_port** configure the postgres client connection and set the port
+
+### NOTES
+
+- **starts_at** and **expires_at** settings are only available via CLI!
+
+- default duration of a license is 365 days
+
+- set environment variables will override values from the configuration file
+- set cli arguments will override values from environment variables and the configuration file
+
+- all settings in the config file are optional
+- all environment variables are optional
+- all cli arguments are optional
+- cli flag args (boolean) have a default value of true when set - to set them to false use assignment notation (example: **-is_trial=false**)
+- string and integer cli arguments support indirect assignment notation (example: **-users 12**)
