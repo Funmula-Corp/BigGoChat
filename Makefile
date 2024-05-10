@@ -8,6 +8,11 @@ build: build-server build-package
 build-package:
 	cd server && $(MAKE) package
 
+build-docker:
+	cd server/build && \
+	cp -r ../dist packages && \
+	docker build -t mattermost:development .
+
 build-server:
 	cd server && $(MAKE) build
 
