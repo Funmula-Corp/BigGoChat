@@ -1,25 +1,39 @@
 package biggo
 
 import (
+	"context"
+
 	"github.com/mattermost/mattermost/server/public/model"
 	"github.com/mattermost/mattermost/server/v8/biggo_dbg"
+	"github.com/mattermost/mattermost/server/v8/channels/app/platform"
 	"github.com/mattermost/mattermost/server/v8/einterfaces"
 )
 
 // distribute users across the MM cluster based on userID & consistent hashing
 
-type biggoCluster struct{}
+type biggoCluster struct {
+	ps *platform.PlatformService
+
+	gCtx    context.Context
+	gCancel context.CancelFunc
+	msgHdlr msgRegistry
+}
 
 func (c *biggoCluster) StartInterNodeCommunication() {
+	// - store node info in database (cluster_discovery_store.go)
+
 	biggo_dbg.Trace()
+	c.startInterNodeListener()
 }
 
 func (c *biggoCluster) StopInterNodeCommunication() {
 	biggo_dbg.Trace()
+	c.stopInterNodeListener()
 }
 
 func (c *biggoCluster) RegisterClusterMessageHandler(event model.ClusterEvent, crm einterfaces.ClusterMessageHandler) {
-	biggo_dbg.Trace(event, crm)
+	biggo_dbg.Trace(string(event), crm)
+	c.msgHdlr[event] = crm
 }
 
 func (c *biggoCluster) GetClusterId() string {
@@ -49,6 +63,7 @@ func (c *biggoCluster) GetClusterInfos() []*model.ClusterInfo {
 
 func (c *biggoCluster) SendClusterMessage(msg *model.ClusterMessage) {
 	biggo_dbg.Trace(msg)
+	c.sendMessage("127.0.0.1", msg)
 }
 
 func (c *biggoCluster) SendClusterMessageToNode(nodeID string, msg *model.ClusterMessage) error {
