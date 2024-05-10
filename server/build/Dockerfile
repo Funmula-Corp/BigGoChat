@@ -37,7 +37,7 @@ RUN tar zxvf mattermost-team-linux-amd64.tar.gz && rm mattermost-team-linux-amd6
   && chown -R mattermost:mattermost /mattermost /mattermost/data /mattermost/plugins /mattermost/client/plugins
 
 # custom certificate for development ap
-COPY FunmulaTestRootCA.crt /usr/local/share/ca-certificates/
+COPY Funmula_Internal_Root_CA.crt /usr/local/share/ca-certificates/
 RUN update-ca-certificates
 
 # We should refrain from running as privileged user
