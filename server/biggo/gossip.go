@@ -9,26 +9,32 @@ import (
 	"github.com/mattermost/logr/v2"
 	"github.com/mattermost/mattermost/server/public/model"
 	"github.com/mattermost/mattermost/server/public/shared/mlog"
-	"github.com/mattermost/mattermost/server/v8/channels/app/platform"
+	"github.com/mattermost/mattermost/server/v8/biggo_dbg"
 )
 
-type GossipService struct{}
+type GossipService struct {
+	gCtx    context.Context
+	gCancel context.CancelFunc
+}
+
 type GossipServiceArgs struct {
 	Message *model.ClusterMessage
 }
+
 type GossipServiceReply struct{}
 
-var gsInstance *GossipService
-
-func (gs *GossipService) RecvMessage(args *GossipServiceArgs, _ *GossipServiceReply) (err error) {
-	if f, ok := cluster.(*biggoCluster).msgHdlr[args.Message.Event]; ok {
-		go f(args.Message)
+func (gs *GossipService) Receive(args *GossipServiceArgs, _ *GossipServiceReply) (err error) {
+	if args.Message != nil {
+		if f, ok := cluster.(*biggoCluster).cbMap[args.Message.Event]; ok {
+			biggo_dbg.Trace("====FOUND====")
+			go f(args.Message)
+		}
 	}
 	return
 }
 
-func (c *biggoCluster) sendMessage(rcvr string, msg *model.ClusterMessage) (err error) {
-	client, err := rpc.Dial("tcp", fmt.Sprintf("%s:%d", rcvr, *c.ps.Config().ClusterSettings.GossipPort))
+func (gs *GossipService) Publish(host string, port *int, msg *model.ClusterMessage) (err error) {
+	client, err := rpc.Dial("tcp", fmt.Sprintf("%s:%d", host, *port))
 	if err != nil {
 		mlog.Error("Gossip IPC Connection Error", logr.Err(err))
 		return
@@ -36,21 +42,15 @@ func (c *biggoCluster) sendMessage(rcvr string, msg *model.ClusterMessage) (err 
 	defer client.Close()
 
 	args := GossipServiceArgs{Message: msg}
-	if err = client.Call("GossipService.RecvMessage", &args, new(GossipServiceReply)); err != nil {
+	if err = client.Call("GossipService.Receive", &args, new(GossipServiceReply)); err != nil {
 		mlog.Error("Gossip IPC Call Error", logr.Err(err))
 	}
 	return
 }
 
-func (c *biggoCluster) startInterNodeListener() {
-	if c.gCtx == nil && c.gCancel == nil {
-		if gsInstance == nil {
-			gsInstance = new(GossipService)
-			rpc.Register(gsInstance)
-		}
-
-		c.gCtx, c.gCancel = context.WithCancel(context.Background())
-		port := c.ps.Config().ClusterSettings.GossipPort
+func (gs *GossipService) Start(port *int) {
+	if gs.gCtx == nil && gs.gCancel == nil {
+		gs.gCtx, gs.gCancel = context.WithCancel(context.Background())
 
 		hdlr := func(srv net.Listener, ctx context.Context) {
 			for {
@@ -68,7 +68,7 @@ func (c *biggoCluster) startInterNodeListener() {
 			}
 		}
 
-		go func(ps *platform.PlatformService, ctx context.Context, port *int) {
+		go func(ctx context.Context, port *int) {
 			if srv, err := net.Listen("tcp", fmt.Sprintf(":%d", *port)); err != nil {
 				mlog.Error("Gossip IPC Socket Error", logr.Err(err))
 				return
@@ -76,13 +76,13 @@ func (c *biggoCluster) startInterNodeListener() {
 				defer srv.Close()
 				hdlr(srv, ctx)
 			}
-		}(c.ps, c.gCtx, port)
+		}(gs.gCtx, port)
 	}
 }
 
-func (c *biggoCluster) stopInterNodeListener() {
-	if c.gCtx != nil && c.gCancel != nil {
-		c.gCancel()
-		c.gCtx, c.gCancel = nil, nil
+func (gs *GossipService) Stop() {
+	if gs.gCtx != nil && gs.gCancel != nil {
+		gs.gCancel()
+		gs.gCtx, gs.gCancel = nil, nil
 	}
 }
