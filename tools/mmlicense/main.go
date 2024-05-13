@@ -27,6 +27,7 @@ var (
 
 	Activate  bool   = false
 	Insert    bool   = false
+	Show      bool   = false
 	LicenseId string = ""
 )
 
@@ -35,11 +36,14 @@ func init() {
 	flag.BoolVar(&Activate, "activate", false, "quiet mode - print only encoded license")
 	flag.BoolVar(&Insert, "insert", false, "insert the created license into the database")
 	flag.StringVar(&LicenseId, "license_id", LicenseId, "set license id (!SKIPS LICENSE GENERATION!)")
+	flag.BoolVar(&Show, "show", Show, "show license information (!SKIPS LICENSE GENERATION!)")
 	flag.Parse()
 }
 
 func main() {
-	if LicenseId == "" {
+	if Show {
+		LoadLicense()
+	} else if LicenseId == "" {
 		NewLicense()
 	}
 
@@ -67,6 +71,41 @@ func NewLicense() {
 		if Insert {
 			storage.InsertLicense(licenseConfig.Id, licenseConfig.IssuedAt, []byte(signedLicenseString))
 		}
+	}
+}
+
+func LoadLicense() {
+	licenseConfig := license.New()
+
+	if LicenseId == "" {
+		LicenseId, _ = storage.GetActiveLicense()
+	}
+
+	if buffer, err := storage.GetLicense(LicenseId); err != nil {
+		log.Fatalln(err)
+	} else {
+		decoded := make([]byte, base64.StdEncoding.DecodedLen(len(buffer)))
+
+		_, err := base64.StdEncoding.Decode(decoded, buffer)
+		if err != nil {
+			log.Fatalf("encountered error decoding license: %s\r\n", err)
+			return
+		}
+
+		for len(decoded) > 0 && decoded[len(decoded)-1] == byte(0) {
+			decoded = decoded[:len(decoded)-1]
+		}
+
+		if len(decoded) <= 256 {
+			log.Fatalln("Signed license not long enough")
+		}
+
+		plaintext := decoded[:len(decoded)-256]
+		if err = json.Unmarshal(plaintext, licenseConfig); err != nil {
+			log.Fatalln(err)
+		}
+
+		PrintDetails(licenseConfig)
 	}
 }
 

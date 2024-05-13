@@ -57,12 +57,39 @@ func InsertLicense(id string, createdAt int64, buffer []byte) (err error) {
 	var tx pgx.Tx
 	if tx, err = db.Begin(context.Background()); err != nil {
 		db.Close(context.Background())
-		log.Println(err)
+		log.Fatalln(err)
 	} else {
 		defer tx.Rollback(context.Background())
 		if _, err = tx.Exec(context.Background(), "INSERT INTO licenses (id, createat, bytes) VALUES ($1, $2, $3);", id, createdAt, buffer); err == nil {
 			err = tx.Commit(context.Background())
 		}
+	}
+	return
+}
+
+func GetActiveLicense() (licenseId string, err error) {
+	db := initDBConn()
+	defer db.Close(context.Background())
+
+	row := db.QueryRow(context.Background(), "SELECT value::text FROM systems WHERE name = 'ActiveLicenseId';")
+	if err = row.Scan(&licenseId); err != nil {
+		db.Close(context.Background())
+		log.Fatalln(err)
+	}
+	return
+}
+
+func GetLicense(id string) (buffer []byte, err error) {
+	db := initDBConn()
+	defer db.Close(context.Background())
+
+	var strBuf string
+	row := db.QueryRow(context.Background(), "SELECT bytes::text FROM licenses WHERE id = $1;", id)
+	if err = row.Scan(&strBuf); err != nil {
+		db.Close(context.Background())
+		log.Fatalln(err)
+	} else {
+		buffer = []byte(strBuf)
 	}
 	return
 }
