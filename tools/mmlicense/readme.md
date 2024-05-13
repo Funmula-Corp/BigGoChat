@@ -183,6 +183,8 @@ export MM_LICENSE_FEATURE_FUTUREFEATURES=false
 - **-pg_db** configure the postgres client connection and set the db
 - **-pg_port** configure the postgres client connection and set the port
 
+- **-show** decodes and displays license information from the database (default: currnetly active license, use **-license_id** to specify license)
+
 ### NOTES
 
 - **starts_at** and **expires_at** settings are only available via CLI!
