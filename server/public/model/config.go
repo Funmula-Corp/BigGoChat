@@ -1354,7 +1354,7 @@ func (s *LogSettings) SetDefaults() {
 	}
 
 	if s.EnableDiagnostics == nil {
-		s.EnableDiagnostics = NewBool(true)
+		s.EnableDiagnostics = NewBool(false)
 	}
 
 	if s.VerboseDiagnostics == nil {
