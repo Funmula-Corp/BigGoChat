@@ -32,7 +32,7 @@ RUN mkdir -p /mattermost/data /mattermost/plugins /mattermost/client/plugins \
   && adduser -q --disabled-password --uid ${PUID} --gid ${PGID} --gecos "" --home /mattermost mattermost
 
 # get mattermost from make package
-COPY packages/mattermost-team-linux-amd64.tar.gz .
+COPY packages/dist/mattermost-team-linux-amd64.tar.gz .
 RUN tar zxvf mattermost-team-linux-amd64.tar.gz && rm mattermost-team-linux-amd64.tar.gz \
   && chown -R mattermost:mattermost /mattermost /mattermost/data /mattermost/plugins /mattermost/client/plugins
 
@@ -41,7 +41,7 @@ COPY Funmula_Internal_Root_CA.crt /usr/local/share/ca-certificates/
 RUN update-ca-certificates
 
 # We should refrain from running as privileged user
-USER mattermost
+# USER mattermost
 
 # Healthcheck to make sure container is ready
 HEALTHCHECK --interval=30s --timeout=10s \
