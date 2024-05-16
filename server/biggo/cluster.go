@@ -23,17 +23,17 @@ type BiggoCluster struct {
 	ps  *platform.PlatformService
 	cds *platform.ClusterDiscoveryService
 
-	gService *GossipService
+	g2Service *G2Service
 
 	cbMap map[model.ClusterEvent]einterfaces.ClusterMessageHandler
 }
 
 func (c *BiggoCluster) StartInterNodeCommunication() {
-	c.gService.start()
+	c.g2Service.StartInterNodeCommunication()
 }
 
 func (c *BiggoCluster) StopInterNodeCommunication() {
-	c.gService.stop()
+	c.g2Service.StopInterNodeCommunication()
 }
 
 func (c *BiggoCluster) RegisterClusterMessageHandler(event model.ClusterEvent, crm einterfaces.ClusterMessageHandler) {
@@ -57,7 +57,6 @@ func (c *BiggoCluster) HealthScore() int {
 	return 0
 }
 
-// TODO: work in progress
 func (c *BiggoCluster) GetMyClusterInfo() (info *model.ClusterInfo) {
 	buffer := bytes.NewBuffer([]byte{})
 	json.NewEncoder(buffer).Encode(c.ps.Config())
@@ -105,8 +104,8 @@ func (c *BiggoCluster) GetClusterInfos() (result []*model.ClusterInfo) {
 				continue
 			}
 
-			if res, err := c.gService.SendGossip(cd.Hostname, ClusterGossipEventRequestInfo, nil); res != nil && err == nil {
-				result = append(result, res.(*model.ClusterInfo))
+			if res, err := c.g2Service.GetClusterInfo(cd.Hostname); res != nil && err == nil {
+				result = append(result, res)
 			}
 		}
 	}
@@ -118,15 +117,26 @@ func (c *BiggoCluster) SendClusterMessage(msg *model.ClusterMessage) {
 		mlog.Error("Cluster Discovery Error", logr.Err(err))
 	} else {
 		for _, cd := range clusterDiscovery {
-			if c.cds.IsEqual(cd) {
-				c.SendClusterMessageToNode(cd.Hostname, msg)
+			if !c.cds.IsEqual(cd) {
+				if err := c.g2Service.PostClusterMessage(cd.Hostname, msg); err != nil {
+					mlog.Error("SendClusterMessage Error", logr.String("hostname", cd.Hostname))
+				}
 			}
 		}
 	}
 }
 
 func (c *BiggoCluster) SendClusterMessageToNode(nodeID string, msg *model.ClusterMessage) (err error) {
-	_, err = c.gService.SendGossip(nodeID, ClusterGossipEventRequestMessage, msg)
+	var clusterDiscovery []*model.ClusterDiscovery
+	if clusterDiscovery, err = c.ps.Store.ClusterDiscovery().GetAll(c.cds.Type, c.cds.ClusterName); err != nil {
+		mlog.Error("Cluster Discovery Error", logr.Err(err))
+	} else {
+		for _, cd := range clusterDiscovery {
+			if cd.Id == nodeID {
+				err = c.g2Service.PostClusterMessage(cd.Hostname, msg)
+			}
+		}
+	}
 	return
 }
 
@@ -159,21 +169,16 @@ func (c *BiggoCluster) GetPluginStatuses() (model.PluginStatuses, *model.AppErro
 }
 
 func (c *BiggoCluster) ConfigChanged(previousConfig *model.Config, newConfig *model.Config, sendToOtherServer bool) (aerr *model.AppError) {
-	biggo_dbg.Trace(previousConfig, newConfig, sendToOtherServer)
 	if sendToOtherServer {
 		if clusterDiscovery, err := c.ps.Store.ClusterDiscovery().GetAll(c.cds.Type, c.cds.ClusterName); err != nil {
 			mlog.Error("Cluster Discovery Error", logr.Err(err))
 		} else {
 			for _, cd := range clusterDiscovery {
 				if !c.cds.IsEqual(cd) {
-					go c.gService.SendGossip(cd.Hostname, ClusterGossipEventRequestSaveConfig, newConfig)
+					c.g2Service.PostClusterConfig(cd.Hostname, newConfig)
 				}
 			}
 		}
-	} else {
-		//_, _, aerr = c.ps.SaveConfig(newConfig, false)
-		mlog.Info("=====DEBUG=====", logr.Any("set_config", newConfig))
-		c.ps.GetConfigStore().Set(newConfig)
 	}
 	return
 }

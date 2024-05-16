@@ -1,184 +1,165 @@
 package biggo
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
-	"net"
-	"net/rpc"
+	"net/http"
+	"sync"
+	"sync/atomic"
+	"time"
 
-	"github.com/mattermost/logr/v2"
 	"github.com/mattermost/mattermost/server/public/model"
-	"github.com/mattermost/mattermost/server/public/shared/mlog"
 )
 
-type GossipRequestEventType string
-type GossipResponseEventType string
+type G2Service struct {
+	cluster *BiggoCluster
 
-const (
-	ClusterGossipEventRequestGetLogs            GossipRequestEventType  = model.ClusterGossipEventRequestGetLogs
-	ClusterGossipEventResponseGetLogs           GossipResponseEventType = model.ClusterGossipEventResponseGetLogs
-	ClusterGossipEventRequestGetClusterStats    GossipRequestEventType  = model.ClusterGossipEventRequestGetClusterStats
-	ClusterGossipEventResponseGetClusterStats   GossipResponseEventType = model.ClusterGossipEventResponseGetClusterStats
-	ClusterGossipEventRequestGetPluginStatuses  GossipRequestEventType  = model.ClusterGossipEventRequestGetPluginStatuses
-	ClusterGossipEventResponseGetPluginStatuses GossipResponseEventType = model.ClusterGossipEventResponseGetPluginStatuses
-	ClusterGossipEventRequestSaveConfig         GossipRequestEventType  = model.ClusterGossipEventRequestSaveConfig
-	ClusterGossipEventResponseSaveConfig        GossipResponseEventType = model.ClusterGossipEventResponseSaveConfig
-	ClusterGossipEventRequestWebConnCount       GossipRequestEventType  = model.ClusterGossipEventRequestWebConnCount
-	ClusterGossipEventResponseWebConnCount      GossipResponseEventType = model.ClusterGossipEventResponseWebConnCount
+	mux *http.ServeMux
+	svr *http.Server
 
-	ClusterGossipEventRequestInfo     GossipRequestEventType  = "gossip_request_cluster_info"
-	ClusterGossipEventResponseInfo    GossipResponseEventType = "gossip_response_cluster_info"
-	ClusterGossipEventRequestMessage  GossipRequestEventType  = "gossip_request_cluster_message"
-	ClusterGossipEventResponseMessage GossipResponseEventType = "gossip_response_cluster_message"
-)
-
-type GossipService struct {
-	c *BiggoCluster
-
-	gCtx    context.Context
-	gCancel context.CancelFunc
+	lock    sync.Mutex
+	running atomic.Bool
 }
 
-type GossipServiceRequest struct {
-	Type   GossipRequestEventType
-	Buffer []byte
-}
+func (g2s *G2Service) StartInterNodeCommunication() {
+	g2s.lock.Lock()
+	defer g2s.lock.Unlock()
 
-type GossipServiceResponse struct {
-	Type   GossipResponseEventType
-	Buffer []byte
-}
-
-func (gs *GossipService) RecvGossip(request *GossipServiceRequest, response *GossipServiceResponse) (err error) {
-	switch request.Type {
-	case ClusterGossipEventRequestMessage:
-		response.Type = ClusterGossipEventResponseMessage
-		msg := new(model.ClusterMessage)
-		if err = json.Unmarshal(request.Buffer, msg); err == nil {
-			if cb, ok := gs.c.cbMap[msg.Event]; ok {
-				go cb(msg)
-			} else {
-				mlog.Warn("No callback registered for ClusterMessage Event:", logr.Any("ClusterMessageEvent", msg.Event))
-			}
+	if !g2s.running.Load() {
+		if *g2s.cluster.ps.Config().ClusterSettings.OverrideHostname != "" {
+			g2s.cluster.cds.Hostname = *g2s.cluster.ps.Config().ClusterSettings.OverrideHostname
+		} else if *g2s.cluster.ps.Config().ClusterSettings.UseIPAddress {
+			g2s.cluster.cds.AutoFillIPAddress(
+				*g2s.cluster.ps.Config().ClusterSettings.NetworkInterface,
+				*g2s.cluster.ps.Config().ClusterSettings.AdvertiseAddress,
+			)
+		} else {
+			g2s.cluster.cds.AutoFillHostname()
 		}
-	case ClusterGossipEventRequestSaveConfig:
-		response.Type = ClusterGossipEventResponseSaveConfig
-		cfg := new(model.Config)
-		if err = json.Unmarshal(request.Buffer, cfg); err == nil {
-			gs.c.ConfigChanged(nil, cfg, false)
+
+		g2s.cluster.cds.ClusterName = *g2s.cluster.ps.Config().ClusterSettings.ClusterName
+		g2s.cluster.cds.GossipPort = (int32)(*g2s.cluster.ps.Config().ClusterSettings.GossipPort)
+		g2s.cluster.cds.Type = model.GetServiceEnvironment()
+
+		g2s.mux = http.NewServeMux()
+		g2s.svr = &http.Server{
+			Addr:    fmt.Sprintf(":%d", g2s.cluster.cds.GossipPort),
+			Handler: g2s.mux,
 		}
-	case ClusterGossipEventRequestInfo:
-		response.Type = ClusterGossipEventResponseInfo
-		response.Buffer, _ = json.Marshal(gs.c.GetMyClusterInfo())
-	default:
-		err = errors.New("unknown gossip event type")
+
+		g2s.mux.HandleFunc("/gossip/cluster/info", g2s.clusterInfoHandler)
+		g2s.mux.HandleFunc("/gossip/cluster/message", g2s.clusterMessageHandler)
+		g2s.mux.HandleFunc("/gossip/cluster/config", g2s.clusterConfigChangedHandler)
+
+		go func() {
+			defer g2s.running.Store(false)
+			defer g2s.cluster.cds.Stop()
+			g2s.running.Store(true)
+			g2s.cluster.cds.Start()
+			g2s.svr.ListenAndServe()
+		}()
 	}
-	return
 }
 
-func (gs *GossipService) SendGossip(host string, eventType GossipRequestEventType, value interface{}) (result interface{}, err error) {
-	client, err := rpc.Dial("tcp", fmt.Sprintf("%s:%d", host, *gs.c.ps.Config().ClusterSettings.GossipPort))
-	if err != nil {
-		mlog.Error("Gossip IPC Connection Error", logr.Err(err))
+func (g2s *G2Service) StopInterNodeCommunication() {
+	g2s.lock.Lock()
+	defer g2s.lock.Unlock()
+
+	if g2s.running.Load() {
+		ctx, _ := context.WithTimeout(context.Background(), time.Second*5)
+		g2s.svr.Shutdown(ctx)
+	}
+}
+
+func (g2s *G2Service) clusterInfoHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Add("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(g2s.cluster.GetMyClusterInfo())
+}
+
+func (g2s *G2Service) GetClusterInfo(host string) (info *model.ClusterInfo, err error) {
+	ctx, _ := context.WithTimeout(context.Background(), time.Second*5)
+
+	var req *http.Request
+	if req, err = http.NewRequestWithContext(ctx, http.MethodGet,
+		fmt.Sprintf("http://%s:%d/gossip/cluster/info", host, g2s.cluster.cds.GossipPort), nil,
+	); err != nil {
 		return
 	}
-	defer client.Close()
 
-	var buffer []byte
-	if value != nil {
-		buffer, _ = json.Marshal(value)
-	}
-	request := &GossipServiceRequest{
-		Type:   eventType,
-		Buffer: buffer,
+	var res *http.Response
+	if res, err = http.DefaultClient.Do(req); err != nil {
+		return
 	}
 
-	response := &GossipServiceResponse{}
-	if err = client.Call("GossipService.RecvGossip", request, response); err != nil {
-		mlog.Error("Gossip IPC Call Error", logr.Err(err))
-	} else {
-		if len(response.Buffer) > 0 {
-			if verifyResponseType(request.Type, response.Type) {
-				err = errors.New("request-response event type mismatch")
-				mlog.Error("Gossip IPC Response Error", logr.Err(err))
-				return
-			}
-
-			switch response.Type {
-			case ClusterGossipEventResponseInfo:
-				var info model.ClusterInfo
-				err = json.Unmarshal(response.Buffer, &info)
-				result = &info
-			default:
-				err = errors.New("unknown response event type")
-				mlog.Error("Gossip IPC Response Error", logr.Err(err))
-			}
-		}
-	}
+	info = new(model.ClusterInfo)
+	err = json.NewDecoder(res.Body).Decode(info)
 	return
 }
 
-func verifyResponseType(reqType GossipRequestEventType, resType GossipResponseEventType) bool {
-	return (reqType == ClusterGossipEventRequestGetLogs && resType == ClusterGossipEventResponseGetLogs) ||
-		(reqType == ClusterGossipEventRequestGetClusterStats && resType == ClusterGossipEventResponseGetClusterStats) ||
-		(reqType == ClusterGossipEventRequestGetPluginStatuses && resType == ClusterGossipEventResponseGetPluginStatuses) ||
-		(reqType == ClusterGossipEventRequestSaveConfig && resType == ClusterGossipEventResponseSaveConfig) ||
-		(reqType == ClusterGossipEventRequestWebConnCount && resType == ClusterGossipEventResponseWebConnCount) ||
-		(reqType == ClusterGossipEventRequestMessage && resType == ClusterGossipEventResponseMessage)
-}
-
-func (gs *GossipService) start() {
-	if gs.gCtx == nil && gs.gCancel == nil {
-		gs.gCtx, gs.gCancel = context.WithCancel(context.Background())
-
-		go func(ctx context.Context) {
-			defer gs.stop()
-
-			if *gs.c.ps.Config().ClusterSettings.OverrideHostname != "" {
-				gs.c.cds.Hostname = *gs.c.ps.Config().ClusterSettings.OverrideHostname
-			} else if *gs.c.ps.Config().ClusterSettings.UseIPAddress {
-				gs.c.cds.AutoFillIPAddress(
-					*gs.c.ps.Config().ClusterSettings.NetworkInterface,
-					*gs.c.ps.Config().ClusterSettings.AdvertiseAddress,
-				)
-			} else {
-				gs.c.cds.AutoFillHostname()
-			}
-
-			gs.c.cds.ClusterName = *gs.c.ps.Config().ClusterSettings.ClusterName
-			gs.c.cds.GossipPort = (int32)(*gs.c.ps.Config().ClusterSettings.GossipPort)
-			gs.c.cds.Type = model.GetServiceEnvironment()
-
-			if srv, err := net.Listen("tcp", fmt.Sprintf(":%d", gs.c.cds.GossipPort)); err != nil {
-				mlog.Error("Gossip IPC Socket Error", logr.Err(err))
-				return
-			} else {
-				defer srv.Close()
-				defer gs.stop()
-				defer gs.c.cds.Stop()
-				gs.c.cds.Start()
-				for {
-					select {
-					case <-ctx.Done():
-						return
-					default:
-						conn, err := srv.Accept()
-						if err != nil {
-							mlog.Error("Gossip IPC Accept Error", logr.Err(err))
-							continue
-						}
-						go rpc.ServeConn(conn)
-					}
-				}
-			}
-		}(gs.gCtx)
+func (g2s *G2Service) clusterMessageHandler(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case http.MethodPost:
+		msg := new(model.ClusterMessage)
+		if err := json.NewDecoder(r.Body).Decode(msg); err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		g2s.cluster.cbMap[msg.Event](msg)
+	default:
+		http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
 	}
 }
 
-func (gs *GossipService) stop() {
-	if gs.gCancel != nil {
-		gs.gCancel()
+func (g2s *G2Service) PostClusterMessage(host string, msg *model.ClusterMessage) (err error) {
+	ctx, _ := context.WithTimeout(context.Background(), time.Second*5)
+
+	buffer := bytes.NewBuffer([]byte{})
+	if err = json.NewEncoder(buffer).Encode(msg); err != nil {
+		return
 	}
+
+	var req *http.Request
+	if req, err = http.NewRequestWithContext(ctx, http.MethodPost,
+		fmt.Sprintf("http://%s:%d/gossip/cluster/message", host, g2s.cluster.cds.GossipPort), buffer,
+	); err != nil {
+		return
+	}
+
+	_, err = http.DefaultClient.Do(req)
+	return
+}
+
+func (g2s *G2Service) clusterConfigChangedHandler(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case http.MethodPost:
+		cfg := new(model.Config)
+		if err := json.NewDecoder(r.Body).Decode(cfg); err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		g2s.cluster.ps.GetConfigStore().Set(cfg)
+	default:
+		http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
+	}
+}
+
+func (g2s *G2Service) PostClusterConfig(host string, cfg *model.Config) (err error) {
+	ctx, _ := context.WithTimeout(context.Background(), time.Second*5)
+
+	buffer := bytes.NewBuffer([]byte{})
+	if err = json.NewEncoder(buffer).Encode(cfg); err != nil {
+		return
+	}
+
+	var req *http.Request
+	if req, err = http.NewRequestWithContext(ctx, http.MethodPost,
+		fmt.Sprintf("http://%s:%d/gossip/cluster/config", host, g2s.cluster.cds.GossipPort), buffer,
+	); err != nil {
+		return
+	}
+
+	_, err = http.DefaultClient.Do(req)
+	return
 }
