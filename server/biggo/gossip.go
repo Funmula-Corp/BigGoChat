@@ -137,25 +137,21 @@ func (gs *GossipService) start() {
 			defer gs.stop()
 
 			if *gs.c.ps.Config().ClusterSettings.OverrideHostname != "" {
-				gs.c.cds.ClusterDiscovery.Hostname = *gs.c.ps.Config().ClusterSettings.OverrideHostname
-			} else {
-				gs.c.cds.ClusterDiscovery.Hostname = ""
-			}
-
-			if *gs.c.ps.Config().ClusterSettings.UseIPAddress {
-				gs.c.cds.ClusterDiscovery.AutoFillIPAddress(
+				gs.c.cds.Hostname = *gs.c.ps.Config().ClusterSettings.OverrideHostname
+			} else if *gs.c.ps.Config().ClusterSettings.UseIPAddress {
+				gs.c.cds.AutoFillIPAddress(
 					*gs.c.ps.Config().ClusterSettings.NetworkInterface,
 					*gs.c.ps.Config().ClusterSettings.AdvertiseAddress,
 				)
 			} else {
-				gs.c.cds.ClusterDiscovery.AutoFillHostname()
+				gs.c.cds.AutoFillHostname()
 			}
 
-			gs.c.cds.ClusterDiscovery.ClusterName = *gs.c.ps.Config().ClusterSettings.ClusterName
-			gs.c.cds.ClusterDiscovery.GossipPort = (int32)(*gs.c.ps.Config().ClusterSettings.GossipPort)
-			gs.c.cds.ClusterDiscovery.Type = model.GetServiceEnvironment()
+			gs.c.cds.ClusterName = *gs.c.ps.Config().ClusterSettings.ClusterName
+			gs.c.cds.GossipPort = (int32)(*gs.c.ps.Config().ClusterSettings.GossipPort)
+			gs.c.cds.Type = model.GetServiceEnvironment()
 
-			if srv, err := net.Listen("tcp", fmt.Sprintf(":%d", gs.c.cds.ClusterDiscovery.GossipPort)); err != nil {
+			if srv, err := net.Listen("tcp", fmt.Sprintf(":%d", gs.c.cds.GossipPort)); err != nil {
 				mlog.Error("Gossip IPC Socket Error", logr.Err(err))
 				return
 			} else {

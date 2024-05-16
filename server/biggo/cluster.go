@@ -45,8 +45,9 @@ func (c *BiggoCluster) GetClusterId() string {
 }
 
 func (c *BiggoCluster) IsLeader() bool {
-	// TODO: determine if needed in planned concept
-	return true
+	// TODO: implement
+	hostname, _ := os.Hostname()
+	return hostname == "biggo-chat-0"
 }
 
 func (c *BiggoCluster) HealthScore() int {
@@ -89,6 +90,7 @@ func (c *BiggoCluster) GetMyClusterInfo() (info *model.ClusterInfo) {
 	info.Hostname, _ = os.Hostname()
 	info.Version = dbVersion
 	info.SchemaVersion = dbSchemaVersion
+	mlog.Info("=====DEBUG=====", logr.Any("cluster_info", info))
 	return
 }
 
@@ -169,7 +171,9 @@ func (c *BiggoCluster) ConfigChanged(previousConfig *model.Config, newConfig *mo
 			}
 		}
 	} else {
-		_, _, aerr = c.ps.SaveConfig(newConfig, false)
+		//_, _, aerr = c.ps.SaveConfig(newConfig, false)
+		mlog.Info("=====DEBUG=====", logr.Any("set_config", newConfig))
+		c.ps.GetConfigStore().Set(newConfig)
 	}
 	return
 }
