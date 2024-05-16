@@ -1019,7 +1019,6 @@ var transitionallyPrepackagedPlugins = []string{
 	"com.mattermost.confluence",
 	"com.mattermost.custom-attributes",
 	"jenkins",
-	"jitsi",
 	"com.mattermost.plugin-todo",
 	"com.mattermost.welcomebot",
 	"com.mattermost.apps",
