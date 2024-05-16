@@ -68,7 +68,8 @@ func (g2s *G2Service) StopInterNodeCommunication() {
 	defer g2s.lock.Unlock()
 
 	if g2s.running.Load() {
-		ctx, _ := context.WithTimeout(context.Background(), time.Second*5)
+		ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+		defer cancel()
 		g2s.svr.Shutdown(ctx)
 	}
 }
@@ -79,7 +80,8 @@ func (g2s *G2Service) clusterInfoHandler(w http.ResponseWriter, r *http.Request)
 }
 
 func (g2s *G2Service) GetClusterInfo(host string) (info *model.ClusterInfo, err error) {
-	ctx, _ := context.WithTimeout(context.Background(), time.Second*5)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
 
 	var req *http.Request
 	if req, err = http.NewRequestWithContext(ctx, http.MethodGet,
@@ -113,7 +115,8 @@ func (g2s *G2Service) clusterMessageHandler(w http.ResponseWriter, r *http.Reque
 }
 
 func (g2s *G2Service) PostClusterMessage(host string, msg *model.ClusterMessage) (err error) {
-	ctx, _ := context.WithTimeout(context.Background(), time.Second*5)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
 
 	buffer := bytes.NewBuffer([]byte{})
 	if err = json.NewEncoder(buffer).Encode(msg); err != nil {
@@ -146,7 +149,8 @@ func (g2s *G2Service) clusterConfigChangedHandler(w http.ResponseWriter, r *http
 }
 
 func (g2s *G2Service) PostClusterConfig(host string, cfg *model.Config) (err error) {
-	ctx, _ := context.WithTimeout(context.Background(), time.Second*5)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
 
 	buffer := bytes.NewBuffer([]byte{})
 	if err = json.NewEncoder(buffer).Encode(cfg); err != nil {
