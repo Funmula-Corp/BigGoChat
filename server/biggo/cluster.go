@@ -1,7 +1,13 @@
 package biggo
 
 import (
+	"bytes"
+	"crypto/md5"
+	"encoding/hex"
+	"encoding/json"
 	"errors"
+	"fmt"
+	"os"
 
 	"github.com/mattermost/logr/v2"
 	"github.com/mattermost/mattermost/server/public/model"
@@ -13,7 +19,7 @@ import (
 
 // distribute users across the MM cluster based on userID & consistent hashing via ISTIO proxy
 
-type biggoCluster struct {
+type BiggoCluster struct {
 	ps  *platform.PlatformService
 	cds *platform.ClusterDiscoveryService
 
@@ -22,100 +28,154 @@ type biggoCluster struct {
 	cbMap map[model.ClusterEvent]einterfaces.ClusterMessageHandler
 }
 
-func (c *biggoCluster) StartInterNodeCommunication() {
-	c.gService.Start(c.ps.Config().ClusterSettings.GossipPort)
-	c.cds.Start()
+func (c *BiggoCluster) StartInterNodeCommunication() {
+	c.gService.start()
 }
 
-func (c *biggoCluster) StopInterNodeCommunication() {
-	c.cds.Stop()
-	c.gService.Stop()
+func (c *BiggoCluster) StopInterNodeCommunication() {
+	c.gService.stop()
 }
 
-func (c *biggoCluster) RegisterClusterMessageHandler(event model.ClusterEvent, crm einterfaces.ClusterMessageHandler) {
+func (c *BiggoCluster) RegisterClusterMessageHandler(event model.ClusterEvent, crm einterfaces.ClusterMessageHandler) {
 	c.cbMap[event] = crm
 }
 
-// TODO: implement
-func (c *biggoCluster) GetClusterId() string {
-	biggo_dbg.Trace()
-	return ""
+func (c *BiggoCluster) GetClusterId() string {
+	return c.cds.Id
 }
 
-// TODO: implement
-func (c *biggoCluster) IsLeader() bool {
-	biggo_dbg.Trace()
+func (c *BiggoCluster) IsLeader() bool {
+	// TODO: determine if needed in planned concept
 	return true
 }
 
-func (c *biggoCluster) HealthScore() int {
+func (c *BiggoCluster) HealthScore() int {
 	// HealthScore returns a number which is indicative of how well an instance is meeting
 	// the soft real-time requirements of the protocol. Lower numbers are better,
 	// and zero means "totally healthy".
-	biggo_dbg.Trace()
 	return 0
 }
 
-// TODO: implement
-func (c *biggoCluster) GetMyClusterInfo() *model.ClusterInfo {
-	biggo_dbg.Trace()
-	return nil
+// TODO: work in progress
+func (c *BiggoCluster) GetMyClusterInfo() (info *model.ClusterInfo) {
+	buffer := bytes.NewBuffer([]byte{})
+	json.NewEncoder(buffer).Encode(c.ps.Config())
+
+	hash := md5.New()
+	hash.Write(buffer.Bytes())
+
+	dbVersion := func() string {
+		if version, err := c.ps.Store.GetDbVersion(true); err != nil {
+			mlog.Error("Cluster Info Error", logr.Err(err))
+			return "ERROR"
+		} else {
+			return version
+		}
+	}()
+
+	dbSchemaVersion := func() string {
+		if version, err := c.ps.Store.GetDBSchemaVersion(); err != nil {
+			mlog.Error("Cluster Info Error", logr.Err(err))
+			return "ERROR"
+		} else {
+			return fmt.Sprintf("%d", version)
+		}
+	}()
+
+	info = new(model.ClusterInfo)
+	info.Id = c.cds.Id
+	info.ConfigHash = hex.EncodeToString(hash.Sum(nil))
+	info.IPAddress = c.cds.Hostname
+	info.Hostname, _ = os.Hostname()
+	info.Version = dbVersion
+	info.SchemaVersion = dbSchemaVersion
+	return
 }
 
-// TODO: implement
-func (c *biggoCluster) GetClusterInfos() []*model.ClusterInfo {
-	biggo_dbg.Trace()
-	return nil
+func (c *BiggoCluster) GetClusterInfos() (result []*model.ClusterInfo) {
+	result = make([]*model.ClusterInfo, 0)
+	if clusterDiscovery, err := c.ps.Store.ClusterDiscovery().GetAll(c.cds.Type, c.cds.ClusterName); err != nil {
+		mlog.Error("Cluster Discovery Error", logr.Err(err))
+	} else {
+		for _, cd := range clusterDiscovery {
+			if c.cds.IsEqual(cd) {
+				result = append(result, c.GetMyClusterInfo())
+				continue
+			}
+
+			if res, err := c.gService.SendGossip(cd.Hostname, ClusterGossipEventRequestInfo, nil); res != nil && err == nil {
+				result = append(result, res.(*model.ClusterInfo))
+			}
+		}
+	}
+	return
 }
 
-// TODO: implement gossipping (message distribution to neighbor)
-func (c *biggoCluster) SendClusterMessage(msg *model.ClusterMessage) {
-	biggo_dbg.Trace(msg)
-	c.gService.Publish("127.0.0.1", c.ps.Config().ClusterSettings.GossipPort, msg)
+func (c *BiggoCluster) SendClusterMessage(msg *model.ClusterMessage) {
+	if clusterDiscovery, err := c.ps.Store.ClusterDiscovery().GetAll(c.cds.Type, c.cds.ClusterName); err != nil {
+		mlog.Error("Cluster Discovery Error", logr.Err(err))
+	} else {
+		for _, cd := range clusterDiscovery {
+			if c.cds.IsEqual(cd) {
+				c.SendClusterMessageToNode(cd.Hostname, msg)
+			}
+		}
+	}
 }
 
-// TODO: implement
-func (c *biggoCluster) SendClusterMessageToNode(nodeID string, msg *model.ClusterMessage) error {
-	biggo_dbg.Trace(nodeID, msg)
-	return nil
+func (c *BiggoCluster) SendClusterMessageToNode(nodeID string, msg *model.ClusterMessage) (err error) {
+	_, err = c.gService.SendGossip(nodeID, ClusterGossipEventRequestMessage, msg)
+	return
 }
 
-func (c *biggoCluster) NotifyMsg(buf []byte) {
+func (c *BiggoCluster) NotifyMsg(buf []byte) {
 	mlog.Error("Cluster NotifyMsg Call Error", logr.Err(errors.New("NOT IMPLEMENTED")))
 }
 
 // TODO: implement
-func (c *biggoCluster) GetClusterStats() ([]*model.ClusterStats, *model.AppError) {
+func (c *BiggoCluster) GetClusterStats() ([]*model.ClusterStats, *model.AppError) {
 	biggo_dbg.Trace()
 	return nil, nil
 }
 
 // TODO: implement
-func (c *biggoCluster) GetLogs(page, perPage int) ([]string, *model.AppError) {
+func (c *BiggoCluster) GetLogs(page, perPage int) ([]string, *model.AppError) {
 	biggo_dbg.Trace(page, perPage)
 	return nil, nil
 }
 
 // TODO: implement
-func (c *biggoCluster) QueryLogs(page, perPage int) (map[string][]string, *model.AppError) {
+func (c *BiggoCluster) QueryLogs(page, perPage int) (map[string][]string, *model.AppError) {
 	biggo_dbg.Trace(page, perPage)
 	return nil, nil
 }
 
 // TODO: implement
-func (c *biggoCluster) GetPluginStatuses() (model.PluginStatuses, *model.AppError) {
+func (c *BiggoCluster) GetPluginStatuses() (model.PluginStatuses, *model.AppError) {
 	biggo_dbg.Trace()
 	return nil, nil
 }
 
-// TODO: implement
-func (c *biggoCluster) ConfigChanged(previousConfig *model.Config, newConfig *model.Config, sendToOtherServer bool) *model.AppError {
+func (c *BiggoCluster) ConfigChanged(previousConfig *model.Config, newConfig *model.Config, sendToOtherServer bool) (aerr *model.AppError) {
 	biggo_dbg.Trace(previousConfig, newConfig, sendToOtherServer)
-	return nil
+	if sendToOtherServer {
+		if clusterDiscovery, err := c.ps.Store.ClusterDiscovery().GetAll(c.cds.Type, c.cds.ClusterName); err != nil {
+			mlog.Error("Cluster Discovery Error", logr.Err(err))
+		} else {
+			for _, cd := range clusterDiscovery {
+				if !c.cds.IsEqual(cd) {
+					go c.gService.SendGossip(cd.Hostname, ClusterGossipEventRequestSaveConfig, newConfig)
+				}
+			}
+		}
+	} else {
+		_, _, aerr = c.ps.SaveConfig(newConfig, false)
+	}
+	return
 }
 
 // TODO: implement
-func (c *biggoCluster) WebConnCountForUser(userID string) (int, *model.AppError) {
+func (c *BiggoCluster) WebConnCountForUser(userID string) (int, *model.AppError) {
 	biggo_dbg.Trace(userID)
 	return 0, nil
 }
