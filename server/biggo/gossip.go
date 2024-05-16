@@ -51,6 +51,8 @@ func (g2s *G2Service) StartInterNodeCommunication() {
 
 		g2s.mux.HandleFunc("/gossip/cluster/info", g2s.clusterInfoHandler)
 		g2s.mux.HandleFunc("/gossip/cluster/message", g2s.clusterMessageHandler)
+		g2s.mux.HandleFunc("/gossip/cluster/stats", g2s.clusterStatsHandler)
+		g2s.mux.HandleFunc("/gossip/cluster/plugin/statuses", g2s.clusterPluginStatusesHandler)
 		g2s.mux.HandleFunc("/gossip/cluster/config", g2s.clusterConfigChangedHandler)
 
 		go func() {
@@ -131,6 +133,63 @@ func (g2s *G2Service) PostClusterMessage(host string, msg *model.ClusterMessage)
 	}
 
 	_, err = http.DefaultClient.Do(req)
+	return
+}
+
+func (g2s *G2Service) clusterStatsHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Add("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(&model.ClusterStats{Id: g2s.cluster.cds.Id,
+		TotalWebsocketConnections: g2s.cluster.ps.TotalWebsocketConnections(),
+		TotalReadDbConnections:    g2s.cluster.ps.Store.TotalReadDbConnections(),
+		TotalMasterDbConnections:  g2s.cluster.ps.Store.TotalMasterDbConnections(),
+	})
+}
+
+func (g2s *G2Service) GetClusterStats(host string) (stats *model.ClusterStats, err error) {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
+
+	var req *http.Request
+	if req, err = http.NewRequestWithContext(ctx, http.MethodGet,
+		fmt.Sprintf("http://%s:%d/gossip/cluster/stats", host, g2s.cluster.cds.GossipPort), nil,
+	); err != nil {
+		return
+	}
+
+	var res *http.Response
+	if res, err = http.DefaultClient.Do(req); err != nil {
+		return
+	}
+
+	stats = new(model.ClusterStats)
+	err = json.NewDecoder(res.Body).Decode(stats)
+	return
+}
+
+func (g2s *G2Service) clusterPluginStatusesHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Add("Content-Type", "application/json")
+	pStats, _ := g2s.cluster.ps.GetPluginStatuses()
+	json.NewEncoder(w).Encode(&pStats)
+}
+
+func (g2s *G2Service) GetClusterPluginStatuses(host string) (pStats *model.PluginStatuses, err error) {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
+
+	var req *http.Request
+	if req, err = http.NewRequestWithContext(ctx, http.MethodGet,
+		fmt.Sprintf("http://%s:%d/gossip/cluster/plugin/statuses", host, g2s.cluster.cds.GossipPort), nil,
+	); err != nil {
+		return
+	}
+
+	var res *http.Response
+	if res, err = http.DefaultClient.Do(req); err != nil {
+		return
+	}
+
+	pStats = new(model.PluginStatuses)
+	err = json.NewDecoder(res.Body).Decode(pStats)
 	return
 }
 

@@ -89,7 +89,6 @@ func (c *BiggoCluster) GetMyClusterInfo() (info *model.ClusterInfo) {
 	info.Hostname, _ = os.Hostname()
 	info.Version = dbVersion
 	info.SchemaVersion = dbSchemaVersion
-	mlog.Info("=====DEBUG=====", logr.Any("cluster_info", info))
 	return
 }
 
@@ -144,10 +143,27 @@ func (c *BiggoCluster) NotifyMsg(buf []byte) {
 	mlog.Error("Cluster NotifyMsg Call Error", logr.Err(errors.New("NOT IMPLEMENTED")))
 }
 
-// TODO: implement
 func (c *BiggoCluster) GetClusterStats() ([]*model.ClusterStats, *model.AppError) {
-	biggo_dbg.Trace()
-	return nil, nil
+	result := []*model.ClusterStats{{Id: c.cds.Id,
+		TotalWebsocketConnections: c.ps.TotalWebsocketConnections(),
+		TotalReadDbConnections:    c.ps.Store.TotalReadDbConnections(),
+		TotalMasterDbConnections:  c.ps.Store.TotalMasterDbConnections(),
+	}}
+
+	if clusterDiscovery, err := c.ps.Store.ClusterDiscovery().GetAll(c.cds.Type, c.cds.ClusterName); err != nil {
+		mlog.Error("Cluster Discovery Error", logr.Err(err))
+	} else {
+		for _, cd := range clusterDiscovery {
+			if c.cds.IsEqual(cd) {
+				continue
+			}
+
+			if res, err := c.g2Service.GetClusterStats(cd.Hostname); res != nil && err == nil {
+				result = append(result, res)
+			}
+		}
+	}
+	return result, nil
 }
 
 // TODO: implement
@@ -162,10 +178,22 @@ func (c *BiggoCluster) QueryLogs(page, perPage int) (map[string][]string, *model
 	return nil, nil
 }
 
-// TODO: implement
 func (c *BiggoCluster) GetPluginStatuses() (model.PluginStatuses, *model.AppError) {
-	biggo_dbg.Trace()
-	return nil, nil
+	result := model.PluginStatuses{}
+	if clusterDiscovery, err := c.ps.Store.ClusterDiscovery().GetAll(c.cds.Type, c.cds.ClusterName); err != nil {
+		mlog.Error("Cluster Discovery Error", logr.Err(err))
+	} else {
+		for _, cd := range clusterDiscovery {
+			if c.cds.IsEqual(cd) {
+				continue
+			}
+
+			if res, err := c.g2Service.GetClusterPluginStatuses(cd.Hostname); res != nil && err == nil {
+				result = append(result, *res...)
+			}
+		}
+	}
+	return result, nil
 }
 
 func (c *BiggoCluster) ConfigChanged(previousConfig *model.Config, newConfig *model.Config, sendToOtherServer bool) (aerr *model.AppError) {
