@@ -45,3 +45,9 @@ restart-server:
 
 restart-client:
 	cd server && $(MAKE) restart-client
+
+build-server-full: build-server build-package build-docker
+	docker push docker.dev.cloud.biggo.com/test/mattermost:development
+
+build-full: build-client build-server build-package build-docker
+	docker push docker.dev.cloud.biggo.com/test/mattermost:development

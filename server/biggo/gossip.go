@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -52,8 +53,10 @@ func (g2s *G2Service) StartInterNodeCommunication() {
 		g2s.mux.HandleFunc("/gossip/cluster/info", g2s.clusterInfoHandler)
 		g2s.mux.HandleFunc("/gossip/cluster/message", g2s.clusterMessageHandler)
 		g2s.mux.HandleFunc("/gossip/cluster/stats", g2s.clusterStatsHandler)
+		g2s.mux.HandleFunc("/gossip/cluster/logs", g2s.clusterLogsHandler)
 		g2s.mux.HandleFunc("/gossip/cluster/plugin/statuses", g2s.clusterPluginStatusesHandler)
 		g2s.mux.HandleFunc("/gossip/cluster/config", g2s.clusterConfigChangedHandler)
+		g2s.mux.HandleFunc("/gossip/cluster/web_conn_count", g2s.clusterWebConnectionCountForUserHandler)
 
 		go func() {
 			defer g2s.running.Store(false)
@@ -166,6 +169,51 @@ func (g2s *G2Service) GetClusterStats(host string) (stats *model.ClusterStats, e
 	return
 }
 
+func (g2s *G2Service) clusterLogsHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Add("Content-Type", "application/json")
+	q := r.URL.Query()
+	var (
+		err error
+		p   int
+		c   int
+	)
+
+	if p, err = strconv.Atoi(q.Get("p")); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	if c, err = strconv.Atoi(q.Get("c")); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	if logs, aErr := g2s.cluster.ps.GetLogsSkipSend(p, c, &model.LogFilter{}); aErr == nil {
+		json.NewEncoder(w).Encode(&logs)
+	}
+}
+
+func (g2s *G2Service) GetClusterLogs(host string, page, perPage int) (logs *[]string, err error) {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
+
+	var req *http.Request
+	if req, err = http.NewRequestWithContext(ctx, http.MethodGet,
+		fmt.Sprintf("http://%s:%d/gossip/cluster/logs?p=%d&c=%d", host, g2s.cluster.cds.GossipPort, page, perPage), nil,
+	); err != nil {
+		return
+	}
+
+	var res *http.Response
+	if res, err = http.DefaultClient.Do(req); err != nil {
+		return
+	}
+
+	logs = new([]string)
+	err = json.NewDecoder(res.Body).Decode(logs)
+	return
+}
+
 func (g2s *G2Service) clusterPluginStatusesHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Content-Type", "application/json")
 	pStats, _ := g2s.cluster.ps.GetPluginStatuses()
@@ -224,5 +272,31 @@ func (g2s *G2Service) PostClusterConfig(host string, cfg *model.Config) (err err
 	}
 
 	_, err = http.DefaultClient.Do(req)
+	return
+}
+
+func (g2s *G2Service) clusterWebConnectionCountForUserHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Add("Content-Type", "application/json")
+	webConnCount := g2s.cluster.ps.WebConnCountForUser(r.URL.Query().Get("uid"))
+	json.NewEncoder(w).Encode(&webConnCount)
+}
+
+func (g2s *G2Service) GetClusterWebConnectionCountForUser(host, userId string) (webConnCount int, err error) {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
+
+	var req *http.Request
+	if req, err = http.NewRequestWithContext(ctx, http.MethodGet,
+		fmt.Sprintf("http://%s:%d/gossip/cluster/web_conn_count?uid=%s", host, g2s.cluster.cds.GossipPort, userId), nil,
+	); err != nil {
+		return
+	}
+
+	var res *http.Response
+	if res, err = http.DefaultClient.Do(req); err != nil {
+		return
+	}
+
+	err = json.NewDecoder(res.Body).Decode(&webConnCount)
 	return
 }

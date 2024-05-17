@@ -7,12 +7,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net/http"
 	"os"
 
 	"github.com/mattermost/logr/v2"
 	"github.com/mattermost/mattermost/server/public/model"
 	"github.com/mattermost/mattermost/server/public/shared/mlog"
-	"github.com/mattermost/mattermost/server/v8/biggo_dbg"
 	"github.com/mattermost/mattermost/server/v8/channels/app/platform"
 	"github.com/mattermost/mattermost/server/v8/einterfaces"
 )
@@ -143,15 +143,15 @@ func (c *BiggoCluster) NotifyMsg(buf []byte) {
 	mlog.Error("Cluster NotifyMsg Call Error", logr.Err(errors.New("NOT IMPLEMENTED")))
 }
 
-func (c *BiggoCluster) GetClusterStats() ([]*model.ClusterStats, *model.AppError) {
-	result := []*model.ClusterStats{{Id: c.cds.Id,
+func (c *BiggoCluster) GetClusterStats() (clusterStats []*model.ClusterStats, aErr *model.AppError) {
+	clusterStats = []*model.ClusterStats{{Id: c.cds.Id,
 		TotalWebsocketConnections: c.ps.TotalWebsocketConnections(),
 		TotalReadDbConnections:    c.ps.Store.TotalReadDbConnections(),
 		TotalMasterDbConnections:  c.ps.Store.TotalMasterDbConnections(),
 	}}
 
 	if clusterDiscovery, err := c.ps.Store.ClusterDiscovery().GetAll(c.cds.Type, c.cds.ClusterName); err != nil {
-		mlog.Error("Cluster Discovery Error", logr.Err(err))
+		aErr = model.NewAppError("ClusterDiscovery", "api.cluster.get_cluster_stats", nil, "", http.StatusInternalServerError).Wrap(err)
 	} else {
 		for _, cd := range clusterDiscovery {
 			if c.cds.IsEqual(cd) {
@@ -159,29 +159,53 @@ func (c *BiggoCluster) GetClusterStats() ([]*model.ClusterStats, *model.AppError
 			}
 
 			if res, err := c.g2Service.GetClusterStats(cd.Hostname); res != nil && err == nil {
-				result = append(result, res)
+				clusterStats = append(clusterStats, res)
 			}
 		}
 	}
-	return result, nil
+	return
 }
 
-// TODO: implement
-func (c *BiggoCluster) GetLogs(page, perPage int) ([]string, *model.AppError) {
-	biggo_dbg.Trace(page, perPage)
-	return nil, nil
-}
-
-// TODO: implement
-func (c *BiggoCluster) QueryLogs(page, perPage int) (map[string][]string, *model.AppError) {
-	biggo_dbg.Trace(page, perPage)
-	return nil, nil
-}
-
-func (c *BiggoCluster) GetPluginStatuses() (model.PluginStatuses, *model.AppError) {
-	result := model.PluginStatuses{}
+func (c *BiggoCluster) GetLogs(page, perPage int) (logs []string, aErr *model.AppError) {
+	logs = []string{}
 	if clusterDiscovery, err := c.ps.Store.ClusterDiscovery().GetAll(c.cds.Type, c.cds.ClusterName); err != nil {
-		mlog.Error("Cluster Discovery Error", logr.Err(err))
+		aErr = model.NewAppError("ClusterDiscovery", "api.cluster.get_logs", nil, "", http.StatusInternalServerError).Wrap(err)
+	} else {
+		for _, cd := range clusterDiscovery {
+			if c.cds.IsEqual(cd) {
+				continue
+			}
+
+			if res, err := c.g2Service.GetClusterLogs(cd.Hostname, page, perPage); res != nil && err == nil {
+				logs = append(logs, *res...)
+			}
+		}
+	}
+	return
+}
+
+func (c *BiggoCluster) QueryLogs(page, perPage int) (logs map[string][]string, aErr *model.AppError) {
+	logs = map[string][]string{}
+	if clusterDiscovery, err := c.ps.Store.ClusterDiscovery().GetAll(c.cds.Type, c.cds.ClusterName); err != nil {
+		aErr = model.NewAppError("ClusterDiscovery", "api.cluster.get_logs", nil, "", http.StatusInternalServerError).Wrap(err)
+	} else {
+		for _, cd := range clusterDiscovery {
+			if c.cds.IsEqual(cd) {
+				continue
+			}
+
+			if res, err := c.g2Service.GetClusterLogs(cd.Hostname, page, perPage); res != nil && err == nil {
+				logs[cd.Hostname] = *res
+			}
+		}
+	}
+	return
+}
+
+func (c *BiggoCluster) GetPluginStatuses() (pluginStatuses model.PluginStatuses, aErr *model.AppError) {
+	pluginStatuses = model.PluginStatuses{}
+	if clusterDiscovery, err := c.ps.Store.ClusterDiscovery().GetAll(c.cds.Type, c.cds.ClusterName); err != nil {
+		aErr = model.NewAppError("ClusterDiscovery", "api.cluster.get_plugin_statuses", nil, "", http.StatusInternalServerError).Wrap(err)
 	} else {
 		for _, cd := range clusterDiscovery {
 			if c.cds.IsEqual(cd) {
@@ -189,17 +213,17 @@ func (c *BiggoCluster) GetPluginStatuses() (model.PluginStatuses, *model.AppErro
 			}
 
 			if res, err := c.g2Service.GetClusterPluginStatuses(cd.Hostname); res != nil && err == nil {
-				result = append(result, *res...)
+				pluginStatuses = append(pluginStatuses, *res...)
 			}
 		}
 	}
-	return result, nil
+	return
 }
 
-func (c *BiggoCluster) ConfigChanged(previousConfig *model.Config, newConfig *model.Config, sendToOtherServer bool) (aerr *model.AppError) {
+func (c *BiggoCluster) ConfigChanged(previousConfig *model.Config, newConfig *model.Config, sendToOtherServer bool) (aErr *model.AppError) {
 	if sendToOtherServer {
 		if clusterDiscovery, err := c.ps.Store.ClusterDiscovery().GetAll(c.cds.Type, c.cds.ClusterName); err != nil {
-			mlog.Error("Cluster Discovery Error", logr.Err(err))
+			aErr = model.NewAppError("ClusterDiscovery", "api.cluster.config_changed", nil, "", http.StatusInternalServerError).Wrap(err)
 		} else {
 			for _, cd := range clusterDiscovery {
 				if !c.cds.IsEqual(cd) {
@@ -211,8 +235,20 @@ func (c *BiggoCluster) ConfigChanged(previousConfig *model.Config, newConfig *mo
 	return
 }
 
-// TODO: implement
-func (c *BiggoCluster) WebConnCountForUser(userID string) (int, *model.AppError) {
-	biggo_dbg.Trace(userID)
-	return 0, nil
+func (c *BiggoCluster) WebConnCountForUser(userID string) (count int, aErr *model.AppError) {
+	if clusterDiscovery, err := c.ps.Store.ClusterDiscovery().GetAll(c.cds.Type, c.cds.ClusterName); err != nil {
+		aErr = model.NewAppError("ClusterDiscovery", "api.cluster.get_web_connection_count_for_user", nil, "", http.StatusInternalServerError).Wrap(err)
+	} else {
+		for _, cd := range clusterDiscovery {
+			if c.cds.IsEqual(cd) {
+				count += c.ps.WebConnCountForUser(userID)
+				continue
+			}
+
+			if res, err := c.g2Service.GetClusterWebConnectionCountForUser(cd.Hostname, userID); err == nil {
+				count += res
+			}
+		}
+	}
+	return
 }
