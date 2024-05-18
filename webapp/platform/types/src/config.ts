@@ -944,6 +944,7 @@ export type AdminConfig = {
     ThemeSettings: ThemeSettings;
     GitLabSettings: SSOSettings;
     GoogleSettings: SSOSettings;
+    BiggoSettings: SSOSettings;
     Office365Settings: Office365Settings;
     OpenIdSettings: SSOSettings;
     LdapSettings: LdapSettings;

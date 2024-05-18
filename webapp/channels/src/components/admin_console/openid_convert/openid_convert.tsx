@@ -53,7 +53,7 @@ export default class OpenIdConvert extends React.PureComponent<Props, State> {
             newConfig.GitLabSettings.DiscoveryEndpoint = url + '/.well-known/openid-configuration';
         }
 
-        ['Office365Settings', 'GoogleSettings', 'GitLabSettings'].forEach((setting) => {
+        ['Office365Settings', 'GoogleSettings', 'GitLabSettings', 'BiggoSettings'].forEach((setting) => {
             newConfig[setting].Scope = Constants.OPENID_SCOPES;
             newConfig[setting].UserAPIEndpoint = '';
             newConfig[setting].AuthEndpoint = '';
