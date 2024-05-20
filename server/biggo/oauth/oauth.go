@@ -1,4 +1,4 @@
-package oauthbiggo
+package oauth
 
 import (
 	"encoding/json"
