@@ -628,10 +628,6 @@ func (a *App) LoginByOAuth(c request.CTX, service string, userData io.Reader, te
 	}
 
 	user, err := a.GetUserByAuth(model.NewString(*authUser.AuthData), service)
-	if *authUser.AuthData == model.ServiceBiggo && user == nil {
-		user, err = a.CreateUser(c, authUser)
-	}
-
 	if err != nil {
 		if err.Id == MissingAuthAccountError {
 			user, err = a.CreateOAuthUser(c, service, bytes.NewReader(buf.Bytes()), teamID, tokenUser)
