@@ -359,10 +359,6 @@ layers: app-layers store-layers pluginapi
 
 generated: mocks layers
 
-check-prereqs-enterprise: setup-go-work ## Checks prerequisite software status for enterprise.
-ifeq ($(BUILD_ENTERPRISE_READY),true)
-	./scripts/prereq-check-enterprise.sh
-endif
 
 setup-go-work: export BUILD_ENTERPRISE_READY := $(BUILD_ENTERPRISE_READY)
 setup-go-work: ## Sets up your go.work file
@@ -372,9 +368,6 @@ ifneq ($(IGNORE_GO_WORK_IF_EXISTS),true)
 	$(GO) work init
 	$(GO) work use .
 	$(GO) work use ./public
-ifeq ($(BUILD_ENTERPRISE_READY),true)
-	$(GO) work use ../../enterprise
-endif
 endif
 
 check-style: plugin-checker vet golangci-lint ## Runs style/lint checks
@@ -386,7 +379,7 @@ gotestsum:
 test-compile: gotestsum ## Compile tests.
 	@echo COMPILE TESTS
 
-	for package in $(TE_PACKAGES) $(EE_PACKAGES); do \
+	for package in $(TE_PACKAGES); do \
 		$(GO) test $(GOFLAGS) -c $$package; \
 	done
 
@@ -396,7 +389,7 @@ modules-tidy:
 	-cd public && $(GO) mod tidy
 	mv enterprise/external_imports.go.orig enterprise/external_imports.go
 
-test-server-pre: check-prereqs-enterprise start-docker gotestsum ## Runs tests.
+test-server-pre: start-docker gotestsum ## Runs tests.
 ifeq ($(BUILD_ENTERPRISE_READY),true)
 	@echo Running all tests
 else
@@ -409,9 +402,9 @@ test-server-race: export GOTESTSUM_JUNITFILE := $(GOTESTSUM_JUNITFILE)
 test-server-race: export GOTESTSUM_JSONFILE := $(GOTESTSUM_JSONFILE)
 test-server-race: test-server-pre
 ifeq ($(IS_CI),true)
-	GOMAXPROCS=4 $(GOBIN)/gotestsum --rerun-fails=3 --packages="$(TE_PACKAGES) $(EE_PACKAGES)" -- -race $(GOFLAGS) -timeout=90m
+	GOMAXPROCS=4 $(GOBIN)/gotestsum --rerun-fails=3 --packages="$(TE_PACKAGES)" -- -race $(GOFLAGS) -timeout=90m
 else
-	$(GOBIN)/gotestsum --rerun-fails=3 --packages="$(TE_PACKAGES) $(EE_PACKAGES)" -- -race $(GOFLAGS) -timeout=90m
+	$(GOBIN)/gotestsum --rerun-fails=3 --packages="$(TE_PACKAGES)" -- -race $(GOFLAGS) -timeout=90m
 endif
 ifneq ($(IS_CI),true)
   ifneq ($(MM_NO_DOCKER),true)
@@ -427,7 +420,7 @@ test-server: export GOTESTSUM_FORMAT := $(GOTESTSUM_FORMAT)
 test-server: export GOTESTSUM_JUNITFILE := $(GOTESTSUM_JUNITFILE)
 test-server: export GOTESTSUM_JSONFILE := $(GOTESTSUM_JSONFILE)
 test-server: test-server-pre
-	$(GOBIN)/gotestsum --rerun-fails=3 --packages="$(TE_PACKAGES) $(EE_PACKAGES)" -- $(GOFLAGS)-timeout=90m
+	$(GOBIN)/gotestsum --rerun-fails=3 --packages="$(TE_PACKAGES)" -- $(GOFLAGS)-timeout=90m
 ifneq ($(IS_CI),true)
   ifneq ($(MM_NO_DOCKER),true)
     ifneq ($(TEMP_DOCKER_SERVICES),)
@@ -437,26 +430,12 @@ ifneq ($(IS_CI),true)
   endif
 endif
 
-test-server-ee: export MM_SERVER_PATH := $(MM_SERVER_PATH)
-test-server-ee: export GOTESTSUM_FORMAT := $(GOTESTSUM_FORMAT)
-test-server-ee: export GOTESTSUM_JUNITFILE := $(GOTESTSUM_JUNITFILE)
-test-server-ee: export GOTESTSUM_JSONFILE := $(GOTESTSUM_JSONFILE)
-test-server-ee: check-prereqs-enterprise start-docker gotestsum ## Runs EE tests.
-	@echo Running only EE tests
-	$(GOBIN)/gotestsum --packages="$(EE_PACKAGES)" -- $(GOFLAGS) -timeout=20m
-
 test-server-quick: export MM_SERVER_PATH := $(MM_SERVER_PATH)
 test-server-quick: export GOTESTSUM_FORMAT := $(GOTESTSUM_FORMAT)
 test-server-quick: export GOTESTSUM_JUNITFILE := $(GOTESTSUM_JUNITFILE)
 test-server-quick: export GOTESTSUM_JSONFILE := $(GOTESTSUM_JSONFILE)
-test-server-quick: check-prereqs-enterprise ## Runs only quick tests.
-ifeq ($(BUILD_ENTERPRISE_READY),true)
-	@echo Running all tests
-	$(GOBIN)/gotestsum --packages="$(TE_PACKAGES) $(EE_PACKAGES)" -- $(GOFLAGS) -short
-else
 	@echo Running only TE tests
 	$(GOBIN)/gotestsum --packages="$(TE_PACKAGES)" -- $(GOFLAGS) -short
-endif
 
 internal-test-web-client: ## Runs web client tests.
 	$(GO) run $(GOFLAGS) $(PLATFORM_FILES) test web_client_tests

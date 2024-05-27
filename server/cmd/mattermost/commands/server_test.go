@@ -12,7 +12,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/jobs"
-	"git.biggo.com/Funmula/mattermost-funmula/servernfig"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/config"
 )
 
 const (
