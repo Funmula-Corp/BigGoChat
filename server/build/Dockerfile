@@ -24,6 +24,7 @@ RUN apt-get update \
   poppler-utils \
   tidy \
   tzdata \
+  net-tools \
   && rm -rf /var/lib/apt/lists/*
 
 # Set mattermost group/user
