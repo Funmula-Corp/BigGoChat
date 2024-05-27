@@ -16,14 +16,14 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/mattermost/mattermost/server/public/model"
-	"github.com/mattermost/mattermost/server/public/shared/mlog"
-	"github.com/mattermost/mattermost/server/public/shared/request"
-	"github.com/mattermost/mattermost/server/v8/channels/app/imports"
-	"github.com/mattermost/mattermost/server/v8/channels/app/teams"
-	"github.com/mattermost/mattermost/server/v8/channels/app/users"
-	"github.com/mattermost/mattermost/server/v8/channels/store"
-	"github.com/mattermost/mattermost/server/v8/channels/utils"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app/imports"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app/teams"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app/users"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/utils"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
 )
 
 // -- Bulk Import Functions --
@@ -1282,7 +1282,7 @@ func compareFilesContent(fileA, fileB io.Reader, bufSize int64) (bool, error) {
 		// (BenchmarkCompareFilesContent) and it showed to provide
 		// a good compromise between processing speed and allocated memory,
 		// especially in the common case of the readers being part of an S3 stored ZIP file.
-		// See https://github.com/mattermost/mattermost/pull/26629 for full context.
+		// See https://git.biggo.com/Funmula/mattermost-funmula/pull/26629 for full context.
 		bufSize = 1024 * 1024 * 2 // 2MB
 	}
 

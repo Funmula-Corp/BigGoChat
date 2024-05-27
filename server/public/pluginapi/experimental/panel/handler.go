@@ -7,9 +7,9 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/pkg/errors"
 
-	"github.com/mattermost/mattermost/server/public/model"
-	"github.com/mattermost/mattermost/server/public/pluginapi/experimental/common"
-	"github.com/mattermost/mattermost/server/public/pluginapi/experimental/panel/settings"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/pluginapi/experimental/common"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/pluginapi/experimental/panel/settings"
 )
 
 type handler struct {

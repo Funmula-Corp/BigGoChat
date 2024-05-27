@@ -26,7 +26,7 @@ up()
     docker run -it -u root \
         --privileged \
         -v $GOPATH:/go \
-        -w /go/src/github.com/mattermost/mattermost-server/ \
+        -w /go/src/git.biggo.com/Funmula/mattermost-funmula-server/ \
         --net ${COMPOSE_PROJECT_NAME}_mm-test \
         --env-file=dotenv/test.env
         -e GOPATH="/go" \

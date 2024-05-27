@@ -6,8 +6,8 @@ package searchengine
 import (
 	"testing"
 
-	"github.com/mattermost/mattermost/server/public/model"
-	"github.com/mattermost/mattermost/server/v8/platform/services/searchengine/mocks"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/services/searchengine/mocks"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 	"github.com/stretchr/testify/assert"
 )
 

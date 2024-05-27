@@ -1,10 +1,10 @@
 package biggo
 
 import (
-	"github.com/mattermost/mattermost/server/v8/biggo/gossip"
-	"github.com/mattermost/mattermost/server/v8/biggo/pluginAPI"
-	"github.com/mattermost/mattermost/server/v8/channels/app/platform"
-	"github.com/mattermost/mattermost/server/v8/einterfaces"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/biggo/gossip"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/biggo/pluginAPI"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app/platform"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/einterfaces"
 )
 
 func Cluster(ps *platform.PlatformService) (cluster einterfaces.ClusterInterface) {

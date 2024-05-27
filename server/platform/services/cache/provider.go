@@ -6,7 +6,7 @@ package cache
 import (
 	"time"
 
-	"github.com/mattermost/mattermost/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 )
 
 // CacheOptions contains options for initializing a cache

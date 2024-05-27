@@ -1,4 +1,4 @@
-module github.com/mattermost/mattermost/server/v8
+module git.biggo.com/Funmula/mattermost-funmula/server/v8
 
 go 1.21
 

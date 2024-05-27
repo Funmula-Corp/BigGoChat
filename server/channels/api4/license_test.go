@@ -11,11 +11,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mattermost/mattermost/server/public/model"
-	"github.com/mattermost/mattermost/server/v8/channels/utils"
-	mocks2 "github.com/mattermost/mattermost/server/v8/channels/utils/mocks"
-	"github.com/mattermost/mattermost/server/v8/channels/utils/testutils"
-	"github.com/mattermost/mattermost/server/v8/einterfaces/mocks"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/utils"
+	mocks2 "git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/utils/mocks"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/utils/testutils"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/einterfaces/mocks"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"

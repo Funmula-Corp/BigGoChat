@@ -1,9 +1,9 @@
 package pluginapi_test
 
 import (
-	"github.com/mattermost/mattermost/server/public/pluginapi"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/pluginapi"
 
-	"github.com/mattermost/mattermost/server/public/plugin"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
 )
 
 type Plugin struct {

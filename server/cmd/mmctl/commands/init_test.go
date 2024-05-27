@@ -13,8 +13,8 @@ import (
 	"os"
 	"testing"
 
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 	"github.com/gorilla/mux"
-	"github.com/mattermost/mattermost/server/public/model"
 	"github.com/stretchr/testify/require"
 )
 

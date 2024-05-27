@@ -3,7 +3,7 @@
 
 package app
 
-import "github.com/mattermost/mattermost/server/v8/platform/services/telemetry"
+import "git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/services/telemetry"
 
 func (s *Server) GetTelemetryService() *telemetry.TelemetryService {
 	return s.telemetryService
