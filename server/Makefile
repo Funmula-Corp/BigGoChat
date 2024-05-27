@@ -63,26 +63,8 @@ MMCTL_LDFLAGS += -X "$(MMCTL_PKG).buildDate=$(MMCTL_BUILD_DATE)"
 # Enterprise
 BUILD_ENTERPRISE_DIR ?= ../../enterprise
 BUILD_ENTERPRISE ?= true
-BUILD_ENTERPRISE_READY = false
+BUILD_ENTERPRISE_READY ?= true
 BUILD_TYPE_NAME = team
-BUILD_HASH_ENTERPRISE = none
-ifneq ($(wildcard $(BUILD_ENTERPRISE_DIR)/.),)
-	MMCTL_TESTFLAGS += -ldflags '-X "$(MMCTL_PKG).EnableEnterpriseTests=true" -X "github.com/mattermost/mattermost/server/public/model.BuildEnterpriseReady=true"'
-	MMCTL_BUILD_TAGS += enterprise
-
-  ifeq ($(BUILD_ENTERPRISE),true)
-	BUILD_ENTERPRISE_READY = true
-	BUILD_TYPE_NAME = enterprise
-	BUILD_HASH_ENTERPRISE = $(shell cd $(BUILD_ENTERPRISE_DIR) && git rev-parse HEAD)
-	BUILD_TAGS += enterprise
-  else
-	BUILD_ENTERPRISE_READY = false
-	BUILD_TYPE_NAME = team
-  endif
-else
-	BUILD_ENTERPRISE_READY = false
-	BUILD_TYPE_NAME = team
-endif
 
 # Clean up the old means of importing enterprise source, if it exists
 ifneq ($(wildcard channels/imports/imports.go),)
@@ -116,7 +98,7 @@ DELVE ?= dlv
 LDFLAGS += -X "github.com/mattermost/mattermost/server/public/model.BuildNumber=$(BUILD_NUMBER)"
 LDFLAGS += -X "github.com/mattermost/mattermost/server/public/model.BuildDate=$(BUILD_DATE)"
 LDFLAGS += -X "github.com/mattermost/mattermost/server/public/model.BuildHash=$(BUILD_HASH)"
-LDFLAGS += -X "github.com/mattermost/mattermost/server/public/model.BuildHashEnterprise=$(BUILD_HASH_ENTERPRISE)"
+LDFLAGS += -X "github.com/mattermost/mattermost/server/public/model.BuildHashEnterprise=$(BUILD_HASH)"
 LDFLAGS += -X "github.com/mattermost/mattermost/server/public/model.BuildEnterpriseReady=$(BUILD_ENTERPRISE_READY)"
 
 GO_MAJOR_VERSION = $(shell $(GO) version | cut -c 14- | cut -d' ' -f1 | cut -d'.' -f1)
@@ -158,13 +140,8 @@ PLUGIN_PACKAGES += mattermost-plugin-zoom-v1.8.0
 PLUGIN_PACKAGES += mattermost-plugin-ai-v0.6.3
 PLUGIN_PACKAGES += mattermost-plugin-jitsi-v2.0.1
 
-EE_PACKAGES=$(shell $(GO) list $(BUILD_ENTERPRISE_DIR)/...)
 
-ifeq ($(BUILD_ENTERPRISE_READY),true)
-  ALL_PACKAGES=$(TE_PACKAGES) $(EE_PACKAGES)
-else
-  ALL_PACKAGES=$(TE_PACKAGES)
-endif
+ALL_PACKAGES=$(TE_PACKAGES)
 
 all: run ## Alias for 'run'.
 
@@ -576,7 +553,7 @@ debug-server: start-docker ## Compile and start server using delve.
 		-X github.com/mattermost/mattermost/server/public/model.BuildNumber=$(BUILD_NUMBER)\
 		-X \"github.com/mattermost/mattermost/server/public/model.BuildDate=$(BUILD_DATE)\"\
 		-X github.com/mattermost/mattermost/server/public/model.BuildHash=$(BUILD_HASH)\
-		-X github.com/mattermost/mattermost/server/public/model.BuildHashEnterprise=$(BUILD_HASH_ENTERPRISE)\
+		-X github.com/mattermost/mattermost/server/public/model.BuildHashEnterprise=$(BUILD_HASH)\
 		-X github.com/mattermost/mattermost/server/public/model.BuildEnterpriseReady=$(BUILD_ENTERPRISE_READY)'\
 		-tags '$(BUILD_TAGS)'"
 
@@ -586,7 +563,7 @@ debug-server-headless: start-docker ## Debug server from within an IDE like VSCo
 		-X github.com/mattermost/mattermost/server/public/model.BuildNumber=$(BUILD_NUMBER)\
 		-X \"github.com/mattermost/mattermost/server/public/model.BuildDate=$(BUILD_DATE)\"\
 		-X github.com/mattermost/mattermost/server/public/model.BuildHash=$(BUILD_HASH)\
-		-X github.com/mattermost/mattermost/server/public/model.BuildHashEnterprise=$(BUILD_HASH_ENTERPRISE)\
+		-X github.com/mattermost/mattermost/server/public/model.BuildHashEnterprise=$(BUILD_HASH)\
 		-X github.com/mattermost/mattermost/server/public/model.BuildEnterpriseReady=$(BUILD_ENTERPRISE_READY)'\
 		-tags '$(BUILD_TAGS)'"
 
