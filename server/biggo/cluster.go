@@ -93,6 +93,20 @@ func (c *BiggoCluster) GetMyClusterInfo() (info *model.ClusterInfo) {
 }
 
 func (c *BiggoCluster) GetClusterInfos() (result []*model.ClusterInfo) {
+	mx := sync.Mutex{}
+	result = []*model.ClusterInfo{}
+	c.g2s.CallCluster(func(hostname string) {
+		if res, err := c.g2s.CallGetMyClusterInfo(hostname); err == nil {
+			mx.Lock()
+			defer mx.Unlock()
+			result = append(result, res)
+		}
+	}, false)
+	return
+}
+
+/*
+func (c *BiggoCluster) GetClusterInfos() (result []*model.ClusterInfo) {
 	cds := c.g2s.GetClusterDiscoveryService()
 	if cds == nil {
 		return
@@ -102,7 +116,6 @@ func (c *BiggoCluster) GetClusterInfos() (result []*model.ClusterInfo) {
 	if clusterDiscovery, err := c.ps.Store.ClusterDiscovery().GetAll(cds.Type, cds.ClusterName); err != nil {
 		mlog.Error("Cluster Discovery Error", logr.Err(err))
 	} else {
-		mx := sync.Mutex{}
 		wg := sync.WaitGroup{}
 		for _, cd := range clusterDiscovery {
 			if cds.IsEqual(cd) {
@@ -115,20 +128,22 @@ func (c *BiggoCluster) GetClusterInfos() (result []*model.ClusterInfo) {
 			wg.Add(1)
 			go func(hostname string) {
 				defer wg.Done()
-				if res, err := c.g2s.CallGetMyClusterInfo(hostname); res != nil && err == nil {
-					mx.Lock()
-					defer mx.Unlock()
-					result = append(result, res)
-				} else if err != nil {
-					mlog.Error("Get Cluster Info Error", mlog.Err(err))
-				}
+
 			}(cd.Hostname)
 		}
 		wg.Wait()
 	}
 	return
 }
+*/
 
+func (c *BiggoCluster) SendClusterMessage(msg *model.ClusterMessage) {
+	c.g2s.CallCluster(func(hostname string) {
+		c.g2s.CallSendClusterMessageToNode(hostname, msg)
+	}, true)
+}
+
+/*
 func (c *BiggoCluster) SendClusterMessage(msg *model.ClusterMessage) {
 	cds := c.g2s.GetClusterDiscoveryService()
 	if cds == nil {
@@ -152,6 +167,7 @@ func (c *BiggoCluster) SendClusterMessage(msg *model.ClusterMessage) {
 		wg.Wait()
 	}
 }
+*/
 
 func (c *BiggoCluster) SendClusterMessageToNode(nodeID string, msg *model.ClusterMessage) (err error) {
 	cds := c.g2s.GetClusterDiscoveryService()
@@ -171,9 +187,7 @@ func (c *BiggoCluster) SendClusterMessageToNode(nodeID string, msg *model.Cluste
 			wg.Add(1)
 			go func(hostname string, msg *model.ClusterMessage) {
 				defer wg.Done()
-				if err := c.g2s.CallSendClusterMessageToNode(hostname, msg); err != nil {
-					mlog.Error("Send Cluster Message To Node Error", mlog.Err(err))
-				}
+				c.g2s.CallSendClusterMessageToNode(hostname, msg)
 			}(cd.Hostname, msg)
 		}
 		wg.Wait()
@@ -185,6 +199,20 @@ func (c *BiggoCluster) NotifyMsg(buf []byte) {
 	mlog.Error("Cluster NotifyMsg Call Error", logr.Err(errors.New("NOT IMPLEMENTED")))
 }
 
+func (c *BiggoCluster) GetClusterStats() (result []*model.ClusterStats, aErr *model.AppError) {
+	mx := sync.Mutex{}
+	result = []*model.ClusterStats{}
+	c.g2s.CallCluster(func(hostname string) {
+		if res, err := c.g2s.CallGetClusterStats(hostname); err == nil {
+			mx.Lock()
+			defer mx.Unlock()
+			result = append(result, res)
+		}
+	}, true)
+	return
+}
+
+/*
 func (c *BiggoCluster) GetClusterStats() (result []*model.ClusterStats, aErr *model.AppError) {
 	cds := c.g2s.GetClusterDiscoveryService()
 	if cds == nil {
@@ -205,12 +233,10 @@ func (c *BiggoCluster) GetClusterStats() (result []*model.ClusterStats, aErr *mo
 			wg.Add(1)
 			go func(hostname string) {
 				defer wg.Done()
-				if res, err := c.g2s.CallGetClusterStats(hostname); res != nil && err == nil {
+				if res, err := c.g2s.CallGetClusterStats(hostname); err == nil {
 					mx.Lock()
 					defer mx.Unlock()
 					result = append(result, res)
-				} else if err != nil {
-					mlog.Error("Get Cluster Stats Error", mlog.Err(err))
 				}
 			}(cd.Hostname)
 		}
@@ -218,7 +244,22 @@ func (c *BiggoCluster) GetClusterStats() (result []*model.ClusterStats, aErr *mo
 	}
 	return
 }
+*/
 
+func (c *BiggoCluster) GetLogs(page, perPage int) (result []string, aErr *model.AppError) {
+	mx := sync.Mutex{}
+	result = []string{}
+	c.g2s.CallCluster(func(hostname string) {
+		if res, err := c.g2s.CallGetLogs(hostname, page, perPage); err == nil {
+			mx.Lock()
+			defer mx.Unlock()
+			result = append(result, res...)
+		}
+	}, true)
+	return
+}
+
+/*
 func (c *BiggoCluster) GetLogs(page, perPage int) (result []string, aErr *model.AppError) {
 	cds := c.g2s.GetClusterDiscoveryService()
 	if cds == nil {
@@ -239,12 +280,10 @@ func (c *BiggoCluster) GetLogs(page, perPage int) (result []string, aErr *model.
 			wg.Add(1)
 			go func(hostname string) {
 				defer wg.Done()
-				if res, err := c.g2s.CallGetLogs(hostname, page, perPage); res != nil && err == nil {
+				if res, err := c.g2s.CallGetLogs(hostname, page, perPage); err == nil {
 					mx.Lock()
 					defer mx.Unlock()
-					result = append(result, *res...)
-				} else if err != nil {
-					mlog.Error("Get Cluster Logs Error", mlog.Err(err))
+					result = append(result, res...)
 				}
 			}(cd.Hostname)
 		}
@@ -252,7 +291,22 @@ func (c *BiggoCluster) GetLogs(page, perPage int) (result []string, aErr *model.
 	}
 	return
 }
+*/
 
+func (c *BiggoCluster) QueryLogs(page, perPage int) (result map[string][]string, aErr *model.AppError) {
+	mx := sync.Mutex{}
+	result = map[string][]string{}
+	c.g2s.CallCluster(func(hostname string) {
+		if res, err := c.g2s.CallGetLogs(hostname, page, perPage); err == nil {
+			mx.Lock()
+			defer mx.Unlock()
+			result[hostname] = res
+		}
+	}, true)
+	return
+}
+
+/*
 func (c *BiggoCluster) QueryLogs(page, perPage int) (result map[string][]string, aErr *model.AppError) {
 	cds := c.g2s.GetClusterDiscoveryService()
 	if cds == nil {
@@ -273,14 +327,10 @@ func (c *BiggoCluster) QueryLogs(page, perPage int) (result map[string][]string,
 			wg.Add(1)
 			go func(hostname string) {
 				defer wg.Done()
-				if res, err := c.g2s.CallQueryLogs(hostname, page, perPage); res != nil && err == nil {
+				if res, err := c.g2s.CallQueryLogs(hostname, page, perPage); err == nil {
 					mx.Lock()
 					defer mx.Unlock()
-					for k, v := range *res {
-						result[k] = v
-					}
-				} else if err != nil {
-					mlog.Error("Get Cluster Query Logs Error", mlog.Err(err))
+					result[hostname] = res
 				}
 			}(cd.Hostname)
 		}
@@ -288,7 +338,22 @@ func (c *BiggoCluster) QueryLogs(page, perPage int) (result map[string][]string,
 	}
 	return
 }
+*/
 
+func (c *BiggoCluster) GetPluginStatuses() (result model.PluginStatuses, aErr *model.AppError) {
+	mx := sync.Mutex{}
+	result = model.PluginStatuses{}
+	c.g2s.CallCluster(func(hostname string) {
+		if res, err := c.g2s.CallGetPluginStatuses(hostname); err == nil {
+			mx.Lock()
+			defer mx.Unlock()
+			result = append(result, res...)
+		}
+	}, true)
+	return
+}
+
+/*
 func (c *BiggoCluster) GetPluginStatuses() (result model.PluginStatuses, aErr *model.AppError) {
 	cds := c.g2s.GetClusterDiscoveryService()
 	if cds == nil {
@@ -309,12 +374,10 @@ func (c *BiggoCluster) GetPluginStatuses() (result model.PluginStatuses, aErr *m
 			wg.Add(1)
 			go func(hostname string) {
 				defer wg.Done()
-				if res, err := c.g2s.CallGetPluginStatuses(hostname); res != nil && err == nil {
+				if res, err := c.g2s.CallGetPluginStatuses(hostname); err == nil {
 					mx.Lock()
 					defer mx.Unlock()
 					result = append(result, res...)
-				} else if err != nil {
-					mlog.Error("Get Cluster Plugin Info Error", mlog.Err(err))
 				}
 			}(cd.Hostname)
 		}
@@ -322,12 +385,17 @@ func (c *BiggoCluster) GetPluginStatuses() (result model.PluginStatuses, aErr *m
 	}
 	return
 }
+*/
 
 func (c *BiggoCluster) ConfigChanged(previousConfig *model.Config, newConfig *model.Config, sendToOtherServer bool) (aErr *model.AppError) {
-	if !sendToOtherServer {
-		return
-	}
+	c.g2s.CallCluster(func(hostname string) {
+		c.g2s.CallConfigChanged(hostname, previousConfig, newConfig)
+	}, true)
+	return
+}
 
+/*
+func (c *BiggoCluster) ConfigChanged(previousConfig *model.Config, newConfig *model.Config, sendToOtherServer bool) (aErr *model.AppError) {
 	cds := c.g2s.GetClusterDiscoveryService()
 	if cds == nil {
 		return
@@ -354,7 +422,21 @@ func (c *BiggoCluster) ConfigChanged(previousConfig *model.Config, newConfig *mo
 	}
 	return
 }
+*/
 
+func (c *BiggoCluster) WebConnCountForUser(userID string) (result int, aErr *model.AppError) {
+	mx := sync.Mutex{}
+	c.g2s.CallCluster(func(hostname string) {
+		if res, err := c.g2s.CallWebConnCountForUser(hostname, userID); err == nil {
+			mx.Lock()
+			defer mx.Unlock()
+			result += res
+		}
+	}, true)
+	return
+}
+
+/*
 func (c *BiggoCluster) WebConnCountForUser(userID string) (count int, aErr *model.AppError) {
 	cds := c.g2s.GetClusterDiscoveryService()
 	if cds == nil {
@@ -375,9 +457,7 @@ func (c *BiggoCluster) WebConnCountForUser(userID string) (count int, aErr *mode
 			wg.Add(1)
 			go func(hostname string) {
 				defer wg.Done()
-				if res, err := c.g2s.CallWebConnCountForUser(hostname, userID); err != nil {
-					mlog.Error("Get Cluster Websocket Count Error", mlog.Err(err))
-				} else {
+				if res, err := c.g2s.CallWebConnCountForUser(hostname, userID); err == nil {
 					mx.Lock()
 					defer mx.Unlock()
 					count += res
@@ -388,3 +468,4 @@ func (c *BiggoCluster) WebConnCountForUser(userID string) (count int, aErr *mode
 	}
 	return
 }
+*/
