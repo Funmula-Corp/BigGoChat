@@ -815,6 +815,10 @@ func (u *User) IsGuest() bool {
 	return IsInRole(u.Roles, SystemGuestRoleId)
 }
 
+func (u *User) IsVerified() bool {
+	return IsInRole(u.Roles, SystemVerified)
+}
+
 func (u *User) IsSystemAdmin() bool {
 	return IsInRole(u.Roles, SystemAdminRoleId)
 }
