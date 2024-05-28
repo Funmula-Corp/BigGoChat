@@ -1,4 +1,4 @@
-package pluginAPI
+package biggo
 
 import (
 	context "context"
@@ -8,12 +8,13 @@ import (
 
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app/platform"
+	"git.biggo.com/Funmula/mattermost-packages/pluginAPI"
 
 	"google.golang.org/grpc"
 )
 
 type PluginAPIService struct {
-	UnimplementedPluginAPIServer
+	pluginAPI.UnimplementedPluginAPIServer
 	ps *platform.PlatformService
 
 	running atomic.Bool
@@ -26,7 +27,7 @@ type PluginAPIService struct {
 
 var instance *PluginAPIService
 
-func Init(ps *platform.PlatformService) {
+func InitPluginAPI(ps *platform.PlatformService) {
 	if instance == nil {
 		instance = &PluginAPIService{ps: ps}
 		instance.Start()
@@ -53,12 +54,12 @@ func (s *PluginAPIService) Start() (err error) {
 	return
 }
 
-func (s *PluginAPIService) GetUserIdByAuthData(ctx context.Context, in *UserIdByAuthDataRequest) (reply *UserIdByAuthDataReply, err error) {
+func (s *PluginAPIService) GetUserIdByAuthData(ctx context.Context, in *pluginAPI.UserIdByAuthDataRequest) (reply *pluginAPI.UserIdByAuthDataReply, err error) {
 	var user *model.User
 	if user, err = s.ps.Store.User().GetByAuth(&in.AuthData, "service"); err != nil {
 		return
 	}
-	reply = &UserIdByAuthDataReply{
+	reply = &pluginAPI.UserIdByAuthDataReply{
 		UserId: user.Id,
 	}
 	return
