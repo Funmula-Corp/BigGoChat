@@ -13,7 +13,7 @@ import (
 	"mmlicense/env"
 	"mmlicense/gen"
 
-	"github.com/mattermost/mattermost/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 )
 
 var (

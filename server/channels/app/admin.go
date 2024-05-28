@@ -10,11 +10,11 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/mattermost/mattermost/server/public/model"
-	"github.com/mattermost/mattermost/server/public/shared/i18n"
-	"github.com/mattermost/mattermost/server/public/shared/request"
-	"github.com/mattermost/mattermost/server/v8/platform/services/cache"
-	"github.com/mattermost/mattermost/server/v8/platform/shared/mail"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/services/cache"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/shared/mail"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/i18n"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
 )
 
 var latestVersionCache = cache.NewLRU(cache.LRUOptions{

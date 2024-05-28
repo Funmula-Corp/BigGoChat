@@ -7,10 +7,10 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/mattermost/mattermost/server/public/model"
-	"github.com/mattermost/mattermost/server/public/plugin"
-	"github.com/mattermost/mattermost/server/v8/channels/app/plugin_api_tests"
-	"github.com/mattermost/mattermost/server/v8/platform/shared/mail"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app/plugin_api_tests"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/shared/mail"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
 )
 
 type MyPlugin struct {

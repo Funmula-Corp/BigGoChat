@@ -6,8 +6,8 @@ package sqlstore
 import (
 	"database/sql"
 
-	"github.com/mattermost/mattermost/server/v8/channels/store"
-	"github.com/mattermost/mattermost/server/v8/einterfaces"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/einterfaces"
 	sq "github.com/mattermost/squirrel"
 	"github.com/pkg/errors"
 )

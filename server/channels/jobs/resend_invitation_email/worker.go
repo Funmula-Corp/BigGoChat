@@ -8,13 +8,13 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/mattermost/mattermost/server/public/model"
-	"github.com/mattermost/mattermost/server/public/shared/mlog"
-	"github.com/mattermost/mattermost/server/public/shared/request"
-	"github.com/mattermost/mattermost/server/v8/channels/jobs"
-	"github.com/mattermost/mattermost/server/v8/channels/store"
-	"github.com/mattermost/mattermost/server/v8/platform/services/configservice"
-	"github.com/mattermost/mattermost/server/v8/platform/services/telemetry"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/jobs"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/services/configservice"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/services/telemetry"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
 )
 
 const FourtyEightHoursInMillis int64 = 172800000

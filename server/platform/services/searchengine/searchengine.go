@@ -4,7 +4,7 @@
 package searchengine
 
 import (
-	"github.com/mattermost/mattermost/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 )
 
 func NewBroker(cfg *model.Config) *Broker {

@@ -5,8 +5,8 @@
 package mocks
 
 import (
-	model "github.com/mattermost/mattermost/server/public/model"
-	store "github.com/mattermost/mattermost/server/v8/channels/store"
+	model "git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	store "git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
 	mock "github.com/stretchr/testify/mock"
 )
 

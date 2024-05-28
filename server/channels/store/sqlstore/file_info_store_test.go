@@ -6,8 +6,8 @@ package sqlstore
 import (
 	"testing"
 
-	"github.com/mattermost/mattermost/server/v8/channels/store/searchtest"
-	"github.com/mattermost/mattermost/server/v8/channels/store/storetest"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store/searchtest"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store/storetest"
 )
 
 func TestFileInfoStore(t *testing.T) {

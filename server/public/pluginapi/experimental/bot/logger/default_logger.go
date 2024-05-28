@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/mattermost/mattermost/server/public/pluginapi/experimental/common"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/pluginapi/experimental/common"
 )
 
 type defaultLogger struct {

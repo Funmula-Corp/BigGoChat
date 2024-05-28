@@ -4,14 +4,14 @@
 package commands
 
 import (
-	"github.com/mattermost/mattermost/server/v8/cmd/mmctl/client"
-	"github.com/mattermost/mattermost/server/v8/cmd/mmctl/mocks"
-	"github.com/mattermost/mattermost/server/v8/cmd/mmctl/printer"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/cmd/mmctl/client"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/cmd/mmctl/mocks"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/cmd/mmctl/printer"
 
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/suite"
 
-	"github.com/mattermost/mattermost/server/v8/channels/api4"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/api4"
 )
 
 var EnableEnterpriseTests string

@@ -7,16 +7,16 @@ import (
 	"fmt"
 	"os"
 
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 	"github.com/hashicorp/go-multierror"
-	"github.com/mattermost/mattermost/server/public/model"
 	"github.com/pkg/errors"
 
 	"path/filepath"
 
 	"github.com/spf13/cobra"
 
-	"github.com/mattermost/mattermost/server/v8/cmd/mmctl/client"
-	"github.com/mattermost/mattermost/server/v8/cmd/mmctl/printer"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/cmd/mmctl/client"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/cmd/mmctl/printer"
 )
 
 func (s *MmctlE2ETestSuite) TestPluginAddCmd() {

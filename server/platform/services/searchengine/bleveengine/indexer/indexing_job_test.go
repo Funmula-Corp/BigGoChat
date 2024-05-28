@@ -10,12 +10,12 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/mattermost/mattermost/server/public/model"
-	"github.com/mattermost/mattermost/server/public/shared/mlog"
-	"github.com/mattermost/mattermost/server/v8/channels/jobs"
-	"github.com/mattermost/mattermost/server/v8/channels/store/storetest"
-	"github.com/mattermost/mattermost/server/v8/channels/utils/testutils"
-	"github.com/mattermost/mattermost/server/v8/platform/services/searchengine/bleveengine"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/jobs"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store/storetest"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/utils/testutils"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/services/searchengine/bleveengine"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
 )
 
 func TestBleveIndexer(t *testing.T) {

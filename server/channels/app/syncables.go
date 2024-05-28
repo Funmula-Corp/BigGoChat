@@ -8,10 +8,10 @@ import (
 	"net/http"
 	"strings"
 
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
 	"github.com/hashicorp/go-multierror"
-	"github.com/mattermost/mattermost/server/public/model"
-	"github.com/mattermost/mattermost/server/public/shared/mlog"
-	"github.com/mattermost/mattermost/server/public/shared/request"
 )
 
 // createDefaultChannelMemberships adds users to channels based on their group memberships and how those groups are

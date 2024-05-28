@@ -1,4 +1,4 @@
-module github.com/mattermost/mattermost/api/internal
+module git.biggo.com/Funmula/mattermost-funmula/api/internal
 
 go 1.21
 

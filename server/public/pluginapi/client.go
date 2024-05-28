@@ -1,8 +1,8 @@
 package pluginapi
 
 import (
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
 	"github.com/blang/semver/v4"
-	"github.com/mattermost/mattermost/server/public/plugin"
 	"github.com/pkg/errors"
 )
 

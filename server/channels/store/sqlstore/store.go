@@ -15,7 +15,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	sqlUtils "github.com/mattermost/mattermost/server/public/utils/sql"
+	sqlUtils "git.biggo.com/Funmula/mattermost-funmula/server/public/utils/sql"
 
 	sq "github.com/mattermost/squirrel"
 
@@ -26,11 +26,11 @@ import (
 	"github.com/mattermost/morph/models"
 	"github.com/pkg/errors"
 
-	"github.com/mattermost/mattermost/server/public/model"
-	"github.com/mattermost/mattermost/server/public/shared/mlog"
-	"github.com/mattermost/mattermost/server/v8/channels/db"
-	"github.com/mattermost/mattermost/server/v8/channels/store"
-	"github.com/mattermost/mattermost/server/v8/einterfaces"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/db"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/einterfaces"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
 )
 
 type migrationDirection string
@@ -115,7 +115,7 @@ type SqlStoreStores struct {
 
 type SqlStore struct {
 	// rrCounter and srCounter should be kept first.
-	// See https://github.com/mattermost/mattermost/server/v8/channels/pull/7281
+	// See https://git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/pull/7281
 	rrCounter int64
 	srCounter int64
 

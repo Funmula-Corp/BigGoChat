@@ -8,8 +8,8 @@ import (
 	"github.com/blang/semver/v4"
 	"github.com/pkg/errors"
 
-	"github.com/mattermost/mattermost/server/public/model"
-	"github.com/mattermost/mattermost/server/public/plugin"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
 )
 
 // SystemService exposes methods to query system properties.

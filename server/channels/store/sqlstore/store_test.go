@@ -22,15 +22,15 @@ import (
 	"github.com/stretchr/testify/require"
 	"golang.org/x/sync/errgroup"
 
-	"github.com/mattermost/mattermost/server/public/model"
-	"github.com/mattermost/mattermost/server/public/plugin/plugintest/mock"
-	"github.com/mattermost/mattermost/server/public/shared/mlog"
-	"github.com/mattermost/mattermost/server/public/shared/request"
-	"github.com/mattermost/mattermost/server/v8/channels/db"
-	"github.com/mattermost/mattermost/server/v8/channels/store"
-	"github.com/mattermost/mattermost/server/v8/channels/store/searchtest"
-	"github.com/mattermost/mattermost/server/v8/channels/store/storetest"
-	"github.com/mattermost/mattermost/server/v8/einterfaces/mocks"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/db"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store/searchtest"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store/storetest"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/einterfaces/mocks"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin/plugintest/mock"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
 )
 
 type storeType struct {

@@ -3,7 +3,7 @@ package common
 import (
 	"errors"
 
-	"github.com/mattermost/mattermost/server/public/pluginapi"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/pluginapi"
 )
 
 var ErrNotFound = errors.New("not found")
