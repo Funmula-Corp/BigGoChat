@@ -9,11 +9,11 @@ import (
 
 	"github.com/pkg/errors"
 
-	"github.com/mattermost/mattermost/server/public/model"
-	"github.com/mattermost/mattermost/server/public/shared/mlog"
-	"github.com/mattermost/mattermost/server/public/shared/request"
-	"github.com/mattermost/mattermost/server/v8/channels/store"
-	"github.com/mattermost/mattermost/server/v8/platform/services/searchengine"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/services/searchengine"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
 )
 
 type SearchUserStore struct {
@@ -90,15 +90,12 @@ func (s *SearchUserStore) Save(rctx request.CTX, user *model.User) (*model.User,
 	return nuser, err
 }
 
-func (s *SearchUserStore) PermanentDelete(userId string) error {
-	// TODO: Use the actuall request context from the App layer
-	// https://mattermost.atlassian.net/browse/MM-55738
-	rctx := request.EmptyContext(s.rootStore.Logger())
+func (s *SearchUserStore) PermanentDelete(rctx request.CTX, userId string) error {
 	user, userErr := s.UserStore.Get(context.Background(), userId)
 	if userErr != nil {
 		rctx.Logger().Warn("Encountered error deleting user", mlog.String("user_id", userId), mlog.Err(userErr))
 	}
-	err := s.UserStore.PermanentDelete(userId)
+	err := s.UserStore.PermanentDelete(rctx, userId)
 	if err == nil && userErr == nil {
 		s.deleteUserIndex(rctx, user)
 	}

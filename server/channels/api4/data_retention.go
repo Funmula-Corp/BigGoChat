@@ -7,9 +7,9 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/mattermost/mattermost/server/public/model"
-	"github.com/mattermost/mattermost/server/public/shared/mlog"
-	"github.com/mattermost/mattermost/server/v8/channels/audit"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/audit"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
 )
 
 func (api *API) InitDataRetention() {
@@ -373,7 +373,7 @@ func searchChannelsInPolicy(c *Context, w http.ResponseWriter, r *http.Request) 
 
 	channelsJSON, jsonErr := json.Marshal(channels)
 	if jsonErr != nil {
-		c.Err = model.NewAppError("searchChannelsInPolicy", "api.marshal_error", nil, jsonErr.Error(), http.StatusInternalServerError)
+		c.Err = model.NewAppError("searchChannelsInPolicy", "api.marshal_error", nil, "", http.StatusInternalServerError).Wrap(jsonErr)
 		return
 	}
 
@@ -458,7 +458,7 @@ func getTeamPoliciesForUser(c *Context, w http.ResponseWriter, r *http.Request) 
 
 	js, jsonErr := json.Marshal(policies)
 	if jsonErr != nil {
-		c.Err = model.NewAppError("getTeamPoliciesForUser", "api.marshal_error", nil, jsonErr.Error(), http.StatusInternalServerError)
+		c.Err = model.NewAppError("getTeamPoliciesForUser", "api.marshal_error", nil, "", http.StatusInternalServerError).Wrap(jsonErr)
 		return
 	}
 	w.Write(js)
@@ -486,7 +486,7 @@ func getChannelPoliciesForUser(c *Context, w http.ResponseWriter, r *http.Reques
 
 	js, jsonErr := json.Marshal(policies)
 	if jsonErr != nil {
-		c.Err = model.NewAppError("getChannelPoliciesForUser", "api.marshal_error", nil, jsonErr.Error(), http.StatusInternalServerError)
+		c.Err = model.NewAppError("getChannelPoliciesForUser", "api.marshal_error", nil, "", http.StatusInternalServerError).Wrap(jsonErr)
 		return
 	}
 	w.Write(js)

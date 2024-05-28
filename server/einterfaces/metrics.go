@@ -6,8 +6,8 @@ package einterfaces
 import (
 	"database/sql"
 
-	"github.com/mattermost/mattermost/server/public/model"
-	"github.com/mattermost/mattermost/server/public/shared/mlog"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
 )
 
 type MetricsInterface interface {
@@ -49,6 +49,9 @@ type MetricsInterface interface {
 	IncrementWebSocketBroadcastUsersRegistered(hub string, amount float64)
 	DecrementWebSocketBroadcastUsersRegistered(hub string, amount float64)
 	IncrementWebsocketReconnectEvent(eventType string)
+
+	IncrementHTTPWebSockets(originClient string)
+	DecrementHTTPWebSockets(originClient string)
 
 	AddMemCacheHitCounter(cacheName string, amount float64)
 	AddMemCacheMissCounter(cacheName string, amount float64)
@@ -92,4 +95,11 @@ type MetricsInterface interface {
 
 	SetReplicaLagAbsolute(node string, value float64)
 	SetReplicaLagTime(node string, value float64)
+
+	IncrementNotificationCounter(notificationType model.NotificationType)
+	IncrementNotificationAckCounter(notificationType model.NotificationType)
+	IncrementNotificationSuccessCounter(notificationType model.NotificationType)
+	IncrementNotificationErrorCounter(notificationType model.NotificationType, errorReason model.NotificationReason)
+	IncrementNotificationNotSentCounter(notificationType model.NotificationType, notSentReason model.NotificationReason)
+	IncrementNotificationUnsupportedCounter(notificationType model.NotificationType, notSentReason model.NotificationReason)
 }

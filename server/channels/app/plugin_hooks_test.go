@@ -22,12 +22,12 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 
-	"github.com/mattermost/mattermost/server/public/model"
-	"github.com/mattermost/mattermost/server/public/plugin"
-	"github.com/mattermost/mattermost/server/public/plugin/plugintest"
-	"github.com/mattermost/mattermost/server/public/plugin/utils"
-	"github.com/mattermost/mattermost/server/public/shared/request"
-	"github.com/mattermost/mattermost/server/v8/einterfaces/mocks"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/einterfaces/mocks"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin/plugintest"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin/utils"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
 )
 
 func SetAppEnvironmentWithPlugins(t *testing.T, pluginCode []string, app *App, apiFunc func(*model.Manifest) plugin.API) (func(), []string, []error) {
@@ -75,8 +75,8 @@ func TestHookMessageWillBePosted(t *testing.T) {
 			package main
 
 			import (
-				"github.com/mattermost/mattermost/server/public/plugin"
-				"github.com/mattermost/mattermost/server/public/model"
+				"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
+				"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 			)
 
 			type MyPlugin struct {
@@ -115,8 +115,8 @@ func TestHookMessageWillBePosted(t *testing.T) {
 			package main
 
 			import (
-				"github.com/mattermost/mattermost/server/public/plugin"
-				"github.com/mattermost/mattermost/server/public/model"
+				"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
+				"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 			)
 
 			type MyPlugin struct {
@@ -156,8 +156,8 @@ func TestHookMessageWillBePosted(t *testing.T) {
 			package main
 
 			import (
-				"github.com/mattermost/mattermost/server/public/plugin"
-				"github.com/mattermost/mattermost/server/public/model"
+				"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
+				"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 			)
 
 			type MyPlugin struct {
@@ -199,8 +199,8 @@ func TestHookMessageWillBePosted(t *testing.T) {
 			package main
 
 			import (
-				"github.com/mattermost/mattermost/server/public/plugin"
-				"github.com/mattermost/mattermost/server/public/model"
+				"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
+				"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 			)
 
 			type MyPlugin struct {
@@ -243,8 +243,8 @@ func TestHookMessageWillBePosted(t *testing.T) {
 			package main
 
 			import (
-				"github.com/mattermost/mattermost/server/public/plugin"
-				"github.com/mattermost/mattermost/server/public/model"
+				"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
+				"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 			)
 
 			type MyPlugin struct {
@@ -265,8 +265,8 @@ func TestHookMessageWillBePosted(t *testing.T) {
 			package main
 
 			import (
-				"github.com/mattermost/mattermost/server/public/plugin"
-				"github.com/mattermost/mattermost/server/public/model"
+				"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
+				"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 			)
 
 			type MyPlugin struct {
@@ -311,8 +311,8 @@ func TestHookMessageHasBeenPosted(t *testing.T) {
 		package main
 
 		import (
-			"github.com/mattermost/mattermost/server/public/plugin"
-			"github.com/mattermost/mattermost/server/public/model"
+			"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
+			"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 		)
 
 		type MyPlugin struct {
@@ -349,8 +349,8 @@ func TestHookMessageWillBeUpdated(t *testing.T) {
 		package main
 
 		import (
-			"github.com/mattermost/mattermost/server/public/plugin"
-			"github.com/mattermost/mattermost/server/public/model"
+			"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
+			"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 		)
 
 		type MyPlugin struct {
@@ -397,8 +397,8 @@ func TestHookMessageHasBeenUpdated(t *testing.T) {
 		package main
 
 		import (
-			"github.com/mattermost/mattermost/server/public/plugin"
-			"github.com/mattermost/mattermost/server/public/model"
+			"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
+			"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 		)
 
 		type MyPlugin struct {
@@ -444,8 +444,8 @@ func TestHookMessageHasBeenDeleted(t *testing.T) {
 		package main
 
 		import (
-			"github.com/mattermost/mattermost/server/public/plugin"
-			"github.com/mattermost/mattermost/server/public/model"
+			"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
+			"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 		)
 
 		type MyPlugin struct {
@@ -489,8 +489,8 @@ func TestHookFileWillBeUploaded(t *testing.T) {
 
 			import (
 				"io"
-				"github.com/mattermost/mattermost/server/public/plugin"
-				"github.com/mattermost/mattermost/server/public/model"
+				"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
+				"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 			)
 
 			type MyPlugin struct {
@@ -534,8 +534,8 @@ func TestHookFileWillBeUploaded(t *testing.T) {
 			import (
 				"fmt"
 				"io"
-				"github.com/mattermost/mattermost/server/public/plugin"
-				"github.com/mattermost/mattermost/server/public/model"
+				"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
+				"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 			)
 
 			type MyPlugin struct {
@@ -583,8 +583,8 @@ func TestHookFileWillBeUploaded(t *testing.T) {
 
 			import (
 				"io"
-				"github.com/mattermost/mattermost/server/public/plugin"
-				"github.com/mattermost/mattermost/server/public/model"
+				"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
+				"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 			)
 
 			type MyPlugin struct {
@@ -640,8 +640,8 @@ func TestHookFileWillBeUploaded(t *testing.T) {
 				"io"
 				"fmt"
 				"bytes"
-				"github.com/mattermost/mattermost/server/public/plugin"
-				"github.com/mattermost/mattermost/server/public/model"
+				"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
+				"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 			)
 
 			type MyPlugin struct {
@@ -708,8 +708,8 @@ func TestUserWillLogIn_Blocked(t *testing.T) {
 		package main
 
 		import (
-			"github.com/mattermost/mattermost/server/public/plugin"
-			"github.com/mattermost/mattermost/server/public/model"
+			"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
+			"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 		)
 
 		type MyPlugin struct {
@@ -748,8 +748,8 @@ func TestUserWillLogInIn_Passed(t *testing.T) {
 		package main
 
 		import (
-			"github.com/mattermost/mattermost/server/public/plugin"
-			"github.com/mattermost/mattermost/server/public/model"
+			"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
+			"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 		)
 
 		type MyPlugin struct {
@@ -789,8 +789,8 @@ func TestUserHasLoggedIn(t *testing.T) {
 		package main
 
 		import (
-			"github.com/mattermost/mattermost/server/public/plugin"
-			"github.com/mattermost/mattermost/server/public/model"
+			"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
+			"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 		)
 
 		type MyPlugin struct {
@@ -831,8 +831,8 @@ func TestUserHasBeenDeactivated(t *testing.T) {
 		package main
 
 		import (
-			"github.com/mattermost/mattermost/server/public/plugin"
-			"github.com/mattermost/mattermost/server/public/model"
+			"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
+			"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 		)
 
 		type MyPlugin struct {
@@ -879,8 +879,8 @@ func TestUserHasBeenCreated(t *testing.T) {
 		package main
 
 		import (
-			"github.com/mattermost/mattermost/server/public/plugin"
-			"github.com/mattermost/mattermost/server/public/model"
+			"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
+			"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 		)
 
 		type MyPlugin struct {
@@ -926,7 +926,7 @@ func TestErrorString(t *testing.T) {
 			import (
 				"errors"
 
-				"github.com/mattermost/mattermost/server/public/plugin"
+				"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
 			)
 
 			type MyPlugin struct {
@@ -955,8 +955,8 @@ func TestErrorString(t *testing.T) {
 			package main
 
 			import (
-				"github.com/mattermost/mattermost/server/public/plugin"
-				"github.com/mattermost/mattermost/server/public/model"
+				"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
+				"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 			)
 
 			type MyPlugin struct {
@@ -1007,8 +1007,8 @@ func TestHookContext(t *testing.T) {
 		package main
 
 		import (
-			"github.com/mattermost/mattermost/server/public/plugin"
-			"github.com/mattermost/mattermost/server/public/model"
+			"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
+			"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 		)
 
 		type MyPlugin struct {
@@ -1050,8 +1050,8 @@ func TestActiveHooks(t *testing.T) {
 			package main
 
 			import (
-				"github.com/mattermost/mattermost/server/public/model"
-				"github.com/mattermost/mattermost/server/public/plugin"
+				"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+				"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
 			)
 
 			type MyPlugin struct {
@@ -1135,8 +1135,8 @@ func TestHookMetrics(t *testing.T) {
 	package main
 
 	import (
-		"github.com/mattermost/mattermost/server/public/model"
-		"github.com/mattermost/mattermost/server/public/plugin"
+		"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+		"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
 	)
 
 	type MyPlugin struct {
@@ -1222,8 +1222,8 @@ func TestHookReactionHasBeenAdded(t *testing.T) {
 		package main
 
 		import (
-			"github.com/mattermost/mattermost/server/public/plugin"
-			"github.com/mattermost/mattermost/server/public/model"
+			"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
+			"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 		)
 
 		type MyPlugin struct {
@@ -1264,8 +1264,8 @@ func TestHookReactionHasBeenRemoved(t *testing.T) {
 		package main
 
 		import (
-			"github.com/mattermost/mattermost/server/public/plugin"
-			"github.com/mattermost/mattermost/server/public/model"
+			"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
+			"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 		)
 
 		type MyPlugin struct {
@@ -1308,7 +1308,7 @@ func TestHookRunDataRetention(t *testing.T) {
 		package main
 
 		import (
-			"github.com/mattermost/mattermost/server/public/plugin"
+			"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
 		)
 
 		type MyPlugin struct {
@@ -1352,7 +1352,7 @@ func TestHookOnSendDailyTelemetry(t *testing.T) {
 		package main
 
 		import (
-			"github.com/mattermost/mattermost/server/public/plugin"
+			"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
 		)
 
 		type MyPlugin struct {
@@ -1395,8 +1395,8 @@ func TestHookOnCloudLimitsUpdated(t *testing.T) {
 		package main
 
 		import (
-			"github.com/mattermost/mattermost/server/public/model"
-			"github.com/mattermost/mattermost/server/public/plugin"
+			"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+			"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
 		)
 
 		type MyPlugin struct {
@@ -1566,8 +1566,8 @@ func TestHookMessagesWillBeConsumed(t *testing.T) {
 			package main
 
 			import (
-				"github.com/mattermost/mattermost/server/public/plugin"
-				"github.com/mattermost/mattermost/server/public/model"
+				"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
+				"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 			)
 
 			type MyPlugin struct {
@@ -1649,8 +1649,8 @@ func TestHookPreferencesHaveChanged(t *testing.T) {
 			import (
 				"fmt"
 
-				"github.com/mattermost/mattermost/server/public/plugin"
-				"github.com/mattermost/mattermost/server/public/model"
+				"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
+				"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 			)
 
 			type MyPlugin struct {
@@ -1713,8 +1713,8 @@ func TestHookPreferencesHaveChanged(t *testing.T) {
 			package main
 
 			import (
-				"github.com/mattermost/mattermost/server/public/plugin"
-				"github.com/mattermost/mattermost/server/public/model"
+				"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
+				"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 			)
 
 			const (
@@ -1795,8 +1795,8 @@ func TestChannelHasBeenCreated(t *testing.T) {
 			package main
 
 			import (
-				"github.com/mattermost/mattermost/server/public/plugin"
-				"github.com/mattermost/mattermost/server/public/model"
+				"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
+				"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 			)
 
 			const (
@@ -1916,8 +1916,8 @@ func TestUserHasJoinedChannel(t *testing.T) {
 			import (
 				"fmt"
 
-				"github.com/mattermost/mattermost/server/public/plugin"
-				"github.com/mattermost/mattermost/server/public/model"
+				"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
+				"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 			)
 
 			const (

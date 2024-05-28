@@ -11,9 +11,9 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/mattermost/mattermost/server/public/model"
-	"github.com/mattermost/mattermost/server/public/shared/mlog"
-	"github.com/mattermost/mattermost/server/public/shared/request"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
 )
 
 // AutocompleteDynamicArgProvider dynamically provides auto-completion args for built-in commands.
@@ -245,7 +245,7 @@ func (a *App) getDynamicListArgument(c request.CTX, commandArgs *model.CommandAr
 	if strings.HasPrefix(dynamicArg.FetchURL, "builtin:") {
 		listItems, err := a.getBuiltinDynamicListArgument(c, commandArgs, arg, parsed, toBeParsed)
 		if err != nil {
-			a.Log().Error("Can't fetch dynamic list arguments for", mlog.String("url", dynamicArg.FetchURL), mlog.Err(err))
+			c.Logger().Error("Can't fetch dynamic list arguments for", mlog.String("url", dynamicArg.FetchURL), mlog.Err(err))
 			return false, parsed, toBeParsed, []model.AutocompleteSuggestion{}
 		}
 		return parseListItems(listItems, parsed, toBeParsed)
@@ -274,7 +274,7 @@ func (a *App) getDynamicListArgument(c request.CTX, commandArgs *model.CommandAr
 	resp, err := a.doPluginRequest(c, "GET", dynamicArg.FetchURL, params, nil)
 
 	if err != nil {
-		a.Log().Error("Can't fetch dynamic list arguments for", mlog.String("url", dynamicArg.FetchURL), mlog.Err(err))
+		c.Logger().Error("Can't fetch dynamic list arguments for", mlog.String("url", dynamicArg.FetchURL), mlog.Err(err))
 		return false, parsed, toBeParsed, []model.AutocompleteSuggestion{}
 	}
 

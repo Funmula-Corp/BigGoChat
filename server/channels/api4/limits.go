@@ -7,28 +7,28 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/mattermost/mattermost/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 
-	"github.com/mattermost/mattermost/server/public/shared/mlog"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
 )
 
 func (api *API) InitLimits() {
-	api.BaseRoutes.Limits.Handle("/users", api.APISessionRequired(getUserLimits)).Methods("GET")
+	api.BaseRoutes.Limits.Handle("/server", api.APISessionRequired(getServerLimits)).Methods("GET")
 }
 
-func getUserLimits(c *Context, w http.ResponseWriter, r *http.Request) {
+func getServerLimits(c *Context, w http.ResponseWriter, r *http.Request) {
 	if !(c.IsSystemAdmin() && c.App.SessionHasPermissionTo(*c.AppContext.Session(), model.PermissionSysconsoleReadUserManagementUsers)) {
 		c.SetPermissionError(model.PermissionSysconsoleReadUserManagementUsers)
 		return
 	}
 
-	userLimits, err := c.App.GetUserLimits()
+	serverLimits, err := c.App.GetServerLimits()
 	if err != nil {
 		c.Err = err
 		return
 	}
 
-	if err := json.NewEncoder(w).Encode(userLimits); err != nil {
-		c.Logger.Error("Error writing user limits response", mlog.Err(err))
+	if err := json.NewEncoder(w).Encode(serverLimits); err != nil {
+		c.Logger.Error("Error writing server limits response", mlog.Err(err))
 	}
 }

@@ -12,11 +12,11 @@ import (
 	"github.com/stretchr/testify/require"
 	"gopkg.in/yaml.v2"
 
-	"github.com/mattermost/mattermost/server/public/model"
-	"github.com/mattermost/mattermost/server/v8/channels/app/platform"
-	smocks "github.com/mattermost/mattermost/server/v8/channels/store/storetest/mocks"
-	"github.com/mattermost/mattermost/server/v8/config"
-	fmocks "github.com/mattermost/mattermost/server/v8/platform/shared/filestore/mocks"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app/platform"
+	smocks "git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store/storetest/mocks"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/config"
+	fmocks "git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/shared/filestore/mocks"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 )
 
 func TestCreatePluginsFile(t *testing.T) {

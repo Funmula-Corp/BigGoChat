@@ -38,6 +38,7 @@ export type ClientConfig = {
     DiagnosticId: string;
     DiagnosticsEnabled: string;
     DisableRefetchingOnBrowserFocus: string;
+    DisableWakeUpReconnectHandler: string;
     EmailLoginButtonBorderColor: string;
     EmailLoginButtonColor: string;
     EmailLoginButtonTextColor: string;
@@ -95,6 +96,7 @@ export type ClientConfig = {
     EnableSignUpWithEmail: string;
     EnableSignUpWithGitLab: string;
     EnableSignUpWithGoogle: string;
+    EnableSignUpWithBiggo: string;
     EnableSignUpWithOffice365: string;
     EnableSignUpWithOpenId: string;
     EnableSVGs: string;
@@ -531,6 +533,7 @@ export type FileSettings = {
     AmazonS3SSE: boolean;
     AmazonS3Trace: boolean;
     AmazonS3RequestTimeoutMilliseconds: number;
+    AmazonS3UploadPartSizeBytes: number;
     DedicatedExportStore: boolean;
     ExportDriverName: string;
     ExportDirectory: string;
@@ -546,6 +549,7 @@ export type FileSettings = {
     ExportAmazonS3Trace: boolean;
     ExportAmazonS3RequestTimeoutMilliseconds: number;
     ExportAmazonS3PresignExpiresSeconds: number;
+    ExportAmazonS3UploadPartSizeBytes: number;
 };
 
 export type EmailSettings = {
@@ -940,6 +944,7 @@ export type AdminConfig = {
     ThemeSettings: ThemeSettings;
     GitLabSettings: SSOSettings;
     GoogleSettings: SSOSettings;
+    BiggoSettings: SSOSettings;
     Office365Settings: Office365Settings;
     OpenIdSettings: SSOSettings;
     LdapSettings: LdapSettings;

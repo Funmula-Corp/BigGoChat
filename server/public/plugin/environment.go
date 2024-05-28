@@ -14,9 +14,9 @@ import (
 	plugin "github.com/hashicorp/go-plugin"
 	"github.com/pkg/errors"
 
-	"github.com/mattermost/mattermost/server/public/model"
-	"github.com/mattermost/mattermost/server/public/shared/mlog"
-	"github.com/mattermost/mattermost/server/public/utils"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/utils"
 )
 
 var ErrNotFound = errors.New("Item not found")
@@ -54,7 +54,7 @@ type Environment struct {
 	logger                           *mlog.Logger
 	metrics                          metricsInterface
 	newAPIImpl                       apiImplCreatorFunc
-	dbDriver                         Driver
+	dbDriver                         AppDriver
 	pluginDir                        string
 	webappPluginDir                  string
 	prepackagedPlugins               []*PrepackagedPlugin
@@ -64,7 +64,7 @@ type Environment struct {
 
 func NewEnvironment(
 	newAPIImpl apiImplCreatorFunc,
-	dbDriver Driver,
+	dbDriver AppDriver,
 	pluginDir string,
 	webappPluginDir string,
 	logger *mlog.Logger,

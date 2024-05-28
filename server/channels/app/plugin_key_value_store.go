@@ -9,9 +9,10 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/mattermost/mattermost/server/public/model"
-	"github.com/mattermost/mattermost/server/public/shared/mlog"
-	"github.com/mattermost/mattermost/server/v8/channels/store"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
 )
 
 func getKeyHash(key string) string {
@@ -44,7 +45,7 @@ func (a *App) SetPluginKeyWithOptions(pluginID string, key string, value []byte,
 	return a.Srv().Platform().SetPluginKeyWithOptions(pluginID, key, value, options)
 }
 
-func (a *App) CompareAndDeletePluginKey(pluginID string, key string, oldValue []byte) (bool, *model.AppError) {
+func (a *App) CompareAndDeletePluginKey(rctx request.CTX, pluginID string, key string, oldValue []byte) (bool, *model.AppError) {
 	kv := &model.PluginKeyValue{
 		PluginId: pluginID,
 		Key:      key,
@@ -52,7 +53,7 @@ func (a *App) CompareAndDeletePluginKey(pluginID string, key string, oldValue []
 
 	deleted, err := a.Srv().Store().Plugin().CompareAndDelete(kv, oldValue)
 	if err != nil {
-		mlog.Error("Failed to compare and delete plugin key value", mlog.String("plugin_id", pluginID), mlog.String("key", key), mlog.Err(err))
+		rctx.Logger().Error("Failed to compare and delete plugin key value", mlog.String("key", key), mlog.Err(err))
 		var appErr *model.AppError
 		switch {
 		case errors.As(err, &appErr):
@@ -64,7 +65,7 @@ func (a *App) CompareAndDeletePluginKey(pluginID string, key string, oldValue []
 
 	// Clean up a previous entry using the hashed key, if it exists.
 	if err := a.Srv().Store().Plugin().Delete(pluginID, getKeyHash(key)); err != nil {
-		mlog.Warn("Failed to clean up previously hashed plugin key value", mlog.String("plugin_id", pluginID), mlog.String("key", key), mlog.Err(err))
+		rctx.Logger().Warn("Failed to clean up previously hashed plugin key value", mlog.String("key", key), mlog.Err(err))
 	}
 
 	return deleted, nil

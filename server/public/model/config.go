@@ -21,8 +21,8 @@ import (
 
 	"github.com/mattermost/ldap"
 
-	"github.com/mattermost/mattermost/server/public/shared/mlog"
-	"github.com/mattermost/mattermost/server/public/utils"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/utils"
 )
 
 const (
@@ -43,11 +43,12 @@ const (
 	MinioSecretKey = "miniosecretkey"
 	MinioBucket    = "mattermost-test"
 
-	PasswordMaximumLength = 64
+	PasswordMaximumLength = 72
 	PasswordMinimumLength = 5
 
 	ServiceGitlab    = "gitlab"
 	ServiceGoogle    = "google"
+	ServiceBiggo     = "biggo"
 	ServiceOffice365 = "office365"
 	ServiceOpenid    = "openid"
 
@@ -245,6 +246,11 @@ const (
 	GoogleSettingsDefaultTokenEndpoint   = "https://www.googleapis.com/oauth2/v4/token"
 	GoogleSettingsDefaultUserAPIEndpoint = "https://people.googleapis.com/v1/people/me?personFields=names,emailAddresses,nicknames,metadata"
 
+	BiggoSettingsDefaultScope           = "profile email"
+	BiggoSettingsDefaultAuthEndpoint    = "http://kyle.account.biggo.com/"
+	BiggoSettingsDefaultTokenEndpoint   = "https://api-auth.dev.cloud.biggo.com/auth/v1/token"
+	BiggoSettingsDefaultUserAPIEndpoint = "http://api-auth.dev.cloud.biggo.com/auth/v1/token/user_info"
+
 	Office365SettingsDefaultScope           = "User.Read"
 	Office365SettingsDefaultAuthEndpoint    = "https://login.microsoftonline.com/common/oauth2/v2.0/authorize"
 	Office365SettingsDefaultTokenEndpoint   = "https://login.microsoftonline.com/common/oauth2/v2.0/token"
@@ -403,7 +409,6 @@ type ServiceSettings struct {
 	CollapsedThreads                                  *string `access:"experimental_features"`
 	ManagedResourcePaths                              *string `access:"environment_web_server,write_restrictable,cloud_restrictable"`
 	EnableCustomGroups                                *bool   `access:"site_users_and_teams"`
-	SelfHostedPurchase                                *bool   `access:"write_restrictable,cloud_restrictable"`
 	AllowSyncedDrafts                                 *bool   `access:"site_posts"`
 	UniqueEmojiReactionLimitPerPost                   *int    `access:"site_posts"`
 	RefreshPostStatsRunTime                           *string `access:"site_users_and_teams"`
@@ -903,10 +908,6 @@ func (s *ServiceSettings) SetDefaults(isUpdate bool) {
 		s.AllowSyncedDrafts = NewBool(true)
 	}
 
-	if s.SelfHostedPurchase == nil {
-		s.SelfHostedPurchase = NewBool(true)
-	}
-
 	if s.UniqueEmojiReactionLimitPerPost == nil {
 		s.UniqueEmojiReactionLimitPerPost = NewInt(ServiceSettingsDefaultUniqueReactionsPerPost)
 	}
@@ -985,9 +986,10 @@ func (s *ClusterSettings) SetDefaults() {
 }
 
 type MetricsSettings struct {
-	Enable           *bool   `access:"environment_performance_monitoring,write_restrictable,cloud_restrictable"`
-	BlockProfileRate *int    `access:"environment_performance_monitoring,write_restrictable,cloud_restrictable"`
-	ListenAddress    *string `access:"environment_performance_monitoring,write_restrictable,cloud_restrictable"` // telemetry: none
+	Enable              *bool   `access:"environment_performance_monitoring,write_restrictable,cloud_restrictable"`
+	BlockProfileRate    *int    `access:"environment_performance_monitoring,write_restrictable,cloud_restrictable"`
+	ListenAddress       *string `access:"environment_performance_monitoring,write_restrictable,cloud_restrictable"` // telemetry: none
+	EnableClientMetrics *bool   `access:"environment_performance_monitoring,write_restrictable,cloud_restrictable"`
 }
 
 func (s *MetricsSettings) SetDefaults() {
@@ -1002,6 +1004,10 @@ func (s *MetricsSettings) SetDefaults() {
 	if s.BlockProfileRate == nil {
 		s.BlockProfileRate = NewInt(0)
 	}
+
+	if s.EnableClientMetrics == nil {
+		s.EnableClientMetrics = NewBool(true)
+	}
 }
 
 type ExperimentalSettings struct {
@@ -1014,6 +1020,7 @@ type ExperimentalSettings struct {
 	DisableAppBar                   *bool   `access:"experimental_features"`
 	DisableRefetchingOnBrowserFocus *bool   `access:"experimental_features"`
 	DelayChannelAutocomplete        *bool   `access:"experimental_features"`
+	DisableWakeUpReconnectHandler   *bool   `access:"experimental_features"`
 }
 
 func (s *ExperimentalSettings) SetDefaults() {
@@ -1051,6 +1058,10 @@ func (s *ExperimentalSettings) SetDefaults() {
 
 	if s.DelayChannelAutocomplete == nil {
 		s.DelayChannelAutocomplete = NewBool(false)
+	}
+
+	if s.DisableWakeUpReconnectHandler == nil {
+		s.DisableWakeUpReconnectHandler = NewBool(false)
 	}
 }
 
@@ -1343,7 +1354,7 @@ func (s *LogSettings) SetDefaults() {
 	}
 
 	if s.EnableDiagnostics == nil {
-		s.EnableDiagnostics = NewBool(true)
+		s.EnableDiagnostics = NewBool(false)
 	}
 
 	if s.VerboseDiagnostics == nil {
@@ -1395,7 +1406,7 @@ type ExperimentalAuditSettings struct {
 	FileMaxBackups        *int            `access:"experimental_features,write_restrictable,cloud_restrictable"`
 	FileCompress          *bool           `access:"experimental_features,write_restrictable,cloud_restrictable"`
 	FileMaxQueueSize      *int            `access:"experimental_features,write_restrictable,cloud_restrictable"`
-	AdvancedLoggingJSON   json.RawMessage `access:"experimental_features,write_restrictable,cloud_restrictable"`
+	AdvancedLoggingJSON   json.RawMessage `access:"experimental_features,write_restrictable"`
 	AdvancedLoggingConfig *string         `access:"experimental_features,write_restrictable,cloud_restrictable"` // Deprecated: use `AdvancedLoggingJSON`
 }
 
@@ -3472,6 +3483,7 @@ type Config struct {
 	ThemeSettings             ThemeSettings
 	GitLabSettings            SSOSettings
 	GoogleSettings            SSOSettings
+	BiggoSettings             SSOSettings
 	Office365Settings         Office365Settings
 	OpenIdSettings            SSOSettings
 	LdapSettings              LdapSettings
@@ -3536,6 +3548,8 @@ func (o *Config) GetSSOService(service string) *SSOSettings {
 		return &o.GitLabSettings
 	case ServiceGoogle:
 		return &o.GoogleSettings
+	case ServiceBiggo:
+		return &o.BiggoSettings
 	case ServiceOffice365:
 		return o.Office365Settings.SSOSettings()
 	case ServiceOpenid:
@@ -3578,6 +3592,7 @@ func (o *Config) SetDefaults() {
 	o.Office365Settings.setDefaults()
 	o.GitLabSettings.setDefaults("", "", "", "", "")
 	o.GoogleSettings.setDefaults(GoogleSettingsDefaultScope, GoogleSettingsDefaultAuthEndpoint, GoogleSettingsDefaultTokenEndpoint, GoogleSettingsDefaultUserAPIEndpoint, "")
+	o.BiggoSettings.setDefaults(BiggoSettingsDefaultScope, BiggoSettingsDefaultAuthEndpoint, BiggoSettingsDefaultTokenEndpoint, BiggoSettingsDefaultUserAPIEndpoint, "")
 	o.OpenIdSettings.setDefaults(OpenidSettingsDefaultScope, "", "", "", "#145DBF")
 	o.ServiceSettings.SetDefaults(isUpdate)
 	o.PasswordSettings.SetDefaults()
@@ -4335,6 +4350,10 @@ func (o *Config) Sanitize() {
 
 	if o.GoogleSettings.Secret != nil && *o.GoogleSettings.Secret != "" {
 		*o.GoogleSettings.Secret = FakeSetting
+	}
+
+	if o.BiggoSettings.Secret != nil && *o.BiggoSettings.Secret != "" {
+		*o.BiggoSettings.Secret = FakeSetting
 	}
 
 	if o.Office365Settings.Secret != nil && *o.Office365Settings.Secret != "" {

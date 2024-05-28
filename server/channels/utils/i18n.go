@@ -8,12 +8,12 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/mattermost/mattermost/server/public/shared/i18n"
-	"github.com/mattermost/mattermost/server/v8/channels/utils/fileutils"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/utils/fileutils"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/i18n"
 )
 
-// this functions loads translations from filesystem if they are not
-// loaded already and assigns english while loading server config
+// TranslationsPreInit loads translations from filesystem if they are not
+// loaded already and assigns english while loading server config.
 func TranslationsPreInit() error {
 	translationsDir := "i18n"
 	if mattermostPath := os.Getenv("MM_SERVER_PATH"); mattermostPath != "" {

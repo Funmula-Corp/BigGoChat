@@ -3,9 +3,9 @@ package admincclogger
 import (
 	"fmt"
 
-	"github.com/mattermost/mattermost/server/public/pluginapi/experimental/bot/logger"
-	"github.com/mattermost/mattermost/server/public/pluginapi/experimental/bot/poster"
-	"github.com/mattermost/mattermost/server/public/pluginapi/experimental/common"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/pluginapi/experimental/bot/logger"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/pluginapi/experimental/bot/poster"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/pluginapi/experimental/common"
 )
 
 type adminCCLogger struct {

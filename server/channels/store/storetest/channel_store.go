@@ -19,11 +19,11 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/mattermost/mattermost/server/public/model"
-	"github.com/mattermost/mattermost/server/public/shared/request"
-	"github.com/mattermost/mattermost/server/public/shared/timezones"
-	"github.com/mattermost/mattermost/server/v8/channels/store"
-	"github.com/mattermost/mattermost/server/v8/channels/utils"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/utils"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/timezones"
 )
 
 type SqlStore interface {
@@ -364,10 +364,9 @@ func testChannelStoreUpdate(t *testing.T, rctx request.CTX, ss store.Store) {
 
 	// Make sure that the error correctly reports the wrong field to be Name
 	// See https://mattermost.atlassian.net/browse/MM-53756
-	var invalidInputErr *store.ErrInvalidInput
-	require.ErrorAs(t, err, &invalidInputErr)
-	require.Equal(t, invalidInputErr.Entity, "Channel")
-	require.Equal(t, invalidInputErr.Field, "Name")
+	var uniqueConstraintErr *store.ErrUniqueConstraint
+	require.ErrorAs(t, err, &uniqueConstraintErr)
+	require.Contains(t, uniqueConstraintErr.Columns, "Name")
 }
 
 func testGetChannelUnread(t *testing.T, rctx request.CTX, ss store.Store) {

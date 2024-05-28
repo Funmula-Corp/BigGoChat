@@ -7,8 +7,8 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/mattermost/mattermost/server/public/model"
-	"github.com/mattermost/mattermost/server/public/shared/mlog"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
 )
 
 func (api *API) InitAction() {
@@ -84,7 +84,7 @@ func openDialog(c *Context, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if appErr := c.App.OpenInteractiveDialog(dialog); appErr != nil {
+	if appErr := c.App.OpenInteractiveDialog(c.AppContext, dialog); appErr != nil {
 		c.Err = appErr
 		return
 	}

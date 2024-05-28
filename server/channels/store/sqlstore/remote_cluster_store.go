@@ -12,8 +12,8 @@ import (
 
 	sq "github.com/mattermost/squirrel"
 
-	"github.com/mattermost/mattermost/server/public/model"
-	"github.com/mattermost/mattermost/server/v8/channels/store"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 )
 
 type sqlRemoteClusterStore struct {
@@ -189,6 +189,10 @@ func (s sqlRemoteClusterStore) GetAll(filter model.RemoteClusterQueryFilter) ([]
 
 	if filter.PluginID != "" {
 		query = query.Where(sq.Eq{"rc.PluginID": filter.PluginID})
+	}
+
+	if filter.OnlyPlugins {
+		query = query.Where(sq.NotEq{"rc.PluginID": ""})
 	}
 
 	if filter.RequireOptions != 0 {

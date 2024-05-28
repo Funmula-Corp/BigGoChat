@@ -8,12 +8,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/mattermost/mattermost/server/public/model"
-	"github.com/mattermost/mattermost/server/public/shared/i18n"
-	"github.com/mattermost/mattermost/server/public/shared/mlog"
-	"github.com/mattermost/mattermost/server/public/shared/request"
-	"github.com/mattermost/mattermost/server/v8/channels/app"
-	"github.com/mattermost/mattermost/server/v8/platform/shared/filestore"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/shared/filestore"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/i18n"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
 )
 
 type ExportLinkProvider struct {
@@ -86,7 +86,7 @@ func (*ExportLinkProvider) DoCommand(a *app.App, c request.CTX, args *model.Comm
 			}
 			t, err := b.FileModTime(f)
 			if err != nil {
-				a.Log().Warn("Failed to get file mod time", mlog.String("file", f), mlog.Err(err))
+				c.Logger().Warn("Failed to get file mod time", mlog.String("file", f), mlog.Err(err))
 				continue
 			}
 			if t.After(latestFound) {

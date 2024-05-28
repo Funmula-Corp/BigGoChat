@@ -4,7 +4,7 @@
 package commands
 
 import (
-	"github.com/mattermost/mattermost/server/v8/cmd/mmctl/client"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/cmd/mmctl/client"
 
 	"github.com/spf13/cobra"
 )

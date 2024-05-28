@@ -6,10 +6,10 @@ package slashcommands
 import (
 	"strings"
 
-	"github.com/mattermost/mattermost/server/public/model"
-	"github.com/mattermost/mattermost/server/public/shared/i18n"
-	"github.com/mattermost/mattermost/server/public/shared/request"
-	"github.com/mattermost/mattermost/server/v8/channels/app"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/i18n"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
 )
 
 type InvitePeopleProvider struct {
@@ -75,7 +75,7 @@ func (*InvitePeopleProvider) DoCommand(a *app.App, c request.CTX, args *model.Co
 		return &model.CommandResponse{ResponseType: model.CommandResponseTypeEphemeral, Text: args.T("api.command.invite_people.no_email")}
 	}
 
-	if err := a.InviteNewUsersToTeam(emailList, args.TeamId, args.UserId); err != nil {
+	if err := a.InviteNewUsersToTeam(c, emailList, args.TeamId, args.UserId); err != nil {
 		c.Logger().Error(err.Error())
 		return &model.CommandResponse{ResponseType: model.CommandResponseTypeEphemeral, Text: args.T("api.command.invite_people.fail")}
 	}

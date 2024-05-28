@@ -18,11 +18,11 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 
-	"github.com/mattermost/mattermost/server/public/model"
-	"github.com/mattermost/mattermost/server/public/shared/i18n"
-	platform_mocks "github.com/mattermost/mattermost/server/v8/channels/app/platform/mocks"
-	"github.com/mattermost/mattermost/server/v8/channels/store/storetest/mocks"
-	"github.com/mattermost/mattermost/server/v8/channels/testlib"
+	platform_mocks "git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app/platform/mocks"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store/storetest/mocks"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/testlib"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/i18n"
 )
 
 func dummyWebsocketHandler(t *testing.T) http.HandlerFunc {
@@ -291,6 +291,7 @@ func TestHubConnIndex(t *testing.T) {
 
 		assert.ElementsMatch(t, connIndex.ForUser(wc2.UserId), []*WebConn{wc2, wc4})
 		assert.ElementsMatch(t, connIndex.ForUser(wc1.UserId), []*WebConn{})
+		assert.Len(t, connIndex.ForUser(wc1.UserId), 0)
 		assert.Len(t, connIndex.All(), 2)
 		assert.False(t, connIndex.Has(wc1))
 		assert.True(t, connIndex.Has(wc2))
@@ -454,7 +455,9 @@ func TestHubConnIndexInactive(t *testing.T) {
 	connIndex.Add(wc3)
 
 	assert.Nil(t, connIndex.RemoveInactiveByConnectionID(wc2.UserId, "conn2"))
+	assert.Equal(t, connIndex.ForUserActiveCount(wc2.UserId), 1)
 	assert.NotNil(t, connIndex.RemoveInactiveByConnectionID(wc2.UserId, "conn3"))
+	assert.Equal(t, connIndex.ForUserActiveCount(wc2.UserId), 1)
 	assert.Nil(t, connIndex.RemoveInactiveByConnectionID(wc1.UserId, "conn3"))
 	assert.False(t, connIndex.Has(wc3))
 	assert.Len(t, connIndex.ForUser(wc2.UserId), 1)
@@ -464,12 +467,14 @@ func TestHubConnIndexInactive(t *testing.T) {
 	connIndex.RemoveInactiveConnections()
 	assert.True(t, connIndex.Has(wc3))
 	assert.Len(t, connIndex.ForUser(wc2.UserId), 2)
+	assert.Equal(t, connIndex.ForUserActiveCount(wc2.UserId), 1)
 	assert.Len(t, connIndex.All(), 3)
 
 	wc3.lastUserActivityAt = model.GetMillis() - (time.Minute).Milliseconds()
 	connIndex.RemoveInactiveConnections()
 	assert.False(t, connIndex.Has(wc3))
 	assert.Len(t, connIndex.ForUser(wc2.UserId), 1)
+	assert.Equal(t, connIndex.ForUserActiveCount(wc2.UserId), 1)
 	assert.Len(t, connIndex.All(), 2)
 }
 
@@ -541,6 +546,35 @@ func TestHubIsRegistered(t *testing.T) {
 	})
 	require.NoError(t, err)
 	assert.False(t, th.Service.SessionIsRegistered(*session4))
+}
+
+func TestHubWebConnCount(t *testing.T) {
+	th := Setup(t).InitBasic()
+	defer th.TearDown()
+
+	session, err := th.Service.CreateSession(th.Context, &model.Session{
+		UserId: th.BasicUser.Id,
+	})
+	require.NoError(t, err)
+
+	mockSuite := &platform_mocks.SuiteIFace{}
+	mockSuite.On("GetSession", session.Token).Return(session, nil)
+	th.Suite = mockSuite
+
+	s := httptest.NewServer(dummyWebsocketHandler(t))
+	defer s.Close()
+
+	th.Service.Start(nil)
+	wc1 := registerDummyWebConn(t, th, s.Listener.Addr(), session)
+	wc2 := registerDummyWebConn(t, th, s.Listener.Addr(), session)
+	defer wc1.Close()
+
+	assert.Equal(t, 2, th.Service.WebConnCountForUser(th.BasicUser.Id))
+
+	wc2.Close()
+
+	assert.Equal(t, 1, th.Service.WebConnCountForUser(th.BasicUser.Id))
+	assert.Equal(t, 0, th.Service.WebConnCountForUser("none"))
 }
 
 // Always run this with -benchtime=0.1s

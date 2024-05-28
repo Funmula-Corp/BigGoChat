@@ -7,14 +7,14 @@ package mocks
 import (
 	context "context"
 
-	mlog "github.com/mattermost/mattermost/server/public/shared/mlog"
+	mlog "git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
 	mock "github.com/stretchr/testify/mock"
 
-	model "github.com/mattermost/mattermost/server/public/model"
+	model "git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 
 	sql "database/sql"
 
-	store "github.com/mattermost/mattermost/server/v8/channels/store"
+	store "git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
 
 	time "time"
 )
@@ -1153,26 +1153,6 @@ func (_m *Store) TotalSearchDbConnections() int {
 		r0 = rf()
 	} else {
 		r0 = ret.Get(0).(int)
-	}
-
-	return r0
-}
-
-// TrueUpReview provides a mock function with given fields:
-func (_m *Store) TrueUpReview() store.TrueUpReviewStore {
-	ret := _m.Called()
-
-	if len(ret) == 0 {
-		panic("no return value specified for TrueUpReview")
-	}
-
-	var r0 store.TrueUpReviewStore
-	if rf, ok := ret.Get(0).(func() store.TrueUpReviewStore); ok {
-		r0 = rf()
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(store.TrueUpReviewStore)
-		}
 	}
 
 	return r0

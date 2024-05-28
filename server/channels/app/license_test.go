@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/mattermost/mattermost/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 )
 
 func TestLoadLicense(t *testing.T) {
@@ -71,24 +71,6 @@ func TestGetSanitizedClientLicense(t *testing.T) {
 	assert.False(t, ok)
 	_, ok = m["SkuName"]
 	assert.False(t, ok)
-}
-
-func TestGenerateRenewalToken(t *testing.T) {
-	th := Setup(t)
-	defer th.TearDown()
-
-	t.Run("renewal token generated correctly", func(t *testing.T) {
-		setLicense(th, nil)
-		token, appErr := th.App.Srv().GenerateRenewalToken(JWTDefaultTokenExpiration)
-		require.Nil(t, appErr)
-		require.NotEmpty(t, token)
-	})
-
-	t.Run("return error if there is no active license", func(t *testing.T) {
-		th.App.Srv().SetLicense(nil)
-		_, appErr := th.App.Srv().GenerateRenewalToken(JWTDefaultTokenExpiration)
-		require.NotNil(t, appErr)
-	})
 }
 
 func setLicense(th *TestHelper, customer *model.Customer) {

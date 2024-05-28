@@ -7,15 +7,15 @@ import (
 	"fmt"
 	"sort"
 
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/api4"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 	"github.com/hashicorp/go-multierror"
-	"github.com/mattermost/mattermost/server/public/model"
-	"github.com/mattermost/mattermost/server/v8/channels/api4"
-	"github.com/mattermost/mattermost/server/v8/channels/app"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 
-	"github.com/mattermost/mattermost/server/v8/cmd/mmctl/client"
-	"github.com/mattermost/mattermost/server/v8/cmd/mmctl/printer"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/cmd/mmctl/client"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/cmd/mmctl/printer"
 )
 
 func (s *MmctlE2ETestSuite) TestListChannelsCmdF() {
@@ -291,8 +291,9 @@ func (s *MmctlE2ETestSuite) TestUnarchiveChannelsCmdF() {
 		printer.Clean()
 
 		err := unarchiveChannelsCmdF(s.th.Client, &cobra.Command{}, []string{fmt.Sprintf("%s:%s", s.th.BasicTeam.Id, s.th.BasicDeletedChannel.Name)})
-		s.Require().Nil(err)
-		s.Require().Contains(printer.GetErrorLines()[0], fmt.Sprintf("Unable to unarchive channel '%s:%s'", s.th.BasicTeam.Id, s.th.BasicDeletedChannel.Name))
+		expectedError := fmt.Sprintf("Unable to unarchive channel '%s:%s'", s.th.BasicTeam.Id, s.th.BasicDeletedChannel.Name)
+		s.Require().ErrorContains(err, expectedError)
+		s.Require().Contains(printer.GetErrorLines()[0], expectedError)
 		s.Require().Contains(printer.GetErrorLines()[0], "You do not have the appropriate permissions.")
 	})
 
@@ -300,16 +301,18 @@ func (s *MmctlE2ETestSuite) TestUnarchiveChannelsCmdF() {
 		printer.Clean()
 
 		err := unarchiveChannelsCmdF(c, &cobra.Command{}, []string{fmt.Sprintf("%s:%s", s.th.BasicTeam.Id, "nonexistent-channel")})
-		s.Require().Nil(err)
-		s.Require().Contains(printer.GetErrorLines()[0], fmt.Sprintf("Unable to find channel '%s:%s'", s.th.BasicTeam.Id, "nonexistent-channel"))
+		expectedError := fmt.Sprintf("Unable to find channel '%s:%s'", s.th.BasicTeam.Id, "nonexistent-channel")
+		s.Require().ErrorContains(err, expectedError)
+		s.Require().Contains(printer.GetErrorLines()[0], expectedError)
 	})
 
 	s.Run("Unarchive open channel", func() {
 		printer.Clean()
 
 		err := unarchiveChannelsCmdF(s.th.SystemAdminClient, &cobra.Command{}, []string{fmt.Sprintf("%s:%s", s.th.BasicTeam.Id, s.th.BasicChannel.Name)})
-		s.Require().Nil(err)
-		s.Require().Contains(printer.GetErrorLines()[0], fmt.Sprintf("Unable to unarchive channel '%s:%s'", s.th.BasicTeam.Id, s.th.BasicChannel.Name))
+		expectedError := fmt.Sprintf("Unable to unarchive channel '%s:%s'", s.th.BasicTeam.Id, s.th.BasicChannel.Name)
+		s.Require().ErrorContains(err, expectedError)
+		s.Require().Contains(printer.GetErrorLines()[0], expectedError)
 		s.Require().Contains(printer.GetErrorLines()[0], "Unable to unarchive channel. The channel is not archived.")
 	})
 }
@@ -354,7 +357,7 @@ func (s *MmctlE2ETestSuite) TestDeleteChannelsCmd() {
 		_, err = s.th.App.GetChannel(s.th.Context, channel.Id)
 
 		s.Require().NotNil(err)
-		s.Require().Equal(fmt.Sprintf("GetChannel: Unable to find the existing channel., resource: Channel id: %s", channel.Id), err.Error())
+		s.Require().Equal(fmt.Sprintf("GetChannel: Unable to find the existing channel., resource \"Channel\" not found, id: %s", channel.Id), err.Error())
 	})
 
 	s.Run("Delete channel without permissions", func() {
@@ -398,7 +401,7 @@ func (s *MmctlE2ETestSuite) TestDeleteChannelsCmd() {
 
 		s.Require().Nil(channel)
 		s.Require().NotNil(err)
-		s.Require().Equal(fmt.Sprintf("GetChannel: Unable to find the existing channel., resource: Channel id: %s", notExistingChannelID), err.Error())
+		s.Require().Equal(fmt.Sprintf("GetChannel: Unable to find the existing channel., resource \"Channel\" not found, id: %s", notExistingChannelID), err.Error())
 	})
 }
 

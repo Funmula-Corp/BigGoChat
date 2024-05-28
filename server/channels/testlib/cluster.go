@@ -6,8 +6,8 @@ package testlib
 import (
 	"sync"
 
-	"github.com/mattermost/mattermost/server/public/model"
-	"github.com/mattermost/mattermost/server/v8/einterfaces"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/einterfaces"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 )
 
 type FakeClusterInterface struct {
@@ -102,4 +102,8 @@ func (c *FakeClusterInterface) ClearMessages() {
 	c.mut.Lock()
 	defer c.mut.Unlock()
 	c.messages = nil
+}
+
+func (c *FakeClusterInterface) WebConnCountForUser(userID string) (int, *model.AppError) {
+	return 0, nil
 }

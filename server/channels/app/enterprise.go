@@ -4,8 +4,8 @@
 package app
 
 import (
-	"github.com/mattermost/mattermost/server/v8/einterfaces"
-	ejobs "github.com/mattermost/mattermost/server/v8/einterfaces/jobs"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/einterfaces"
+	ejobs "git.biggo.com/Funmula/mattermost-funmula/server/v8/einterfaces/jobs"
 )
 
 var accountMigrationInterface func(*App) einterfaces.AccountMigrationInterface

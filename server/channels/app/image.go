@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/mattermost/mattermost/server/v8/channels/app/imaging"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app/imaging"
 )
 
 func checkImageResolutionLimit(w, h int, maxRes int64) error {

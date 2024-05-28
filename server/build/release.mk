@@ -86,9 +86,9 @@ else
 	env GOOS=windows GOARCH=amd64 $(GO) build -o $(GOBIN)/windows_amd64 $(GOFLAGS) -trimpath -tags '$(BUILD_TAGS) production' -ldflags '$(LDFLAGS)' ./cmd/...
 endif
 
-build: setup-go-work build-client build-linux build-windows build-osx
+build: setup-go-work build-client build-linux #build-windows build-osx
 
-build-cmd: setup-go-work build-client build-cmd-linux build-cmd-windows build-cmd-osx
+build-cmd: setup-go-work build-client build-cmd-linux #build-cmd-windows build-cmd-osx
 
 build-client:
 	@echo Building mattermost web app
@@ -126,12 +126,7 @@ package-prep:
 	cp -RL $(BUILD_WEBAPP_DIR)/channels/dist/* $(DIST_PATH)/client
 
 	@# Help files
-ifeq ($(BUILD_ENTERPRISE_READY),true)
-	cp $(BUILD_ENTERPRISE_DIR)/ENTERPRISE-EDITION-LICENSE.txt $(DIST_PATH)
-	cp -L $(BUILD_ENTERPRISE_DIR)/cloud/config/cloud_defaults.json $(DIST_PATH)/config
-else
 	cp build/MIT-COMPILED-LICENSE.md $(DIST_PATH)
-endif
 	cp ../NOTICE.txt $(DIST_PATH)
 	cp ../README.md $(DIST_PATH)
 	if [ -f bin/manifest.txt ]; then \
@@ -218,6 +213,6 @@ package-windows: package-prep
 	@# Cleanup
 	rm -rf $(DIST_ROOT)/windows
 
-package: package-linux package-osx package-windows
+package: package-linux #package-osx package-windows
 	rm -rf tmpprepackaged
 	rm -rf $(DIST_PATH)

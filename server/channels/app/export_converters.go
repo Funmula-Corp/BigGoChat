@@ -6,8 +6,8 @@ package app
 import (
 	"strings"
 
-	"github.com/mattermost/mattermost/server/public/model"
-	"github.com/mattermost/mattermost/server/v8/channels/app/imports"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app/imports"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 )
 
 func ImportLineFromTeam(team *model.TeamForExport) *imports.LineImportData {

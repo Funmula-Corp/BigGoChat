@@ -10,8 +10,8 @@ import (
 	"github.com/lib/pq"
 	"github.com/pkg/errors"
 
-	"github.com/mattermost/mattermost/server/public/model"
-	"github.com/mattermost/mattermost/server/v8/channels/store/storetest/mocks"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store/storetest/mocks"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 )
 
 func genStore() *mocks.Store {
@@ -60,7 +60,6 @@ func genStore() *mocks.Store {
 	mock.On("PostPriority").Return(&mocks.PostPriorityStore{})
 	mock.On("PostAcknowledgement").Return(&mocks.PostAcknowledgementStore{})
 	mock.On("PostPersistentNotification").Return(&mocks.PostPersistentNotificationStore{})
-	mock.On("TrueUpReview").Return(&mocks.TrueUpReviewStore{})
 	mock.On("DesktopTokens").Return(&mocks.DesktopTokensStore{})
 	mock.On("ChannelBookmark").Return(&mocks.ChannelBookmarkStore{})
 	return mock

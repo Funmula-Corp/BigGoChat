@@ -6,14 +6,13 @@ package main
 import (
 	"os"
 
-	"github.com/mattermost/mattermost/server/v8/cmd/mattermost/commands"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/cmd/mattermost/commands"
 	// Import and register app layer slash commands
-	_ "github.com/mattermost/mattermost/server/v8/channels/app/slashcommands"
+	_ "git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app/slashcommands"
 	// Plugins
-	_ "github.com/mattermost/mattermost/server/v8/channels/app/oauthproviders/gitlab"
+	_ "git.biggo.com/Funmula/mattermost-funmula/server/v8/biggo/oauth"
+	_ "git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app/oauthproviders/gitlab"
 
-	// Enterprise Imports
-	_ "github.com/mattermost/mattermost/server/v8/enterprise"
 )
 
 func main() {

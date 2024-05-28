@@ -6,7 +6,7 @@ package users
 import (
 	"testing"
 
-	"github.com/mattermost/mattermost/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 
 	"github.com/stretchr/testify/require"
 )
@@ -56,7 +56,7 @@ func TestFirstUserPromoted(t *testing.T) {
 
 	require.Equal(t, model.SystemUserRoleId, user2.Roles)
 
-	th.dbStore.User().PermanentDelete(user.Id)
+	th.dbStore.User().PermanentDelete(th.Context, user.Id)
 
 	b := &model.Bot{
 		UserId:   user2.Id,

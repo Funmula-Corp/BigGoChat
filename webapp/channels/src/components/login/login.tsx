@@ -85,6 +85,7 @@ const Login = ({onCustomizeHeader}: LoginProps) => {
         EnableSignUpWithGitLab,
         EnableSignUpWithOffice365,
         EnableSignUpWithGoogle,
+        EnableSignUpWithBiggo,
         EnableSignUpWithOpenId,
         EnableOpenServer,
         LdapLoginFieldName,
@@ -105,7 +106,7 @@ const Login = ({onCustomizeHeader}: LoginProps) => {
     const initializing = useSelector((state: GlobalState) => state.requests.users.logout.status === RequestStatus.SUCCESS || !state.storage.initialized);
     const currentUser = useSelector(getCurrentUser);
     const experimentalPrimaryTeam = useSelector((state: GlobalState) => (ExperimentalPrimaryTeam ? getTeamByName(state, ExperimentalPrimaryTeam) : undefined));
-    const experimentalPrimaryTeamMember = useSelector((state: GlobalState) => getMyTeamMember(state, experimentalPrimaryTeam?.id ?? ''));
+    const experimentalPrimaryTeamMember = useSelector((state: GlobalState) => (experimentalPrimaryTeam ? getMyTeamMember(state, experimentalPrimaryTeam.id) : undefined));
     const onboardingFlowEnabled = useSelector(getIsOnboardingFlowEnabled);
 
     const loginIdInput = useRef<HTMLInputElement>(null);
@@ -131,6 +132,7 @@ const Login = ({onCustomizeHeader}: LoginProps) => {
     const enableSignUpWithEmail = EnableSignUpWithEmail === 'true';
     const enableSignUpWithGitLab = EnableSignUpWithGitLab === 'true';
     const enableSignUpWithGoogle = EnableSignUpWithGoogle === 'true';
+    const enableSignUpWithBiggo = EnableSignUpWithBiggo === 'true';
     const enableSignUpWithOffice365 = EnableSignUpWithOffice365 === 'true';
     const enableSignUpWithOpenId = EnableSignUpWithOpenId === 'true';
     const isLicensed = IsLicensed === 'true';
@@ -139,9 +141,9 @@ const Login = ({onCustomizeHeader}: LoginProps) => {
     const siteName = SiteName ?? '';
 
     const enableBaseLogin = enableSignInWithEmail || enableSignInWithUsername || ldapEnabled;
-    const enableExternalSignup = enableSignUpWithGitLab || enableSignUpWithOffice365 || enableSignUpWithGoogle || enableSignUpWithOpenId || enableSignUpWithSaml;
+    const enableExternalSignup = enableSignUpWithGitLab || enableSignUpWithOffice365 || enableSignUpWithGoogle || enableSignUpWithBiggo || enableSignUpWithOpenId || enableSignUpWithSaml;
     const showSignup = enableOpenServer && (enableExternalSignup || enableSignUpWithEmail || enableLdap);
-    const onlyLdapEnabled = enableLdap && !(enableSaml || enableSignInWithEmail || enableSignInWithUsername || enableSignUpWithEmail || enableSignUpWithGitLab || enableSignUpWithGoogle || enableSignUpWithOffice365 || enableSignUpWithOpenId);
+    const onlyLdapEnabled = enableLdap && !(enableSaml || enableSignInWithEmail || enableSignInWithUsername || enableSignUpWithEmail || enableSignUpWithGitLab || enableSignUpWithGoogle || enableSignUpWithBiggo || enableSignUpWithOffice365 || enableSignUpWithOpenId);
 
     const query = new URLSearchParams(search);
     const redirectTo = query.get('redirect_to');
@@ -174,6 +176,17 @@ const Login = ({onCustomizeHeader}: LoginProps) => {
                 url,
                 icon: <LoginGoogleIcon/>,
                 label: formatMessage({id: 'login.google', defaultMessage: 'Google'}),
+                onClick: desktopExternalAuth(url),
+            });
+        }
+
+        if (enableSignUpWithBiggo) {
+            const url = `${Client4.getOAuthRoute()}/biggo/login${search}`;
+            externalLoginOptions.push({
+                id: 'biggo',
+                url,
+                icon: <LoginOpenIDIcon/>,
+                label: formatMessage({id: 'login.biggo', defaultMessage: 'Biggo'}),
                 onClick: desktopExternalAuth(url),
             });
         }
@@ -252,7 +265,7 @@ const Login = ({onCustomizeHeader}: LoginProps) => {
 
     const showSessionExpiredNotificationIfNeeded = useCallback(() => {
         if (sessionExpired && !closeSessionExpiredNotification!.current) {
-            showNotification({
+            dispatch(showNotification({
                 title: siteName,
                 body: formatMessage({
                     id: 'login.session_expired.notification',
@@ -267,7 +280,7 @@ const Login = ({onCustomizeHeader}: LoginProps) => {
                         closeSessionExpiredNotification.current = undefined;
                     }
                 },
-            }).then(({callback: closeNotification}) => {
+            })).then(({callback: closeNotification}) => {
                 closeSessionExpiredNotification.current = closeNotification;
             }).catch(() => {
                 // Ignore the failure to display the notification.
@@ -666,7 +679,7 @@ const Login = ({onCustomizeHeader}: LoginProps) => {
             history.push(redirectTo);
         } else if (team) {
             history.push(`/${team.name}`);
-        } else if (experimentalPrimaryTeamMember.team_id) {
+        } else if (experimentalPrimaryTeamMember?.team_id) {
             // Only set experimental team if user is on that team
             history.push(`/${ExperimentalPrimaryTeam}`);
         } else if (onboardingFlowEnabled) {

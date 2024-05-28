@@ -4,21 +4,17 @@
 package app
 
 import (
-	"os"
 	"testing"
 
-	"github.com/mattermost/mattermost/server/public/model"
-	"github.com/mattermost/mattermost/server/v8/channels/store"
-	storemocks "github.com/mattermost/mattermost/server/v8/channels/store/storetest/mocks"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
+	storemocks "git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store/storetest/mocks"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 )
 
 func TestResolvePersistentNotification(t *testing.T) {
 	t.Run("should not delete when no posts exist", func(t *testing.T) {
-		os.Setenv("MM_FEATUREFLAGS_POSTPRIORITY", "true")
-		defer os.Unsetenv("MM_FEATUREFLAGS_POSTPRIORITY")
-
 		th := SetupWithStoreMock(t)
 		defer th.TearDown()
 
@@ -42,9 +38,6 @@ func TestResolvePersistentNotification(t *testing.T) {
 	})
 
 	t.Run("should delete for mentioned user", func(t *testing.T) {
-		os.Setenv("MM_FEATUREFLAGS_POSTPRIORITY", "true")
-		defer os.Unsetenv("MM_FEATUREFLAGS_POSTPRIORITY")
-
 		th := SetupWithStoreMock(t)
 		defer th.TearDown()
 
@@ -108,9 +101,6 @@ func TestResolvePersistentNotification(t *testing.T) {
 	})
 
 	t.Run("should not delete for non-mentioned user", func(t *testing.T) {
-		os.Setenv("MM_FEATUREFLAGS_POSTPRIORITY", "true")
-		defer os.Unsetenv("MM_FEATUREFLAGS_POSTPRIORITY")
-
 		th := SetupWithStoreMock(t)
 		defer th.TearDown()
 
@@ -159,9 +149,6 @@ func TestResolvePersistentNotification(t *testing.T) {
 
 func TestDeletePersistentNotification(t *testing.T) {
 	t.Run("should not delete when no posts exist", func(t *testing.T) {
-		os.Setenv("MM_FEATUREFLAGS_POSTPRIORITY", "true")
-		defer os.Unsetenv("MM_FEATUREFLAGS_POSTPRIORITY")
-
 		th := SetupWithStoreMock(t)
 		defer th.TearDown()
 
@@ -185,9 +172,6 @@ func TestDeletePersistentNotification(t *testing.T) {
 	})
 
 	t.Run("should delete", func(t *testing.T) {
-		os.Setenv("MM_FEATUREFLAGS_POSTPRIORITY", "true")
-		defer os.Unsetenv("MM_FEATUREFLAGS_POSTPRIORITY")
-
 		th := SetupWithStoreMock(t)
 		defer th.TearDown()
 

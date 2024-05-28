@@ -1,8 +1,8 @@
 package cluster_test
 
 import (
-	"github.com/mattermost/mattermost/server/public/plugin"
-	"github.com/mattermost/mattermost/server/public/pluginapi/cluster"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/pluginapi/cluster"
 )
 
 //nolint:staticcheck

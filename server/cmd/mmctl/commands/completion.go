@@ -8,8 +8,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/mattermost/mattermost/server/public/model"
-	"github.com/mattermost/mattermost/server/v8/cmd/mmctl/client"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/cmd/mmctl/client"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 	"github.com/spf13/cobra"
 )
 
@@ -213,7 +213,7 @@ func noCompletion(_ *cobra.Command, _ []string, _ string) ([]string, cobra.Shell
 
 type validateArgsFn func(ctx context.Context, c client.Client, cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective)
 
-func validateArgsWithClient(fn validateArgsFn) func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) { //nolint:unused // Remove with https://github.com/mattermost/mattermost/pull/25633
+func validateArgsWithClient(fn validateArgsFn) func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 	return func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		ctx, cancel := context.WithTimeout(context.Background(), shellCompleteTimeout)
 		defer cancel()

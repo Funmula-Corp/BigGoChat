@@ -391,7 +391,7 @@ import (
 	"net/http"
 	timePkg "time"
 
-	"github.com/mattermost/mattermost/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 )
 
 type apiTimerLayer struct {
@@ -432,7 +432,7 @@ import (
 	"net/http"
 	timePkg "time"
 
-	"github.com/mattermost/mattermost/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 )
 
 type hooksTimerLayer struct {
@@ -511,7 +511,10 @@ func generateHooksGlue(info *PluginInterfaceInfo) {
 		})
 	}
 	templateResult := &bytes.Buffer{}
-	hooksTemplate.Execute(templateResult, &templateParams)
+	err = hooksTemplate.Execute(templateResult, &templateParams)
+	if err != nil {
+		panic(err)
+	}
 
 	formatted, err := imports.Process("", templateResult.Bytes(), nil)
 	if err != nil {
@@ -565,7 +568,10 @@ func generatePluginTimerLayer(info *PluginInterfaceInfo) {
 		}
 
 		templateResult := &bytes.Buffer{}
-		parsedTemplate.Execute(templateResult, &templateParams)
+		err = parsedTemplate.Execute(templateResult, &templateParams)
+		if err != nil {
+			panic(err)
+		}
 
 		formatted, err := imports.Process("", templateResult.Bytes(), nil)
 		if err != nil {
@@ -579,7 +585,7 @@ func generatePluginTimerLayer(info *PluginInterfaceInfo) {
 }
 
 func getPluginPackageDir() string {
-	dirs, err := goList("github.com/mattermost/mattermost/server/public/plugin")
+	dirs, err := goList("git.biggo.com/Funmula/mattermost-funmula/server/public/plugin")
 	if err != nil {
 		panic(err)
 	} else if len(dirs) != 1 {

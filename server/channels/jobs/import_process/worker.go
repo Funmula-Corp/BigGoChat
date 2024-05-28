@@ -15,12 +15,12 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/mattermost/mattermost/server/public/model"
-	"github.com/mattermost/mattermost/server/public/shared/mlog"
-	"github.com/mattermost/mattermost/server/public/shared/request"
-	"github.com/mattermost/mattermost/server/v8/channels/jobs"
-	"github.com/mattermost/mattermost/server/v8/platform/services/configservice"
-	"github.com/mattermost/mattermost/server/v8/platform/shared/filestore"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/jobs"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/services/configservice"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/shared/filestore"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
 )
 
 type AppIface interface {
@@ -55,7 +55,7 @@ func MakeWorker(jobServer *jobs.JobServer, app AppIface) *jobs.SimpleWorker {
 			// We simply read the file from the local filesystem.
 			info, err := os.Stat(importFileName)
 			if errors.Is(err, os.ErrNotExist) {
-				return fmt.Errorf("file %s doesn't exist.", importFile)
+				return fmt.Errorf("file %s doesn't exist.", importFileName)
 			}
 
 			importFileSize = info.Size()

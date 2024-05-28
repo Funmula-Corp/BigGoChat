@@ -8,7 +8,6 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"os"
 	"strconv"
 	"sync"
 	"testing"
@@ -17,17 +16,17 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/mattermost/mattermost/server/public/model"
-	"github.com/mattermost/mattermost/server/public/plugin/plugintest/mock"
-	"github.com/mattermost/mattermost/server/public/shared/mlog"
-	"github.com/mattermost/mattermost/server/v8/channels/app/platform"
-	"github.com/mattermost/mattermost/server/v8/channels/store"
-	"github.com/mattermost/mattermost/server/v8/channels/store/storetest"
-	storemocks "github.com/mattermost/mattermost/server/v8/channels/store/storetest/mocks"
-	"github.com/mattermost/mattermost/server/v8/channels/testlib"
-	eMocks "github.com/mattermost/mattermost/server/v8/einterfaces/mocks"
-	"github.com/mattermost/mattermost/server/v8/platform/services/imageproxy"
-	"github.com/mattermost/mattermost/server/v8/platform/services/searchengine/mocks"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app/platform"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store/storetest"
+	storemocks "git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store/storetest/mocks"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/testlib"
+	eMocks "git.biggo.com/Funmula/mattermost-funmula/server/v8/einterfaces/mocks"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/services/imageproxy"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/services/searchengine/mocks"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin/plugintest/mock"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
 )
 
 func TestCreatePostDeduplicate(t *testing.T) {
@@ -61,8 +60,8 @@ func TestCreatePostDeduplicate(t *testing.T) {
 			package main
 
 			import (
-				"github.com/mattermost/mattermost/server/public/plugin"
-				"github.com/mattermost/mattermost/server/public/model"
+				"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
+				"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 			)
 
 			type MyPlugin struct {
@@ -110,8 +109,8 @@ func TestCreatePostDeduplicate(t *testing.T) {
 			package main
 
 			import (
-				"github.com/mattermost/mattermost/server/public/plugin"
-				"github.com/mattermost/mattermost/server/public/model"
+				"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
+				"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 				"time"
 			)
 
@@ -418,8 +417,8 @@ func TestUpdatePostPluginHooks(t *testing.T) {
 				package main
 
 				import (
-					"github.com/mattermost/mattermost/server/public/plugin"
-					"github.com/mattermost/mattermost/server/public/model"
+					"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
+					"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 				)
 
 				type MyPlugin struct {
@@ -438,8 +437,8 @@ func TestUpdatePostPluginHooks(t *testing.T) {
 				package main
 
 				import (
-					"github.com/mattermost/mattermost/server/public/plugin"
-					"github.com/mattermost/mattermost/server/public/model"
+					"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
+					"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 				)
 
 				type MyPlugin struct {
@@ -487,8 +486,8 @@ func TestUpdatePostPluginHooks(t *testing.T) {
 				package main
 
 				import (
-					"github.com/mattermost/mattermost/server/public/plugin"
-					"github.com/mattermost/mattermost/server/public/model"
+					"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
+					"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 				)
 
 				type MyPlugin struct {
@@ -508,8 +507,8 @@ func TestUpdatePostPluginHooks(t *testing.T) {
 				package main
 
 				import (
-					"github.com/mattermost/mattermost/server/public/plugin"
-					"github.com/mattermost/mattermost/server/public/model"
+					"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
+					"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 				)
 
 				type MyPlugin struct {
@@ -2451,9 +2450,6 @@ func TestCountMentionsFromPost(t *testing.T) {
 	})
 
 	t.Run("should count urgent mentions", func(t *testing.T) {
-		os.Setenv("MM_FEATUREFLAGS_POSTPRIORITY", "true")
-		defer os.Unsetenv("MM_FEATUREFLAGS_POSTPRIORITY")
-
 		th := Setup(t).InitBasic()
 		defer th.TearDown()
 

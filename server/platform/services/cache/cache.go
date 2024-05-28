@@ -7,7 +7,7 @@ import (
 	"errors"
 	"time"
 
-	"github.com/mattermost/mattermost/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 )
 
 // ErrKeyNotFound is the error when the given key is not found

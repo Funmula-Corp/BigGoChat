@@ -6,7 +6,7 @@ package web
 import (
 	"testing"
 
-	"github.com/mattermost/mattermost/server/v8/channels/testlib"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/testlib"
 )
 
 var mainHelper *testlib.MainHelper

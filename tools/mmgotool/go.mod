@@ -1,6 +1,6 @@
-module github.com/mattermost/mattermost/tools/mmgotool
+module git.biggo.com/Funmula/mattermost-funmula/tools/mmgotool
 
-go 1.20
+go 1.21
 
 require github.com/spf13/cobra v1.7.0
 

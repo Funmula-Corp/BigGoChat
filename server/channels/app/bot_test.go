@@ -11,7 +11,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/mattermost/mattermost/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 )
 
 func TestCreateBot(t *testing.T) {
@@ -169,7 +169,7 @@ func TestEnsureBot(t *testing.T) {
 		assert.Equal(t, "username", bot.Username)
 		assert.Equal(t, "a bot", bot.Description)
 
-		err = th.App.Srv().Store().User().PermanentDelete(initialBot.UserId)
+		err = th.App.Srv().Store().User().PermanentDelete(th.Context, initialBot.UserId)
 		require.NoError(t, err)
 		botID2, err := th.App.EnsureBot(th.Context, pluginId, &model.Bot{
 			Username:    "another_username",

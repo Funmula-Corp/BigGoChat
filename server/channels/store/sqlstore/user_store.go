@@ -17,11 +17,11 @@ import (
 	"github.com/pkg/errors"
 	"golang.org/x/sync/errgroup"
 
-	"github.com/mattermost/mattermost/server/public/model"
-	"github.com/mattermost/mattermost/server/public/shared/mlog"
-	"github.com/mattermost/mattermost/server/public/shared/request"
-	"github.com/mattermost/mattermost/server/v8/channels/store"
-	"github.com/mattermost/mattermost/server/v8/einterfaces"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/einterfaces"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
 )
 
 const (
@@ -108,7 +108,7 @@ func (us SqlUserStore) InsertUsers(users []*model.User) error {
 }
 
 func (us SqlUserStore) Save(rctx request.CTX, user *model.User) (*model.User, error) {
-	if user.Id != "" && !user.IsRemote() {
+	if user.Id != "" && !user.IsRemote() && user.AuthService != model.ServiceBiggo {
 		return nil, store.NewErrInvalidInput("User", "id", user.Id)
 	}
 
@@ -1337,7 +1337,7 @@ func (us SqlUserStore) VerifyEmail(userId, email string) (string, error) {
 	return userId, nil
 }
 
-func (us SqlUserStore) PermanentDelete(userId string) error {
+func (us SqlUserStore) PermanentDelete(rctx request.CTX, userId string) error {
 	if _, err := us.GetMasterX().Exec("DELETE FROM Users WHERE Id = ?", userId); err != nil {
 		return errors.Wrapf(err, "failed to delete User with userId=%s", userId)
 	}

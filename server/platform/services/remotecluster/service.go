@@ -10,10 +10,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/mattermost/mattermost/server/public/model"
-	"github.com/mattermost/mattermost/server/public/shared/mlog"
-	"github.com/mattermost/mattermost/server/v8/channels/store"
-	"github.com/mattermost/mattermost/server/v8/einterfaces"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/einterfaces"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
 )
 
 const (
@@ -261,6 +261,10 @@ func (rcs *Service) resume() {
 	rcs.done = make(chan struct{})
 
 	if !disablePing {
+		// first ping all the plugin remotes immediately, synchronously.
+		rcs.pingAllNow(model.RemoteClusterQueryFilter{OnlyPlugins: true})
+
+		// start the async ping loop
 		rcs.pingLoop(rcs.done)
 	}
 

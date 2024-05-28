@@ -10,10 +10,10 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/mattermost/mattermost/server/public/model"
-	"github.com/mattermost/mattermost/server/public/shared/i18n"
-	"github.com/mattermost/mattermost/server/public/shared/mlog"
-	"github.com/mattermost/mattermost/server/v8/channels/utils"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/utils"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/i18n"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
 )
 
 // marshalConfig converts the given configuration into JSON bytes for persistence.
@@ -104,14 +104,11 @@ func fixConfig(cfg *model.Config) {
 		}
 	}
 
-	FixInvalidLocales(cfg)
+	fixInvalidLocales(cfg)
 }
 
-// FixInvalidLocales checks and corrects the given config for invalid locale-related settings.
-//
-// Ideally, this function would be completely internal, but it's currently exposed to allow the cli
-// to test the config change before allowing the save.
-func FixInvalidLocales(cfg *model.Config) bool {
+// fixInvalidLocales checks and corrects the given config for invalid locale-related settings.
+func fixInvalidLocales(cfg *model.Config) bool {
 	var changed bool
 
 	locales := i18n.GetSupportedLocales()

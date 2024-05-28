@@ -19,15 +19,15 @@ import (
 	"github.com/opentracing/opentracing-go/ext"
 	spanlog "github.com/opentracing/opentracing-go/log"
 
-	"github.com/mattermost/mattermost/server/public/model"
-	"github.com/mattermost/mattermost/server/public/shared/i18n"
-	"github.com/mattermost/mattermost/server/public/shared/mlog"
-	"github.com/mattermost/mattermost/server/public/shared/request"
-	"github.com/mattermost/mattermost/server/v8/channels/app"
-	app_opentracing "github.com/mattermost/mattermost/server/v8/channels/app/opentracing"
-	"github.com/mattermost/mattermost/server/v8/channels/store/opentracinglayer"
-	"github.com/mattermost/mattermost/server/v8/channels/utils"
-	"github.com/mattermost/mattermost/server/v8/platform/services/tracing"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app"
+	app_opentracing "git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app/opentracing"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store/opentracinglayer"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/utils"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/services/tracing"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/i18n"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
 )
 
 const (
@@ -258,11 +258,6 @@ func (h Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("X-Content-Type-Options", "nosniff")
 	w.Header().Set("Referrer-Policy", "no-referrer")
 
-	cloudCSP := ""
-	if c.App.Channels().License().IsCloud() || *c.App.Config().ServiceSettings.SelfHostedPurchase {
-		cloudCSP = " js.stripe.com/v3"
-	}
-
 	if h.IsStatic {
 		// Instruct the browser not to display us in an iframe unless is the same origin for anti-clickjacking
 		w.Header().Set("X-Frame-Options", "SAMEORIGIN")
@@ -271,9 +266,8 @@ func (h Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 		// Set content security policy. This is also specified in the root.html of the webapp in a meta tag.
 		w.Header().Set("Content-Security-Policy", fmt.Sprintf(
-			"frame-ancestors %s; script-src 'self' cdn.rudderlabs.com%s%s%s",
+			"frame-ancestors %s; script-src 'self' cdn.rudderlabs.com%s%s",
 			frameAncestors,
-			cloudCSP,
 			h.cspShaDirective,
 			devCSP,
 		))
@@ -430,9 +424,7 @@ func (h Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				pageLoadContext = ""
 			}
 
-			originClient := string(originClient(r))
-
-			c.App.Metrics().ObserveAPIEndpointDuration(h.HandlerName, r.Method, statusCode, originClient, pageLoadContext, elapsed)
+			c.App.Metrics().ObserveAPIEndpointDuration(h.HandlerName, r.Method, statusCode, string(GetOriginClient(r)), pageLoadContext, elapsed)
 		}
 	}
 }
@@ -446,12 +438,12 @@ const (
 	OriginClientDesktop OriginClient = "desktop"
 )
 
-// originClient returns the device from which the provided request was issued. The algorithm roughly looks like:
+// GetOriginClient returns the device from which the provided request was issued. The algorithm roughly looks like:
 // - If the URL contains the query mobilev2=true, then it's mobile
 // - If the first field of the user agent starts with either "rnbeta" or "Mattermost", then it's mobile
 // - If the last field of the user agent starts with "Mattermost", then it's desktop
 // - Otherwise, it's web
-func originClient(r *http.Request) OriginClient {
+func GetOriginClient(r *http.Request) OriginClient {
 	userAgent := r.Header.Get("User-Agent")
 	fields := strings.Fields(userAgent)
 	if len(fields) < 1 {

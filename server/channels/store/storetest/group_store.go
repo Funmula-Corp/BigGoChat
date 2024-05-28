@@ -16,9 +16,9 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/mattermost/mattermost/server/public/model"
-	"github.com/mattermost/mattermost/server/public/shared/request"
-	"github.com/mattermost/mattermost/server/v8/channels/store"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
 )
 
 func TestGroupStore(t *testing.T, rctx request.CTX, ss store.Store) {
@@ -5350,8 +5350,8 @@ func groupTestDistinctGroupMemberCountForSource(t *testing.T, rctx request.CTX, 
 		ss.Group().Delete(customGroup.Id)
 		ss.Group().Delete(ldapGroup.Id)
 
-		ss.User().PermanentDelete(user1.Id)
-		ss.User().PermanentDelete(user2.Id)
+		ss.User().PermanentDelete(rctx, user1.Id)
+		ss.User().PermanentDelete(rctx, user2.Id)
 	}()
 
 	customGroupCount, err := ss.Group().DistinctGroupMemberCountForSource(model.GroupSourceCustom)
