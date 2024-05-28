@@ -1,4 +1,4 @@
-module github.com/mattermost/mattermost/tools/mmgotool
+module git.biggo.com/Funmula/mattermost-funmula/tools/mmgotool
 
 go 1.21
 
