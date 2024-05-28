@@ -374,6 +374,7 @@ const (
 	SystemReadOnlyAdminRoleId    = "system_read_only_admin"
 	SystemManagerRoleId          = "system_manager"
 	SystemCustomGroupAdminRoleId = "system_custom_group_admin"
+	SystemVerified               = "system_verified"
 
 	TeamGuestRoleId         = "team_guest"
 	TeamUserRoleId          = "team_user"
