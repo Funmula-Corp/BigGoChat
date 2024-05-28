@@ -1,0 +1,18 @@
+syntax = "proto3";
+option go_package = "./pluginAPI";
+package pluginAPI;
+
+message Void {
+}
+
+service PluginAPI {
+  rpc GetUserIdByAuthData (UserIdByAuthDataRequest) returns (UserIdByAuthDataReply) {}
+}
+
+message UserIdByAuthDataRequest {
+  string AuthData = 1;
+}
+
+message UserIdByAuthDataReply {
+  string UserId = 1;
+}
