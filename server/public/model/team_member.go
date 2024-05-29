@@ -24,6 +24,7 @@ type TeamMember struct {
 	DeleteAt      int64  `json:"delete_at"`
 	SchemeGuest   bool   `json:"scheme_guest"`
 	SchemeUser    bool   `json:"scheme_user"`
+	SchemeVerified bool   `json:"scheme_verified"`
 	SchemeAdmin   bool   `json:"scheme_admin"`
 	ExplicitRoles string `json:"explicit_roles"`
 	CreateAt      int64  `json:"-"`

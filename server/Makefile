@@ -799,3 +799,11 @@ test-migration:
 	# for now we exclude plugins such as playbooks and focalboard
 	# we also exlude systems table temporarily due to adding some keys while running the initial migration
 	bin/dbcmp --source "${MYSQL_DSN}" --target "${POSTGRES_DSN}" --exclude="db_migrations","ir_","focalboard","systems"
+
+# to test specific module.
+# test-it: export MM_SERVER_PATH := $(MM_SERVER_PATH)
+# test-it: export GOTESTSUM_FORMAT := $(GOTESTSUM_FORMAT)
+# test-it: export GOTESTSUM_JUNITFILE := $(GOTESTSUM_JUNITFILE)
+# test-it: export GOTESTSUM_JSONFILE := $(GOTESTSUM_JSONFILE)
+# test-it: test-server-pre
+# 	$(GOBIN)/gotestsum  --rerun-fails=0 --packages="git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/api4" -- $(GOFLAGS)-timeout=90m -run TestCreateBot/create_bot_with_permissions

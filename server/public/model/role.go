@@ -379,12 +379,14 @@ const (
 	TeamGuestRoleId         = "team_guest"
 	TeamUserRoleId          = "team_user"
 	TeamAdminRoleId         = "team_admin"
+	TeamVerifiedRoleId      = "team_verified"
 	TeamPostAllRoleId       = "team_post_all"
 	TeamPostAllPublicRoleId = "team_post_all_public"
 
 	ChannelGuestRoleId = "channel_guest"
 	ChannelUserRoleId  = "channel_user"
 	ChannelAdminRoleId = "channel_admin"
+	ChannelVerifiedRoleId = "channel_verified"
 
 	CustomGroupUserRoleId = "custom_group_user"
 
