@@ -1,28 +1,20 @@
 package biggo
 
 import (
-	context "context"
-	"net"
+	"net/http"
 	"sync"
 	"sync/atomic"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app/platform"
-	"git.biggo.com/Funmula/mattermost-packages/pluginAPI"
-
-	"google.golang.org/grpc"
 )
 
 type PluginAPIService struct {
-	pluginAPI.UnimplementedPluginAPIServer
 	ps *platform.PlatformService
 
 	running atomic.Bool
 
-	grpcSoc net.Listener
-	grpcSvr *grpc.Server
-
-	mx sync.Mutex
+	mx  sync.Mutex
+	mux *http.ServeMux
 }
 
 var instance *PluginAPIService
@@ -39,28 +31,39 @@ func (s *PluginAPIService) Start() (err error) {
 	defer s.mx.Unlock()
 
 	if !s.running.Load() {
-		if s.grpcSoc, err = net.Listen("tcp", "localhost:9999"); err != nil {
-			return
-		}
-		s.grpcSvr = grpc.NewServer()
-
+		s.mux = http.NewServeMux()
+		s.mux.HandleFunc("/api/v1/user/id", s.GetUserId)
 		go func() {
 			defer s.running.Store(false)
-			defer s.grpcSoc.Close()
 			s.running.Store(true)
-			s.grpcSvr.Serve(s.grpcSoc)
+			http.ListenAndServe(":9999", s.mux)
 		}()
 	}
 	return
 }
 
-func (s *PluginAPIService) GetUserIdByAuthData(ctx context.Context, in *pluginAPI.UserIdByAuthDataRequest) (reply *pluginAPI.UserIdByAuthDataReply, err error) {
-	var user *model.User
-	if user, err = s.ps.Store.User().GetByAuth(&in.AuthData, "service"); err != nil {
+func (s *PluginAPIService) GetUserId(w http.ResponseWriter, r *http.Request) {
+	r.ParseForm()
+	if r.Method != http.MethodGet {
+		http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
 		return
 	}
-	reply = &pluginAPI.UserIdByAuthDataReply{
-		UserId: user.Id,
+
+	authData := r.FormValue("auth_data")
+	if authData == "" {
+		http.Error(w, "query auth_data missing", http.StatusBadRequest)
+		return
 	}
-	return
+
+	authService := r.FormValue("auth_service")
+	if authData == "" {
+		http.Error(w, "query auth_service missing", http.StatusBadRequest)
+		return
+	}
+
+	if user, err := s.ps.Store.User().GetByAuth(&authData, authService); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	} else {
+		w.Write([]byte(user.Id))
+	}
 }
