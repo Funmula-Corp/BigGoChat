@@ -6602,7 +6602,7 @@ func (s *apiRPCServer) UpdateUserRoles(args *Z_UpdateUserRolesArgs, returns *Z_U
 	return nil
 }
 
-type Z_PublishCoreWebSocketEventArgs struct {
+type Z_BDPublishWebSocketEventArgs struct {
 	A model.WebsocketEventType
 	B string
 	C string
@@ -6612,25 +6612,25 @@ type Z_PublishCoreWebSocketEventArgs struct {
 	G map[string]any
 }
 
-type Z_PublishCoreWebSocketEventReturns struct {
+type Z_BDPublishWebSocketEventReturns struct {
 }
 
-func (g *apiRPCClient) PublishCoreWebSocketEvent(event model.WebsocketEventType, teamId string, channelId string, userId string, omitUsers map[string]bool, omitConnectionId string, data map[string]any) {
-	_args := &Z_PublishCoreWebSocketEventArgs{event, teamId, channelId, userId, omitUsers, omitConnectionId, data}
-	_returns := &Z_PublishCoreWebSocketEventReturns{}
-	if err := g.client.Call("Plugin.PublishCoreWebSocketEvent", _args, _returns); err != nil {
-		log.Printf("RPC call to PublishCoreWebSocketEvent API failed: %s", err.Error())
+func (g *apiRPCClient) BDPublishWebSocketEvent(event model.WebsocketEventType, teamId string, channelId string, userId string, omitUsers map[string]bool, omitConnectionId string, data map[string]any) {
+	_args := &Z_BDPublishWebSocketEventArgs{event, teamId, channelId, userId, omitUsers, omitConnectionId, data}
+	_returns := &Z_BDPublishWebSocketEventReturns{}
+	if err := g.client.Call("Plugin.BDPublishWebSocketEvent", _args, _returns); err != nil {
+		log.Printf("RPC call to BDPublishWebSocketEvent API failed: %s", err.Error())
 	}
 
 }
 
-func (s *apiRPCServer) PublishCoreWebSocketEvent(args *Z_PublishCoreWebSocketEventArgs, returns *Z_PublishCoreWebSocketEventReturns) error {
+func (s *apiRPCServer) BDPublishWebSocketEvent(args *Z_BDPublishWebSocketEventArgs, returns *Z_BDPublishWebSocketEventReturns) error {
 	if hook, ok := s.impl.(interface {
-		PublishCoreWebSocketEvent(event model.WebsocketEventType, teamId string, channelId string, userId string, omitUsers map[string]bool, omitConnectionId string, data map[string]any)
+		BDPublishWebSocketEvent(event model.WebsocketEventType, teamId string, channelId string, userId string, omitUsers map[string]bool, omitConnectionId string, data map[string]any)
 	}); ok {
-		hook.PublishCoreWebSocketEvent(args.A, args.B, args.C, args.D, args.E, args.F, args.G)
+		hook.BDPublishWebSocketEvent(args.A, args.B, args.C, args.D, args.E, args.F, args.G)
 	} else {
-		return encodableError(fmt.Errorf("API PublishCoreWebSocketEvent called but not implemented."))
+		return encodableError(fmt.Errorf("API BDPublishWebSocketEvent called but not implemented."))
 	}
 	return nil
 }

@@ -1340,7 +1340,7 @@ func (api *PluginAPI) UninviteRemoteFromChannel(channelID string, remoteID strin
 	return api.app.UninviteRemoteFromChannel(channelID, remoteID)
 }
 
-func (api *PluginAPI) PublishCoreWebSocketEvent(event model.WebsocketEventType, teamId string, channelId string, userId string, omitUsers map[string]bool, omitConnectionId string, data map[string]any) {
+func (api *PluginAPI) BDPublishWebSocketEvent(event model.WebsocketEventType, teamId string, channelId string, userId string, omitUsers map[string]bool, omitConnectionId string, data map[string]any) {
 	evt := model.NewWebSocketEvent(event, teamId, channelId, userId, omitUsers, omitConnectionId)
 	for key, value := range data {
 		evt.Add(key, value)

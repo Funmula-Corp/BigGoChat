@@ -1372,8 +1372,8 @@ func (api *apiTimerLayer) UpdateUserRoles(userID, newRoles string) (*model.User,
 	return _returnsA, _returnsB
 }
 
-func (api *apiTimerLayer) PublishCoreWebSocketEvent(event model.WebsocketEventType, teamId string, channelId string, userId string, omitUsers map[string]bool, omitConnectionId string, data map[string]any) {
+func (api *apiTimerLayer) BDPublishWebSocketEvent(event model.WebsocketEventType, teamId string, channelId string, userId string, omitUsers map[string]bool, omitConnectionId string, data map[string]any) {
 	startTime := timePkg.Now()
-	api.apiImpl.PublishCoreWebSocketEvent(event, teamId, channelId, userId, omitUsers, omitConnectionId, data)
-	api.recordTime(startTime, "PublishCoreWebSocketEvent", true)
+	api.apiImpl.BDPublishWebSocketEvent(event, teamId, channelId, userId, omitUsers, omitConnectionId, data)
+	api.recordTime(startTime, "BDPublishWebSocketEvent", true)
 }
