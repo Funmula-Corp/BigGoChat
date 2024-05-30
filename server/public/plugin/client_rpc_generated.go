@@ -6601,3 +6601,36 @@ func (s *apiRPCServer) UpdateUserRoles(args *Z_UpdateUserRolesArgs, returns *Z_U
 	}
 	return nil
 }
+
+type Z_PublishCoreWebSocketEventArgs struct {
+	A model.WebsocketEventType
+	B string
+	C string
+	D string
+	E map[string]bool
+	F string
+	G map[string]any
+}
+
+type Z_PublishCoreWebSocketEventReturns struct {
+}
+
+func (g *apiRPCClient) PublishCoreWebSocketEvent(event model.WebsocketEventType, teamId string, channelId string, userId string, omitUsers map[string]bool, omitConnectionId string, data map[string]any) {
+	_args := &Z_PublishCoreWebSocketEventArgs{event, teamId, channelId, userId, omitUsers, omitConnectionId, data}
+	_returns := &Z_PublishCoreWebSocketEventReturns{}
+	if err := g.client.Call("Plugin.PublishCoreWebSocketEvent", _args, _returns); err != nil {
+		log.Printf("RPC call to PublishCoreWebSocketEvent API failed: %s", err.Error())
+	}
+
+}
+
+func (s *apiRPCServer) PublishCoreWebSocketEvent(args *Z_PublishCoreWebSocketEventArgs, returns *Z_PublishCoreWebSocketEventReturns) error {
+	if hook, ok := s.impl.(interface {
+		PublishCoreWebSocketEvent(event model.WebsocketEventType, teamId string, channelId string, userId string, omitUsers map[string]bool, omitConnectionId string, data map[string]any)
+	}); ok {
+		hook.PublishCoreWebSocketEvent(args.A, args.B, args.C, args.D, args.E, args.F, args.G)
+	} else {
+		return encodableError(fmt.Errorf("API PublishCoreWebSocketEvent called but not implemented."))
+	}
+	return nil
+}

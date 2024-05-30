@@ -1300,6 +1300,12 @@ type API interface {
 	// @tag User
 	// Minimum server version: 9.8
 	UpdateUserRoles(userID, newRoles string) (*model.User, *model.AppError)
+
+	// PublishCoreWebSocketEvent publish core websocket event without plugin prefix
+	// core function, may break frontend, USE WITH CAUTION.
+	//
+	// @tag WebSocketEvent
+	PublishCoreWebSocketEvent(event model.WebsocketEventType, teamId string, channelId string, userId string, omitUsers map[string]bool, omitConnectionId string, data map[string]any)
 }
 
 var handshake = plugin.HandshakeConfig{
