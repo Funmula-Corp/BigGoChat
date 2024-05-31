@@ -168,7 +168,7 @@ func (g2s *GossipService) CallGetPluginStatuses(addr string) (result model.Plugi
 
 func (g2s *GossipService) CallConfigChanged(addr string, previousConfig, newConfig *model.Config) (err error) {
 	var soc *grpc.ClientConn
-	if soc, err = grpc.NewClient(fmt.Sprintf("%s:%d", addr, g2s.cds.GossipPort), grpc.WithTransportCredentials(insecure.NewCredentials())); err != nil {
+	if soc, err = grpc.Dial(fmt.Sprintf("%s:%d", addr, g2s.cds.GossipPort), grpc.WithTransportCredentials(insecure.NewCredentials())); err != nil {
 		return
 	}
 	defer soc.Close()
