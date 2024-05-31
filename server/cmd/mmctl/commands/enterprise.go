@@ -12,8 +12,8 @@ package commands
 
 import (
 	// Enterprise Deps
+	_ "git.biggo.com/Funmula/mattermost-funmula/server/biggo"
 	_ "git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/utils/testutils"
-	_ "git.biggo.com/Funmula/mattermost-funmula/serverterprise"
 	_ "github.com/gorilla/handlers"
 	_ "github.com/hako/durafmt"
 	_ "github.com/hashicorp/memberlist"

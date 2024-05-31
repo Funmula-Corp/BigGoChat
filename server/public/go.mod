@@ -43,7 +43,7 @@ require (
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/yamux v0.1.1 // indirect
 	github.com/kr/text v0.2.0 // indirect
-	github.com/mattermost/mattermost/server/public v0.1.0 // indirect
+	github.com/mattermost/mattermost/server/public v0.0.10-0.20231116111926-0bc542620ce2 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/mitchellh/go-testing-interface v1.14.1 // indirect
