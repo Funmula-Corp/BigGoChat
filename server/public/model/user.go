@@ -432,7 +432,11 @@ func NormalizeEmail(email string) string {
 // be run before saving the user to the db.
 func (u *User) PreSave() {
 	if u.Id == "" {
-		u.Id = NewId()
+		if u.AuthService == ServiceBiggo && u.AuthData != nil {
+			u.Id = HashId(*u.AuthData)
+		} else {
+			u.Id = NewId()
+		}
 	}
 
 	if u.Username == "" {
