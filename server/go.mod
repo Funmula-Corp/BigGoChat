@@ -84,7 +84,8 @@ require (
 )
 
 require (
-	git.biggo.com/Funmula/mattermost-packages/pluginAPI v0.0.0-20240528125602-c7713a7419a2 // indirect
+	git.biggo.com/Funmula/mattermost-packages/grpc v0.0.0-20240531015220-e417ca8b4371 // indirect
+	git.biggo.com/Funmula/mattermost-packages/pluginAPI v0.0.0-20240531023356-8868cd3d192c // indirect
 	github.com/HdrHistogram/hdrhistogram-go v0.9.0 // indirect
 	github.com/JalfResi/justext v0.0.0-20221106200834-be571e3e3052 // indirect
 	github.com/PuerkitoBio/goquery v1.9.0 // indirect

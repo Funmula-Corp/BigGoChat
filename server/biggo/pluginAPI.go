@@ -1,20 +1,23 @@
 package biggo
 
 import (
-	"net/http"
+	"context"
 	"sync"
 	"sync/atomic"
 
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app/platform"
+
+	"git.biggo.com/Funmula/mattermost-packages/grpc/grpcServer"
+	"git.biggo.com/Funmula/mattermost-packages/pluginAPI"
 )
 
 type PluginAPIService struct {
+	pluginAPI.UnsafePluginAPIServer
 	ps *platform.PlatformService
 
 	running atomic.Bool
-
-	mx  sync.Mutex
-	mux *http.ServeMux
+	mx      sync.Mutex
 }
 
 var instance *PluginAPIService
@@ -31,39 +34,31 @@ func (s *PluginAPIService) Start() (err error) {
 	defer s.mx.Unlock()
 
 	if !s.running.Load() {
-		s.mux = http.NewServeMux()
-		s.mux.HandleFunc("/api/v1/user/id", s.GetUserId)
+		const (
+			endpointTCP   string = "localhost:6222"
+			endpointHTTP2 string = "localhost:6443"
+		)
+
+		var server *grpcServer.GRPCServer
+		if server, err = grpcServer.NewGRPCServer[pluginAPI.PluginAPIServer](&PluginAPIService{}, pluginAPI.RegisterPluginAPIServer, endpointTCP, endpointHTTP2); err != nil {
+			return
+		}
+
 		go func() {
 			defer s.running.Store(false)
 			s.running.Store(true)
-			http.ListenAndServe(":9999", s.mux)
+			server.ListenAndServe(true, true)
 		}()
 	}
 	return
 }
 
-func (s *PluginAPIService) GetUserId(w http.ResponseWriter, r *http.Request) {
-	r.ParseForm()
-	if r.Method != http.MethodGet {
-		http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-		return
+func (s *PluginAPIService) GetUserIdByAuthData(ctx context.Context, request *pluginAPI.UserIdByAuthDataRequest) (reply *pluginAPI.UserIdByAuthDataReply, err error) {
+	var user *model.User
+	if user, err = s.ps.Store.User().GetByAuth(&request.AuthData, request.AuthService); err == nil {
+		reply = &pluginAPI.UserIdByAuthDataReply{
+			UserId: user.Id,
+		}
 	}
-
-	authData := r.FormValue("auth_data")
-	if authData == "" {
-		http.Error(w, "query auth_data missing", http.StatusBadRequest)
-		return
-	}
-
-	authService := r.FormValue("auth_service")
-	if authData == "" {
-		http.Error(w, "query auth_service missing", http.StatusBadRequest)
-		return
-	}
-
-	if user, err := s.ps.Store.User().GetByAuth(&authData, authService); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-	} else {
-		w.Write([]byte(user.Id))
-	}
+	return
 }

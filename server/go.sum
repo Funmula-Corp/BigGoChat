@@ -8,8 +8,15 @@ dmitri.shuralyov.com/html/belt v0.0.0-20180602232347-f7d459c86be0/go.mod h1:JLBr
 dmitri.shuralyov.com/service/change v0.0.0-20181023043359-a85b471d5412/go.mod h1:a1inKt/atXimZ4Mv927x+r7UpyzRUf4emIoiiSC2TN4=
 dmitri.shuralyov.com/state v0.0.0-20180228185332-28bcc343414c/go.mod h1:0PRwlb0D6DFvNNtx+9ybjezNCa8XF0xaYcETyp6rHWU=
 git.apache.org/thrift.git v0.0.0-20180902110319-2566ecd5d999/go.mod h1:fPE2ZNJGynbRyZ4dJvy6G277gSllfV2HJqblrnkyeyg=
+git.biggo.com/Funmula/mattermost-packages/grpc v0.0.0-20240531015220-e417ca8b4371 h1:ZJFnXcSnSjNteFZypshFBsKYYysrWLjarXvxHOatHGU=
+git.biggo.com/Funmula/mattermost-packages/grpc v0.0.0-20240531015220-e417ca8b4371/go.mod h1:6A7ODlLGHnlCTeOJClTG9oJbrFuJcvQrLmljhHjX6bQ=
 git.biggo.com/Funmula/mattermost-packages/pluginAPI v0.0.0-20240528064513-a9a7b8bacd87 h1:oNaCLgmpndsNcxNqbdWqEGQ8rBKSP8CvCtJrivPLjkE=
 git.biggo.com/Funmula/mattermost-packages/pluginAPI v0.0.0-20240528064513-a9a7b8bacd87/go.mod h1:ucn86EPzIB999tXOrLNDbMyTCgo+ymnoI8ktfWIlt1E=
+git.biggo.com/Funmula/mattermost-packages/pluginAPI v0.0.0-20240528125602-c7713a7419a2/go.mod h1:EuiXF+Q06ywwmFkLCYPWE4tpFRDldOQDxFGrzRXihw0=
+git.biggo.com/Funmula/mattermost-packages/pluginAPI v0.0.0-20240531015220-e417ca8b4371 h1:uKzYy/8CG7eri19JnLX5ZFkokYQTDg8TJXzccfzG1ts=
+git.biggo.com/Funmula/mattermost-packages/pluginAPI v0.0.0-20240531015220-e417ca8b4371/go.mod h1:5Dg9/PbdeIna1G8bayxIEgQXCo3Vg6AeVMsukjgaJ1Q=
+git.biggo.com/Funmula/mattermost-packages/pluginAPI v0.0.0-20240531023356-8868cd3d192c h1:r4BMywDf6gmohOhRYxtrnjjBeqJMyHoTeQgAOW/8D5I=
+git.biggo.com/Funmula/mattermost-packages/pluginAPI v0.0.0-20240531023356-8868cd3d192c/go.mod h1:5Dg9/PbdeIna1G8bayxIEgQXCo3Vg6AeVMsukjgaJ1Q=
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
 github.com/DataDog/datadog-go v3.2.0+incompatible/go.mod h1:LButxg5PwREeZtORoXG3tL4fMGNddJ+vMq1mwgfaqoQ=
 github.com/HdrHistogram/hdrhistogram-go v0.9.0/go.mod h1:nxrse8/Tzg2tg3DZcZjm6qEclQKK70g0KxO61gFFZD4=
