@@ -2,7 +2,6 @@ package biggo
 
 import (
 	"context"
-	"fmt"
 	"sync"
 	"sync/atomic"
 
@@ -57,10 +56,6 @@ func (s *PluginAPIService) Start() (err error) {
 func (s *PluginAPIService) GetUserIdByAuthData(ctx context.Context, request *pluginAPI.UserIdByAuthDataRequest) (reply *pluginAPI.UserIdByAuthDataReply, err error) {
 	var user *model.User
 	if user, err = s.ps.Store.User().GetByAuth(&request.AuthData, request.AuthService); err == nil {
-		if user == nil {
-			err = fmt.Errorf("user is nil")
-			return
-		}
 		reply = &pluginAPI.UserIdByAuthDataReply{
 			UserId: user.Id,
 		}
