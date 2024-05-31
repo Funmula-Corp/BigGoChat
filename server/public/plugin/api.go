@@ -1305,6 +1305,7 @@ type API interface {
 	// core function, may break frontend, USE WITH CAUTION.
 	//
 	// @tag WebSocketEvent
+	// Minimum server version: 9.8
 	BDPublishWebSocketEvent(event model.WebsocketEventType, teamId string, channelId string, userId string, omitUsers map[string]bool, omitConnectionId string, data map[string]any)
 }
 

@@ -114,6 +114,11 @@ func (_m *API) AddUserToChannel(channelId string, userID string, asUserId string
 	return r0, r1
 }
 
+// BDPublishWebSocketEvent provides a mock function with given fields: event, teamId, channelId, userId, omitUsers, omitConnectionId, data
+func (_m *API) BDPublishWebSocketEvent(event model.WebsocketEventType, teamId string, channelId string, userId string, omitUsers map[string]bool, omitConnectionId string, data map[string]interface{}) {
+	_m.Called(event, teamId, channelId, userId, omitUsers, omitConnectionId, data)
+}
+
 // CopyFileInfos provides a mock function with given fields: userID, fileIds
 func (_m *API) CopyFileInfos(userID string, fileIds []string) ([]string, *model.AppError) {
 	ret := _m.Called(userID, fileIds)
