@@ -2,6 +2,7 @@ package biggo
 
 import (
 	"context"
+	"fmt"
 	"sync"
 	"sync/atomic"
 
@@ -23,7 +24,7 @@ type PluginAPIService struct {
 var instance *PluginAPIService
 
 func InitPluginAPI(ps *platform.PlatformService) {
-	if instance == nil {
+	if instance == nil && ps != nil {
 		instance = &PluginAPIService{ps: ps}
 		instance.Start()
 	}
@@ -40,7 +41,7 @@ func (s *PluginAPIService) Start() (err error) {
 		)
 
 		var server *grpcServer.GRPCServer
-		if server, err = grpcServer.NewGRPCServer[pluginAPI.PluginAPIServer](&PluginAPIService{}, pluginAPI.RegisterPluginAPIServer, endpointTCP, endpointHTTP2); err != nil {
+		if server, err = grpcServer.NewGRPCServer[pluginAPI.PluginAPIServer](s, pluginAPI.RegisterPluginAPIServer, endpointTCP, endpointHTTP2); err != nil {
 			return
 		}
 
@@ -56,6 +57,10 @@ func (s *PluginAPIService) Start() (err error) {
 func (s *PluginAPIService) GetUserIdByAuthData(ctx context.Context, request *pluginAPI.UserIdByAuthDataRequest) (reply *pluginAPI.UserIdByAuthDataReply, err error) {
 	var user *model.User
 	if user, err = s.ps.Store.User().GetByAuth(&request.AuthData, request.AuthService); err == nil {
+		if user == nil {
+			err = fmt.Errorf("user is nil")
+			return
+		}
 		reply = &pluginAPI.UserIdByAuthDataReply{
 			UserId: user.Id,
 		}

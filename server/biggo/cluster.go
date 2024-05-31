@@ -10,11 +10,11 @@ import (
 	"os"
 	"sync"
 
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/biggo/gossip"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app/platform"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/einterfaces"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
 	"github.com/mattermost/logr/v2"
 )
 
