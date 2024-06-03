@@ -165,14 +165,16 @@ func (c *BiggoCluster) GetLogs(page, perPage int) (result []string, aErr *model.
 	return
 }
 
-func (c *BiggoCluster) QueryLogs(page, perPage int) (result map[string][]string, aErr *model.AppError) {
+func (c *BiggoCluster) QueryLogs(page, perPage int, logFilter *model.LogFilter) (result map[string][]string, aErr *model.AppError) {
 	mx := sync.Mutex{}
 	result = map[string][]string{}
 	c.g2s.CallCluster(func(hostname string) {
-		if res, err := c.g2s.CallGetLogs(hostname, page, perPage); err == nil {
+		if res, err := c.g2s.CallQueryLogs(hostname, page, perPage, logFilter); err == nil {
 			mx.Lock()
 			defer mx.Unlock()
-			result[hostname] = res
+			for k, v := range res {
+				result[k] = v
+			}
 		}
 	}, true)
 	return

@@ -6,8 +6,8 @@ package testlib
 import (
 	"sync"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/einterfaces"
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/einterfaces"
 )
 
 type FakeClusterInterface struct {
@@ -59,7 +59,7 @@ func (c *FakeClusterInterface) GetLogs(page, perPage int) ([]string, *model.AppE
 	return []string{}, nil
 }
 
-func (c *FakeClusterInterface) QueryLogs(page, perPage int) (map[string][]string, *model.AppError) {
+func (c *FakeClusterInterface) QueryLogs(page, perPage int, logFilter *model.LogFilter) (map[string][]string, *model.AppError) {
 	return make(map[string][]string), nil
 }
 

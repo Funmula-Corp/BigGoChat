@@ -55,9 +55,17 @@ message PluginStatusReply {
   repeated PluginStatus Statuses = 1;
 }
 
+message LogFilter {
+	repeated string ServerNames = 1;
+	repeated string LogLevels = 2;
+	string DateFrom = 3;
+	string DateTo = 4;
+}
+
 message LogRequest {
   int32 Page = 1;
   int32 PerPage = 2;
+  LogFilter Filter = 3;
 }
 
 message LogReply {
@@ -65,8 +73,11 @@ message LogReply {
 }
 
 message QueryLogReply {
-  string Id = 1;
-  repeated string Entries = 2;
+  map<string, StringList> Entries = 1;
+}
+
+message StringList {
+  repeated string values = 1;
 }
 
 message ConfigUpdateRequest {

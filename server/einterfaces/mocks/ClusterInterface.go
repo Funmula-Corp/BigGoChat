@@ -232,7 +232,7 @@ func (_m *ClusterInterface) NotifyMsg(buf []byte) {
 }
 
 // QueryLogs provides a mock function with given fields: page, perPage
-func (_m *ClusterInterface) QueryLogs(page int, perPage int) (map[string][]string, *model.AppError) {
+func (_m *ClusterInterface) QueryLogs(page int, perPage int, logFilter *model.LogFilter) (map[string][]string, *model.AppError) {
 	ret := _m.Called(page, perPage)
 
 	if len(ret) == 0 {

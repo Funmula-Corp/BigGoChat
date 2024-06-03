@@ -6,9 +6,9 @@ import (
 	"sync"
 	"sync/atomic"
 
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app/platform"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/einterfaces"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 
 	"google.golang.org/grpc"
 )
@@ -34,13 +34,6 @@ type GossipService struct {
 	grpcSvr *grpc.Server
 
 	mx sync.Mutex
-}
-
-func (g2s *GossipService) GetHostname() string {
-	if g2s.cds == nil {
-		return ""
-	}
-	return g2s.cds.Hostname
 }
 
 func (g2s *GossipService) GetClusterDiscoveryService() *platform.ClusterDiscoveryService {

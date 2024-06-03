@@ -112,7 +112,7 @@ func (g2s *GossipService) CallGetLogs(addr string, page, perPage int) (result []
 	return
 }
 
-func (g2s *GossipService) CallQueryLogs(addr string, page, perPage int) (result []string, err error) {
+func (g2s *GossipService) CallQueryLogs(addr string, page, perPage int, logFilter *model.LogFilter) (result map[string][]string, err error) {
 	var (
 		client     ClusterClient
 		connection *grpc.ClientConn
@@ -124,12 +124,23 @@ func (g2s *GossipService) CallQueryLogs(addr string, page, perPage int) (result 
 	defer connection.Close()
 
 	var reply *QueryLogReply
-	if reply, err = client.QueryLogs(context.Background(), &LogRequest{Page: int32(page), PerPage: int32(perPage)}); err != nil {
+	if reply, err = client.QueryLogs(context.Background(), &LogRequest{
+		Page: int32(page), PerPage: int32(perPage),
+		Filter: &LogFilter{
+			ServerNames: logFilter.ServerNames,
+			LogLevels:   logFilter.LogLevels,
+			DateFrom:    logFilter.DateFrom,
+			DateTo:      logFilter.DateTo,
+		},
+	}); err != nil {
 		mlog.Error("CallQueryLogs", mlog.Err(err))
 		return
 	}
 
-	result = reply.Entries
+	result = map[string][]string{}
+	for k, v := range reply.Entries {
+		result[k] = v.Values
+	}
 	return
 }
 
