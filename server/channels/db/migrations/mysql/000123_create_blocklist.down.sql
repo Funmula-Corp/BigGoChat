@@ -1,1 +1,2 @@
-DROP TABLE ChannelBlockUsers;
+DROP TABLE IF EXISTS ChannelBlockUsers;
+DROP TABLE IF EXISTS UserBlockUsers;
