@@ -7,8 +7,8 @@ package mock_bot
 import (
 	reflect "reflect"
 
-	gomock "github.com/golang/mock/gomock"
 	model "git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	gomock "github.com/golang/mock/gomock"
 )
 
 // MockPoster is a mock of Poster interface.

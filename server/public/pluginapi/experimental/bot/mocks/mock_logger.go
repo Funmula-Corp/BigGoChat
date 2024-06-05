@@ -7,8 +7,8 @@ package mock_bot
 import (
 	reflect "reflect"
 
-	gomock "github.com/golang/mock/gomock"
 	logger "git.biggo.com/Funmula/mattermost-funmula/server/public/pluginapi/experimental/bot/logger"
+	gomock "github.com/golang/mock/gomock"
 )
 
 // MockLogger is a mock of Logger interface.
