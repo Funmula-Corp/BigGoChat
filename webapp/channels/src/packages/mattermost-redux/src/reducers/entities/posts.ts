@@ -349,7 +349,7 @@ function handlePostReceived(nextState: any, post: Post, nestedPermalinkLevel?: n
 
     if (post.delete_at > 0) {
         // We've received a deleted post, so mark the post as deleted if we already have it
-        if (currentState[post.id]) {
+        if (currentState[post.id] || post.props.deleteBy !== post.user_id) {
             currentState[post.id] = {
                 ...removeUnneededMetadata(post),
                 state: Posts.POST_DELETED,
@@ -773,7 +773,7 @@ export function postsInChannel(state: Record<string, PostOrderBlock[]> = {}, act
             const block = nextPostsForChannel[i];
 
             // Remove any comments for this post
-            const nextOrder = block.order.filter((postId: string) => prevPosts[postId].root_id !== post.id);
+            const nextOrder = block.order.filter((postId: string) => prevPosts[postId]?.root_id !== post.id);
 
             if (nextOrder.length !== block.order.length) {
                 nextPostsForChannel[i] = {
@@ -815,7 +815,7 @@ export function postsInChannel(state: Record<string, PostOrderBlock[]> = {}, act
         for (let i = 0; i < nextPostsForChannel.length; i++) {
             const block = nextPostsForChannel[i];
 
-            const nextOrder = block.order.filter((postId: string) => postId !== post.id && prevPosts[postId].root_id !== post.id);
+            const nextOrder = block.order.filter((postId: string) => postId !== post.id && prevPosts[postId]?.root_id !== post.id);
 
             if (nextOrder.length !== block.order.length) {
                 nextPostsForChannel[i] = {
