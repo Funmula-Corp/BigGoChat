@@ -1860,10 +1860,10 @@ func TestGetPostsForChannel(t *testing.T) {
 	client.DeletePost(context.Background(), post10.Id)
 	client.DeletePost(context.Background(), post8.Id)
 
-	// include deleted posts for non-admin users.
+	// include deleted posts for all users.
 	_, resp, err = client.GetPostsForChannel(context.Background(), th.BasicChannel.Id, 0, 100, "", false, true)
-	require.Error(t, err)
-	CheckForbiddenStatus(t, resp)
+	require.NoError(t, err)
+	CheckOKStatus(t, resp)
 
 	th.TestForSystemAdminAndLocal(t, func(t *testing.T, c *model.Client4) {
 		// include deleted posts for admin users.
@@ -2229,10 +2229,10 @@ func TestGetPostsBefore(t *testing.T) {
 	client.DeletePost(context.Background(), post9.Id)
 	client.DeletePost(context.Background(), post8.Id)
 
-	// include deleted posts for non-admin users.
+	// include deleted posts for all users.
 	_, resp, err = client.GetPostsBefore(context.Background(), th.BasicChannel.Id, post9.Id, 0, 60, "", false, true)
-	require.Error(t, err)
-	CheckForbiddenStatus(t, resp)
+	require.NoError(t, err)
+	CheckOKStatus(t, resp)
 
 	th.TestForSystemAdminAndLocal(t, func(t *testing.T, c *model.Client4) {
 		// include deleted posts for admin users.
@@ -2377,8 +2377,8 @@ func TestGetPostsAfter(t *testing.T) {
 
 	// include deleted posts for non-admin users.
 	_, resp, err = client.GetPostsAfter(context.Background(), th.BasicChannel.Id, post1.Id, 0, 60, "", false, true)
-	require.Error(t, err)
-	CheckForbiddenStatus(t, resp)
+	require.NoError(t, err)
+	CheckOKStatus(t, resp)
 
 	th.TestForSystemAdminAndLocal(t, func(t *testing.T, c *model.Client4) {
 		// include deleted posts for admin users.
