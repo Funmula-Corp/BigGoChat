@@ -593,7 +593,7 @@ func (s *TimerLayerBlocklistStore) GetUserBlockUser(userId string, blockedId str
 	return result, err
 }
 
-func (s *TimerLayerBlocklistStore) ListChannelBlockUsers(channelId string) (*model.ChannelBlockUsers, error) {
+func (s *TimerLayerBlocklistStore) ListChannelBlockUsers(channelId string) (*model.ChannelBlockUserList, error) {
 	start := time.Now()
 
 	result, err := s.BlocklistStore.ListChannelBlockUsers(channelId)
@@ -609,7 +609,7 @@ func (s *TimerLayerBlocklistStore) ListChannelBlockUsers(channelId string) (*mod
 	return result, err
 }
 
-func (s *TimerLayerBlocklistStore) ListChannelBlockUsersByBlockedUser(blockedId string) (*model.ChannelBlockUsers, error) {
+func (s *TimerLayerBlocklistStore) ListChannelBlockUsersByBlockedUser(blockedId string) (*model.ChannelBlockUserList, error) {
 	start := time.Now()
 
 	result, err := s.BlocklistStore.ListChannelBlockUsersByBlockedUser(blockedId)
@@ -625,7 +625,7 @@ func (s *TimerLayerBlocklistStore) ListChannelBlockUsersByBlockedUser(blockedId 
 	return result, err
 }
 
-func (s *TimerLayerBlocklistStore) ListUserBlockUsers(userId string) (*model.UserBlockUsers, error) {
+func (s *TimerLayerBlocklistStore) ListUserBlockUsers(userId string) (*model.UserBlockUserList, error) {
 	start := time.Now()
 
 	result, err := s.BlocklistStore.ListUserBlockUsers(userId)
@@ -641,7 +641,7 @@ func (s *TimerLayerBlocklistStore) ListUserBlockUsers(userId string) (*model.Use
 	return result, err
 }
 
-func (s *TimerLayerBlocklistStore) ListUserBlockUsersByBlockedUser(blockedId string) (*model.UserBlockUsers, error) {
+func (s *TimerLayerBlocklistStore) ListUserBlockUsersByBlockedUser(blockedId string) (*model.UserBlockUserList, error) {
 	start := time.Now()
 
 	result, err := s.BlocklistStore.ListUserBlockUsersByBlockedUser(blockedId)

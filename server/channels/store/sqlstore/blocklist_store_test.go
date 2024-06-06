@@ -10,5 +10,5 @@ import (
 )
 
 func TestBlockUserStore(t *testing.T) {
-	StoreTest(t, storetest.TestChannelBlockUserStore)
+	StoreTest(t, storetest.TestBlocklistStore)
 }

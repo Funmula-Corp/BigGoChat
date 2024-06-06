@@ -7,7 +7,7 @@ type ChannelBlockUser struct {
 	CreateBy  string `json:"create_by"`
 }
 
-type ChannelBlockUsers []*ChannelBlockUser
+type ChannelBlockUserList []*ChannelBlockUser
 
 func (o *ChannelBlockUser) PreSave() {
 	if o.CreateAt == 0 {
@@ -21,7 +21,7 @@ type UserBlockUser struct {
 	CreateAt  int64  `json:"-"`
 }
 
-type UserBlockUsers []*UserBlockUser
+type UserBlockUserList []*UserBlockUser
 
 func (o *UserBlockUser) PreSave() {
 	if o.CreateAt == 0 {

@@ -10,10 +10,10 @@ import (
 
 	"github.com/stretchr/testify/mock"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store/storetest/mocks"
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store/storetest/mocks"
 )
 
 // Store can be used to provide mock stores for testing.
@@ -65,6 +65,7 @@ type Store struct {
 	PostPersistentNotificationStore mocks.PostPersistentNotificationStore
 	DesktopTokensStore              mocks.DesktopTokensStore
 	ChannelBookmarkStore            mocks.ChannelBookmarkStore
+	
 }
 
 func (s *Store) SetContext(context context.Context)            { s.context = context }

@@ -607,7 +607,7 @@ func (s *OpenTracingLayerBlocklistStore) GetUserBlockUser(userId string, blocked
 	return result, err
 }
 
-func (s *OpenTracingLayerBlocklistStore) ListChannelBlockUsers(channelId string) (*model.ChannelBlockUsers, error) {
+func (s *OpenTracingLayerBlocklistStore) ListChannelBlockUsers(channelId string) (*model.ChannelBlockUserList, error) {
 	origCtx := s.Root.Store.Context()
 	span, newCtx := tracing.StartSpanWithParentByContext(s.Root.Store.Context(), "BlocklistStore.ListChannelBlockUsers")
 	s.Root.Store.SetContext(newCtx)
@@ -625,7 +625,7 @@ func (s *OpenTracingLayerBlocklistStore) ListChannelBlockUsers(channelId string)
 	return result, err
 }
 
-func (s *OpenTracingLayerBlocklistStore) ListChannelBlockUsersByBlockedUser(blockedId string) (*model.ChannelBlockUsers, error) {
+func (s *OpenTracingLayerBlocklistStore) ListChannelBlockUsersByBlockedUser(blockedId string) (*model.ChannelBlockUserList, error) {
 	origCtx := s.Root.Store.Context()
 	span, newCtx := tracing.StartSpanWithParentByContext(s.Root.Store.Context(), "BlocklistStore.ListChannelBlockUsersByBlockedUser")
 	s.Root.Store.SetContext(newCtx)
@@ -643,7 +643,7 @@ func (s *OpenTracingLayerBlocklistStore) ListChannelBlockUsersByBlockedUser(bloc
 	return result, err
 }
 
-func (s *OpenTracingLayerBlocklistStore) ListUserBlockUsers(userId string) (*model.UserBlockUsers, error) {
+func (s *OpenTracingLayerBlocklistStore) ListUserBlockUsers(userId string) (*model.UserBlockUserList, error) {
 	origCtx := s.Root.Store.Context()
 	span, newCtx := tracing.StartSpanWithParentByContext(s.Root.Store.Context(), "BlocklistStore.ListUserBlockUsers")
 	s.Root.Store.SetContext(newCtx)
@@ -661,7 +661,7 @@ func (s *OpenTracingLayerBlocklistStore) ListUserBlockUsers(userId string) (*mod
 	return result, err
 }
 
-func (s *OpenTracingLayerBlocklistStore) ListUserBlockUsersByBlockedUser(blockedId string) (*model.UserBlockUsers, error) {
+func (s *OpenTracingLayerBlocklistStore) ListUserBlockUsersByBlockedUser(blockedId string) (*model.UserBlockUserList, error) {
 	origCtx := s.Root.Store.Context()
 	span, newCtx := tracing.StartSpanWithParentByContext(s.Root.Store.Context(), "BlocklistStore.ListUserBlockUsersByBlockedUser")
 	s.Root.Store.SetContext(newCtx)

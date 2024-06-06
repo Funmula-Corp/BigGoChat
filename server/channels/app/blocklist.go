@@ -13,7 +13,7 @@ func (a *App) RemoveChannelBlockUser(rctx request.CTX, channelId string, blocked
 	return model.NewAppError("", "", map[string]any{}, "not implemented", 501)
 }
 
-func (a *App) ListChannelBlockUsers(rctx request.CTX, channelId string)(*model.ChannelBlockUsers, *model.AppError) {
+func (a *App) ListChannelBlockUsers(rctx request.CTX, channelId string)(*model.ChannelBlockUserList, *model.AppError) {
 	return nil, model.NewAppError("", "", map[string]any{}, "not implemented", 501)
 }
 
@@ -21,7 +21,7 @@ func (a *App) GetChannelBlockUser(rctx request.CTX, channelId string, blockedId 
 	return nil, model.NewAppError("", "", map[string]any{}, "", 501)
 }
 
-func (a *App) ListChannelsByBlockedUser(rctx request.CTX, blockedId string) (*model.ChannelBlockUsers, *model.AppError) {
+func (a *App) ListChannelsByBlockedUser(rctx request.CTX, blockedId string) (*model.ChannelBlockUserList, *model.AppError) {
 	return nil, model.NewAppError("", "", map[string]any{}, "not implemented", 501)
 }
 
@@ -34,7 +34,7 @@ func (a *App) RemoveUserBlockUser(rctx request.CTX, userId string, blockedId str
 	return model.NewAppError("", "", map[string]any{}, "not implemented", 501)
 }
 
-func (a *App) ListUserBlockUsers(rctx request.CTX, userId string)(*model.UserBlockUsers, *model.AppError) {
+func (a *App) ListUserBlockUsers(rctx request.CTX, userId string)(*model.UserBlockUserList, *model.AppError) {
 	return nil, model.NewAppError("", "", map[string]any{}, "not implemented", 501)
 }
 
@@ -42,7 +42,7 @@ func (a *App) GetUserBlockUser(rctx request.CTX, userId string, blockedId string
 	return nil, model.NewAppError("", "", map[string]any{}, "not implemented", 501)
 }
 
-func (a *App) ListUsersBlockedUser(rctx request.CTX, blockedId string) (*model.UserBlockUsers, *model.AppError) {
+func (a *App) ListUsersBlockedUser(rctx request.CTX, blockedId string) (*model.UserBlockUserList, *model.AppError) {
 	return nil, model.NewAppError("", "", map[string]any{}, "not implemented", 501)
 }
 

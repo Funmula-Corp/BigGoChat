@@ -648,7 +648,7 @@ func (s *RetryLayerBlocklistStore) GetUserBlockUser(userId string, blockedId str
 
 }
 
-func (s *RetryLayerBlocklistStore) ListChannelBlockUsers(channelId string) (*model.ChannelBlockUsers, error) {
+func (s *RetryLayerBlocklistStore) ListChannelBlockUsers(channelId string) (*model.ChannelBlockUserList, error) {
 
 	tries := 0
 	for {
@@ -669,7 +669,7 @@ func (s *RetryLayerBlocklistStore) ListChannelBlockUsers(channelId string) (*mod
 
 }
 
-func (s *RetryLayerBlocklistStore) ListChannelBlockUsersByBlockedUser(blockedId string) (*model.ChannelBlockUsers, error) {
+func (s *RetryLayerBlocklistStore) ListChannelBlockUsersByBlockedUser(blockedId string) (*model.ChannelBlockUserList, error) {
 
 	tries := 0
 	for {
@@ -690,7 +690,7 @@ func (s *RetryLayerBlocklistStore) ListChannelBlockUsersByBlockedUser(blockedId 
 
 }
 
-func (s *RetryLayerBlocklistStore) ListUserBlockUsers(userId string) (*model.UserBlockUsers, error) {
+func (s *RetryLayerBlocklistStore) ListUserBlockUsers(userId string) (*model.UserBlockUserList, error) {
 
 	tries := 0
 	for {
@@ -711,7 +711,7 @@ func (s *RetryLayerBlocklistStore) ListUserBlockUsers(userId string) (*model.Use
 
 }
 
-func (s *RetryLayerBlocklistStore) ListUserBlockUsersByBlockedUser(blockedId string) (*model.UserBlockUsers, error) {
+func (s *RetryLayerBlocklistStore) ListUserBlockUsersByBlockedUser(blockedId string) (*model.UserBlockUserList, error) {
 
 	tries := 0
 	for {

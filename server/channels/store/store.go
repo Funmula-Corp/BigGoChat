@@ -1046,13 +1046,13 @@ type ChannelBookmarkStore interface {
 
 type BlocklistStore interface {
 	GetChannelBlockUser(channelId string, userId string) (*model.ChannelBlockUser, error)
-	ListChannelBlockUsers(channelId string) (*model.ChannelBlockUsers, error)
-	ListChannelBlockUsersByBlockedUser(blockedId string)(*model.ChannelBlockUsers, error)
+	ListChannelBlockUsers(channelId string) (*model.ChannelBlockUserList, error)
+	ListChannelBlockUsersByBlockedUser(blockedId string)(*model.ChannelBlockUserList, error)
 	DeleteChannelBlockUser(channelId string, userId string) error
 	SaveChannelBlockUser(blockUser *model.ChannelBlockUser) (*model.ChannelBlockUser, error)
 	GetUserBlockUser(userId string, blockedId string) (*model.UserBlockUser, error)
-	ListUserBlockUsers(userId string) (*model.UserBlockUsers, error)
-	ListUserBlockUsersByBlockedUser(blockedId string) (*model.UserBlockUsers, error)
+	ListUserBlockUsers(userId string) (*model.UserBlockUserList, error)
+	ListUserBlockUsersByBlockedUser(blockedId string) (*model.UserBlockUserList, error)
 	DeleteUserBlockUser(userId string, blockedId string) error
 	SaveUserBlockUser(userBlockUser *model.UserBlockUser) (*model.UserBlockUser, error)
 }
