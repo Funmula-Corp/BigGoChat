@@ -17,6 +17,9 @@ build-docker:
 build-server:
 	cd server && $(MAKE) build
 
+build-webapp:
+	cd webapp && $(MAKE) dist
+
 clean-docker:
 	cd server && $(MAKE) clean-docker
 
