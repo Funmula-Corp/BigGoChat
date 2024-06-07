@@ -27,6 +27,7 @@ steps:
     tags:
     - development
   commands:
-  - pwd
+  - ls -alh
   - ls -alh ./server/build/
+  - ls -alh ./server/build/packages
   - cd ./server/build/ && container-init.sh
