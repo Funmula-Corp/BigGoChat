@@ -28,4 +28,5 @@ steps:
     - development
   commands:
   - pwd
+  - ls -alh ./server/build/
   - cd ./server/build/ && container-init.sh
