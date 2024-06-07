@@ -2,6 +2,12 @@ kind: pipeline
 type: kubernetes
 name: dev-build
 
+trigger:
+  branch:
+  - development
+  event:
+  - custom
+
 steps:
 - name: "build server"
   image: docker.cloud.biggo.com/droneio/mattermost-funmula-build:dev
