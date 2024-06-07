@@ -10,7 +10,7 @@ trigger:
 
 steps:
 - name: "build server"
-  image: docker.cloud.biggo.com/droneio/mattermost-funmula-build:dev
+  image: docker.cloud.biggo.com/droneio/mattermost-funmula-build:latest
   commands:
   - make build-server
   - make build-package
