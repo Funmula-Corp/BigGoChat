@@ -1861,9 +1861,11 @@ func TestGetPostsForChannel(t *testing.T) {
 	client.DeletePost(context.Background(), post8.Id)
 
 	// include deleted posts for all users.
-	_, resp, err = client.GetPostsForChannel(context.Background(), th.BasicChannel.Id, 0, 100, "", false, true)
+	posts, resp, err = client.GetPostsForChannel(context.Background(), th.BasicChannel.Id, 0, 100, "", false, true)
 	require.NoError(t, err)
 	CheckOKStatus(t, resp)
+	require.Contains(t, posts.Order, post10.Id)
+	require.Contains(t, posts.Order, post8.Id)
 
 	th.TestForSystemAdminAndLocal(t, func(t *testing.T, c *model.Client4) {
 		// include deleted posts for admin users.
@@ -2230,9 +2232,11 @@ func TestGetPostsBefore(t *testing.T) {
 	client.DeletePost(context.Background(), post8.Id)
 
 	// include deleted posts for all users.
-	_, resp, err = client.GetPostsBefore(context.Background(), th.BasicChannel.Id, post9.Id, 0, 60, "", false, true)
+	posts, resp, err = client.GetPostsBefore(context.Background(), th.BasicChannel.Id, post9.Id, 0, 60, "", false, true)
 	require.NoError(t, err)
 	CheckOKStatus(t, resp)
+	// get before by post9 id, so post9 not included.
+	require.Contains(t, posts.Order, post8.Id)
 
 	th.TestForSystemAdminAndLocal(t, func(t *testing.T, c *model.Client4) {
 		// include deleted posts for admin users.
