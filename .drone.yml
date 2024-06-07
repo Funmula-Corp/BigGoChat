@@ -22,12 +22,7 @@ steps:
     cache_from: docker.dev.cloud.biggo.com/test/mattermost:development
     registry: docker.dev.cloud.biggo.com
     repo: docker.dev.cloud.biggo.com/test/mattermost
-    #dockerfile: ./server/build/Dockerfile
-    #context: ./server/build/.
+    dockerfile: /drone/src/server/build/Dockerfile
+    context: /drone/src/server/build/.
     tags:
     - development
-  commands:
-  - ls -alh
-  - ls -alh ./server/build/
-  - ls -alh ./server/build/packages
-  - cd ./server/build/ && container-init.sh
