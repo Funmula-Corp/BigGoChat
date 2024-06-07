@@ -21,7 +21,6 @@ steps:
     cache_from: docker.dev.cloud.biggo.com/test/mattermost:development
     registry: docker.dev.cloud.biggo.com
     repo: docker.dev.cloud.biggo.com/test/mattermost
-    dockerfile: ./server/build/Dockerfile
     context: ./server/build/
     tags:
     - development
