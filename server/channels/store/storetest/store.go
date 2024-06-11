@@ -65,6 +65,7 @@ type Store struct {
 	PostPersistentNotificationStore mocks.PostPersistentNotificationStore
 	DesktopTokensStore              mocks.DesktopTokensStore
 	ChannelBookmarkStore            mocks.ChannelBookmarkStore
+	BlocklistStore                  mocks.BlocklistStore
 	
 }
 
@@ -148,6 +149,8 @@ func (s *Store) CheckIntegrity() <-chan model.IntegrityCheckResult {
 func (s *Store) ReplicaLagAbs() error  { return nil }
 func (s *Store) ReplicaLagTime() error { return nil }
 
+func (s *Store) Blocklist() store.BlocklistStore {return &s.BlocklistStore}
+
 func (s *Store) AssertExpectations(t mock.TestingT) bool {
 	return mock.AssertExpectationsForObjects(t,
 		&s.TeamStore,
@@ -189,5 +192,6 @@ func (s *Store) AssertExpectations(t mock.TestingT) bool {
 		&s.PostPersistentNotificationStore,
 		&s.DesktopTokensStore,
 		&s.ChannelBookmarkStore,
+		&s.BlocklistStore,
 	)
 }
