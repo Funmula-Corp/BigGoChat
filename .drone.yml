@@ -19,9 +19,9 @@ steps:
   - cd server/build && cp -r ../dist packages
   - pwd
   - ls -alh server/
-  - ls -alh server/build/
-  - ls -alh server/build/packages/
-  - ls -alh server/build/packages/dist/
+  - ls -alh packages/
+  - ls -alh packages/dist/
+  - env
 
 - name: "build docker image"
   image: docker.dev.cloud.biggo.com/test/plugin-docker
