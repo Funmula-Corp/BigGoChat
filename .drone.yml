@@ -16,8 +16,7 @@ steps:
   - make build-package
   - cd server/build 
   - mkdir packages
-  - mkdir packages/dist
-  - cp -r ../dist packages/dist
+  - cp -r ../dist packages
   - ls -alh
   - ls -alh packages/
   - ls -alh packages/dist/
