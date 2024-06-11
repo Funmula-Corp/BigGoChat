@@ -18,7 +18,7 @@ steps:
   - make build-package
   - cd server/build && cp -r ../dist packages
   - pwd
-  - ls -alh server/
+  - ls -alh
   - ls -alh packages/
   - ls -alh packages/dist/
   - env
