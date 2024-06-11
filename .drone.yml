@@ -15,6 +15,7 @@ steps:
   - make build-server
   - make build-package
   - cd server/build && cp -r ../dist packages
+  - ls -alh server/build/packages/dist/
 
 - name: "build docker image"
   image: docker.dev.cloud.biggo.com/test/plugin-docker
