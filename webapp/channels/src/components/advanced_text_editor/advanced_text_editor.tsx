@@ -50,6 +50,7 @@ import SendButton from './send_button';
 import ShowFormat from './show_formatting';
 import TexteditorActions from './texteditor_actions';
 import ToggleFormattingBar from './toggle_formatting_bar';
+import SaveButton from 'components/save_button';
 
 import './advanced_text_editor.scss';
 
@@ -120,6 +121,7 @@ type Props = {
     replyToLastPost?: (e: React.KeyboardEvent) => void;
     caretPosition: number;
     placeholder?: string;
+    isPhoneVerified: boolean;
 }
 
 const AdvanceTextEditor = ({
@@ -183,8 +185,10 @@ const AdvanceTextEditor = ({
     replyToLastPost,
     caretPosition,
     placeholder,
+    isPhoneVerified,
 }: Props) => {
     const readOnlyChannel = !canPost;
+    const isVerified = canPost && isPhoneVerified;
     const {formatMessage} = useIntl();
     const ariaLabelMessageInput = Utils.localizeMessage(
         'accessibility.sections.centerFooter',
@@ -224,6 +228,23 @@ const AdvanceTextEditor = ({
     }, []);
 
     const isRHS = location === Locations.RHS_COMMENT;
+
+    // TODO i18n
+    let verifiedButton = null;
+    if (!isVerified) {
+        const onClick = () => window.location.href = "https://account.biggo.com/setting/phone";
+        verifiedButton = (
+            <div className={classNames('AdvancedTextEditor__verified-button')}>
+                <SaveButton
+                    defaultMessage={'前往驗證 〉'}
+                    extraClasses='btn-sm'
+                    disabled={false}
+                    saving={false}
+                    onClick={onClick}
+                />
+            </div>
+        );
+    }
 
     let attachmentPreview = null;
     if (!readOnlyChannel && (draft.fileInfos.length > 0 || draft.uploadsInProgress.length > 0)) {
@@ -340,6 +361,9 @@ const AdvanceTextEditor = ({
             },
             {channelDisplayName: currentChannel.display_name},
         );
+    } else if (!isVerified) {
+        // TODO i18n
+        createMessage = '為確保傳送訊息的安全性, 請先完成身份認證, 才能傳送訊息。';
     } else if (readOnlyChannel) {
         createMessage = Utils.localizeMessage(
             'create_post.read_only',
@@ -656,6 +680,7 @@ const AdvanceTextEditor = ({
                     'AdvancedTextEditor__attachment-disabled': !canUploadFiles,
                     scroll: renderScrollbar,
                     'formatting-bar': showFormattingBar,
+                    'not-verified': !isVerified,
                 })}
             >
                 {!wasNotifiedOfLogIn && (
@@ -671,7 +696,7 @@ const AdvanceTextEditor = ({
                 )}
                 <div
                     className={'AdvancedTextEditor__body'}
-                    disabled={readOnlyChannel}
+                    disabled={readOnlyChannel && isVerified}
                 >
                     <div
                         ref={editorBodyRef}
@@ -702,7 +727,7 @@ const AdvanceTextEditor = ({
                             channelId={channelId}
                             id={textboxId}
                             ref={textboxRef!}
-                            disabled={readOnlyChannel}
+                            disabled={readOnlyChannel || !isVerified}
                             characterLimit={maxPostSize}
                             preview={shouldShowPreview}
                             badConnection={badConnection}
@@ -710,6 +735,7 @@ const AdvanceTextEditor = ({
                             rootId={postId}
                             onWidthChange={handleWidthChange}
                         />
+                        {verifiedButton}
                         {attachmentPreview}
                         {!readOnlyChannel && (showFormattingBar || shouldShowPreview) && (
                             <TexteditorActions
@@ -719,7 +745,7 @@ const AdvanceTextEditor = ({
                                 {showFormatJSX}
                             </TexteditorActions>
                         )}
-                        {showFormattingSpacer || shouldShowPreview || attachmentPreview || isRHS ? (
+                        {isVerified && (showFormattingSpacer || shouldShowPreview || attachmentPreview || isRHS) ? (
                             <FormattingBarSpacer>
                                 {formattingBar}
                             </FormattingBarSpacer>
