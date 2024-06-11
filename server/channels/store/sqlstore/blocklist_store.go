@@ -152,6 +152,9 @@ func (s *SqlBlocklistStore) SaveChannelBlockUser(blockUser *model.ChannelBlockUs
 		return nil, errors.Wrap(err, "save_channel_block_user_tosql")
 	}
 
+	if _, err := transaction.Exec(`DELETE FROM ChannelMembers WHERE ChannelId = ? and UserId = ?`, blockUser.ChannelId, blockUser.BlockedId); err != nil{
+		return nil, errors.Wrapf(err, "failed to delete blocked user %s from channel %s", blockUser.BlockedId, blockUser.ChannelId)
+	}
 	if _, err := transaction.Exec(sql, args...); err != nil {
 		if IsUniqueConstraintError(err, []string{"Name", "channel_block_users_key"}) {
 			dup := model.ChannelBlockUser{}

@@ -562,6 +562,7 @@ type AppIface interface {
 	DeleteAllKeysForPlugin(pluginID string) *model.AppError
 	DeleteBrandImage(rctx request.CTX) *model.AppError
 	DeleteChannel(c request.CTX, channel *model.Channel, userID string) *model.AppError
+	DeleteChannelBlockUser(rctx request.CTX, channelId string, blockedId string) *model.AppError
 	DeleteChannelBookmark(bookmarkId, connectionId string) (*model.ChannelBookmarkWithFileInfo, *model.AppError)
 	DeleteCommand(commandID string) *model.AppError
 	DeleteDraft(rctx request.CTX, draft *model.Draft, connectionID string) *model.AppError
@@ -585,6 +586,7 @@ type AppIface interface {
 	DeleteSharedChannelRemote(id string) (bool, error)
 	DeleteSidebarCategory(c request.CTX, userID, teamID, categoryId string) *model.AppError
 	DeleteToken(token *model.Token) *model.AppError
+	DeleteUserBlockUser(rctx request.CTX, userId string, blockedId string) *model.AppError
 	DisableAutoResponder(rctx request.CTX, userID string, asAdmin bool) *model.AppError
 	DisableUserAccessToken(c request.CTX, token *model.UserAccessToken) *model.AppError
 	DoAppMigrations()
@@ -957,7 +959,7 @@ type AppIface interface {
 	ListPluginKeys(pluginID string, page, perPage int) ([]string, *model.AppError)
 	ListTeamCommands(teamID string) ([]*model.Command, *model.AppError)
 	ListUserBlockUsers(rctx request.CTX, userId string) (*model.UserBlockUserList, *model.AppError)
-	ListUsersBlockedUser(rctx request.CTX, blockedId string) (*model.UserBlockUserList, *model.AppError)
+	ListUsersByBlockedUser(rctx request.CTX, blockedId string) (*model.UserBlockUserList, *model.AppError)
 	Log() *mlog.Logger
 	LoginByOAuth(c request.CTX, service string, userData io.Reader, teamID string, tokenUser *model.User) (*model.User, *model.AppError)
 	MarkChannelsAsViewed(c request.CTX, channelIDs []string, userID string, currentSessionId string, collapsedThreadsSupported, isCRTEnabled bool) (map[string]int64, *model.AppError)
@@ -1016,7 +1018,6 @@ type AppIface interface {
 	RegisterPluginForSharedChannels(rctx request.CTX, opts model.RegisterPluginOpts) (remoteID string, err error)
 	ReloadConfig() error
 	RemoveAllDeactivatedMembersFromChannel(c request.CTX, channel *model.Channel) *model.AppError
-	RemoveChannelBlockUser(rctx request.CTX, channelId string, blockedId string) *model.AppError
 	RemoveChannelsFromRetentionPolicy(policyID string, channelIDs []string) *model.AppError
 	RemoveCustomStatus(c request.CTX, userID string) *model.AppError
 	RemoveDirectory(path string) *model.AppError
@@ -1031,7 +1032,6 @@ type AppIface interface {
 	RemoveSamlPublicCertificate() *model.AppError
 	RemoveTeamIcon(teamID string) *model.AppError
 	RemoveTeamsFromRetentionPolicy(policyID string, teamIDs []string) *model.AppError
-	RemoveUserBlockUser(rctx request.CTX, userId string, blockedId string) *model.AppError
 	RemoveUserFromChannel(c request.CTX, userIDToRemove string, removerUserId string, channel *model.Channel) *model.AppError
 	RemoveUserFromTeam(c request.CTX, teamID string, userID string, requestorId string) *model.AppError
 	RemoveUsersFromChannelNotMemberOfTeam(c request.CTX, remover *model.User, channel *model.Channel, team *model.Team) *model.AppError

@@ -3221,6 +3221,28 @@ func (a *OpenTracingAppLayer) DeleteChannel(c request.CTX, channel *model.Channe
 	return resultVar0
 }
 
+func (a *OpenTracingAppLayer) DeleteChannelBlockUser(rctx request.CTX, channelId string, blockedId string) *model.AppError {
+	origCtx := a.ctx
+	span, newCtx := tracing.StartSpanWithParentByContext(a.ctx, "app.DeleteChannelBlockUser")
+
+	a.ctx = newCtx
+	a.app.Srv().Store().SetContext(newCtx)
+	defer func() {
+		a.app.Srv().Store().SetContext(origCtx)
+		a.ctx = origCtx
+	}()
+
+	defer span.Finish()
+	resultVar0 := a.app.DeleteChannelBlockUser(rctx, channelId, blockedId)
+
+	if resultVar0 != nil {
+		span.LogFields(spanlog.Error(resultVar0))
+		ext.Error.Set(span, true)
+	}
+
+	return resultVar0
+}
+
 func (a *OpenTracingAppLayer) DeleteChannelBookmark(bookmarkId string, connectionId string) (*model.ChannelBookmarkWithFileInfo, *model.AppError) {
 	origCtx := a.ctx
 	span, newCtx := tracing.StartSpanWithParentByContext(a.ctx, "app.DeleteChannelBookmark")
@@ -3799,6 +3821,28 @@ func (a *OpenTracingAppLayer) DeleteToken(token *model.Token) *model.AppError {
 
 	defer span.Finish()
 	resultVar0 := a.app.DeleteToken(token)
+
+	if resultVar0 != nil {
+		span.LogFields(spanlog.Error(resultVar0))
+		ext.Error.Set(span, true)
+	}
+
+	return resultVar0
+}
+
+func (a *OpenTracingAppLayer) DeleteUserBlockUser(rctx request.CTX, userId string, blockedId string) *model.AppError {
+	origCtx := a.ctx
+	span, newCtx := tracing.StartSpanWithParentByContext(a.ctx, "app.DeleteUserBlockUser")
+
+	a.ctx = newCtx
+	a.app.Srv().Store().SetContext(newCtx)
+	defer func() {
+		a.app.Srv().Store().SetContext(origCtx)
+		a.ctx = origCtx
+	}()
+
+	defer span.Finish()
+	resultVar0 := a.app.DeleteUserBlockUser(rctx, userId, blockedId)
 
 	if resultVar0 != nil {
 		span.LogFields(spanlog.Error(resultVar0))
@@ -12848,9 +12892,9 @@ func (a *OpenTracingAppLayer) ListUserBlockUsers(rctx request.CTX, userId string
 	return resultVar0, resultVar1
 }
 
-func (a *OpenTracingAppLayer) ListUsersBlockedUser(rctx request.CTX, blockedId string) (*model.UserBlockUserList, *model.AppError) {
+func (a *OpenTracingAppLayer) ListUsersByBlockedUser(rctx request.CTX, blockedId string) (*model.UserBlockUserList, *model.AppError) {
 	origCtx := a.ctx
-	span, newCtx := tracing.StartSpanWithParentByContext(a.ctx, "app.ListUsersBlockedUser")
+	span, newCtx := tracing.StartSpanWithParentByContext(a.ctx, "app.ListUsersByBlockedUser")
 
 	a.ctx = newCtx
 	a.app.Srv().Store().SetContext(newCtx)
@@ -12860,7 +12904,7 @@ func (a *OpenTracingAppLayer) ListUsersBlockedUser(rctx request.CTX, blockedId s
 	}()
 
 	defer span.Finish()
-	resultVar0, resultVar1 := a.app.ListUsersBlockedUser(rctx, blockedId)
+	resultVar0, resultVar1 := a.app.ListUsersByBlockedUser(rctx, blockedId)
 
 	if resultVar1 != nil {
 		span.LogFields(spanlog.Error(resultVar1))
@@ -14359,28 +14403,6 @@ func (a *OpenTracingAppLayer) RemoveAllDeactivatedMembersFromChannel(c request.C
 	return resultVar0
 }
 
-func (a *OpenTracingAppLayer) RemoveChannelBlockUser(rctx request.CTX, channelId string, blockedId string) *model.AppError {
-	origCtx := a.ctx
-	span, newCtx := tracing.StartSpanWithParentByContext(a.ctx, "app.RemoveChannelBlockUser")
-
-	a.ctx = newCtx
-	a.app.Srv().Store().SetContext(newCtx)
-	defer func() {
-		a.app.Srv().Store().SetContext(origCtx)
-		a.ctx = origCtx
-	}()
-
-	defer span.Finish()
-	resultVar0 := a.app.RemoveChannelBlockUser(rctx, channelId, blockedId)
-
-	if resultVar0 != nil {
-		span.LogFields(spanlog.Error(resultVar0))
-		ext.Error.Set(span, true)
-	}
-
-	return resultVar0
-}
-
 func (a *OpenTracingAppLayer) RemoveChannelsFromRetentionPolicy(policyID string, channelIDs []string) *model.AppError {
 	origCtx := a.ctx
 	span, newCtx := tracing.StartSpanWithParentByContext(a.ctx, "app.RemoveChannelsFromRetentionPolicy")
@@ -14695,28 +14717,6 @@ func (a *OpenTracingAppLayer) RemoveTeamsFromRetentionPolicy(policyID string, te
 
 	defer span.Finish()
 	resultVar0 := a.app.RemoveTeamsFromRetentionPolicy(policyID, teamIDs)
-
-	if resultVar0 != nil {
-		span.LogFields(spanlog.Error(resultVar0))
-		ext.Error.Set(span, true)
-	}
-
-	return resultVar0
-}
-
-func (a *OpenTracingAppLayer) RemoveUserBlockUser(rctx request.CTX, userId string, blockedId string) *model.AppError {
-	origCtx := a.ctx
-	span, newCtx := tracing.StartSpanWithParentByContext(a.ctx, "app.RemoveUserBlockUser")
-
-	a.ctx = newCtx
-	a.app.Srv().Store().SetContext(newCtx)
-	defer func() {
-		a.app.Srv().Store().SetContext(origCtx)
-		a.ctx = origCtx
-	}()
-
-	defer span.Finish()
-	resultVar0 := a.app.RemoveUserBlockUser(rctx, userId, blockedId)
 
 	if resultVar0 != nil {
 		span.LogFields(spanlog.Error(resultVar0))

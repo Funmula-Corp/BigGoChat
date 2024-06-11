@@ -9,13 +9,13 @@ import (
 	"regexp"
 	"strings"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/audit"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/utils"
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/i18n"
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/audit"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/utils"
 )
 
 type Context struct {
@@ -768,4 +768,15 @@ func (c *Context) RequireInvoiceId() *Context {
 
 func (c *Context) GetRemoteID(r *http.Request) string {
 	return r.Header.Get(model.HeaderRemoteclusterId)
+}
+
+func (c *Context) RequireBlockedId() *Context {
+	if c.Err != nil {
+		return c
+	}
+
+	if !model.IsValidId(c.Params.BlockedUserId) {
+		c.SetInvalidURLParam("blocked_user_id")
+	}
+	return c
 }
