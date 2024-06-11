@@ -26,9 +26,9 @@ steps:
       from_secret: droneio-dev-docker-user
     password:
       from_secret: droneio-dev-docker-secret
-    cache_from: docker.dev.cloud.biggo.com/test/mattermost:development
+    cache_from: docker.dev.cloud.biggo.com/mattermost/mattermost:development
     registry: docker.dev.cloud.biggo.com
-    repo: docker.dev.cloud.biggo.com/test/mattermost
+    repo: docker.dev.cloud.biggo.com/mattermost/mattermost
     dockerfile: server/build/Dockerfile
     context: server/build
     tags:
@@ -61,9 +61,9 @@ steps:
       from_secret: droneio-dev-docker-user
     password:
       from_secret: droneio-dev-docker-secret
-    cache_from: docker.dev.cloud.biggo.com/test/mattermost:cache
+    cache_from: docker.dev.cloud.biggo.com/mattermost/mattermost:cache
     registry: docker.dev.cloud.biggo.com
-    repo: docker.dev.cloud.biggo.com/test/mattermost
+    repo: docker.dev.cloud.biggo.com/mattermost/mattermost
     dockerfile: server/build/Dockerfile
     context: server/build
     tags:
