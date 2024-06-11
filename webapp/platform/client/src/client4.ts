@@ -2061,9 +2061,9 @@ export default class Client4 {
         );
     };
 
-    getPostThread = (postId: string, fetchThreads = true, collapsedThreads = false, collapsedThreadsExtended = false) => {
+    getPostThread = (postId: string, fetchThreads = true, collapsedThreads = false, collapsedThreadsExtended = false, includeDeleted = true) => {
         // this is to ensure we have backwards compatibility for `getPostThread`
-        return this.getPaginatedPostThread(postId, {fetchThreads, collapsedThreads, collapsedThreadsExtended});
+        return this.getPaginatedPostThread(postId, {fetchThreads, collapsedThreads, collapsedThreadsExtended, includeDeleted});
     };
 
     getPaginatedPostThread = async (postId: string, options: FetchPaginatedThreadOptions): Promise<PaginatedPostList> => {
@@ -2075,11 +2075,12 @@ export default class Client4 {
             direction = 'down',
             fetchAll = false,
             perPage = fetchAll ? undefined : PER_PAGE_DEFAULT,
+            includeDeleted = true,
             ...rest
         } = options;
 
         return this.doFetch<PaginatedPostList>(
-            `${this.getPostRoute(postId)}/thread${buildQueryString({skipFetchThreads: !fetchThreads, collapsedThreads, collapsedThreadsExtended, direction, perPage, ...rest})}`,
+            `${this.getPostRoute(postId)}/thread${buildQueryString({skipFetchThreads: !fetchThreads, collapsedThreads, collapsedThreadsExtended, direction, perPage, include_deleted: includeDeleted, ...rest})}`,
             {method: 'get'},
         );
     };
@@ -2091,30 +2092,30 @@ export default class Client4 {
         );
     };
 
-    getPostsUnread = (channelId: string, userId: string, limitAfter = DEFAULT_LIMIT_AFTER, limitBefore = DEFAULT_LIMIT_BEFORE, fetchThreads = true, collapsedThreads = false, collapsedThreadsExtended = false) => {
+    getPostsUnread = (channelId: string, userId: string, limitAfter = DEFAULT_LIMIT_AFTER, limitBefore = DEFAULT_LIMIT_BEFORE, fetchThreads = true, collapsedThreads = false, collapsedThreadsExtended = false, includeDeleted = true) => {
         return this.doFetch<PostList>(
-            `${this.getUserRoute(userId)}/channels/${channelId}/posts/unread${buildQueryString({limit_after: limitAfter, limit_before: limitBefore, skipFetchThreads: !fetchThreads, collapsedThreads, collapsedThreadsExtended})}`,
+            `${this.getUserRoute(userId)}/channels/${channelId}/posts/unread${buildQueryString({limit_after: limitAfter, limit_before: limitBefore, skipFetchThreads: !fetchThreads, collapsedThreads, collapsedThreadsExtended, include_deleted: includeDeleted})}`,
             {method: 'get'},
         );
     };
 
-    getPostsSince = (channelId: string, since: number, fetchThreads = true, collapsedThreads = false, collapsedThreadsExtended = false) => {
+    getPostsSince = (channelId: string, since: number, fetchThreads = true, collapsedThreads = false, collapsedThreadsExtended = false, includeDeleted = true) => {
         return this.doFetch<PostList>(
-            `${this.getChannelRoute(channelId)}/posts${buildQueryString({since, skipFetchThreads: !fetchThreads, collapsedThreads, collapsedThreadsExtended})}`,
+            `${this.getChannelRoute(channelId)}/posts${buildQueryString({since, skipFetchThreads: !fetchThreads, collapsedThreads, collapsedThreadsExtended, include_deleted: includeDeleted})}`,
             {method: 'get'},
         );
     };
 
-    getPostsBefore = (channelId: string, postId: string, page = 0, perPage = PER_PAGE_DEFAULT, fetchThreads = true, collapsedThreads = false, collapsedThreadsExtended = false) => {
+    getPostsBefore = (channelId: string, postId: string, page = 0, perPage = PER_PAGE_DEFAULT, fetchThreads = true, collapsedThreads = false, collapsedThreadsExtended = false, includeDeleted = true) => {
         return this.doFetch<PostList>(
-            `${this.getChannelRoute(channelId)}/posts${buildQueryString({before: postId, page, per_page: perPage, skipFetchThreads: !fetchThreads, collapsedThreads, collapsedThreadsExtended})}`,
+            `${this.getChannelRoute(channelId)}/posts${buildQueryString({before: postId, page, per_page: perPage, skipFetchThreads: !fetchThreads, collapsedThreads, collapsedThreadsExtended, include_deleted: includeDeleted})}`,
             {method: 'get'},
         );
     };
 
-    getPostsAfter = (channelId: string, postId: string, page = 0, perPage = PER_PAGE_DEFAULT, fetchThreads = true, collapsedThreads = false, collapsedThreadsExtended = false) => {
+    getPostsAfter = (channelId: string, postId: string, page = 0, perPage = PER_PAGE_DEFAULT, fetchThreads = true, collapsedThreads = false, collapsedThreadsExtended = false, includeDeleted = true) => {
         return this.doFetch<PostList>(
-            `${this.getChannelRoute(channelId)}/posts${buildQueryString({after: postId, page, per_page: perPage, skipFetchThreads: !fetchThreads, collapsedThreads, collapsedThreadsExtended})}`,
+            `${this.getChannelRoute(channelId)}/posts${buildQueryString({after: postId, page, per_page: perPage, skipFetchThreads: !fetchThreads, collapsedThreads, collapsedThreadsExtended, include_deleted: includeDeleted})}`,
             {method: 'get'},
         );
     };

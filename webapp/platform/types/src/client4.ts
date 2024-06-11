@@ -36,4 +36,5 @@ export type FetchPaginatedThreadOptions = {
     perPage?: number;
     fromCreateAt?: number;
     fromPost?: string;
+    includeDeleted?: boolean;
 }
