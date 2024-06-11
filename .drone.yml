@@ -12,6 +12,7 @@ steps:
 - name: "build server"
   image: docker.cloud.biggo.com/droneio/mattermost-funmula-build:latest
   commands:
+  - env
   - make build-server
   - make build-package
   - cd server/build 
@@ -21,6 +22,10 @@ steps:
 - name: "build docker image"
   image: docker.dev.cloud.biggo.com/test/plugin-docker
   settings:
+    username:
+      from_secret: droneio-dev-docker-user
+    password:
+      from_secret: droneio-dev-docker-secret
     cache_from: docker.dev.cloud.biggo.com/test/mattermost:development
     registry: docker.dev.cloud.biggo.com
     repo: docker.dev.cloud.biggo.com/test/mattermost
@@ -52,6 +57,10 @@ steps:
 - name: "build docker image"
   image: docker.dev.cloud.biggo.com/test/plugin-docker
   settings:
+    username:
+      from_secret: droneio-dev-docker-user
+    password:
+      from_secret: droneio-dev-docker-secret
     cache_from: docker.dev.cloud.biggo.com/test/mattermost:cache
     registry: docker.dev.cloud.biggo.com
     repo: docker.dev.cloud.biggo.com/test/mattermost
