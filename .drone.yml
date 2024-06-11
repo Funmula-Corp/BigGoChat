@@ -17,9 +17,6 @@ steps:
   - cd server/build 
   - mkdir packages
   - cp -r ../dist packages
-  - ls -alh
-  - ls -alh packages/
-  - ls -alh packages/dist/
 
 - name: "build docker image"
   image: docker.dev.cloud.biggo.com/test/plugin-docker
@@ -31,3 +28,35 @@ steps:
     context: server/build
     tags:
     - development
+
+---
+
+kind: pipeline
+type: kubernetes
+name: release
+
+trigger:
+  event:
+  - tag
+
+steps:
+- name: "build server"
+  image: docker.cloud.biggo.com/droneio/mattermost-funmula-build:latest
+  commands:
+  - make build-server
+  - make build-package
+  - cd server/build 
+  - mkdir packages
+  - cp -r ../dist packages
+
+- name: "build docker image"
+  image: docker.dev.cloud.biggo.com/test/plugin-docker
+  settings:
+    cache_from: docker.dev.cloud.biggo.com/test/mattermost:cache
+    registry: docker.dev.cloud.biggo.com
+    repo: docker.dev.cloud.biggo.com/test/mattermost
+    dockerfile: server/build/Dockerfile
+    context: server/build
+    tags:
+    - cache
+    - ${DRONE_SEMVER}
