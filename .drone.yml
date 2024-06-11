@@ -12,16 +12,15 @@ steps:
 - name: "build server"
   image: docker.cloud.biggo.com/droneio/mattermost-funmula-build:latest
   commands:
-  - pwd
-  - ls -alh
   - make build-server
   - make build-package
-  - cd server/build && cp -r ../dist packages
-  - pwd
+  - cd server/build 
+  - mkdir packages
+  - mkdir packages/dist
+  - cp -r ../dist packages/dist
   - ls -alh
   - ls -alh packages/
   - ls -alh packages/dist/
-  - env
 
 - name: "build docker image"
   image: docker.dev.cloud.biggo.com/test/plugin-docker
