@@ -2919,7 +2919,7 @@ func TestCollapsedThreadFetch(t *testing.T) {
 		th.App.MarkChannelAsUnreadFromPost(th.Context, postRoot.Id, user1.Id, true)
 
 		// extended fetch posts around
-		l, err = th.App.GetPostsForChannelAroundLastUnread(th.Context, channel.Id, user1.Id, 10, 10, true, true, true)
+		l, err = th.App.GetPostsForChannelAroundLastUnread(th.Context, channel.Id, user1.Id, 10, 10, true, true, true, false)
 		require.Nil(t, err)
 		require.Len(t, l.Order, 1)
 		require.NotEmpty(t, l.Posts[postRoot.Id].Participants[0].Email)
