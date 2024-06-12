@@ -106,6 +106,36 @@ func (_m *RoleStore) ChannelRolesUnderTeamRole(roleName string) ([]*model.Role, 
 	return r0, r1
 }
 
+// CreateRole provides a mock function with given fields: role
+func (_m *RoleStore) CreateRole(role *model.Role) (*model.Role, error) {
+	ret := _m.Called(role)
+
+	if len(ret) == 0 {
+		panic("no return value specified for CreateRole")
+	}
+
+	var r0 *model.Role
+	var r1 error
+	if rf, ok := ret.Get(0).(func(*model.Role) (*model.Role, error)); ok {
+		return rf(role)
+	}
+	if rf, ok := ret.Get(0).(func(*model.Role) *model.Role); ok {
+		r0 = rf(role)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.Role)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(*model.Role) error); ok {
+		r1 = rf(role)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // Delete provides a mock function with given fields: roleID
 func (_m *RoleStore) Delete(roleID string) (*model.Role, error) {
 	ret := _m.Called(roleID)
