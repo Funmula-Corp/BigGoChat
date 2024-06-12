@@ -247,6 +247,10 @@ export class StatusDropdown extends React.PureComponent<Props, State> {
         this.props.actions.setStatusDropdown(open);
     };
 
+    goToBigGoAccount = () => {
+        window.open("https://account.biggo.com");
+    };
+
     handleCompleteYourProfileTask = (): void => {
         const taskName = OnboardingTasksName.COMPLETE_YOUR_PROFILE;
         const steps = TaskNameMapToSteps[taskName];
@@ -654,12 +658,9 @@ export class StatusDropdown extends React.PureComponent<Props, State> {
                         />
                     </Menu.Group>
                     <Menu.Group>
-                        <Menu.ItemToggleModalRedux
+                        <Menu.ItemAction
                             id='accountSettings'
-                            ariaLabel='Profile'
-                            modalId={ModalIdentifiers.USER_SETTINGS}
-                            dialogType={UserSettingsModal}
-                            dialogProps={{isContentProductSettings: false}}
+                            onClick={this.goToBigGoAccount}
                             text={this.props.intl.formatMessage({id: 'navbar_dropdown.profileSettings', defaultMessage: 'Profile'})}
                             icon={
                                 <AccountOutlineIcon
@@ -677,7 +678,7 @@ export class StatusDropdown extends React.PureComponent<Props, State> {
                                     <CompleteYourProfileTour/>
                                 </div>
                             )}
-                        </Menu.ItemToggleModalRedux>
+                        </Menu.ItemAction>
                     </Menu.Group>
                     <Menu.Group>
                         <span className={'logout__icon'}>
