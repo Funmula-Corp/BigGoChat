@@ -9476,6 +9476,27 @@ func (s *RetryLayerRoleStore) ChannelRolesUnderTeamRole(roleName string) ([]*mod
 
 }
 
+func (s *RetryLayerRoleStore) CreateRole(role *model.Role) (*model.Role, error) {
+
+	tries := 0
+	for {
+		result, err := s.RoleStore.CreateRole(role)
+		if err == nil {
+			return result, nil
+		}
+		if !isRepeatableError(err) {
+			return result, err
+		}
+		tries++
+		if tries >= 3 {
+			err = errors.Wrap(err, "giving up after 3 consecutive repeatable transaction failures")
+			return result, err
+		}
+		timepkg.Sleep(100 * timepkg.Millisecond)
+	}
+
+}
+
 func (s *RetryLayerRoleStore) Delete(roleID string) (*model.Role, error) {
 
 	tries := 0
@@ -9649,6 +9670,27 @@ func (s *RetryLayerSchemeStore) CountWithoutPermission(scope string, permissionI
 	tries := 0
 	for {
 		result, err := s.SchemeStore.CountWithoutPermission(scope, permissionID, roleScope, roleType)
+		if err == nil {
+			return result, nil
+		}
+		if !isRepeatableError(err) {
+			return result, err
+		}
+		tries++
+		if tries >= 3 {
+			err = errors.Wrap(err, "giving up after 3 consecutive repeatable transaction failures")
+			return result, err
+		}
+		timepkg.Sleep(100 * timepkg.Millisecond)
+	}
+
+}
+
+func (s *RetryLayerSchemeStore) CreateScheme(scheme *model.Scheme) (*model.Scheme, error) {
+
+	tries := 0
+	for {
+		result, err := s.SchemeStore.CreateScheme(scheme)
 		if err == nil {
 			return result, nil
 		}

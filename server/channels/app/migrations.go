@@ -650,4 +650,5 @@ func (s *Server) doAppMigrations() {
 	s.doCloudS3PathMigrations(c)
 	s.doDeleteEmptyDraftsMigration(c)
 	s.doDeleteOrphanDraftsMigration(c)
+	s.doBiggoMigration(c)
 }
