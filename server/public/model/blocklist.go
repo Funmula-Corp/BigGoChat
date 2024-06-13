@@ -28,3 +28,7 @@ func (o *UserBlockUser) PreSave() {
 		o.CreateAt = GetMillis()
 	}
 }
+
+func (o *UserBlockUser) GetDMName() string {
+	return GetDMNameFromIds(o.BlockedId, o.UserId)
+}

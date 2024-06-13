@@ -3793,6 +3793,11 @@ func (c *Client4) CreatePost(ctx context.Context, post *Post) (*Post, *Response,
 	}
 	r, err := c.DoAPIPost(ctx, c.postsRoute(), string(postJSON))
 	if err != nil {
+		buffer := make([]byte, 8192)
+		b := new(bytes.Buffer)
+		nr := io.TeeReader(r.Body, b)
+		n, _ := nr.Read(buffer)
+		fmt.Printf("reply body %v, %v\n", r.ContentLength, buffer[:n])
 		return nil, BuildResponse(r), err
 	}
 	defer closeBody(r)

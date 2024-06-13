@@ -4,6 +4,8 @@
 package sqlstore
 
 import (
+	"database/sql"
+
 	sq "github.com/mattermost/squirrel"
 
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
@@ -152,7 +154,7 @@ func (s *SqlBlocklistStore) SaveChannelBlockUser(blockUser *model.ChannelBlockUs
 		return nil, errors.Wrap(err, "save_channel_block_user_tosql")
 	}
 
-	if _, err := transaction.Exec(`DELETE FROM ChannelMembers WHERE ChannelId = ? and UserId = ?`, blockUser.ChannelId, blockUser.BlockedId); err != nil{
+	if _, err := transaction.Exec(`DELETE FROM ChannelMembers WHERE ChannelId = ? and UserId = ?`, blockUser.ChannelId, blockUser.BlockedId); err != nil {
 		return nil, errors.Wrapf(err, "failed to delete blocked user %s from channel %s", blockUser.BlockedId, blockUser.ChannelId)
 	}
 	if _, err := transaction.Exec(sql, args...); err != nil {
@@ -240,15 +242,34 @@ func (s *SqlBlocklistStore) ListUserBlockUsersByBlockedUser(blockedId string) (*
 }
 
 func (s *SqlBlocklistStore) DeleteUserBlockUser(userId string, blockedId string) error {
+	var blockedByPeer model.UserBlockUser
+
 	transaction, err := s.GetMasterX().Beginx()
 	if err != nil {
 		return errors.Wrap(err, "SetDeleteAt: begin_transaction")
 	}
 	defer finalizeTransactionX(transaction, &err)
 
-	if _, err := transaction.Exec(`DELETE FROM UserBlockUsers WHERE UserId = ? and BlockedId = ?`, userId, blockedId); err != nil {
-		return errors.Wrapf(err, "failed to delete channel block user %s %s", userId, blockedId)
+	deleteResult, err := transaction.Exec(`DELETE FROM UserBlockUsers WHERE UserId = ? and BlockedId = ?`, userId, blockedId)
+	if err != nil {
+		return errors.Wrapf(err, "failed to delete user block user %s %s", userId, blockedId)
 	}
+	if r, err := deleteResult.RowsAffected(); err != nil {
+		return errors.Wrapf(err, "failed to count delete user block user rows %s %s", userId, blockedId)
+	} else if r == 0 {
+		return nil
+	}
+
+	err = transaction.Get(&blockedByPeer, `SELECT UserId, BlockedId, CreateAt FROM UserBlockUsers WHERE UserId = ? and BlockedId = ? FOR SHARE`, blockedId, userId)
+
+	if err == sql.ErrNoRows {
+		if _, err = transaction.Exec("UPDATE ChannelMembers SET SchemeUser=true WHERE ChannelId IN (SELECT Id FROM Channels WHERE Name= ?)", model.GetDMNameFromIds(userId, blockedId)); err != nil {
+			return errors.Wrapf(err, "unmark_dm_readonly: user_id=%s blocked_id %s", userId, blockedId)
+		}
+	} else if err != nil {
+		return errors.Wrapf(err, "list: user_id=%s blocked_id %s", userId, blockedId)
+	}
+
 	if err := transaction.Commit(); err != nil {
 		return errors.Wrapf(err, "Delete: commit_transaction")
 	}
@@ -262,13 +283,21 @@ func (s *SqlBlocklistStore) SaveUserBlockUser(userBlockUser *model.UserBlockUser
 	}
 	userBlockUser.PreSave()
 	defer finalizeTransactionX(transaction, &err)
+
+	// this hold "DELETE FROM UserBlockUsers" query from the other user.
+	_, err = transaction.Exec(
+		"SELECT * FROM UserBlockUsers WHERE UserId = ? and BlockedId = ? FOR SHARE",
+		userBlockUser.BlockedId, userBlockUser.UserId)
+	if err != nil {
+		return nil, errors.Wrapf(err, "error while select user block user: %s %s", userBlockUser.BlockedId, userBlockUser.UserId)
+	}
+
 	query := s.getQueryBuilder().Insert("UserBlockUsers").Columns(userBlockUserSliceColumns()...).Values(userBlockUserToSlice(userBlockUser)...)
 	sql, args, err := query.ToSql()
 	if err != nil {
 		return nil, errors.Wrap(err, "save_user_block_user_tosql")
 	}
-
-	if _, err := transaction.Exec(sql, args...); err != nil {
+	if _, err = transaction.Exec(sql, args...); err != nil {
 		if IsUniqueConstraintError(err, []string{"Name", "user_block_users_key"}) {
 			dup := model.UserBlockUser{}
 			if serr := s.GetMasterX().Get(&dup, "SELECT * FROM UserBlockUsers WHERE UserId = ? AND BlockedId = ?", userBlockUser.UserId, userBlockUser.BlockedId); serr != nil {
@@ -276,8 +305,16 @@ func (s *SqlBlocklistStore) SaveUserBlockUser(userBlockUser *model.UserBlockUser
 			}
 			return &dup, store.NewErrConflict("UserBlockUser", err, "id="+userBlockUser.UserId+":"+userBlockUser.BlockedId)
 		}
-		return nil, errors.Wrapf(err, "save_channel_block_user: user_id=%s blocked_id=%s", userBlockUser.UserId, userBlockUser.BlockedId)
+		return nil, errors.Wrapf(err, "save_user_block_user: user_id=%s blocked_id=%s", userBlockUser.UserId, userBlockUser.BlockedId)
 	}
+
+	if _, err = transaction.Exec("UPDATE ChannelMembers SET SchemeUser=false WHERE ChannelId IN (SELECT Id FROM Channels WHERE Name= ?)", userBlockUser.GetDMName()); err != nil {
+		return nil, errors.Wrapf(err, "mark_dm_readonly: user_id=%s blocked_id %s", userBlockUser.UserId, userBlockUser.BlockedId)
+	}
+
 	err = transaction.Commit()
-	return userBlockUser, err
+	if err != nil {
+		return nil, errors.Wrapf(err, "SaveUserBlockUser: commit_transaction")
+	}
+	return userBlockUser, nil
 }

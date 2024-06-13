@@ -13,6 +13,7 @@ import (
 func TestBlocklistStore(t *testing.T, rctx request.CTX, ss store.Store) {
 	t.Run("SaveChannelBlockUser", func(t *testing.T) { testSaveChannelBlockUser(t, rctx, ss) })
 	t.Run("SaveUserBlockUser", func(t *testing.T) { testSaveUserBlockUser(t, rctx, ss) })
+	t.Run("SaveUserBlockUserDM", func(t *testing.T) { testSaveUserBlockUserDM(t, rctx, ss) })
 	t.Run("ListChannelBlockUser", func(t *testing.T) { testListChannelBlockUser(t, rctx, ss) })
 	t.Run("ListUserBlockUser", func(t *testing.T) { testListUserBlockUser(t, rctx, ss) })
 }
@@ -79,6 +80,69 @@ func testSaveUserBlockUser(t *testing.T, _ request.CTX, ss store.Store) {
 
 	err = ss.Blocklist().DeleteUserBlockUser(userBlockUser.UserId, userBlockUser.BlockedId)
 	require.NoError(t, err)
+}
+
+func testSaveUserBlockUserDM(t *testing.T, ctx request.CTX, ss store.Store) {
+	userA := "biggouyyyyyyyyyyyyyyyyyyyy"
+	userB := "biggouyyyyyyyyyyyyyyyyyyyb"
+	channel := model.Channel{
+		TeamId: "teamid",
+		Type: model.ChannelTypeDirect,
+		Name: model.GetDMNameFromIds(userA, userB),
+	}
+	cmA := model.ChannelMember{
+		UserId: userA,
+		SchemeUser: true,
+		NotifyProps: model.GetDefaultChannelNotifyProps(),
+	}
+	cmB := model.ChannelMember{
+		UserId: userB,
+		SchemeUser: true,
+		NotifyProps: model.GetDefaultChannelNotifyProps(),
+	}
+	newChannel, err := ss.Channel().SaveDirectChannel(ctx, &channel, &cmA, &cmB)
+	require.NoError(t, err)
+
+	aBlockB := model.UserBlockUser{
+		UserId:    userA,
+		BlockedId: userB,
+	}
+	_, err = ss.Blocklist().SaveUserBlockUser(&aBlockB)
+	require.NoError(t, err)
+
+	channelMembers, err := ss.Channel().GetMembersByIds(newChannel.Id, []string{userA, userB})
+	require.NoError(t, err)
+	for _, cm := range(channelMembers){
+		assert.False(t, cm.SchemeUser)
+	}
+
+	bBlockA := model.UserBlockUser{
+		UserId:    userB,
+		BlockedId: userA,
+	}
+	_, err = ss.Blocklist().SaveUserBlockUser(&bBlockA)
+	require.NoError(t, err)
+	channelMembers, err = ss.Channel().GetMembersByIds(newChannel.Id, []string{userA, userB})
+	require.NoError(t, err)
+	for _, cm := range(channelMembers){
+		assert.False(t, cm.SchemeUser)
+	}
+
+	err = ss.Blocklist().DeleteUserBlockUser(userB, userA)
+	require.NoError(t, err)
+	channelMembers, err = ss.Channel().GetMembersByIds(newChannel.Id, []string{userA, userB})
+	require.NoError(t, err)
+	for _, cm := range(channelMembers){
+		assert.False(t, cm.SchemeUser)
+	}
+
+	err = ss.Blocklist().DeleteUserBlockUser(userA, userB)
+	require.NoError(t, err)
+	channelMembers, err = ss.Channel().GetMembersByIds(newChannel.Id, []string{userA, userB})
+	require.NoError(t, err)
+	for _, cm := range(channelMembers){
+		assert.True(t, cm.SchemeUser)
+	}
 }
 
 func testListChannelBlockUser(t *testing.T, _ request.CTX, ss store.Store) {

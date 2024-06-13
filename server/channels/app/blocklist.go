@@ -58,7 +58,7 @@ func (a *App) AddUserBlockUser(rctx request.CTX, userId string, blockedId string
 		BlockedId: blockedId,
 	}
 	if saved, err := a.Srv().Store().Blocklist().SaveUserBlockUser(&newUBU); err != nil {
-		return nil, model.NewAppError("AddUserBlockUser", "app.user.add_blocklist.add.app_error", nil, "", 500).Wrap(err)
+		return nil, model.NewAppError("AddUserBlockUser", "app.user.add_blocklist.save.app_error", nil, "", 500).Wrap(err)
 	} else {
 		a.InvalidateCacheForUser(blockedId)
 		a.InvalidateCacheForUser(userId)
@@ -70,6 +70,8 @@ func (a *App) DeleteUserBlockUser(rctx request.CTX, userId string, blockedId str
 	if err := a.Srv().Store().Blocklist().DeleteUserBlockUser(userId, blockedId); err != nil {
 		return model.NewAppError("DeleteUserBlockUser", "app.user.delete_blocklist.delete.app_error", nil, "", 500).Wrap(err)
 	} else {
+		a.InvalidateCacheForUser(blockedId)
+		a.InvalidateCacheForUser(userId)
 		return nil
 	}
 }

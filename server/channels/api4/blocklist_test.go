@@ -4,6 +4,7 @@ import (
 	"context"
 	"testing"
 
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -49,6 +50,89 @@ func TestUserBlockUser(t *testing.T) {
 	_, resp7, err7 := client.ListUserBlockUsers(context.Background(), th.BasicUser2.Id)
 	require.Error(t, err7)
 	CheckForbiddenStatus(t, resp7)
+}
+
+func TestUserBlockUserPost(t *testing.T) {
+	th := Setup(t).InitBasic()
+	defer th.TearDown()
+	ctx := context.Background()
+	client := th.Client
+	client2 := th.CreateClient()
+	_, _, lErr := client2.Login(context.Background(), th.BasicUser2.Username, th.BasicUser2.Password)
+	if lErr != nil {
+		panic(lErr)
+	}
+	dmChannel, resp, err := client.CreateDirectChannel(ctx, th.BasicUser.Id, th.BasicUser2.Id)
+	require.NoError(t, err)
+	require.NotNil(t, resp)
+	require.NotNil(t, dmChannel)
+
+	post := &model.Post{ChannelId: dmChannel.Id, Message: "msg1"}
+	_, resp2, err2 := client.CreatePost(context.Background(), post)
+	require.NoError(t, err2)
+	CheckCreatedStatus(t, resp2)
+
+	// a block b
+	_, resp, err = client.AddUserBlockUser(context.Background(), th.BasicUser.Id, th.BasicUser2.Id)
+	require.NoError(t, err)
+	CheckCreatedStatus(t, resp)
+
+	post = &model.Post{ChannelId: dmChannel.Id, Message: "msg2"}
+	_, resp, err = client.CreatePost(context.Background(), post)
+	require.Error(t, err)
+	CheckForbiddenStatus(t, resp)
+
+	post = &model.Post{ChannelId: dmChannel.Id, Message: "msg3 from user2"}
+	_, resp, err = client2.CreatePost(context.Background(), post)
+	require.Error(t, err)
+	CheckForbiddenStatus(t, resp)
+
+	// TODO: test they can still read posts in the dm channel
+
+	// b blocked a. they block each other
+	_, resp, err = client2.AddUserBlockUser(context.Background(), th.BasicUser2.Id, th.BasicUser.Id)
+	require.NoError(t, err)
+	CheckCreatedStatus(t, resp)
+
+	post = &model.Post{ChannelId: dmChannel.Id, Message: "msg4"}
+	_, resp, err = client.CreatePost(context.Background(), post)
+	require.Error(t, err)
+	CheckForbiddenStatus(t, resp)
+
+	post = &model.Post{ChannelId: dmChannel.Id, Message: "msg5 from user2"}
+	_, resp, err = client2.CreatePost(context.Background(), post)
+	require.Error(t, err)
+	CheckForbiddenStatus(t, resp)
+
+	// a unblock b
+	_, resp, err = client.DeleteUserBlockUser(context.Background(), th.BasicUser.Id, th.BasicUser2.Id)
+	require.NoError(t, err)
+	CheckOKStatus(t, resp)
+
+	post = &model.Post{ChannelId: dmChannel.Id, Message: "msg6"}
+	_, resp, err = client.CreatePost(context.Background(), post)
+	require.Error(t, err)
+	CheckForbiddenStatus(t, resp)
+
+	post = &model.Post{ChannelId: dmChannel.Id, Message: "msg7 from user2"}
+	_, resp, err = client2.CreatePost(context.Background(), post)
+	require.Error(t, err)
+	CheckForbiddenStatus(t, resp)
+
+	// b unblock a, they unblocked each other
+	_, resp, err = client2.DeleteUserBlockUser(context.Background(), th.BasicUser2.Id, th.BasicUser.Id)
+	require.NoError(t, err)
+	CheckOKStatus(t, resp)
+
+	post = &model.Post{ChannelId: dmChannel.Id, Message: "msg6"}
+	_, resp, err = client.CreatePost(context.Background(), post)
+	require.NoError(t, err)
+	CheckCreatedStatus(t, resp)
+
+	post = &model.Post{ChannelId: dmChannel.Id, Message: "msg7 from user2"}
+	_, resp, err = client2.CreatePost(context.Background(), post)
+	require.NoError(t, err)
+	CheckCreatedStatus(t, resp)
 }
 
 func TestChannelBlockUser(t *testing.T) {
