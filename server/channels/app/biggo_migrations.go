@@ -28,7 +28,7 @@ func (s *Server) doChannelReadOnlyRoleCreationMigration() {
 			model.PermissionReadChannel.Id,
 			model.PermissionReadChannelContent.Id,
 		},
-		SchemeManaged: true,
+		SchemeManaged: false,
 		BuiltIn: true,
 	}
 
