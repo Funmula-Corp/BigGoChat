@@ -6,11 +6,6 @@ import (
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
 )
 
-const (
-	CustomChannelReadOnlyRoleCreationMigrationKey = "CustomChannelReadOnlyRoleCreationMigrationComplete"
-	CustomSystemVerifiedRoleCreationMigrationKey = "CustomSystemVerifiedRoleCreationMigrationComplete"
-)
-
 // should define in `model` package
 const (
 	ChannelReadOnlyRoleId = "biggoryyyyyyyyyyyyyyyyyyyb"
@@ -20,7 +15,7 @@ const (
 )
 
 func (s *Server) doChannelReadOnlyRoleCreationMigration() {
-	if _, err := s.Store().System().GetByName(CustomChannelReadOnlyRoleCreationMigrationKey); err == nil {
+	if _, err := s.Store().System().GetByName(model.CustomChannelReadOnlyRoleCreationMigrationKey); err == nil {
 		return
 	}
 
@@ -58,7 +53,7 @@ func (s *Server) doChannelReadOnlyRoleCreationMigration() {
 	}
 
 	system := model.System{
-		Name: CustomChannelReadOnlyRoleCreationMigrationKey,
+		Name: model.CustomChannelReadOnlyRoleCreationMigrationKey,
 		Value: "true",
 	}
 	if err := s.Store().System().Save(&system); err != nil {
@@ -72,7 +67,7 @@ const (
 )
 
 func (s *Server) doSystemVerifiedRoleCreationMigration(c *request.Context) {
-	if _, err := s.Store().System().GetByName(CustomSystemVerifiedRoleCreationMigrationKey); err == nil {
+	if _, err := s.Store().System().GetByName(model.CustomSystemVerifiedRoleCreationMigrationKey); err == nil {
 		return
 	}
 
@@ -101,7 +96,7 @@ func (s *Server) doSystemVerifiedRoleCreationMigration(c *request.Context) {
 	}
 
 	system := model.System{
-		Name: CustomSystemVerifiedRoleCreationMigrationKey,
+		Name: model.CustomSystemVerifiedRoleCreationMigrationKey,
 		Value: "true",
 	}
 	if err := s.Store().System().Save(&system); err != nil {
