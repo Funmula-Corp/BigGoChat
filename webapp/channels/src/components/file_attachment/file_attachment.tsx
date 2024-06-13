@@ -28,6 +28,7 @@ import {
 import ArchivedTooltip from './archived_tooltip';
 import FileThumbnail from './file_thumbnail';
 import FilenameOverlay from './filename_overlay';
+import AudioVideoPreview from 'components/audio_video_preview';
 
 import type {PropsFromRedux} from './index';
 
@@ -393,6 +394,14 @@ export default function FileAttachment(props: Props) {
             </div>
         );
 
+    const fileType = getFileType(fileInfo.extension);
+    const previewContent = (
+        <AudioVideoPreview
+            fileInfo={fileInfo as FileInfo}
+            fileUrl={getFileUrl(fileInfo.id)}
+        />
+    )
+
     if (fileInfo.archived) {
         return (
             <>
@@ -401,5 +410,5 @@ export default function FileAttachment(props: Props) {
             </>
         );
     }
-    return content;
+    return (fileType === FileTypes.VIDEO || fileType === FileTypes.AUDIO) ? previewContent : content;
 }
