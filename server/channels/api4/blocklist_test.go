@@ -87,7 +87,12 @@ func TestUserBlockUserPost(t *testing.T) {
 	require.Error(t, err)
 	CheckForbiddenStatus(t, resp)
 
-	// TODO: test they can still read posts in the dm channel
+	// they can still read posts in the dm channel
+	posts, resp, err := client.GetPostsForChannel(context.Background(), dmChannel.Id, 0, 100, "", false, true)
+	require.NoError(t, err)
+	CheckOKStatus(t, resp)
+	assert.Equal(t, 1, len(posts.Posts))
+	assert.False(t, posts.HasNext)
 
 	// b blocked a. they block each other
 	_, resp, err = client2.AddUserBlockUser(context.Background(), th.BasicUser2.Id, th.BasicUser.Id)

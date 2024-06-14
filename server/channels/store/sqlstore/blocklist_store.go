@@ -308,7 +308,7 @@ func (s *SqlBlocklistStore) SaveUserBlockUser(userBlockUser *model.UserBlockUser
 		return nil, errors.Wrapf(err, "save_user_block_user: user_id=%s blocked_id=%s", userBlockUser.UserId, userBlockUser.BlockedId)
 	}
 
-	if _, err = transaction.Exec("UPDATE ChannelMembers SET SchemeUser=false WHERE ChannelId IN (SELECT Id FROM Channels WHERE Name= ?)", userBlockUser.GetDMName()); err != nil {
+	if _, err = transaction.Exec("UPDATE ChannelMembers SET SchemeUser=false, Roles='channel_readonly' WHERE ChannelId IN (SELECT Id FROM Channels WHERE Name= ?)", userBlockUser.GetDMName()); err != nil {
 		return nil, errors.Wrapf(err, "mark_dm_readonly: user_id=%s blocked_id %s", userBlockUser.UserId, userBlockUser.BlockedId)
 	}
 
