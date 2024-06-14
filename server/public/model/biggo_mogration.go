@@ -2,5 +2,7 @@ package model
 
 const (
 	CustomChannelReadOnlyRoleCreationMigrationKey = "CustomChannelReadOnlyRoleCreationMigrationComplete"
-	CustomSystemVerifiedRoleCreationMigrationKey = "CustomSystemVerifiedRoleCreationMigrationComplete"
+	CustomSystemVerifiedRoleCreationMigrationKey  = "CustomSystemVerifiedRoleCreationMigrationComplete"
+
+	MigrationKeyRemoveChannelManageUserFromChannelUser = "remove_channel_manage_user_from_channel_user"
 )
