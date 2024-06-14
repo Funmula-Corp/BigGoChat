@@ -93,7 +93,7 @@ export default class PostMessageView extends React.PureComponent<Props, State> {
             <em>
                 <FormattedMessage
                     id={id}
-                    values={{ name }}
+                    values={{name}}
                     defaultMessage={defaultMessage}
                 />
             </em>
