@@ -811,6 +811,9 @@ type RoleStore interface {
 	// ChannelRolesUnderTeamRole returns all of the non-deleted roles that are affected by updates to the
 	// given role.
 	ChannelRolesUnderTeamRole(roleName string) ([]*model.Role, error)
+
+	// create role with customized id
+	CreateRole(role *model.Role) (*model.Role, error)
 }
 
 type SchemeStore interface {
@@ -822,6 +825,9 @@ type SchemeStore interface {
 	PermanentDeleteAll() error
 	CountByScope(scope string) (int64, error)
 	CountWithoutPermission(scope, permissionID string, roleScope model.RoleScope, roleType model.RoleType) (int64, error)
+
+	// create scheme with customized id
+	CreateScheme(scheme *model.Scheme) (*model.Scheme, error)
 }
 
 type TermsOfServiceStore interface {

@@ -43,6 +43,7 @@ RUN update-ca-certificates
 
 # We should refrain from running as privileged user
 # USER mattermost
+USER root
 
 # Healthcheck to make sure container is ready
 HEALTHCHECK --interval=30s --timeout=10s \

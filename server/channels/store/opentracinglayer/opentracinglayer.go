@@ -8314,6 +8314,24 @@ func (s *OpenTracingLayerRoleStore) ChannelRolesUnderTeamRole(roleName string) (
 	return result, err
 }
 
+func (s *OpenTracingLayerRoleStore) CreateRole(role *model.Role) (*model.Role, error) {
+	origCtx := s.Root.Store.Context()
+	span, newCtx := tracing.StartSpanWithParentByContext(s.Root.Store.Context(), "RoleStore.CreateRole")
+	s.Root.Store.SetContext(newCtx)
+	defer func() {
+		s.Root.Store.SetContext(origCtx)
+	}()
+
+	defer span.Finish()
+	result, err := s.RoleStore.CreateRole(role)
+	if err != nil {
+		span.LogFields(spanlog.Error(err))
+		ext.Error.Set(span, true)
+	}
+
+	return result, err
+}
+
 func (s *OpenTracingLayerRoleStore) Delete(roleID string) (*model.Role, error) {
 	origCtx := s.Root.Store.Context()
 	span, newCtx := tracing.StartSpanWithParentByContext(s.Root.Store.Context(), "RoleStore.Delete")
@@ -8468,6 +8486,24 @@ func (s *OpenTracingLayerSchemeStore) CountWithoutPermission(scope string, permi
 
 	defer span.Finish()
 	result, err := s.SchemeStore.CountWithoutPermission(scope, permissionID, roleScope, roleType)
+	if err != nil {
+		span.LogFields(spanlog.Error(err))
+		ext.Error.Set(span, true)
+	}
+
+	return result, err
+}
+
+func (s *OpenTracingLayerSchemeStore) CreateScheme(scheme *model.Scheme) (*model.Scheme, error) {
+	origCtx := s.Root.Store.Context()
+	span, newCtx := tracing.StartSpanWithParentByContext(s.Root.Store.Context(), "SchemeStore.CreateScheme")
+	s.Root.Store.SetContext(newCtx)
+	defer func() {
+		s.Root.Store.SetContext(origCtx)
+	}()
+
+	defer span.Finish()
+	result, err := s.SchemeStore.CreateScheme(scheme)
 	if err != nil {
 		span.LogFields(spanlog.Error(err))
 		ext.Error.Set(span, true)

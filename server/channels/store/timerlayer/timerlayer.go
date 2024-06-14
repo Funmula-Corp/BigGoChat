@@ -7497,6 +7497,22 @@ func (s *TimerLayerRoleStore) ChannelRolesUnderTeamRole(roleName string) ([]*mod
 	return result, err
 }
 
+func (s *TimerLayerRoleStore) CreateRole(role *model.Role) (*model.Role, error) {
+	start := time.Now()
+
+	result, err := s.RoleStore.CreateRole(role)
+
+	elapsed := float64(time.Since(start)) / float64(time.Second)
+	if s.Root.Metrics != nil {
+		success := "false"
+		if err == nil {
+			success = "true"
+		}
+		s.Root.Metrics.ObserveStoreMethodDuration("RoleStore.CreateRole", success, elapsed)
+	}
+	return result, err
+}
+
 func (s *TimerLayerRoleStore) Delete(roleID string) (*model.Role, error) {
 	start := time.Now()
 
@@ -7637,6 +7653,22 @@ func (s *TimerLayerSchemeStore) CountWithoutPermission(scope string, permissionI
 			success = "true"
 		}
 		s.Root.Metrics.ObserveStoreMethodDuration("SchemeStore.CountWithoutPermission", success, elapsed)
+	}
+	return result, err
+}
+
+func (s *TimerLayerSchemeStore) CreateScheme(scheme *model.Scheme) (*model.Scheme, error) {
+	start := time.Now()
+
+	result, err := s.SchemeStore.CreateScheme(scheme)
+
+	elapsed := float64(time.Since(start)) / float64(time.Second)
+	if s.Root.Metrics != nil {
+		success := "false"
+		if err == nil {
+			success = "true"
+		}
+		s.Root.Metrics.ObserveStoreMethodDuration("SchemeStore.CreateScheme", success, elapsed)
 	}
 	return result, err
 }

@@ -140,7 +140,9 @@ func (s *SqlRoleStore) createRole(role *model.Role, transaction *sqlxTxWrapper) 
 
 	dbRole := NewRoleFromModel(role)
 
-	dbRole.Id = model.NewId()
+	if role.Id == "" {
+		dbRole.Id = model.NewId()
+	}
 	dbRole.CreateAt = model.GetMillis()
 	dbRole.UpdateAt = dbRole.CreateAt
 

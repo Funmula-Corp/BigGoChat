@@ -1,0 +1,6 @@
+package model
+
+const (
+	CustomChannelReadOnlyRoleCreationMigrationKey = "CustomChannelReadOnlyRoleCreationMigrationComplete"
+	CustomSystemVerifiedRoleCreationMigrationKey = "CustomSystemVerifiedRoleCreationMigrationComplete"
+)
