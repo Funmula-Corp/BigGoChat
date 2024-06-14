@@ -394,7 +394,7 @@ export default function FileAttachment(props: Props) {
             </div>
         );
 
-    const isPreviewFileType = (['mp4', 'webm', 'mov'].indexOf(fileInfo.extension) != -1 || getFileType(fileInfo.extension) === FileTypes.AUDIO);
+    const isPreviewFileType = (['mp4', 'webm', 'mov'].indexOf(fileInfo.extension) != -1);
     const previewContent = (
         <AudioVideoPreview
             fileInfo={fileInfo as FileInfo}
