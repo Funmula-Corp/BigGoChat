@@ -104,7 +104,51 @@ func (s *Server) doSystemVerifiedRoleCreationMigration(c *request.Context) {
 	}
 }
 
+func (a *App) removeChannelManageUserFromChannelUser() (permissionsMap, error) {
+	return permissionsMap{
+		permissionTransformation{
+			On: permissionAnd(isRole(model.ChannelUserRoleId), permissionExists(PermissionManagePublicChannelMembers)),
+			Remove: []string{PermissionManagePublicChannelMembers},
+		},
+		permissionTransformation{
+			On: permissionAnd(isRole(model.ChannelUserRoleId), permissionExists(PermissionManagePrivateChannelMembers)),
+			Remove: []string{PermissionManagePrivateChannelMembers},
+		},
+	}, nil
+}
+
+func (s *Server) doBiggoPermissionMigration() error {
+	a := New(ServerConnector(s.Channels()))
+	PermissionsMigrations := []struct {
+		Key       string
+		Migration func() (permissionsMap, error)
+	}{
+		{Key: model.MigrationKeyRemoveChannelManageUserFromChannelUser, Migration: a.removeChannelManageUserFromChannelUser},
+	}
+
+	roles, err := s.Store().Role().GetAll()
+	if err != nil {
+		return err
+	}
+
+	for _, migration := range PermissionsMigrations {
+		migMap, err := migration.Migration()
+		if err != nil {
+			return err
+		}
+		if err := s.doPermissionsMigration(migration.Key, migMap, roles); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 func (s *Server) doBiggoMigration(c *request.Context) {
 	s.doChannelReadOnlyRoleCreationMigration()
 	s.doSystemVerifiedRoleCreationMigration(c)
+
+	// must be the last, make sure all roles are created
+	if err := s.doBiggoPermissionMigration(); err != nil {
+		mlog.Fatal("(app.App).doBiggoPermissionMigration failed", mlog.Err(err))
+	}
 }
