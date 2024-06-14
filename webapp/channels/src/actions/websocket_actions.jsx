@@ -334,7 +334,6 @@ function handleClose(failCount) {
 }
 
 export function handleEvent(msg) {
-    console.log(msg);
     switch (msg.event) {
     case SocketEvents.POSTED:
     case SocketEvents.EPHEMERAL_MESSAGE:
