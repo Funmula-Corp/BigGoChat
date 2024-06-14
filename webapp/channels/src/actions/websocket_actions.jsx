@@ -44,6 +44,7 @@ import {
     postDeleted,
     receivedNewPost,
     receivedPost,
+    editPost,
 } from 'mattermost-redux/actions/posts';
 import {loadRolesIfNeeded} from 'mattermost-redux/actions/roles';
 import * as TeamActions from 'mattermost-redux/actions/teams';
@@ -333,6 +334,7 @@ function handleClose(failCount) {
 }
 
 export function handleEvent(msg) {
+    console.log(msg);
     switch (msg.event) {
     case SocketEvents.POSTED:
     case SocketEvents.EPHEMERAL_MESSAGE:
@@ -769,6 +771,7 @@ export function handlePostEditEvent(msg) {
 
 async function handlePostDeleteEvent(msg) {
     const post = JSON.parse(msg.data.post);
+    const deleteBy = msg.data.delete_by;
 
     if (window.logPostEvents) {
         // eslint-disable-next-line no-console
@@ -782,7 +785,13 @@ async function handlePostDeleteEvent(msg) {
         dispatch(decrementThreadCounts(post));
     }
 
-    dispatch(postDeleted(post));
+    dispatch(postDeleted({
+        ...post,
+        props: {
+            ...post.props,
+            deleteBy,
+        }
+    }));
 
     // update thread when a comment is deleted and CRT is on
     if (post.root_id && collapsedThreads) {

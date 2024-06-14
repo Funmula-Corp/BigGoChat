@@ -5,11 +5,9 @@ import React from 'react';
 import {FormattedMessage} from 'react-intl';
 
 import type {Post} from '@mattermost/types/posts';
-import type {GlobalState} from '@mattermost/types/store';
 
 import {Posts} from 'mattermost-redux/constants';
 import type {Theme} from 'mattermost-redux/selectors/entities/preferences';
-import {getUser} from 'mattermost-redux/selectors/entities/users';
 import {isPostEphemeral} from 'mattermost-redux/utils/post_utils';
 
 import PostMarkdown from 'components/post_markdown';
@@ -83,17 +81,18 @@ export default class PostMessageView extends React.PureComponent<Props, State> {
     };
 
     renderDeletedPost() {
-        const {
-            post,
-        } = this.props;
+        const deleteBy = this.props.post.props.deleteBy;
+        const id = deleteBy ? 'post_body.deleted_by' : 'post_body.deleted';
+        const defaultMessage = deleteBy ? '(message deleted by {name})' : '(message deleted)';
+
         return (
             <em>
                 <FormattedMessage
-                    id='post_body.deleted'
+                    id={id}
                     values={{
-                        name: post.props.deleteBy,
+                        name: deleteBy,
                     }}
-                    defaultMessage='(message deleted by {name})'
+                    defaultMessage={defaultMessage}
                 />
             </em>
         );

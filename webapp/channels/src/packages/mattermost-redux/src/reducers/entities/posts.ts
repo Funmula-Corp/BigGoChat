@@ -196,6 +196,10 @@ export function handlePosts(state: IDMappedObjects<Post> = {}, action: AnyAction
                 state: Posts.POST_DELETED,
                 file_ids: [],
                 has_reactions: false,
+                props: {
+                    ...state[post.id].props,
+                    deleteBy: action.data.props.deleteBy,
+                }
             },
         };
 
@@ -349,7 +353,7 @@ function handlePostReceived(nextState: any, post: Post, nestedPermalinkLevel?: n
 
     if (post.delete_at > 0) {
         // We've received a deleted post, so mark the post as deleted if we already have it
-        if (currentState[post.id] || post.props.deleteBy !== post.user_id) {
+        if (currentState[post.id]) {
             currentState[post.id] = {
                 ...removeUnneededMetadata(post),
                 state: Posts.POST_DELETED,
@@ -887,8 +891,8 @@ export function mergePostBlocks(blocks: PostOrderBlock[], posts: Record<string, 
 
     // Sort blocks so that the most recent one comes first
     nextBlocks.sort((a, b) => {
-        const aStartsAt = posts[a.order[0]].create_at;
-        const bStartsAt = posts[b.order[0]].create_at;
+        const aStartsAt = posts[a.order[0]]?.create_at || 0;
+        const bStartsAt = posts[b.order[0]]?.create_at || 0;
 
         return bStartsAt - aStartsAt;
     });
@@ -899,10 +903,10 @@ export function mergePostBlocks(blocks: PostOrderBlock[], posts: Record<string, 
         // Since we know the start of a is more recent than the start of b, they'll overlap if the last post in a is
         // older than the first post in b
         const a = nextBlocks[i];
-        const aEndsAt = posts[a.order[a.order.length - 1]].create_at;
+        const aEndsAt = posts[a.order[a.order.length - 1]]?.create_at || 0;
 
         const b = nextBlocks[i + 1];
-        const bStartsAt = posts[b.order[0]].create_at;
+        const bStartsAt = posts[b.order[0]]?.create_at || 0;
 
         if (aEndsAt <= bStartsAt) {
             // The blocks overlap, so combine them and remove the second block
@@ -949,7 +953,7 @@ export function mergePostOrder(left: string[], right: string[], posts: Record<st
     }
 
     // Re-sort so that the most recent post comes first
-    result.sort((a, b) => posts[b].create_at - posts[a].create_at);
+    result.sort((a, b) => posts[b]?.create_at - posts[a]?.create_at);
 
     return result;
 }
