@@ -352,8 +352,9 @@ function handlePostReceived(nextState: any, post: Post, nestedPermalinkLevel?: n
     }
 
     if (post.delete_at > 0) {
+        const deletedByAdmin = post.props.deleteBy !== post.user_id;
         // We've received a deleted post, so mark the post as deleted if we already have it
-        if (currentState[post.id]) {
+        if (currentState[post.id] || deletedByAdmin) {
             currentState[post.id] = {
                 ...removeUnneededMetadata(post),
                 state: Posts.POST_DELETED,
