@@ -44,7 +44,6 @@ import {
     postDeleted,
     receivedNewPost,
     receivedPost,
-    editPost,
 } from 'mattermost-redux/actions/posts';
 import {loadRolesIfNeeded} from 'mattermost-redux/actions/roles';
 import * as TeamActions from 'mattermost-redux/actions/teams';
