@@ -14,13 +14,13 @@ import (
 
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/utils"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store/sqlstore"
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/i18n"
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store/sqlstore"
 )
 
 const (
@@ -1625,6 +1625,12 @@ func (a *App) AddChannelMember(c request.CTX, userID string, channel *model.Chan
 
 	if user.DeleteAt > 0 {
 		return nil, model.NewAppError("AddChannelMember", "app.channel.add_member.deleted_user.app_error", nil, "", http.StatusForbidden)
+	}
+
+	if blocked, err := a.Srv().Store().Blocklist().GetChannelBlockUser(channel.Id, userID); err != nil {
+		return nil, model.NewAppError("AddChannelMember", "app.channel.add_member.check_channel_block_user.app_error", nil, "", http.StatusInternalServerError).Wrap(err)
+	} else if blocked != nil {
+		return nil, model.NewAppError("AddChannelMember", "app.channel.add_member.blocked_user.app_error", nil, "", http.StatusForbidden)
 	}
 
 	var userRequestor *model.User

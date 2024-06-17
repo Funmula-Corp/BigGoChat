@@ -9,9 +9,9 @@ import (
 	"github.com/gorilla/mux"
 	_ "github.com/mattermost/go-i18n/i18n"
 
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/web"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 )
 
 type Routes struct {
@@ -331,6 +331,7 @@ func Init(srv *app.Server) (*API, error) {
 	api.InitReports()
 	api.InitLimits()
 	api.InitOutgoingOAuthConnection()
+	api.InitBlocklist()
 
 	srv.Router.Handle("/api/v4/{anything:.*}", http.HandlerFunc(api.Handle404))
 

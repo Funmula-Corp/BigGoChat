@@ -588,6 +588,22 @@ func (c *Client4) bookmarkRoute(channelId, bookmarkId string) string {
 	return fmt.Sprintf(c.bookmarksRoute(channelId)+"/%v", bookmarkId)
 }
 
+func (c *Client4) channelBlockUsersRoute(channelId string) string {
+	return c.channelRoute(channelId) + "/blockuser"
+}
+
+func (c *Client4) channelBlockUserRoute(channelId string, blockedId string) string {
+	return fmt.Sprintf(c.channelBlockUsersRoute(channelId)+"/%v", blockedId)
+}
+
+func (c *Client4) userBlockUsersRoute(userId string) string {
+	return c.userRoute(userId) + "/blockuser"
+}
+
+func (c *Client4) userBlockUserRoute(userId string, blockedId string) string {
+	return fmt.Sprintf(c.userBlockUsersRoute(userId)+"/%v", blockedId)
+}
+
 func (c *Client4) DoAPIGet(ctx context.Context, url string, etag string) (*http.Response, error) {
 	return c.DoAPIRequest(ctx, http.MethodGet, c.APIURL+url, "", etag)
 }
@@ -3777,6 +3793,11 @@ func (c *Client4) CreatePost(ctx context.Context, post *Post) (*Post, *Response,
 	}
 	r, err := c.DoAPIPost(ctx, c.postsRoute(), string(postJSON))
 	if err != nil {
+		buffer := make([]byte, 8192)
+		b := new(bytes.Buffer)
+		nr := io.TeeReader(r.Body, b)
+		n, _ := nr.Read(buffer)
+		fmt.Printf("reply body %v, %v\n", r.ContentLength, buffer[:n])
 		return nil, BuildResponse(r), err
 	}
 	defer closeBody(r)
@@ -8847,4 +8868,68 @@ func (c *Client4) ListChannelBookmarksForChannel(ctx context.Context, channelId 
 		return nil, nil, NewAppError("ListChannelBookmarksForChannel", "api.unmarshal_error", nil, "", http.StatusInternalServerError).Wrap(err)
 	}
 	return b, BuildResponse(r), nil
+}
+
+func (c *Client4) AddChannelBlockUser(ctx context.Context, channelId string, blockedId string) (*ChannelBlockUser, *Response, error) {
+	r, err := c.DoAPIPut(ctx, c.channelBlockUserRoute(channelId, blockedId), "")
+	defer closeBody(r)
+	if err != nil {
+		return nil, BuildResponse(r), err
+	}
+	var cbu ChannelBlockUser
+	if err := json.NewDecoder(r.Body).Decode(&cbu); err != nil {
+		return nil, nil, NewAppError("AddChannelBLockUser", "api.unmarshal_error", nil, "", http.StatusInternalServerError).Wrap(err)
+	}
+	return &cbu, BuildResponse(r), err
+}
+
+func (c *Client4) DeleteChannelBlockUser(ctx context.Context, channelId string, blockedId string) (string, *Response, error) {
+	r, err := c.DoAPIDelete(ctx, c.channelBlockUserRoute(channelId, blockedId))
+	defer closeBody(r)
+	return "", BuildResponse(r), err
+}
+
+func (c *Client4) ListChannelBlockUsers(ctx context.Context, channelId string) (*ChannelBlockUserList, *Response, error) {
+	r, err := c.DoAPIGet(ctx, c.channelBlockUsersRoute(channelId), "")
+	if err != nil {
+		return nil, BuildResponse(r), err
+	}
+	defer closeBody(r)
+	var b ChannelBlockUserList
+	if err := json.NewDecoder(r.Body).Decode(&b); err != nil {
+		return nil, nil, NewAppError("ListUserBLockUsers", "api.unmarshal_error", nil, "", http.StatusInternalServerError).Wrap(err)
+	}
+	return &b, BuildResponse(r), nil
+}
+
+func (c *Client4) AddUserBlockUser(ctx context.Context, userId string, blockedId string) (*UserBlockUser, *Response, error) {
+	r, err := c.DoAPIPut(ctx, c.userBlockUserRoute(userId, blockedId), "")
+	defer closeBody(r)
+	if err != nil {
+		return nil, BuildResponse(r), err
+	}
+	var ubu UserBlockUser
+	if err := json.NewDecoder(r.Body).Decode(&ubu); err != nil {
+		return nil, nil, NewAppError("LAddChannelBLockUser", "api.unmarshal_error", nil, "", http.StatusInternalServerError).Wrap(err)
+	}
+	return &ubu, BuildResponse(r), err
+}
+
+func (c *Client4) DeleteUserBlockUser(ctx context.Context, userId string, blockedId string) (string, *Response, error) {
+	r, err := c.DoAPIDelete(ctx, c.userBlockUserRoute(userId, blockedId))
+	defer closeBody(r)
+	return "", BuildResponse(r), err
+}
+
+func (c *Client4) ListUserBlockUsers(ctx context.Context, userId string) (*UserBlockUserList, *Response, error) {
+	r, err := c.DoAPIGet(ctx, c.userBlockUsersRoute(userId), "")
+	if err != nil {
+		return nil, BuildResponse(r), err
+	}
+	defer closeBody(r)
+	var b UserBlockUserList
+	if err := json.NewDecoder(r.Body).Decode(&b); err != nil {
+		return nil, nil, NewAppError("ListUserBLockUsers", "api.unmarshal_error", nil, "", http.StatusInternalServerError).Wrap(err)
+	}
+	return &b, BuildResponse(r), nil
 }
