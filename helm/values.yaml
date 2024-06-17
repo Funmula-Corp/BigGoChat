@@ -1,0 +1,27 @@
+deployment:
+  pullsecret: "docker.dev.cloud.biggo.com"
+  image: "${PLUGIN_IMAGE}:${DRONE_SEMVER}"
+  version: "${DRONE_SEMVER}"
+
+ingress:
+  enabled: false
+  hostname: "chat.d.cloud.biggo.com"
+  issuer: "funmula"
+
+service:
+  nodeport: 31832
+  podindex: "'0'"
+
+postgres:
+  database: "postgres"
+  username: "postgres"
+  password: "postgres"
+  host: "10.43.245.67"
+  port: 5432
+
+minio:
+  accesskey: "mattermost"
+  secretkey: "RXANmChLRCjUQVdLzD7EqLFR8oWItPeE3Wuksvt2"
+
+mattermost:
+  clustername: "biggo-chat"
