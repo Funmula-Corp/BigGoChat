@@ -352,16 +352,13 @@ function handlePostReceived(nextState: any, post: Post, nestedPermalinkLevel?: n
     }
 
     if (post.delete_at > 0) {
-        const deletedByAdmin = post.props.deleteBy !== post.user_id;
         // We've received a deleted post, so mark the post as deleted if we already have it
-        if (currentState[post.id] || deletedByAdmin) {
-            currentState[post.id] = {
-                ...removeUnneededMetadata(post),
-                state: Posts.POST_DELETED,
-                file_ids: [],
-                has_reactions: false,
-            };
-        }
+        currentState[post.id] = {
+            ...removeUnneededMetadata(post),
+            state: Posts.POST_DELETED,
+            file_ids: [],
+            has_reactions: false,
+        };
     } else if (post.metadata && post.metadata.embeds) {
         post.metadata.embeds.forEach((embed) => {
             if (embed.type === 'permalink') {
@@ -688,7 +685,6 @@ export function postsInChannel(state: Record<string, PostOrderBlock[]> = {}, act
 
         let nextPostsForChannel = [...postsForChannel, newBlock];
         nextPostsForChannel = mergePostBlocks(nextPostsForChannel, nextPosts);
-
         return {
             ...state,
             [action.channelId]: nextPostsForChannel,
@@ -778,7 +774,7 @@ export function postsInChannel(state: Record<string, PostOrderBlock[]> = {}, act
             const block = nextPostsForChannel[i];
 
             // Remove any comments for this post
-            const nextOrder = block.order.filter((postId: string) => prevPosts[postId]?.root_id !== post.id);
+            const nextOrder = block.order.filter((postId: string) => prevPosts[postId].root_id !== post.id);
 
             if (nextOrder.length !== block.order.length) {
                 nextPostsForChannel[i] = {
@@ -820,7 +816,7 @@ export function postsInChannel(state: Record<string, PostOrderBlock[]> = {}, act
         for (let i = 0; i < nextPostsForChannel.length; i++) {
             const block = nextPostsForChannel[i];
 
-            const nextOrder = block.order.filter((postId: string) => postId !== post.id && prevPosts[postId]?.root_id !== post.id);
+            const nextOrder = block.order.filter((postId: string) => postId !== post.id && prevPosts[postId].root_id !== post.id);
 
             if (nextOrder.length !== block.order.length) {
                 nextPostsForChannel[i] = {
@@ -892,8 +888,8 @@ export function mergePostBlocks(blocks: PostOrderBlock[], posts: Record<string, 
 
     // Sort blocks so that the most recent one comes first
     nextBlocks.sort((a, b) => {
-        const aStartsAt = posts[a.order[0]]?.create_at || 0;
-        const bStartsAt = posts[b.order[0]]?.create_at || 0;
+        const aStartsAt = posts[a.order[0]].create_at;
+        const bStartsAt = posts[b.order[0]].create_at;
 
         return bStartsAt - aStartsAt;
     });
@@ -904,10 +900,10 @@ export function mergePostBlocks(blocks: PostOrderBlock[], posts: Record<string, 
         // Since we know the start of a is more recent than the start of b, they'll overlap if the last post in a is
         // older than the first post in b
         const a = nextBlocks[i];
-        const aEndsAt = posts[a.order[a.order.length - 1]]?.create_at || 0;
+        const aEndsAt = posts[a.order[a.order.length - 1]].create_at;
 
         const b = nextBlocks[i + 1];
-        const bStartsAt = posts[b.order[0]]?.create_at || 0;
+        const bStartsAt = posts[b.order[0]].create_at;
 
         if (aEndsAt <= bStartsAt) {
             // The blocks overlap, so combine them and remove the second block
@@ -954,7 +950,7 @@ export function mergePostOrder(left: string[], right: string[], posts: Record<st
     }
 
     // Re-sort so that the most recent post comes first
-    result.sort((a, b) => posts[b]?.create_at - posts[a]?.create_at);
+    result.sort((a, b) => posts[b].create_at - posts[a].create_at);
 
     return result;
 }
