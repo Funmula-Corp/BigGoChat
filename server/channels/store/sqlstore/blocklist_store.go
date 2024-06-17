@@ -74,7 +74,11 @@ func (s *SqlBlocklistStore) GetChannelBlockUser(channelId string, blockedId stri
 	err = s.GetReplicaX().Get(&channelBlockUser, queryString, args...)
 
 	if err != nil {
-		return nil, errors.Wrapf(err, "failed to get channels blocklist with id %v", channelId)
+		if err == sql.ErrNoRows {
+			return nil, nil
+		} else {
+			return nil, errors.Wrapf(err, "failed to get channels blocklist with id %v", channelId)
+		}
 	}
 	return &channelBlockUser, nil
 }
@@ -190,7 +194,11 @@ func (s *SqlBlocklistStore) GetUserBlockUser(userId string, blockedId string) (*
 	err = s.GetReplicaX().Get(&userBlockUser, queryString, args...)
 
 	if err != nil {
-		return nil, errors.Wrapf(err, "failed to get user blocklist with id %v %v", userId, blockedId)
+		if err == sql.ErrNoRows {
+			return nil, nil
+		} else {
+			return nil, errors.Wrapf(err, "failed to get user blocklist with id %v %v", userId, blockedId)
+		}
 	}
 	return &userBlockUser, nil
 }

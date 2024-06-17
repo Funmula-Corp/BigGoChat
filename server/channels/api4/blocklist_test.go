@@ -193,3 +193,57 @@ func TestChannelBlockUser(t *testing.T) {
 	require.Error(t, err7)
 	CheckForbiddenStatus(t, resp7)
 }
+
+func TestChannelBlockUserPost(t *testing.T) {
+	th := Setup(t).InitBasic()
+	defer th.TearDown()
+	client := th.Client
+	client2 := th.CreateClient()
+	_, _, lErr := client2.Login(context.Background(), th.BasicUser2.Username, th.BasicUser2.Password)
+	if lErr != nil {
+		panic(lErr)
+	}
+
+	post := &model.Post{ChannelId: th.BasicChannel.Id, Message: "msg1"}
+	_, resp, err := client.CreatePost(context.Background(), post)
+	require.NoError(t, err)
+	CheckCreatedStatus(t, resp)
+
+	post = &model.Post{ChannelId: th.BasicChannel.Id, Message: "msg2 user2"}
+	_, resp, err = client2.CreatePost(context.Background(), post)
+	require.NoError(t, err)
+	CheckCreatedStatus(t, resp)
+
+	_, resp, err = client.AddChannelBlockUser(context.Background(), th.BasicChannel.Id, th.BasicUser2.Id)
+	require.NoError(t, err)
+	CheckCreatedStatus(t, resp)
+
+	post = &model.Post{ChannelId: th.BasicChannel.Id, Message: "msg3"}
+	_, resp, err = client.CreatePost(context.Background(), post)
+	require.NoError(t, err)
+	CheckCreatedStatus(t, resp)
+
+	post = &model.Post{ChannelId: th.BasicChannel.Id, Message: "msg4 from user2"}
+	_, resp, err = client2.CreatePost(context.Background(), post)
+	require.Error(t, err)
+	CheckForbiddenStatus(t, resp)
+
+	// todo: block join
+	// client2.AddChannelMember(context.Background(), th.BasicChannel.Id, th.BasicUser2.Id)
+
+	_, resp, err = client.DeleteChannelBlockUser(context.Background(), th.BasicChannel.Id, th.BasicUser2.Id)
+	require.NoError(t, err)
+	CheckOKStatus(t, resp)
+
+	_, resp, err = client2.AddChannelMember(context.Background(), th.BasicChannel.Id, th.BasicUser2.Id)
+	require.NoError(t, err)
+	CheckCreatedStatus(t, resp)
+
+	post = &model.Post{ChannelId: th.BasicChannel.Id, Message: "msg5 from user2"}
+	_, resp, err = client2.CreatePost(context.Background(), post)
+	require.NoError(t, err)
+	CheckCreatedStatus(t, resp)
+}
+
+
+// TODO: DM 被 bang 之後應該不能改 channel 的設定
