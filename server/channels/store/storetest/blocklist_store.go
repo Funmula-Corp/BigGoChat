@@ -44,7 +44,7 @@ func testSaveChannelBlockUser(t *testing.T, _ request.CTX, ss store.Store) {
 	require.NoError(t, err)
 
 	getBlockUser, err = ss.Blocklist().GetChannelBlockUser(channelBlockUser.ChannelId, channelBlockUser.BlockedId)
-	require.Error(t, err)
+	require.NoError(t, err)
 	assert.Nil(t, getBlockUser)
 
 	err = ss.Blocklist().DeleteChannelBlockUser(channelBlockUser.ChannelId, channelBlockUser.BlockedId)
@@ -75,7 +75,7 @@ func testSaveUserBlockUser(t *testing.T, _ request.CTX, ss store.Store) {
 	require.NoError(t, err)
 
 	getBlockUser, err = ss.Blocklist().GetUserBlockUser(userBlockUser.UserId, userBlockUser.BlockedId)
-	require.Error(t, err)
+	require.NoError(t, err)
 	assert.Nil(t, getBlockUser)
 
 	err = ss.Blocklist().DeleteUserBlockUser(userBlockUser.UserId, userBlockUser.BlockedId)
