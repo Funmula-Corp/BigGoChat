@@ -2003,15 +2003,15 @@ type PrivacySettings struct {
 
 func (s *PrivacySettings) setDefaults() {
 	if s.ShowEmailAddress == nil {
-		s.ShowEmailAddress = NewBool(true)
+		s.ShowEmailAddress = NewBool(false)
 	}
 
 	if s.ShowFullName == nil {
-		s.ShowFullName = NewBool(true)
+		s.ShowFullName = NewBool(false)
 	}
 
 	if s.ShowMobilephone == nil {
-		s.ShowMobilephone = NewBool(true)
+		s.ShowMobilephone = NewBool(false)
 	}
 }
 
