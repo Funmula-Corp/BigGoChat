@@ -5,6 +5,7 @@ name: dev-build
 trigger:
   branch:
   - deploy
+  - development
   event:
   - custom
   - push
