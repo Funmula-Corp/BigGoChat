@@ -1101,9 +1101,11 @@ func searchUsers(c *Context, w http.ResponseWriter, r *http.Request) {
 	if c.App.SessionHasPermissionTo(*c.AppContext.Session(), model.PermissionManageSystem) {
 		options.AllowEmails = true
 		options.AllowFullNames = true
+		options.AllowMobilephones = true
 	} else {
 		options.AllowEmails = *c.App.Config().PrivacySettings.ShowEmailAddress
 		options.AllowFullNames = *c.App.Config().PrivacySettings.ShowFullName
+		options.AllowMobilephones = *c.App.Config().PrivacySettings.ShowMobilephone
 	}
 
 	options, appErr := c.App.RestrictUsersSearchByPermissions(c.AppContext, c.AppContext.Session().UserId, options)

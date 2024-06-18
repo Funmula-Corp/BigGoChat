@@ -1021,6 +1021,7 @@ CREATE TABLE `Users` (
   `MfaSecret` varchar(128) DEFAULT NULL,
   `Position` varchar(128) DEFAULT NULL,
   `Timezone` varchar(256) DEFAULT '{"automaticTimezone":"","manualTimezone":"","useAutomaticTimezone":"true"}',
+  `Mobilephone` varchar(24) DEFAULT NULL,
   PRIMARY KEY (`Id`),
   UNIQUE KEY `Username` (`Username`),
   UNIQUE KEY `AuthData` (`AuthData`),
@@ -1029,10 +1030,10 @@ CREATE TABLE `Users` (
   KEY `idx_users_update_at` (`UpdateAt`),
   KEY `idx_users_create_at` (`CreateAt`),
   KEY `idx_users_delete_at` (`DeleteAt`),
-  FULLTEXT KEY `idx_users_all_txt` (`Username`,`FirstName`,`LastName`,`Nickname`,`Email`),
-  FULLTEXT KEY `idx_users_all_no_full_name_txt` (`Username`,`Nickname`,`Email`),
-  FULLTEXT KEY `idx_users_names_txt` (`Username`,`FirstName`,`LastName`,`Nickname`),
-  FULLTEXT KEY `idx_users_names_no_full_name_txt` (`Username`,`Nickname`)
+  FULLTEXT KEY `idx_users_all_txt` (`Username`,`FirstName`,`LastName`,`Nickname`,`Email`,`Mobilephone`),
+  FULLTEXT KEY `idx_users_all_no_full_name_txt` (`Username`,`Nickname`,`Email`,`Mobilephone`),
+  FULLTEXT KEY `idx_users_names_txt` (`Username`,`FirstName`,`LastName`,`Nickname`,`Mobilephone`),
+  FULLTEXT KEY `idx_users_names_no_full_name_txt` (`Username`,`Nickname`,`Mobilephone`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
