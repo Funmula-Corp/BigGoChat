@@ -1638,9 +1638,22 @@ func (us SqlUserStore) performSearch(query sq.SelectBuilder, term string, option
 			searchType = UserSearchTypeNamesNoFullName
 		}
 	}
-	if options.AllowMobilephones {
-		searchType = append(searchType, "Mobilephone")
+
+	// ===========================================================================
+	// generally allow the search via email address and via phone number thrue API
+	// ===========================================================================
+	var found bool
+	for _, sType := range searchType {
+		if sType == "Email" {
+			found = true
+			break
+		}
 	}
+	if !found {
+		searchType = append(searchType, "Email")
+	}
+	searchType = append(searchType, "Mobilephone")
+	// ===========================================================================
 
 	isPostgreSQL := us.DriverName() == model.DatabaseDriverPostgres
 
