@@ -10,7 +10,7 @@ import (
 )
 
 func (g2s *GossipService) NewClient(addr string) (client ClusterClient, connection *grpc.ClientConn, err error) {
-	if connection, err = grpc.NewClient(fmt.Sprintf("%s:%d", addr, g2s.cds.GossipPort), grpc.WithTransportCredentials(insecure.NewCredentials())); err != nil {
+	if connection, err = grpc.Dial(fmt.Sprintf("%s:%d", addr, g2s.cds.GossipPort), grpc.WithTransportCredentials(insecure.NewCredentials())); err != nil {
 		return
 	}
 	client = NewClusterClient(connection)

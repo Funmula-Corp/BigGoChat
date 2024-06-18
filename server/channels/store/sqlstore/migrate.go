@@ -14,9 +14,9 @@ import (
 
 	sqlUtils "git.biggo.com/Funmula/mattermost-funmula/server/public/utils/sql"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/db"
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/db"
 	"github.com/mattermost/morph"
 	"github.com/mattermost/morph/drivers"
 	ms "github.com/mattermost/morph/drivers/mysql"
@@ -154,11 +154,19 @@ func (ss *SqlStore) initMorph(dryRun bool) (*morph.Morph, error) {
 		morph.WithLock("mm-lock-key"),
 		morph.SetStatementTimeoutInSeconds(*ss.settings.MigrationsStatementTimeoutSeconds),
 		morph.SetDryRun(dryRun),
+		morph.SetMigrationTableName("db_migrations"),
 	}
 
 	engine, err := morph.New(context.Background(), driver, src, opts...)
 	if err != nil {
 		return nil, err
+	}
+	engine.Diff(models.Up)
+	switch ss.DriverName() {
+	case model.DatabaseDriverMysql:
+		ss.GetMasterX().Exec("ALTER TABLE db_migrations DROP PRIMARY KEY")
+	case model.DatabaseDriverPostgres:
+		ss.GetMasterX().Exec("ALTER TABLE db_migrations DROP CONSTRAINT IF EXISTS db_migrations_pkey")
 	}
 
 	return engine, nil

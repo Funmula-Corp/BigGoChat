@@ -623,7 +623,8 @@ CREATE TABLE public.users (
     mfaactive boolean,
     mfasecret character varying(128),
     "position" character varying(128),
-    timezone character varying(256) DEFAULT '{"automaticTimezone":"","manualTimezone":"","useAutomaticTimezone":"true"}'::character varying
+    timezone character varying(256) DEFAULT '{"automaticTimezone":"","manualTimezone":"","useAutomaticTimezone":"true"}'::character varying,
+    mobilephone character varying(24)
 );
 
 

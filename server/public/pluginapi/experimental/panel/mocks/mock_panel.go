@@ -7,8 +7,8 @@ package mock_panel
 import (
 	reflect "reflect"
 
-	gomock "github.com/golang/mock/gomock"
 	model "git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	gomock "github.com/golang/mock/gomock"
 )
 
 // MockPanel is a mock of Panel interface.

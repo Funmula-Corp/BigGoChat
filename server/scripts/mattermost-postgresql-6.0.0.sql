@@ -1005,7 +1005,8 @@ CREATE TABLE public.users (
     mfasecret character varying(128),
     "position" character varying(128),
     timezone jsonb,
-    remoteid character varying(26)
+    remoteid character varying(26),
+    mobilephone character varying(24)
 );
 
 

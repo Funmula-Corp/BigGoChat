@@ -13,8 +13,8 @@ import (
 	http "net/http"
 	reflect "reflect"
 
-	gomock "github.com/golang/mock/gomock"
 	model "git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	gomock "github.com/golang/mock/gomock"
 )
 
 // MockClient is a mock of Client interface.

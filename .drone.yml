@@ -1,0 +1,88 @@
+kind: pipeline
+type: kubernetes
+name: dev-build
+
+trigger:
+  branch:
+  - deploy
+  event:
+  - custom
+  - push
+  - pull
+  - rollback
+
+steps:
+- name: "build server"
+  image: docker.cloud.biggo.com/droneio/mattermost-funmula-build:latest
+  commands:
+  - make build-server
+  - make build-package
+  - cd server/build 
+  - mkdir packages
+  - cp -r ../dist packages
+
+- name: "build docker image"
+  image: docker.dev.cloud.biggo.com/test/plugin-docker
+  settings:
+    username:
+      from_secret: droneio-dev-docker-user
+    password:
+      from_secret: droneio-dev-docker-secret
+    cache_from: docker.dev.cloud.biggo.com/mattermost/mattermost:development
+    registry: docker.dev.cloud.biggo.com
+    repo: docker.dev.cloud.biggo.com/mattermost/mattermost
+    dockerfile: server/build/Dockerfile
+    context: server/build
+    tags:
+    - development
+
+---
+
+kind: pipeline
+type: kubernetes
+name: release
+
+trigger:
+  event:
+  - tag
+
+steps:
+- name: "build server"
+  image: docker.cloud.biggo.com/droneio/mattermost-funmula-build
+  commands:
+  - make build-server
+  - make build-package
+  - cd server/build 
+  - mkdir packages
+  - cp -r ../dist packages
+
+- name: "build docker image"
+  image: docker.dev.cloud.biggo.com/test/plugin-docker
+  settings:
+    username:
+      from_secret: droneio-dev-docker-user
+    password:
+      from_secret: droneio-dev-docker-secret
+    cache_from: docker.dev.cloud.biggo.com/mattermost/mattermost:cache
+    registry: docker.dev.cloud.biggo.com
+    repo: docker.dev.cloud.biggo.com/mattermost/mattermost
+    dockerfile: server/build/Dockerfile
+    context: server/build
+    tags:
+    - cache
+    - latest
+    - ${DRONE_SEMVER}
+
+- name: helm
+  image: docker.cloud.biggo.com/droneio/plugin-helm
+  settings:
+    gituser:
+      from_secret: droneio-git-user
+    gittoken:
+      from_secret: droneio-git-token
+    helm_repo_dir: "/helm"
+    helm_template_dir: "./helm"
+    helmStagingBranch: staging
+    helmReleaseBranch: release
+    helmRepo: "https://git.biggo.com/Funmula/helm-repo.git"
+    image: "docker.dev.cloud.biggo.com/mattermost/mattermost"

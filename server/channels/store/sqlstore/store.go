@@ -26,11 +26,11 @@ import (
 	"github.com/mattermost/morph/models"
 	"github.com/pkg/errors"
 
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/db"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/einterfaces"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
 )
 
 type migrationDirection string
@@ -111,6 +111,7 @@ type SqlStoreStores struct {
 	postPersistentNotification store.PostPersistentNotificationStore
 	desktopTokens              store.DesktopTokensStore
 	channelBookmarks           store.ChannelBookmarkStore
+	blocklist                  store.BlocklistStore
 }
 
 type SqlStore struct {
@@ -238,6 +239,7 @@ func New(settings model.SqlSettings, logger mlog.LoggerIFace, metrics einterface
 	store.stores.channelBookmarks = newSqlChannelBookmarkStore(store)
 
 	store.stores.preference.(*SqlPreferenceStore).deleteUnusedFeatures()
+	store.stores.blocklist = newSqlChannelBlocklistStore(store)
 
 	return store, nil
 }
@@ -1037,6 +1039,10 @@ func (ss *SqlStore) DesktopTokens() store.DesktopTokensStore {
 
 func (ss *SqlStore) ChannelBookmark() store.ChannelBookmarkStore {
 	return ss.stores.channelBookmarks
+}
+
+func (ss *SqlStore) Blocklist() store.BlocklistStore {
+	return ss.stores.blocklist
 }
 
 func (ss *SqlStore) DropAllTables() {

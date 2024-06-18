@@ -70,6 +70,36 @@ func (_m *SchemeStore) CountWithoutPermission(scope string, permissionID string,
 	return r0, r1
 }
 
+// CreateScheme provides a mock function with given fields: scheme
+func (_m *SchemeStore) CreateScheme(scheme *model.Scheme) (*model.Scheme, error) {
+	ret := _m.Called(scheme)
+
+	if len(ret) == 0 {
+		panic("no return value specified for CreateScheme")
+	}
+
+	var r0 *model.Scheme
+	var r1 error
+	if rf, ok := ret.Get(0).(func(*model.Scheme) (*model.Scheme, error)); ok {
+		return rf(scheme)
+	}
+	if rf, ok := ret.Get(0).(func(*model.Scheme) *model.Scheme); ok {
+		r0 = rf(scheme)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.Scheme)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(*model.Scheme) error); ok {
+		r1 = rf(scheme)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // Delete provides a mock function with given fields: schemeID
 func (_m *SchemeStore) Delete(schemeID string) (*model.Scheme, error) {
 	ret := _m.Called(schemeID)

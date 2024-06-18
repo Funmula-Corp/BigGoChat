@@ -430,6 +430,7 @@ type AppIface interface {
 	AccountMigration() einterfaces.AccountMigrationInterface
 	ActivateMfa(userID, token string) *model.AppError
 	ActiveSearchBackend() string
+	AddChannelBlockUser(rctx request.CTX, channelId string, blockedId string) (*model.ChannelBlockUser, *model.AppError)
 	AddChannelsToRetentionPolicy(policyID string, channelIDs []string) *model.AppError
 	AddConfigListener(listener func(*model.Config, *model.Config)) string
 	AddDirectChannels(c request.CTX, teamID string, user *model.User) *model.AppError
@@ -446,6 +447,7 @@ type AppIface interface {
 	AddTeamMemberByToken(c request.CTX, userID, tokenID string) (*model.TeamMember, *model.AppError)
 	AddTeamMembers(c request.CTX, teamID string, userIDs []string, userRequestorId string, graceful bool) ([]*model.TeamMemberWithError, *model.AppError)
 	AddTeamsToRetentionPolicy(policyID string, teamIDs []string) *model.AppError
+	AddUserBlockUser(rctx request.CTX, userId string, blockedId string) (*model.UserBlockUser, *model.AppError)
 	AddUserToTeam(c request.CTX, teamID string, userID string, userRequestorId string) (*model.Team, *model.TeamMember, *model.AppError)
 	AddUserToTeamByInviteId(c request.CTX, inviteId string, userID string) (*model.Team, *model.TeamMember, *model.AppError)
 	AddUserToTeamByTeamId(c request.CTX, teamID string, user *model.User) *model.AppError
@@ -560,6 +562,7 @@ type AppIface interface {
 	DeleteAllKeysForPlugin(pluginID string) *model.AppError
 	DeleteBrandImage(rctx request.CTX) *model.AppError
 	DeleteChannel(c request.CTX, channel *model.Channel, userID string) *model.AppError
+	DeleteChannelBlockUser(rctx request.CTX, channelId string, blockedId string) *model.AppError
 	DeleteChannelBookmark(bookmarkId, connectionId string) (*model.ChannelBookmarkWithFileInfo, *model.AppError)
 	DeleteCommand(commandID string) *model.AppError
 	DeleteDraft(rctx request.CTX, draft *model.Draft, connectionID string) *model.AppError
@@ -583,6 +586,7 @@ type AppIface interface {
 	DeleteSharedChannelRemote(id string) (bool, error)
 	DeleteSidebarCategory(c request.CTX, userID, teamID, categoryId string) *model.AppError
 	DeleteToken(token *model.Token) *model.AppError
+	DeleteUserBlockUser(rctx request.CTX, userId string, blockedId string) *model.AppError
 	DisableAutoResponder(rctx request.CTX, userID string, asAdmin bool) *model.AppError
 	DisableUserAccessToken(c request.CTX, token *model.UserAccessToken) *model.AppError
 	DoAppMigrations()
@@ -642,6 +646,7 @@ type AppIface interface {
 	GetBrandImage(rctx request.CTX) ([]byte, *model.AppError)
 	GetBulkReactionsForPosts(postIDs []string) (map[string][]*model.Reaction, *model.AppError)
 	GetChannel(c request.CTX, channelID string) (*model.Channel, *model.AppError)
+	GetChannelBlockUser(rctx request.CTX, channelId string, blockedId string) (*model.ChannelBlockUser, *model.AppError)
 	GetChannelBookmarks(channelId string, since int64) ([]*model.ChannelBookmarkWithFileInfo, *model.AppError)
 	GetChannelByName(c request.CTX, channelName, teamID string, includeDeleted bool) (*model.Channel, *model.AppError)
 	GetChannelByNameForTeamName(c request.CTX, channelName, teamName string, includeDeleted bool) (*model.Channel, *model.AppError)
@@ -769,7 +774,7 @@ type AppIface interface {
 	GetPostsAroundPost(before bool, options model.GetPostsOptions) (*model.PostList, *model.AppError)
 	GetPostsBeforePost(options model.GetPostsOptions) (*model.PostList, *model.AppError)
 	GetPostsEtag(channelID string, collapsedThreads bool) string
-	GetPostsForChannelAroundLastUnread(c request.CTX, channelID, userID string, limitBefore, limitAfter int, skipFetchThreads bool, collapsedThreads, collapsedThreadsExtended bool) (*model.PostList, *model.AppError)
+	GetPostsForChannelAroundLastUnread(c request.CTX, channelID, userID string, limitBefore, limitAfter int, skipFetchThreads bool, collapsedThreads, collapsedThreadsExtended bool, includeDeleted bool) (*model.PostList, *model.AppError)
 	GetPostsPage(options model.GetPostsOptions) (*model.PostList, *model.AppError)
 	GetPostsSince(options model.GetPostsSinceOptions) (*model.PostList, *model.AppError)
 	GetPreferenceByCategoryAndNameForUser(c request.CTX, userID string, category string, preferenceName string) (*model.Preference, *model.AppError)
@@ -857,6 +862,7 @@ type AppIface interface {
 	GetUserAccessToken(tokenID string, sanitize bool) (*model.UserAccessToken, *model.AppError)
 	GetUserAccessTokens(page, perPage int) ([]*model.UserAccessToken, *model.AppError)
 	GetUserAccessTokensForUser(userID string, page, perPage int) ([]*model.UserAccessToken, *model.AppError)
+	GetUserBlockUser(rctx request.CTX, userId string, blockedId string) (*model.UserBlockUser, *model.AppError)
 	GetUserByAuth(authData *string, authService string) (*model.User, *model.AppError)
 	GetUserByEmail(email string) (*model.User, *model.AppError)
 	GetUserByRemoteID(remoteID string) (*model.User, *model.AppError)
@@ -943,6 +949,8 @@ type AppIface interface {
 	License() *model.License
 	LimitedClientConfig() map[string]string
 	ListAllCommands(teamID string, T i18n.TranslateFunc) ([]*model.Command, *model.AppError)
+	ListChannelBlockUsers(rctx request.CTX, channelId string) (*model.ChannelBlockUserList, *model.AppError)
+	ListChannelsByBlockedUser(rctx request.CTX, blockedId string) (*model.ChannelBlockUserList, *model.AppError)
 	ListDirectory(path string) ([]string, *model.AppError)
 	ListDirectoryRecursively(path string) ([]string, *model.AppError)
 	ListExportDirectory(path string) ([]string, *model.AppError)
@@ -950,6 +958,8 @@ type AppIface interface {
 	ListImports() ([]string, *model.AppError)
 	ListPluginKeys(pluginID string, page, perPage int) ([]string, *model.AppError)
 	ListTeamCommands(teamID string) ([]*model.Command, *model.AppError)
+	ListUserBlockUsers(rctx request.CTX, userId string) (*model.UserBlockUserList, *model.AppError)
+	ListUsersByBlockedUser(rctx request.CTX, blockedId string) (*model.UserBlockUserList, *model.AppError)
 	Log() *mlog.Logger
 	LoginByOAuth(c request.CTX, service string, userData io.Reader, teamID string, tokenUser *model.User) (*model.User, *model.AppError)
 	MarkChannelsAsViewed(c request.CTX, channelIDs []string, userID string, currentSessionId string, collapsedThreadsSupported, isCRTEnabled bool) (map[string]int64, *model.AppError)

@@ -1162,6 +1162,7 @@ CREATE TABLE `Users` (
   `Position` varchar(128) DEFAULT NULL,
   `Timezone` json DEFAULT NULL,
   `RemoteId` varchar(26) DEFAULT NULL,
+  `Mobilephone` varchar(24) DEFAULT NULL,
   PRIMARY KEY (`Id`),
   UNIQUE KEY `Username` (`Username`),
   UNIQUE KEY `AuthData` (`AuthData`),
@@ -1169,10 +1170,10 @@ CREATE TABLE `Users` (
   KEY `idx_users_update_at` (`UpdateAt`),
   KEY `idx_users_create_at` (`CreateAt`),
   KEY `idx_users_delete_at` (`DeleteAt`),
-  FULLTEXT KEY `idx_users_all_txt` (`Username`,`FirstName`,`LastName`,`Nickname`,`Email`),
-  FULLTEXT KEY `idx_users_all_no_full_name_txt` (`Username`,`Nickname`,`Email`),
-  FULLTEXT KEY `idx_users_names_txt` (`Username`,`FirstName`,`LastName`,`Nickname`),
-  FULLTEXT KEY `idx_users_names_no_full_name_txt` (`Username`,`Nickname`)
+  FULLTEXT KEY `idx_users_all_txt` (`Username`,`FirstName`,`LastName`,`Nickname`,`Email`,`Mobilephone`),
+  FULLTEXT KEY `idx_users_all_no_full_name_txt` (`Username`,`Nickname`,`Email`,`Mobilephone`),
+  FULLTEXT KEY `idx_users_names_txt` (`Username`,`FirstName`,`LastName`,`Nickname`,`Mobilephone`),
+  FULLTEXT KEY `idx_users_names_no_full_name_txt` (`Username`,`Nickname`,`Mobilephone`)
 );
 /*!40101 SET character_set_client = @saved_cs_client */;
 

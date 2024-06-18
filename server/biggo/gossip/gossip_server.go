@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"os"
 
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
@@ -66,10 +67,20 @@ func (g2s *GossipService) GetLogs(ctx context.Context, in *LogRequest) (reply *L
 
 func (g2s *GossipService) QueryLogs(ctx context.Context, in *LogRequest) (reply *QueryLogReply, err error) {
 	mlog.Debug("QueryLogs-Begin", mlog.String("hostname", g2s.cds.Hostname), mlog.Any("request", in))
-	logs, appErr := g2s.ps.GetLogsSkipSend(int(in.PerPage), int(in.Page), &model.LogFilter{ServerNames: []string{g2s.cds.Hostname}})
-	reply = &QueryLogReply{Entries: logs}
+	logs, appErr := g2s.ps.GetLogsSkipSend(int(in.PerPage), int(in.Page), &model.LogFilter{
+		ServerNames: []string{g2s.cds.Hostname},
+		LogLevels:   in.Filter.LogLevels,
+		DateFrom:    in.Filter.DateFrom,
+		DateTo:      in.Filter.DateTo,
+	})
+
 	if appErr != nil {
 		err = appErr.Unwrap()
+	} else {
+		hostname, _ := os.Hostname()
+		reply = &QueryLogReply{Entries: map[string]*StringList{
+			hostname: {Values: logs},
+		}}
 	}
 	mlog.Debug("QueryLogs-Complete", mlog.String("hostname", g2s.cds.Hostname), mlog.Any("reply", reply), mlog.Err(err))
 	return

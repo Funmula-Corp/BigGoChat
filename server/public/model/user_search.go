@@ -52,4 +52,6 @@ type UserSearchOptions struct {
 	ViewRestrictions *ViewUsersRestrictions
 	// List of allowed channels
 	ListOfAllowedChannels []string
+	// AllowMobilephones allows search to examine the mobilephone of users.
+	AllowMobilephones bool
 }

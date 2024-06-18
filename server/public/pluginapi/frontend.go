@@ -28,3 +28,11 @@ func (f *FrontendService) OpenInteractiveDialog(dialog model.OpenDialogRequest) 
 func (f *FrontendService) PublishWebSocketEvent(event string, payload map[string]interface{}, broadcast *model.WebsocketBroadcast) {
 	f.api.PublishWebSocketEvent(event, payload, broadcast)
 }
+
+// BDPublishWebSocketEvent publish core websocket event without plugin prefix
+// core function, may break frontend, USE WITH CAUTION.
+//
+// Minimum server version: 9.8
+func (f *FrontendService) BDPublishWebSocketEvent(event model.WebsocketEventType, teamId string, channelId string, userId string, omitUsers map[string]bool, omitConnectionId string, data map[string]interface{}) {
+	f.api.BDPublishWebSocketEvent(event, teamId, channelId, userId, omitUsers, omitConnectionId, data)
+}

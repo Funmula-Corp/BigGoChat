@@ -91,6 +91,7 @@ type Store interface {
 	PostPersistentNotification() PostPersistentNotificationStore
 	DesktopTokens() DesktopTokensStore
 	ChannelBookmark() ChannelBookmarkStore
+	Blocklist() BlocklistStore
 }
 
 type RetentionPolicyStore interface {
@@ -811,6 +812,9 @@ type RoleStore interface {
 	// ChannelRolesUnderTeamRole returns all of the non-deleted roles that are affected by updates to the
 	// given role.
 	ChannelRolesUnderTeamRole(roleName string) ([]*model.Role, error)
+
+	// create role with customized id
+	CreateRole(role *model.Role) (*model.Role, error)
 }
 
 type SchemeStore interface {
@@ -822,6 +826,9 @@ type SchemeStore interface {
 	PermanentDeleteAll() error
 	CountByScope(scope string) (int64, error)
 	CountWithoutPermission(scope, permissionID string, roleScope model.RoleScope, roleType model.RoleType) (int64, error)
+
+	// create scheme with customized id
+	CreateScheme(scheme *model.Scheme) (*model.Scheme, error)
 }
 
 type TermsOfServiceStore interface {
@@ -1035,6 +1042,19 @@ type ChannelBookmarkStore interface {
 	UpdateSortOrder(bookmarkId, channelId string, newIndex int64) ([]*model.ChannelBookmarkWithFileInfo, error)
 	Delete(bookmarkId string, deleteFile bool) error
 	GetBookmarksForChannelSince(channelId string, since int64) ([]*model.ChannelBookmarkWithFileInfo, error)
+}
+
+type BlocklistStore interface {
+	GetChannelBlockUser(channelId string, userId string) (*model.ChannelBlockUser, error)
+	ListChannelBlockUsers(channelId string) (*model.ChannelBlockUserList, error)
+	ListChannelBlockUsersByBlockedUser(blockedId string) (*model.ChannelBlockUserList, error)
+	DeleteChannelBlockUser(channelId string, userId string) error
+	SaveChannelBlockUser(blockUser *model.ChannelBlockUser) (*model.ChannelBlockUser, error)
+	GetUserBlockUser(userId string, blockedId string) (*model.UserBlockUser, error)
+	ListUserBlockUsers(userId string) (*model.UserBlockUserList, error)
+	ListUserBlockUsersByBlockedUser(blockedId string) (*model.UserBlockUserList, error)
+	DeleteUserBlockUser(userId string, blockedId string) error
+	SaveUserBlockUser(userBlockUser *model.UserBlockUser) (*model.UserBlockUser, error)
 }
 
 // ChannelSearchOpts contains options for searching channels.

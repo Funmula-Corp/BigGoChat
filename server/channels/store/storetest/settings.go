@@ -213,6 +213,51 @@ func execAsRoot(settings *model.SqlSettings, sqlCommand string) error {
 	return nil
 }
 
+type connection struct {
+	Pid             int
+	ApplicationName sql.NullString
+	State           sql.NullString
+	Query           sql.NullString
+}
+
+func listConnections(settings *model.SqlSettings, database string) ([]connection, error) {
+	var dsn string
+	var driver = *settings.DriverName
+	conns := []connection{}
+
+	switch driver {
+	case model.DatabaseDriverMysql:
+		return conns, fmt.Errorf("unsupported driver %s", driver)
+		// dsn = mySQLRootDSN(*settings.DataSource)
+	case model.DatabaseDriverPostgres:
+		dsn = postgreSQLRootDSN(*settings.DataSource)
+	default:
+		return conns, fmt.Errorf("unsupported driver %s", driver)
+	}
+
+	db, err := sql.Open(driver, dsn)
+	if err != nil {
+		return conns, errors.Wrapf(err, "failed to connect to %s database as root", driver)
+	}
+	defer db.Close()
+
+	rows, err := db.Query("SELECT pid, application_name, state, query FROM pg_stat_activity WHERE datname = '" + database + "'")
+	if err != nil {
+		return conns, errors.Wrapf(err, "failed to list `%s` against %s database as root", database, driver)
+	}
+	defer rows.Close()
+	// data := make(map[string]string)
+	for rows.Next() {
+		conn := connection{}
+		if err := rows.Scan(&conn.Pid, &conn.ApplicationName, &conn.State, &conn.Query); err != nil {
+			return conns, errors.Wrapf(err, "scan failed")
+		}
+		conns = append(conns, conn)
+	}
+
+	return conns, nil
+}
+
 func replaceMySQLDatabaseName(dsn, newDBName string) string {
 	cfg, err := mysql.ParseDSN(dsn)
 	if err != nil {
@@ -280,6 +325,11 @@ func CleanupSqlSettings(settings *model.SqlSettings) {
 	}
 
 	if err := execAsRoot(settings, "DROP DATABASE "+dbName); err != nil {
+		conns, e := listConnections(settings, dbName);
+		if e != nil {
+			panic("failed to list connections" + dbName + ": " + e.Error())
+		}
+		log(fmt.Sprintf("DB connections %v", conns))
 		panic("failed to drop temporary database " + dbName + ": " + err.Error())
 	}
 

@@ -1998,15 +1998,20 @@ func (s *RateLimitSettings) SetDefaults() {
 type PrivacySettings struct {
 	ShowEmailAddress *bool `access:"site_users_and_teams"`
 	ShowFullName     *bool `access:"site_users_and_teams"`
+	ShowMobilephone  *bool `access:"site_users_and_teams"`
 }
 
 func (s *PrivacySettings) setDefaults() {
 	if s.ShowEmailAddress == nil {
-		s.ShowEmailAddress = NewBool(true)
+		s.ShowEmailAddress = NewBool(false)
 	}
 
 	if s.ShowFullName == nil {
-		s.ShowFullName = NewBool(true)
+		s.ShowFullName = NewBool(false)
+	}
+
+	if s.ShowMobilephone == nil {
+		s.ShowMobilephone = NewBool(false)
 	}
 }
 
@@ -4323,6 +4328,7 @@ func (o *Config) GetSanitizeOptions() map[string]bool {
 	options := map[string]bool{}
 	options["fullname"] = *o.PrivacySettings.ShowFullName
 	options["email"] = *o.PrivacySettings.ShowEmailAddress
+	options["mobilephone"] = *o.PrivacySettings.ShowMobilephone
 
 	return options
 }

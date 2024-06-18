@@ -10,11 +10,11 @@ import (
 	"strconv"
 	"time"
 
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/audit"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/web"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
 )
 
 func (api *API) InitPost() {
@@ -253,11 +253,6 @@ func getPostsForChannel(c *Context, w http.ResponseWriter, r *http.Request) {
 	page := c.Params.Page
 	perPage := c.Params.PerPage
 
-	if !c.IsSystemAdmin() && includeDeleted {
-		c.SetPermissionError(model.PermissionReadDeletedPosts)
-		return
-	}
-
 	if !c.App.SessionHasPermissionToChannel(c.AppContext, *c.AppContext.Session(), channelId, model.PermissionReadChannelContent) {
 		c.SetPermissionError(model.PermissionReadChannelContent)
 		return
@@ -356,7 +351,7 @@ func getPostsForChannelAroundLastUnread(c *Context, w http.ResponseWriter, r *ht
 	collapsedThreads := r.URL.Query().Get("collapsedThreads") == "true"
 	collapsedThreadsExtended := r.URL.Query().Get("collapsedThreadsExtended") == "true"
 
-	postList, err := c.App.GetPostsForChannelAroundLastUnread(c.AppContext, channelId, userId, c.Params.LimitBefore, c.Params.LimitAfter, skipFetchThreads, collapsedThreads, collapsedThreadsExtended)
+	postList, err := c.App.GetPostsForChannelAroundLastUnread(c.AppContext, channelId, userId, c.Params.LimitBefore, c.Params.LimitAfter, skipFetchThreads, collapsedThreads, collapsedThreadsExtended, c.Params.IncludeDeleted)
 	if err != nil {
 		c.Err = err
 		return
@@ -370,7 +365,7 @@ func getPostsForChannelAroundLastUnread(c *Context, w http.ResponseWriter, r *ht
 			return
 		}
 
-		postList, err = c.App.GetPostsPage(model.GetPostsOptions{ChannelId: channelId, Page: app.PageDefault, PerPage: c.Params.LimitBefore, SkipFetchThreads: skipFetchThreads, CollapsedThreads: collapsedThreads, CollapsedThreadsExtended: collapsedThreadsExtended, UserId: c.AppContext.Session().UserId})
+		postList, err = c.App.GetPostsPage(model.GetPostsOptions{ChannelId: channelId, Page: app.PageDefault, PerPage: c.Params.LimitBefore, SkipFetchThreads: skipFetchThreads, CollapsedThreads: collapsedThreads, CollapsedThreadsExtended: collapsedThreadsExtended, UserId: c.AppContext.Session().UserId, IncludeDeleted: c.Params.IncludeDeleted})
 		if err != nil {
 			c.Err = err
 			return
@@ -682,6 +677,7 @@ func getPostThread(c *Context, w http.ResponseWriter, r *http.Request) {
 		Direction:                direction,
 		FromPost:                 fromPost,
 		FromCreateAt:             fromCreateAt,
+		IncludeDeleted:           c.Params.IncludeDeleted,
 	}
 	list, err := c.App.GetPostThread(c.Params.PostId, opts, c.AppContext.Session().UserId)
 	if err != nil {

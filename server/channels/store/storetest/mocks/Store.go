@@ -44,6 +44,26 @@ func (_m *Store) Audit() store.AuditStore {
 	return r0
 }
 
+// Blocklist provides a mock function with given fields:
+func (_m *Store) Blocklist() store.BlocklistStore {
+	ret := _m.Called()
+
+	if len(ret) == 0 {
+		panic("no return value specified for Blocklist")
+	}
+
+	var r0 store.BlocklistStore
+	if rf, ok := ret.Get(0).(func() store.BlocklistStore); ok {
+		r0 = rf()
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(store.BlocklistStore)
+		}
+	}
+
+	return r0
+}
+
 // Bot provides a mock function with given fields:
 func (_m *Store) Bot() store.BotStore {
 	ret := _m.Called()

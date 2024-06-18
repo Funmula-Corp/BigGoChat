@@ -28,7 +28,8 @@ func (o *SwitchRequest) EmailToOAuth() bool {
 			o.NewService == UserAuthServiceGitlab ||
 			o.NewService == ServiceGoogle ||
 			o.NewService == ServiceOffice365 ||
-			o.NewService == ServiceOpenid)
+			o.NewService == ServiceOpenid ||
+			o.NewService == ServiceBiggo)
 }
 
 func (o *SwitchRequest) OAuthToEmail() bool {
@@ -36,7 +37,8 @@ func (o *SwitchRequest) OAuthToEmail() bool {
 		o.CurrentService == UserAuthServiceGitlab ||
 		o.CurrentService == ServiceGoogle ||
 		o.CurrentService == ServiceOffice365 ||
-		o.CurrentService == ServiceOpenid) && o.NewService == UserAuthServiceEmail
+		o.CurrentService == ServiceOpenid ||
+		o.CurrentService == ServiceBiggo) && o.NewService == UserAuthServiceEmail
 }
 
 func (o *SwitchRequest) EmailToLdap() bool {

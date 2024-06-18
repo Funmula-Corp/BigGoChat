@@ -107,6 +107,7 @@ type User struct {
 	TermsOfServiceCreateAt int64     `json:"terms_of_service_create_at,omitempty"`
 	DisableWelcomeEmail    bool      `json:"disable_welcome_email"`
 	LastLogin              int64     `json:"last_login,omitempty"`
+	Mobilephone            string    `json:"mobilephone,omitempty"`
 }
 
 func (u *User) Auditable() map[string]interface{} {
@@ -432,7 +433,11 @@ func NormalizeEmail(email string) string {
 // be run before saving the user to the db.
 func (u *User) PreSave() {
 	if u.Id == "" {
-		u.Id = NewId()
+		if u.AuthService == ServiceBiggo && u.AuthData != nil {
+			u.Id = HashId(*u.AuthData)
+		} else {
+			u.Id = NewId()
+		}
 	}
 
 	if u.Username == "" {
@@ -635,6 +640,9 @@ func (u *User) Sanitize(options map[string]bool) {
 	u.MfaSecret = ""
 	u.LastLogin = 0
 
+	if len(options) != 0 && !options["mobilephone"] {
+		u.Mobilephone = ""
+	}
 	if len(options) != 0 && !options["email"] {
 		u.Email = ""
 	}

@@ -1,0 +1,4 @@
+apiVersion: v1
+appVersion: "0.0.0"
+name: "mattermost-funmula"
+version: "0.0.0"

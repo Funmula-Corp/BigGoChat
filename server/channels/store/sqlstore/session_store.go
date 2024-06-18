@@ -11,9 +11,9 @@ import (
 	sq "github.com/mattermost/squirrel"
 	"github.com/pkg/errors"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
 )
 
 const (
@@ -323,12 +323,12 @@ func (me SqlSessionStore) Cleanup(expiryTime int64, batchSize int64) error {
 	for rowsAffected > 0 {
 		sqlResult, err := me.GetMasterX().Exec(query, expiryTime, batchSize)
 		if err != nil {
-			return errors.Wrap(err, "unable to delete sessions")
+			return errors.Wrap(err, "unable to delete sessions: " + query)
 		}
 		var rowErr error
 		rowsAffected, rowErr = sqlResult.RowsAffected()
 		if rowErr != nil {
-			return errors.Wrap(err, "unable to delete sessions")
+			return errors.Wrap(err, "unable to delete sessions: " + query)
 		}
 
 		time.Sleep(sessionsCleanupDelay)
