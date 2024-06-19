@@ -874,11 +874,24 @@ export function removeNonRecentEmptyPostBlocks(blocks: PostOrderBlock[]) {
     return blocks.filter((block: PostOrderBlock) => block.order.length !== 0 || block.recent);
 }
 
+export function removeDeleteBySelfPostBlocks(blocks: PostOrderBlock[], posts: Record<string, Post>) {
+    return blocks.map((block: PostOrderBlock) => ({
+        ...block,
+        order: block.order.filter((postId: string) => posts[postId].props.deleteBy !== posts[postId].user_id),
+    } as PostOrderBlock));
+}
+
+export function IsBlocksEqual(blocks: PostOrderBlock[], otherBlocks: PostOrderBlock[]) {
+    return blocks.length === otherBlocks.length &&
+        blocks.every((block, i) => block.order.length == otherBlocks[i].order.length);
+}
+
 export function mergePostBlocks(blocks: PostOrderBlock[], posts: Record<string, Post>) {
     let nextBlocks = [...blocks];
 
+    nextBlocks = removeDeleteBySelfPostBlocks(nextBlocks, posts);
     // Remove any blocks that may have become empty by removing posts
-    nextBlocks = removeNonRecentEmptyPostBlocks(blocks);
+    nextBlocks = removeNonRecentEmptyPostBlocks(nextBlocks);
 
     // If a channel does not have any posts(Experimental feature where join and leave messages don't exist)
     // return the previous state i.e an empty block
@@ -923,7 +936,7 @@ export function mergePostBlocks(blocks: PostOrderBlock[], posts: Record<string, 
         }
     }
 
-    if (blocks.length === nextBlocks.length) {
+    if (IsBlocksEqual(blocks, nextBlocks)) {
         // No changes were made
         return blocks;
     }
