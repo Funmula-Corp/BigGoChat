@@ -169,6 +169,8 @@ export function nameSuggestionsForUser(user: UserProfile): string[] {
     profileSuggestions.push((user.position || '').toLowerCase());
     const email = (user.email || '').toLowerCase();
     profileSuggestions.push(email);
+    const mobilephone = (user.mobilephone || '').toLowerCase();
+    profileSuggestions.push(mobilephone);
 
     const split = email.split('@');
     if (split.length > 1) {
