@@ -1126,6 +1126,16 @@ func searchUsers(c *Context, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// bypass clientside filter on serverside filtered anonymous fields
+	for _, profile := range profiles {
+		if profile.Email == "" {
+			profile.Email = props.Term
+		}
+		if profile.Mobilephone == "" {
+			profile.Mobilephone = props.Term
+		}
+	}
+
 	w.Write(js)
 }
 
