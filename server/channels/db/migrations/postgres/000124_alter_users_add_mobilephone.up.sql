@@ -1,0 +1,1 @@
+ALTER TABLE public.users ADD COLUMN IF NOT EXISTS mobilephone varchar(24) NOT NULL DEFAULT '';
