@@ -19,16 +19,16 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store/sqlstore"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store/storetest/mocks"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/testlib"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/config"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/einterfaces"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
 )
 
 type TestHelper struct {
@@ -505,9 +505,11 @@ func (th *TestHelper) CreateScheme() (*model.Scheme, []*model.Role) {
 
 	roleNames := []string{
 		scheme.DefaultTeamAdminRole,
+		scheme.DefaultTeamVerifiedRole,
 		scheme.DefaultTeamUserRole,
 		scheme.DefaultTeamGuestRole,
 		scheme.DefaultChannelAdminRole,
+		scheme.DefaultChannelVerifiedRole,
 		scheme.DefaultChannelUserRole,
 		scheme.DefaultChannelGuestRole,
 	}

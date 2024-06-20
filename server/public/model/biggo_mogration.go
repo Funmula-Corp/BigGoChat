@@ -3,4 +3,5 @@ package model
 const (
 	CustomChannelReadOnlyRoleCreationMigrationKey = "CustomChannelReadOnlyRoleCreationMigrationComplete"
 	CustomSystemVerifiedRoleCreationMigrationKey = "CustomSystemVerifiedRoleCreationMigrationComplete"
+	CustomVerifiedTierMigrationMigrationKey = "CustomVerifiedTierMigrationMigrationComplete"
 )

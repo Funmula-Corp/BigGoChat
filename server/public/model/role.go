@@ -374,17 +374,20 @@ const (
 	SystemReadOnlyAdminRoleId    = "system_read_only_admin"
 	SystemManagerRoleId          = "system_manager"
 	SystemCustomGroupAdminRoleId = "system_custom_group_admin"
-	SystemVerifiedId             = "system_verified"
+	SystemVerifiedRoleId         = "system_verified"
 
 	TeamGuestRoleId         = "team_guest"
 	TeamUserRoleId          = "team_user"
 	TeamAdminRoleId         = "team_admin"
+	TeamVerifiedRoleId      = "team_verified"
 	TeamPostAllRoleId       = "team_post_all"
 	TeamPostAllPublicRoleId = "team_post_all_public"
 
 	ChannelGuestRoleId = "channel_guest"
 	ChannelUserRoleId  = "channel_user"
 	ChannelAdminRoleId = "channel_admin"
+	ChannelVerifiedRoleId = "channel_verified"
+	ChannelReadOnlyRoleId = "channel_readonly"
 
 	CustomGroupUserRoleId = "custom_group_user"
 

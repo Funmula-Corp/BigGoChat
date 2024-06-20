@@ -10,10 +10,10 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store/searchtest"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store/storetest"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 )
 
 func TestChannelStore(t *testing.T) {
@@ -92,12 +92,15 @@ func testChannelMemberWithSchemeRolesToModel(t *testing.T) {
 			LastUpdateAt:                  54321,
 			SchemeGuest:                   sql.NullBool{Valid: true, Bool: false},
 			SchemeUser:                    sql.NullBool{Valid: true, Bool: true},
+			SchemeVerified:                    sql.NullBool{Valid: true, Bool: true},
 			SchemeAdmin:                   sql.NullBool{Valid: true, Bool: true},
 			TeamSchemeDefaultGuestRole:    sql.NullString{Valid: false},
 			TeamSchemeDefaultUserRole:     sql.NullString{Valid: false},
+			TeamSchemeDefaultVerifiedRole:     sql.NullString{Valid: false},
 			TeamSchemeDefaultAdminRole:    sql.NullString{Valid: false},
 			ChannelSchemeDefaultGuestRole: sql.NullString{Valid: false},
 			ChannelSchemeDefaultUserRole:  sql.NullString{Valid: false},
+			ChannelSchemeDefaultVerifiedRole:  sql.NullString{Valid: false},
 			ChannelSchemeDefaultAdminRole: sql.NullString{Valid: false},
 		}
 
@@ -105,7 +108,7 @@ func testChannelMemberWithSchemeRolesToModel(t *testing.T) {
 
 		assert.Equal(t, db.ChannelId, m.ChannelId)
 		assert.Equal(t, db.UserId, m.UserId)
-		assert.Equal(t, "custom_role channel_user channel_admin", m.Roles)
+		assert.Equal(t, "custom_role channel_user channel_verified channel_admin", m.Roles)
 		assert.Equal(t, db.LastViewedAt, m.LastViewedAt)
 		assert.Equal(t, db.MsgCount, m.MsgCount)
 		assert.Equal(t, db.MentionCount, m.MentionCount)
@@ -114,6 +117,7 @@ func testChannelMemberWithSchemeRolesToModel(t *testing.T) {
 		assert.Equal(t, db.LastUpdateAt, m.LastUpdateAt)
 		assert.Equal(t, db.SchemeGuest.Bool, m.SchemeGuest)
 		assert.Equal(t, db.SchemeUser.Bool, m.SchemeUser)
+		assert.Equal(t, db.SchemeVerified.Bool, m.SchemeVerified)
 		assert.Equal(t, db.SchemeAdmin.Bool, m.SchemeAdmin)
 		assert.Equal(t, db.Roles, m.ExplicitRoles)
 	})
@@ -124,12 +128,15 @@ func testChannelMemberWithSchemeRolesToModel(t *testing.T) {
 			Roles:                         "channel_user",
 			SchemeGuest:                   sql.NullBool{Valid: false, Bool: false},
 			SchemeUser:                    sql.NullBool{Valid: false, Bool: false},
+			SchemeVerified:                    sql.NullBool{Valid: false, Bool: false},
 			SchemeAdmin:                   sql.NullBool{Valid: false, Bool: false},
 			TeamSchemeDefaultGuestRole:    sql.NullString{Valid: false},
 			TeamSchemeDefaultUserRole:     sql.NullString{Valid: false},
+			TeamSchemeDefaultVerifiedRole:     sql.NullString{Valid: false},
 			TeamSchemeDefaultAdminRole:    sql.NullString{Valid: false},
 			ChannelSchemeDefaultGuestRole: sql.NullString{Valid: false},
 			ChannelSchemeDefaultUserRole:  sql.NullString{Valid: false},
+			ChannelSchemeDefaultVerifiedRole:  sql.NullString{Valid: false},
 			ChannelSchemeDefaultAdminRole: sql.NullString{Valid: false},
 		}
 
@@ -137,6 +144,7 @@ func testChannelMemberWithSchemeRolesToModel(t *testing.T) {
 
 		assert.Equal(t, "channel_user", cm.Roles)
 		assert.Equal(t, false, cm.SchemeGuest)
+		assert.Equal(t, false, cm.SchemeVerified)
 		assert.Equal(t, true, cm.SchemeUser)
 		assert.Equal(t, false, cm.SchemeAdmin)
 		assert.Equal(t, "", cm.ExplicitRoles)
@@ -144,23 +152,27 @@ func testChannelMemberWithSchemeRolesToModel(t *testing.T) {
 
 	t.Run("Unmigrated_NoScheme_Admin", func(t *testing.T) {
 		db := channelMemberWithSchemeRoles{
-			Roles:                         "channel_admin channel_user",
+			Roles:                         "channel_admin channel_user channel_verified",
 			SchemeGuest:                   sql.NullBool{Valid: false, Bool: false},
 			SchemeUser:                    sql.NullBool{Valid: false, Bool: false},
+			SchemeVerified:                    sql.NullBool{Valid: false, Bool: false},
 			SchemeAdmin:                   sql.NullBool{Valid: false, Bool: false},
 			TeamSchemeDefaultGuestRole:    sql.NullString{Valid: false},
 			TeamSchemeDefaultUserRole:     sql.NullString{Valid: false},
+			TeamSchemeDefaultVerifiedRole:     sql.NullString{Valid: false},
 			TeamSchemeDefaultAdminRole:    sql.NullString{Valid: false},
 			ChannelSchemeDefaultGuestRole: sql.NullString{Valid: false},
 			ChannelSchemeDefaultUserRole:  sql.NullString{Valid: false},
+			ChannelSchemeDefaultVerifiedRole:  sql.NullString{Valid: false},
 			ChannelSchemeDefaultAdminRole: sql.NullString{Valid: false},
 		}
 
 		cm := db.ToModel()
 
-		assert.Equal(t, "channel_user channel_admin", cm.Roles)
+		assert.Equal(t, "channel_user channel_verified channel_admin", cm.Roles)
 		assert.Equal(t, false, cm.SchemeGuest)
 		assert.Equal(t, true, cm.SchemeUser)
+		assert.Equal(t, true, cm.SchemeVerified)
 		assert.Equal(t, true, cm.SchemeAdmin)
 		assert.Equal(t, "", cm.ExplicitRoles)
 	})
@@ -170,12 +182,15 @@ func testChannelMemberWithSchemeRolesToModel(t *testing.T) {
 			Roles:                         "custom_role",
 			SchemeGuest:                   sql.NullBool{Valid: false, Bool: false},
 			SchemeUser:                    sql.NullBool{Valid: false, Bool: false},
+			SchemeVerified:                    sql.NullBool{Valid: false, Bool: false},
 			SchemeAdmin:                   sql.NullBool{Valid: false, Bool: false},
 			TeamSchemeDefaultGuestRole:    sql.NullString{Valid: false},
 			TeamSchemeDefaultUserRole:     sql.NullString{Valid: false},
+			TeamSchemeDefaultVerifiedRole:     sql.NullString{Valid: false},
 			TeamSchemeDefaultAdminRole:    sql.NullString{Valid: false},
 			ChannelSchemeDefaultGuestRole: sql.NullString{Valid: false},
 			ChannelSchemeDefaultUserRole:  sql.NullString{Valid: false},
+			ChannelSchemeDefaultVerifiedRole:  sql.NullString{Valid: false},
 			ChannelSchemeDefaultAdminRole: sql.NullString{Valid: false},
 		}
 
@@ -183,6 +198,7 @@ func testChannelMemberWithSchemeRolesToModel(t *testing.T) {
 
 		assert.Equal(t, "custom_role", cm.Roles)
 		assert.Equal(t, false, cm.SchemeUser)
+		assert.Equal(t, false, cm.SchemeVerified)
 		assert.Equal(t, false, cm.SchemeAdmin)
 		assert.Equal(t, "custom_role", cm.ExplicitRoles)
 	})
@@ -192,12 +208,15 @@ func testChannelMemberWithSchemeRolesToModel(t *testing.T) {
 			Roles:                         "channel_user custom_role",
 			SchemeGuest:                   sql.NullBool{Valid: false, Bool: false},
 			SchemeUser:                    sql.NullBool{Valid: false, Bool: false},
+			SchemeVerified:                    sql.NullBool{Valid: false, Bool: false},
 			SchemeAdmin:                   sql.NullBool{Valid: false, Bool: false},
 			TeamSchemeDefaultGuestRole:    sql.NullString{Valid: false},
 			TeamSchemeDefaultUserRole:     sql.NullString{Valid: false},
+			TeamSchemeDefaultVerifiedRole:     sql.NullString{Valid: false},
 			TeamSchemeDefaultAdminRole:    sql.NullString{Valid: false},
 			ChannelSchemeDefaultGuestRole: sql.NullString{Valid: false},
 			ChannelSchemeDefaultUserRole:  sql.NullString{Valid: false},
+			ChannelSchemeDefaultVerifiedRole:  sql.NullString{Valid: false},
 			ChannelSchemeDefaultAdminRole: sql.NullString{Valid: false},
 		}
 
@@ -206,6 +225,7 @@ func testChannelMemberWithSchemeRolesToModel(t *testing.T) {
 		assert.Equal(t, "custom_role channel_user", cm.Roles)
 		assert.Equal(t, false, cm.SchemeGuest)
 		assert.Equal(t, true, cm.SchemeUser)
+		assert.Equal(t, false, cm.SchemeVerified)
 		assert.Equal(t, false, cm.SchemeAdmin)
 		assert.Equal(t, "custom_role", cm.ExplicitRoles)
 	})
@@ -215,12 +235,15 @@ func testChannelMemberWithSchemeRolesToModel(t *testing.T) {
 			Roles:                         "channel_user channel_admin custom_role",
 			SchemeGuest:                   sql.NullBool{Valid: false, Bool: false},
 			SchemeUser:                    sql.NullBool{Valid: false, Bool: false},
+			SchemeVerified:                    sql.NullBool{Valid: false, Bool: false},
 			SchemeAdmin:                   sql.NullBool{Valid: false, Bool: false},
 			TeamSchemeDefaultGuestRole:    sql.NullString{Valid: false},
 			TeamSchemeDefaultUserRole:     sql.NullString{Valid: false},
+			TeamSchemeDefaultVerifiedRole:     sql.NullString{Valid: false},
 			TeamSchemeDefaultAdminRole:    sql.NullString{Valid: false},
 			ChannelSchemeDefaultGuestRole: sql.NullString{Valid: false},
 			ChannelSchemeDefaultUserRole:  sql.NullString{Valid: false},
+			ChannelSchemeDefaultVerifiedRole:  sql.NullString{Valid: false},
 			ChannelSchemeDefaultAdminRole: sql.NullString{Valid: false},
 		}
 
@@ -229,6 +252,7 @@ func testChannelMemberWithSchemeRolesToModel(t *testing.T) {
 		assert.Equal(t, "custom_role channel_user channel_admin", cm.Roles)
 		assert.Equal(t, false, cm.SchemeGuest)
 		assert.Equal(t, true, cm.SchemeUser)
+		assert.Equal(t, false, cm.SchemeVerified)
 		assert.Equal(t, true, cm.SchemeAdmin)
 		assert.Equal(t, "custom_role", cm.ExplicitRoles)
 	})
@@ -238,12 +262,15 @@ func testChannelMemberWithSchemeRolesToModel(t *testing.T) {
 			Roles:                         "",
 			SchemeGuest:                   sql.NullBool{Valid: false, Bool: false},
 			SchemeUser:                    sql.NullBool{Valid: false, Bool: false},
+			SchemeVerified:                    sql.NullBool{Valid: false, Bool: false},
 			SchemeAdmin:                   sql.NullBool{Valid: false, Bool: false},
 			TeamSchemeDefaultGuestRole:    sql.NullString{Valid: false},
 			TeamSchemeDefaultUserRole:     sql.NullString{Valid: false},
+			TeamSchemeDefaultVerifiedRole:     sql.NullString{Valid: false},
 			TeamSchemeDefaultAdminRole:    sql.NullString{Valid: false},
 			ChannelSchemeDefaultGuestRole: sql.NullString{Valid: false},
 			ChannelSchemeDefaultUserRole:  sql.NullString{Valid: false},
+			ChannelSchemeDefaultVerifiedRole:  sql.NullString{Valid: false},
 			ChannelSchemeDefaultAdminRole: sql.NullString{Valid: false},
 		}
 
@@ -252,6 +279,7 @@ func testChannelMemberWithSchemeRolesToModel(t *testing.T) {
 		assert.Equal(t, "", cm.Roles)
 		assert.Equal(t, false, cm.SchemeGuest)
 		assert.Equal(t, false, cm.SchemeUser)
+		assert.Equal(t, false, cm.SchemeVerified)
 		assert.Equal(t, false, cm.SchemeAdmin)
 		assert.Equal(t, "", cm.ExplicitRoles)
 	})
@@ -262,20 +290,24 @@ func testChannelMemberWithSchemeRolesToModel(t *testing.T) {
 			Roles:                         "",
 			SchemeGuest:                   sql.NullBool{Valid: true, Bool: false},
 			SchemeUser:                    sql.NullBool{Valid: true, Bool: true},
+			SchemeVerified:                    sql.NullBool{Valid: true, Bool: true},
 			SchemeAdmin:                   sql.NullBool{Valid: true, Bool: false},
 			TeamSchemeDefaultGuestRole:    sql.NullString{Valid: false},
 			TeamSchemeDefaultUserRole:     sql.NullString{Valid: false},
+			TeamSchemeDefaultVerifiedRole:     sql.NullString{Valid: false},
 			TeamSchemeDefaultAdminRole:    sql.NullString{Valid: false},
 			ChannelSchemeDefaultGuestRole: sql.NullString{Valid: false},
 			ChannelSchemeDefaultUserRole:  sql.NullString{Valid: false},
+			ChannelSchemeDefaultVerifiedRole:  sql.NullString{Valid: false},
 			ChannelSchemeDefaultAdminRole: sql.NullString{Valid: false},
 		}
 
 		cm := db.ToModel()
 
-		assert.Equal(t, "channel_user", cm.Roles)
+		assert.Equal(t, "channel_user channel_verified", cm.Roles)
 		assert.Equal(t, false, cm.SchemeGuest)
 		assert.Equal(t, true, cm.SchemeUser)
+		assert.Equal(t, true, cm.SchemeVerified)
 		assert.Equal(t, false, cm.SchemeAdmin)
 		assert.Equal(t, "", cm.ExplicitRoles)
 	})
@@ -285,12 +317,15 @@ func testChannelMemberWithSchemeRolesToModel(t *testing.T) {
 			Roles:                         "",
 			SchemeGuest:                   sql.NullBool{Valid: true, Bool: false},
 			SchemeUser:                    sql.NullBool{Valid: true, Bool: true},
+			SchemeVerified:                sql.NullBool{Valid: false},
 			SchemeAdmin:                   sql.NullBool{Valid: true, Bool: true},
 			TeamSchemeDefaultGuestRole:    sql.NullString{Valid: false},
 			TeamSchemeDefaultUserRole:     sql.NullString{Valid: false},
+			TeamSchemeDefaultVerifiedRole:     sql.NullString{Valid: false},
 			TeamSchemeDefaultAdminRole:    sql.NullString{Valid: false},
 			ChannelSchemeDefaultGuestRole: sql.NullString{Valid: false},
 			ChannelSchemeDefaultUserRole:  sql.NullString{Valid: false},
+			ChannelSchemeDefaultVerifiedRole:  sql.NullString{Valid: false},
 			ChannelSchemeDefaultAdminRole: sql.NullString{Valid: false},
 		}
 
@@ -299,6 +334,7 @@ func testChannelMemberWithSchemeRolesToModel(t *testing.T) {
 		assert.Equal(t, "channel_user channel_admin", cm.Roles)
 		assert.Equal(t, false, cm.SchemeGuest)
 		assert.Equal(t, true, cm.SchemeUser)
+		assert.Equal(t, false, cm.SchemeVerified)
 		assert.Equal(t, true, cm.SchemeAdmin)
 		assert.Equal(t, "", cm.ExplicitRoles)
 	})
@@ -308,12 +344,15 @@ func testChannelMemberWithSchemeRolesToModel(t *testing.T) {
 			Roles:                         "",
 			SchemeGuest:                   sql.NullBool{Valid: true, Bool: true},
 			SchemeUser:                    sql.NullBool{Valid: true, Bool: false},
+			SchemeVerified:                    sql.NullBool{Valid: true, Bool: false},
 			SchemeAdmin:                   sql.NullBool{Valid: true, Bool: false},
 			TeamSchemeDefaultGuestRole:    sql.NullString{Valid: false},
 			TeamSchemeDefaultUserRole:     sql.NullString{Valid: false},
+			TeamSchemeDefaultVerifiedRole:     sql.NullString{Valid: false},
 			TeamSchemeDefaultAdminRole:    sql.NullString{Valid: false},
 			ChannelSchemeDefaultGuestRole: sql.NullString{Valid: false},
 			ChannelSchemeDefaultUserRole:  sql.NullString{Valid: false},
+			ChannelSchemeDefaultVerifiedRole:  sql.NullString{Valid: false},
 			ChannelSchemeDefaultAdminRole: sql.NullString{Valid: false},
 		}
 
@@ -322,6 +361,7 @@ func testChannelMemberWithSchemeRolesToModel(t *testing.T) {
 		assert.Equal(t, "channel_guest", cm.Roles)
 		assert.Equal(t, true, cm.SchemeGuest)
 		assert.Equal(t, false, cm.SchemeUser)
+		assert.Equal(t, false, cm.SchemeVerified)
 		assert.Equal(t, false, cm.SchemeAdmin)
 		assert.Equal(t, "", cm.ExplicitRoles)
 	})
@@ -331,12 +371,15 @@ func testChannelMemberWithSchemeRolesToModel(t *testing.T) {
 			Roles:                         "custom_role",
 			SchemeGuest:                   sql.NullBool{Valid: true, Bool: false},
 			SchemeUser:                    sql.NullBool{Valid: true, Bool: false},
+			SchemeVerified:                    sql.NullBool{Valid: true, Bool: false},
 			SchemeAdmin:                   sql.NullBool{Valid: true, Bool: false},
 			TeamSchemeDefaultGuestRole:    sql.NullString{Valid: false},
 			TeamSchemeDefaultUserRole:     sql.NullString{Valid: false},
+			TeamSchemeDefaultVerifiedRole:     sql.NullString{Valid: false},
 			TeamSchemeDefaultAdminRole:    sql.NullString{Valid: false},
 			ChannelSchemeDefaultGuestRole: sql.NullString{Valid: false},
 			ChannelSchemeDefaultUserRole:  sql.NullString{Valid: false},
+			ChannelSchemeDefaultVerifiedRole:  sql.NullString{Valid: false},
 			ChannelSchemeDefaultAdminRole: sql.NullString{Valid: false},
 		}
 
@@ -345,6 +388,7 @@ func testChannelMemberWithSchemeRolesToModel(t *testing.T) {
 		assert.Equal(t, "custom_role", cm.Roles)
 		assert.Equal(t, false, cm.SchemeGuest)
 		assert.Equal(t, false, cm.SchemeUser)
+		assert.Equal(t, false, cm.SchemeVerified)
 		assert.Equal(t, false, cm.SchemeAdmin)
 		assert.Equal(t, "custom_role", cm.ExplicitRoles)
 	})
@@ -354,18 +398,22 @@ func testChannelMemberWithSchemeRolesToModel(t *testing.T) {
 			Roles:                         "custom_role",
 			SchemeGuest:                   sql.NullBool{Valid: true, Bool: false},
 			SchemeUser:                    sql.NullBool{Valid: true, Bool: true},
+			SchemeVerified:                sql.NullBool{Valid: true, Bool: true},
 			SchemeAdmin:                   sql.NullBool{Valid: true, Bool: false},
 			TeamSchemeDefaultUserRole:     sql.NullString{Valid: false},
+			TeamSchemeDefaultVerifiedRole:     sql.NullString{Valid: false},
 			TeamSchemeDefaultAdminRole:    sql.NullString{Valid: false},
 			ChannelSchemeDefaultUserRole:  sql.NullString{Valid: false},
+			ChannelSchemeDefaultVerifiedRole:  sql.NullString{Valid: false},
 			ChannelSchemeDefaultAdminRole: sql.NullString{Valid: false},
 		}
 
 		cm := db.ToModel()
 
-		assert.Equal(t, "custom_role channel_user", cm.Roles)
+		assert.Equal(t, "custom_role channel_user channel_verified", cm.Roles)
 		assert.Equal(t, false, cm.SchemeGuest)
 		assert.Equal(t, true, cm.SchemeUser)
+		assert.Equal(t, true, cm.SchemeVerified)
 		assert.Equal(t, false, cm.SchemeAdmin)
 		assert.Equal(t, "custom_role", cm.ExplicitRoles)
 	})
@@ -375,20 +423,24 @@ func testChannelMemberWithSchemeRolesToModel(t *testing.T) {
 			Roles:                         "custom_role",
 			SchemeGuest:                   sql.NullBool{Valid: true, Bool: false},
 			SchemeUser:                    sql.NullBool{Valid: true, Bool: true},
+			SchemeVerified:                sql.NullBool{Valid: true, Bool: true},
 			SchemeAdmin:                   sql.NullBool{Valid: true, Bool: true},
 			TeamSchemeDefaultGuestRole:    sql.NullString{Valid: false},
 			TeamSchemeDefaultUserRole:     sql.NullString{Valid: false},
+			TeamSchemeDefaultVerifiedRole:     sql.NullString{Valid: false},
 			TeamSchemeDefaultAdminRole:    sql.NullString{Valid: false},
 			ChannelSchemeDefaultGuestRole: sql.NullString{Valid: false},
 			ChannelSchemeDefaultUserRole:  sql.NullString{Valid: false},
+			ChannelSchemeDefaultVerifiedRole:  sql.NullString{Valid: false},
 			ChannelSchemeDefaultAdminRole: sql.NullString{Valid: false},
 		}
 
 		cm := db.ToModel()
 
-		assert.Equal(t, "custom_role channel_user channel_admin", cm.Roles)
+		assert.Equal(t, "custom_role channel_user channel_verified channel_admin", cm.Roles)
 		assert.Equal(t, false, cm.SchemeGuest)
 		assert.Equal(t, true, cm.SchemeUser)
+		assert.Equal(t, true, cm.SchemeVerified)
 		assert.Equal(t, true, cm.SchemeAdmin)
 		assert.Equal(t, "custom_role", cm.ExplicitRoles)
 	})
@@ -398,12 +450,15 @@ func testChannelMemberWithSchemeRolesToModel(t *testing.T) {
 			Roles:                         "custom_role",
 			SchemeGuest:                   sql.NullBool{Valid: true, Bool: true},
 			SchemeUser:                    sql.NullBool{Valid: true, Bool: false},
+			SchemeVerified:                sql.NullBool{Valid: true, Bool: false},
 			SchemeAdmin:                   sql.NullBool{Valid: true, Bool: false},
 			TeamSchemeDefaultGuestRole:    sql.NullString{Valid: false},
 			TeamSchemeDefaultUserRole:     sql.NullString{Valid: false},
+			TeamSchemeDefaultVerifiedRole:     sql.NullString{Valid: false},
 			TeamSchemeDefaultAdminRole:    sql.NullString{Valid: false},
 			ChannelSchemeDefaultGuestRole: sql.NullString{Valid: false},
 			ChannelSchemeDefaultUserRole:  sql.NullString{Valid: false},
+			ChannelSchemeDefaultVerifiedRole:  sql.NullString{Valid: false},
 			ChannelSchemeDefaultAdminRole: sql.NullString{Valid: false},
 		}
 
@@ -412,6 +467,7 @@ func testChannelMemberWithSchemeRolesToModel(t *testing.T) {
 		assert.Equal(t, "custom_role channel_guest", cm.Roles)
 		assert.Equal(t, true, cm.SchemeGuest)
 		assert.Equal(t, false, cm.SchemeUser)
+		assert.Equal(t, false, cm.SchemeVerified)
 		assert.Equal(t, false, cm.SchemeAdmin)
 		assert.Equal(t, "custom_role", cm.ExplicitRoles)
 	})
@@ -421,12 +477,15 @@ func testChannelMemberWithSchemeRolesToModel(t *testing.T) {
 			Roles:                         "",
 			SchemeGuest:                   sql.NullBool{Valid: true, Bool: false},
 			SchemeUser:                    sql.NullBool{Valid: true, Bool: false},
+			SchemeVerified:                sql.NullBool{Valid: true, Bool: false},
 			SchemeAdmin:                   sql.NullBool{Valid: true, Bool: false},
 			TeamSchemeDefaultGuestRole:    sql.NullString{Valid: false},
 			TeamSchemeDefaultUserRole:     sql.NullString{Valid: false},
+			TeamSchemeDefaultVerifiedRole:     sql.NullString{Valid: false},
 			TeamSchemeDefaultAdminRole:    sql.NullString{Valid: false},
 			ChannelSchemeDefaultGuestRole: sql.NullString{Valid: false},
 			ChannelSchemeDefaultUserRole:  sql.NullString{Valid: false},
+			ChannelSchemeDefaultVerifiedRole:  sql.NullString{Valid: false},
 			ChannelSchemeDefaultAdminRole: sql.NullString{Valid: false},
 		}
 
@@ -435,6 +494,7 @@ func testChannelMemberWithSchemeRolesToModel(t *testing.T) {
 		assert.Equal(t, "", cm.Roles)
 		assert.Equal(t, false, cm.SchemeGuest)
 		assert.Equal(t, false, cm.SchemeUser)
+		assert.Equal(t, false, cm.SchemeVerified)
 		assert.Equal(t, false, cm.SchemeAdmin)
 		assert.Equal(t, "", cm.ExplicitRoles)
 	})
@@ -445,20 +505,24 @@ func testChannelMemberWithSchemeRolesToModel(t *testing.T) {
 			Roles:                         "",
 			SchemeGuest:                   sql.NullBool{Valid: true, Bool: false},
 			SchemeUser:                    sql.NullBool{Valid: true, Bool: true},
+			SchemeVerified:                    sql.NullBool{Valid: true, Bool: true},
 			SchemeAdmin:                   sql.NullBool{Valid: true, Bool: false},
 			TeamSchemeDefaultGuestRole:    sql.NullString{Valid: false},
 			TeamSchemeDefaultUserRole:     sql.NullString{Valid: false},
+			TeamSchemeDefaultVerifiedRole:     sql.NullString{Valid: false},
 			TeamSchemeDefaultAdminRole:    sql.NullString{Valid: false},
 			ChannelSchemeDefaultGuestRole: sql.NullString{Valid: true, String: "cscheme_guest"},
 			ChannelSchemeDefaultUserRole:  sql.NullString{Valid: true, String: "cscheme_user"},
+			ChannelSchemeDefaultVerifiedRole:  sql.NullString{Valid: true, String: "cscheme_verified"},
 			ChannelSchemeDefaultAdminRole: sql.NullString{Valid: true, String: "cscheme_admin"},
 		}
 
 		cm := db.ToModel()
 
-		assert.Equal(t, "cscheme_user", cm.Roles)
+		assert.Equal(t, "cscheme_user cscheme_verified", cm.Roles)
 		assert.Equal(t, false, cm.SchemeGuest)
 		assert.Equal(t, true, cm.SchemeUser)
+		assert.Equal(t, true, cm.SchemeVerified)
 		assert.Equal(t, false, cm.SchemeAdmin)
 		assert.Equal(t, "", cm.ExplicitRoles)
 	})
@@ -468,20 +532,24 @@ func testChannelMemberWithSchemeRolesToModel(t *testing.T) {
 			Roles:                         "",
 			SchemeGuest:                   sql.NullBool{Valid: true, Bool: false},
 			SchemeUser:                    sql.NullBool{Valid: true, Bool: true},
+			SchemeVerified:                sql.NullBool{Valid: true, Bool: true},
 			SchemeAdmin:                   sql.NullBool{Valid: true, Bool: true},
 			TeamSchemeDefaultGuestRole:    sql.NullString{Valid: false},
 			TeamSchemeDefaultUserRole:     sql.NullString{Valid: false},
+			TeamSchemeDefaultVerifiedRole:     sql.NullString{Valid: false},
 			TeamSchemeDefaultAdminRole:    sql.NullString{Valid: false},
 			ChannelSchemeDefaultGuestRole: sql.NullString{Valid: true, String: "cscheme_guest"},
 			ChannelSchemeDefaultUserRole:  sql.NullString{Valid: true, String: "cscheme_user"},
+			ChannelSchemeDefaultVerifiedRole:  sql.NullString{Valid: true, String: "cscheme_verified"},
 			ChannelSchemeDefaultAdminRole: sql.NullString{Valid: true, String: "cscheme_admin"},
 		}
 
 		cm := db.ToModel()
 
-		assert.Equal(t, "cscheme_user cscheme_admin", cm.Roles)
+		assert.Equal(t, "cscheme_user cscheme_verified cscheme_admin", cm.Roles)
 		assert.Equal(t, false, cm.SchemeGuest)
 		assert.Equal(t, true, cm.SchemeUser)
+		assert.Equal(t, true, cm.SchemeVerified)
 		assert.Equal(t, true, cm.SchemeAdmin)
 		assert.Equal(t, "", cm.ExplicitRoles)
 	})
@@ -491,12 +559,15 @@ func testChannelMemberWithSchemeRolesToModel(t *testing.T) {
 			Roles:                         "",
 			SchemeGuest:                   sql.NullBool{Valid: true, Bool: true},
 			SchemeUser:                    sql.NullBool{Valid: true, Bool: false},
+			SchemeVerified:                    sql.NullBool{Valid: true, Bool: false},
 			SchemeAdmin:                   sql.NullBool{Valid: true, Bool: false},
 			TeamSchemeDefaultGuestRole:    sql.NullString{Valid: false},
 			TeamSchemeDefaultUserRole:     sql.NullString{Valid: false},
+			TeamSchemeDefaultVerifiedRole:     sql.NullString{Valid: false},
 			TeamSchemeDefaultAdminRole:    sql.NullString{Valid: false},
 			ChannelSchemeDefaultGuestRole: sql.NullString{Valid: true, String: "cscheme_guest"},
 			ChannelSchemeDefaultUserRole:  sql.NullString{Valid: true, String: "cscheme_user"},
+			ChannelSchemeDefaultVerifiedRole:  sql.NullString{Valid: true, String: "cscheme_verified"},
 			ChannelSchemeDefaultAdminRole: sql.NullString{Valid: true, String: "cscheme_admin"},
 		}
 
@@ -505,6 +576,7 @@ func testChannelMemberWithSchemeRolesToModel(t *testing.T) {
 		assert.Equal(t, "cscheme_guest", cm.Roles)
 		assert.Equal(t, true, cm.SchemeGuest)
 		assert.Equal(t, false, cm.SchemeUser)
+		assert.Equal(t, false, cm.SchemeVerified)
 		assert.Equal(t, false, cm.SchemeAdmin)
 		assert.Equal(t, "", cm.ExplicitRoles)
 	})
@@ -514,12 +586,15 @@ func testChannelMemberWithSchemeRolesToModel(t *testing.T) {
 			Roles:                         "custom_role",
 			SchemeGuest:                   sql.NullBool{Valid: true, Bool: false},
 			SchemeUser:                    sql.NullBool{Valid: true, Bool: false},
+			SchemeVerified:                sql.NullBool{Valid: true, Bool: false},
 			SchemeAdmin:                   sql.NullBool{Valid: true, Bool: false},
 			TeamSchemeDefaultGuestRole:    sql.NullString{Valid: false},
 			TeamSchemeDefaultUserRole:     sql.NullString{Valid: false},
+			TeamSchemeDefaultVerifiedRole:     sql.NullString{Valid: false},
 			TeamSchemeDefaultAdminRole:    sql.NullString{Valid: false},
 			ChannelSchemeDefaultGuestRole: sql.NullString{Valid: true, String: "cscheme_guest"},
 			ChannelSchemeDefaultUserRole:  sql.NullString{Valid: true, String: "cscheme_user"},
+			ChannelSchemeDefaultVerifiedRole:  sql.NullString{Valid: true, String: "cscheme_verified"},
 			ChannelSchemeDefaultAdminRole: sql.NullString{Valid: true, String: "cscheme_admin"},
 		}
 
@@ -528,6 +603,7 @@ func testChannelMemberWithSchemeRolesToModel(t *testing.T) {
 		assert.Equal(t, "custom_role", cm.Roles)
 		assert.Equal(t, false, cm.SchemeGuest)
 		assert.Equal(t, false, cm.SchemeUser)
+		assert.Equal(t, false, cm.SchemeVerified)
 		assert.Equal(t, false, cm.SchemeAdmin)
 		assert.Equal(t, "custom_role", cm.ExplicitRoles)
 	})
@@ -537,20 +613,24 @@ func testChannelMemberWithSchemeRolesToModel(t *testing.T) {
 			Roles:                         "custom_role",
 			SchemeGuest:                   sql.NullBool{Valid: true, Bool: false},
 			SchemeUser:                    sql.NullBool{Valid: true, Bool: true},
+			SchemeVerified:                sql.NullBool{Valid: true, Bool: true},
 			SchemeAdmin:                   sql.NullBool{Valid: true, Bool: false},
 			TeamSchemeDefaultGuestRole:    sql.NullString{Valid: false},
 			TeamSchemeDefaultUserRole:     sql.NullString{Valid: false},
+			TeamSchemeDefaultVerifiedRole: sql.NullString{Valid: false},
 			TeamSchemeDefaultAdminRole:    sql.NullString{Valid: false},
 			ChannelSchemeDefaultGuestRole: sql.NullString{Valid: true, String: "cscheme_guest"},
 			ChannelSchemeDefaultUserRole:  sql.NullString{Valid: true, String: "cscheme_user"},
+			ChannelSchemeDefaultVerifiedRole:  sql.NullString{Valid: true, String: "cscheme_verified"},
 			ChannelSchemeDefaultAdminRole: sql.NullString{Valid: true, String: "cscheme_admin"},
 		}
 
 		cm := db.ToModel()
 
-		assert.Equal(t, "custom_role cscheme_user", cm.Roles)
+		assert.Equal(t, "custom_role cscheme_user cscheme_verified", cm.Roles)
 		assert.Equal(t, false, cm.SchemeGuest)
 		assert.Equal(t, true, cm.SchemeUser)
+		assert.Equal(t, true, cm.SchemeVerified)
 		assert.Equal(t, false, cm.SchemeAdmin)
 		assert.Equal(t, "custom_role", cm.ExplicitRoles)
 	})
@@ -560,20 +640,24 @@ func testChannelMemberWithSchemeRolesToModel(t *testing.T) {
 			Roles:                         "custom_role",
 			SchemeGuest:                   sql.NullBool{Valid: true, Bool: false},
 			SchemeUser:                    sql.NullBool{Valid: true, Bool: true},
+			SchemeVerified:                    sql.NullBool{Valid: true, Bool: true},
 			SchemeAdmin:                   sql.NullBool{Valid: true, Bool: true},
 			TeamSchemeDefaultGuestRole:    sql.NullString{Valid: false},
 			TeamSchemeDefaultUserRole:     sql.NullString{Valid: false},
+			TeamSchemeDefaultVerifiedRole:     sql.NullString{Valid: false},
 			TeamSchemeDefaultAdminRole:    sql.NullString{Valid: false},
 			ChannelSchemeDefaultGuestRole: sql.NullString{Valid: true, String: "cscheme_guest"},
 			ChannelSchemeDefaultUserRole:  sql.NullString{Valid: true, String: "cscheme_user"},
+			ChannelSchemeDefaultVerifiedRole:  sql.NullString{Valid: true, String: "cscheme_verified"},
 			ChannelSchemeDefaultAdminRole: sql.NullString{Valid: true, String: "cscheme_admin"},
 		}
 
 		cm := db.ToModel()
 
-		assert.Equal(t, "custom_role cscheme_user cscheme_admin", cm.Roles)
+		assert.Equal(t, "custom_role cscheme_user cscheme_verified cscheme_admin", cm.Roles)
 		assert.Equal(t, false, cm.SchemeGuest)
 		assert.Equal(t, true, cm.SchemeUser)
+		assert.Equal(t, true, cm.SchemeVerified)
 		assert.Equal(t, true, cm.SchemeAdmin)
 		assert.Equal(t, "custom_role", cm.ExplicitRoles)
 	})
@@ -583,12 +667,14 @@ func testChannelMemberWithSchemeRolesToModel(t *testing.T) {
 			Roles:                         "custom_role",
 			SchemeGuest:                   sql.NullBool{Valid: true, Bool: true},
 			SchemeUser:                    sql.NullBool{Valid: true, Bool: false},
+			SchemeVerified:                    sql.NullBool{Valid: true, Bool: false},
 			SchemeAdmin:                   sql.NullBool{Valid: true, Bool: false},
 			TeamSchemeDefaultGuestRole:    sql.NullString{Valid: false},
 			TeamSchemeDefaultUserRole:     sql.NullString{Valid: false},
+			TeamSchemeDefaultVerifiedRole: sql.NullString{Valid: false},
 			TeamSchemeDefaultAdminRole:    sql.NullString{Valid: false},
 			ChannelSchemeDefaultGuestRole: sql.NullString{Valid: true, String: "cscheme_guest"},
-			ChannelSchemeDefaultUserRole:  sql.NullString{Valid: true, String: "cscheme_user"},
+			ChannelSchemeDefaultVerifiedRole:  sql.NullString{Valid: true, String: "cscheme_verified"},
 			ChannelSchemeDefaultAdminRole: sql.NullString{Valid: true, String: "cscheme_admin"},
 		}
 
@@ -597,6 +683,7 @@ func testChannelMemberWithSchemeRolesToModel(t *testing.T) {
 		assert.Equal(t, "custom_role cscheme_guest", cm.Roles)
 		assert.Equal(t, true, cm.SchemeGuest)
 		assert.Equal(t, false, cm.SchemeUser)
+		assert.Equal(t, false, cm.SchemeVerified)
 		assert.Equal(t, false, cm.SchemeAdmin)
 		assert.Equal(t, "custom_role", cm.ExplicitRoles)
 	})
@@ -606,12 +693,15 @@ func testChannelMemberWithSchemeRolesToModel(t *testing.T) {
 			Roles:                         "",
 			SchemeGuest:                   sql.NullBool{Valid: true, Bool: false},
 			SchemeUser:                    sql.NullBool{Valid: true, Bool: false},
+			SchemeVerified:                    sql.NullBool{Valid: true, Bool: false},
 			SchemeAdmin:                   sql.NullBool{Valid: true, Bool: false},
 			TeamSchemeDefaultGuestRole:    sql.NullString{Valid: false},
 			TeamSchemeDefaultUserRole:     sql.NullString{Valid: false},
+			TeamSchemeDefaultVerifiedRole:     sql.NullString{Valid: false},
 			TeamSchemeDefaultAdminRole:    sql.NullString{Valid: false},
 			ChannelSchemeDefaultGuestRole: sql.NullString{Valid: true, String: "cscheme_guest"},
 			ChannelSchemeDefaultUserRole:  sql.NullString{Valid: true, String: "cscheme_user"},
+			ChannelSchemeDefaultVerifiedRole:  sql.NullString{Valid: true, String: "cscheme_verified"},
 			ChannelSchemeDefaultAdminRole: sql.NullString{Valid: true, String: "cscheme_admin"},
 		}
 
@@ -620,6 +710,7 @@ func testChannelMemberWithSchemeRolesToModel(t *testing.T) {
 		assert.Equal(t, "", cm.Roles)
 		assert.Equal(t, false, cm.SchemeGuest)
 		assert.Equal(t, false, cm.SchemeUser)
+		assert.Equal(t, false, cm.SchemeVerified)
 		assert.Equal(t, false, cm.SchemeAdmin)
 		assert.Equal(t, "", cm.ExplicitRoles)
 	})
@@ -630,20 +721,24 @@ func testChannelMemberWithSchemeRolesToModel(t *testing.T) {
 			Roles:                         "",
 			SchemeGuest:                   sql.NullBool{Valid: true, Bool: false},
 			SchemeUser:                    sql.NullBool{Valid: true, Bool: true},
+			SchemeVerified:                sql.NullBool{Valid: true, Bool: true},
 			SchemeAdmin:                   sql.NullBool{Valid: true, Bool: false},
 			TeamSchemeDefaultGuestRole:    sql.NullString{Valid: true, String: "tscheme_channelguest"},
 			TeamSchemeDefaultUserRole:     sql.NullString{Valid: true, String: "tscheme_channeluser"},
+			TeamSchemeDefaultVerifiedRole:     sql.NullString{Valid: true, String: "tscheme_channelverified"},
 			TeamSchemeDefaultAdminRole:    sql.NullString{Valid: true, String: "tscheme_channeladmin"},
 			ChannelSchemeDefaultGuestRole: sql.NullString{Valid: false},
 			ChannelSchemeDefaultUserRole:  sql.NullString{Valid: false},
+			ChannelSchemeDefaultVerifiedRole:  sql.NullString{Valid: false},
 			ChannelSchemeDefaultAdminRole: sql.NullString{Valid: false},
 		}
 
 		cm := db.ToModel()
 
-		assert.Equal(t, "tscheme_channeluser", cm.Roles)
+		assert.Equal(t, "tscheme_channeluser tscheme_channelverified", cm.Roles)
 		assert.Equal(t, false, cm.SchemeGuest)
 		assert.Equal(t, true, cm.SchemeUser)
+		assert.Equal(t, true, cm.SchemeVerified)
 		assert.Equal(t, false, cm.SchemeAdmin)
 		assert.Equal(t, "", cm.ExplicitRoles)
 	})
@@ -653,20 +748,24 @@ func testChannelMemberWithSchemeRolesToModel(t *testing.T) {
 			Roles:                         "",
 			SchemeGuest:                   sql.NullBool{Valid: true, Bool: false},
 			SchemeUser:                    sql.NullBool{Valid: true, Bool: true},
+			SchemeVerified:                sql.NullBool{Valid: true, Bool: true},
 			SchemeAdmin:                   sql.NullBool{Valid: true, Bool: true},
 			TeamSchemeDefaultGuestRole:    sql.NullString{Valid: true, String: "tscheme_channelguest"},
 			TeamSchemeDefaultUserRole:     sql.NullString{Valid: true, String: "tscheme_channeluser"},
+			TeamSchemeDefaultVerifiedRole:     sql.NullString{Valid: true, String: "tscheme_channelverified"},
 			TeamSchemeDefaultAdminRole:    sql.NullString{Valid: true, String: "tscheme_channeladmin"},
 			ChannelSchemeDefaultGuestRole: sql.NullString{Valid: false},
 			ChannelSchemeDefaultUserRole:  sql.NullString{Valid: false},
+			ChannelSchemeDefaultVerifiedRole:  sql.NullString{Valid: false},
 			ChannelSchemeDefaultAdminRole: sql.NullString{Valid: false},
 		}
 
 		cm := db.ToModel()
 
-		assert.Equal(t, "tscheme_channeluser tscheme_channeladmin", cm.Roles)
+		assert.Equal(t, "tscheme_channeluser tscheme_channelverified tscheme_channeladmin", cm.Roles)
 		assert.Equal(t, false, cm.SchemeGuest)
 		assert.Equal(t, true, cm.SchemeUser)
+		assert.Equal(t, true, cm.SchemeVerified)
 		assert.Equal(t, true, cm.SchemeAdmin)
 		assert.Equal(t, "", cm.ExplicitRoles)
 	})
@@ -676,12 +775,15 @@ func testChannelMemberWithSchemeRolesToModel(t *testing.T) {
 			Roles:                         "",
 			SchemeGuest:                   sql.NullBool{Valid: true, Bool: true},
 			SchemeUser:                    sql.NullBool{Valid: true, Bool: false},
+			SchemeVerified:                sql.NullBool{Valid: true, Bool: false},
 			SchemeAdmin:                   sql.NullBool{Valid: true, Bool: false},
 			TeamSchemeDefaultGuestRole:    sql.NullString{Valid: true, String: "tscheme_channelguest"},
 			TeamSchemeDefaultUserRole:     sql.NullString{Valid: true, String: "tscheme_channeluser"},
+			TeamSchemeDefaultVerifiedRole:     sql.NullString{Valid: true, String: "tscheme_channelverified"},
 			TeamSchemeDefaultAdminRole:    sql.NullString{Valid: true, String: "tscheme_channeladmin"},
 			ChannelSchemeDefaultGuestRole: sql.NullString{Valid: false},
 			ChannelSchemeDefaultUserRole:  sql.NullString{Valid: false},
+			ChannelSchemeDefaultVerifiedRole:  sql.NullString{Valid: false},
 			ChannelSchemeDefaultAdminRole: sql.NullString{Valid: false},
 		}
 
@@ -690,6 +792,7 @@ func testChannelMemberWithSchemeRolesToModel(t *testing.T) {
 		assert.Equal(t, "tscheme_channelguest", cm.Roles)
 		assert.Equal(t, true, cm.SchemeGuest)
 		assert.Equal(t, false, cm.SchemeUser)
+		assert.Equal(t, false, cm.SchemeVerified)
 		assert.Equal(t, false, cm.SchemeAdmin)
 		assert.Equal(t, "", cm.ExplicitRoles)
 	})
@@ -699,12 +802,15 @@ func testChannelMemberWithSchemeRolesToModel(t *testing.T) {
 			Roles:                         "custom_role",
 			SchemeGuest:                   sql.NullBool{Valid: true, Bool: false},
 			SchemeUser:                    sql.NullBool{Valid: true, Bool: false},
+			SchemeVerified:                sql.NullBool{Valid: true, Bool: false},
 			SchemeAdmin:                   sql.NullBool{Valid: true, Bool: false},
 			TeamSchemeDefaultGuestRole:    sql.NullString{Valid: true, String: "tscheme_channelguest"},
 			TeamSchemeDefaultUserRole:     sql.NullString{Valid: true, String: "tscheme_channeluser"},
+			TeamSchemeDefaultVerifiedRole:     sql.NullString{Valid: true, String: "tscheme_channelverified"},
 			TeamSchemeDefaultAdminRole:    sql.NullString{Valid: true, String: "tscheme_channeladmin"},
 			ChannelSchemeDefaultGuestRole: sql.NullString{Valid: false},
 			ChannelSchemeDefaultUserRole:  sql.NullString{Valid: false},
+			ChannelSchemeDefaultVerifiedRole:  sql.NullString{Valid: false},
 			ChannelSchemeDefaultAdminRole: sql.NullString{Valid: false},
 		}
 
@@ -713,6 +819,7 @@ func testChannelMemberWithSchemeRolesToModel(t *testing.T) {
 		assert.Equal(t, "custom_role", cm.Roles)
 		assert.Equal(t, false, cm.SchemeGuest)
 		assert.Equal(t, false, cm.SchemeUser)
+		assert.Equal(t, false, cm.SchemeVerified)
 		assert.Equal(t, false, cm.SchemeAdmin)
 		assert.Equal(t, "custom_role", cm.ExplicitRoles)
 	})
@@ -722,20 +829,24 @@ func testChannelMemberWithSchemeRolesToModel(t *testing.T) {
 			Roles:                         "custom_role",
 			SchemeGuest:                   sql.NullBool{Valid: true, Bool: false},
 			SchemeUser:                    sql.NullBool{Valid: true, Bool: true},
+			SchemeVerified:                    sql.NullBool{Valid: true, Bool: true},
 			SchemeAdmin:                   sql.NullBool{Valid: true, Bool: false},
 			TeamSchemeDefaultGuestRole:    sql.NullString{Valid: true, String: "tscheme_channelguest"},
 			TeamSchemeDefaultUserRole:     sql.NullString{Valid: true, String: "tscheme_channeluser"},
+			TeamSchemeDefaultVerifiedRole:     sql.NullString{Valid: true, String: "tscheme_channelverified"},
 			TeamSchemeDefaultAdminRole:    sql.NullString{Valid: true, String: "tscheme_channeladmin"},
 			ChannelSchemeDefaultGuestRole: sql.NullString{Valid: false},
 			ChannelSchemeDefaultUserRole:  sql.NullString{Valid: false},
+			ChannelSchemeDefaultVerifiedRole:  sql.NullString{Valid: false},
 			ChannelSchemeDefaultAdminRole: sql.NullString{Valid: false},
 		}
 
 		cm := db.ToModel()
 
-		assert.Equal(t, "custom_role tscheme_channeluser", cm.Roles)
+		assert.Equal(t, "custom_role tscheme_channeluser tscheme_channelverified", cm.Roles)
 		assert.Equal(t, false, cm.SchemeGuest)
 		assert.Equal(t, true, cm.SchemeUser)
+		assert.Equal(t, true, cm.SchemeVerified)
 		assert.Equal(t, false, cm.SchemeAdmin)
 		assert.Equal(t, "custom_role", cm.ExplicitRoles)
 	})
@@ -745,20 +856,24 @@ func testChannelMemberWithSchemeRolesToModel(t *testing.T) {
 			Roles:                         "custom_role",
 			SchemeGuest:                   sql.NullBool{Valid: true, Bool: false},
 			SchemeUser:                    sql.NullBool{Valid: true, Bool: true},
+			SchemeVerified:                sql.NullBool{Valid: true, Bool: true},
 			SchemeAdmin:                   sql.NullBool{Valid: true, Bool: true},
 			TeamSchemeDefaultGuestRole:    sql.NullString{Valid: true, String: "tscheme_channelguest"},
 			TeamSchemeDefaultUserRole:     sql.NullString{Valid: true, String: "tscheme_channeluser"},
+			TeamSchemeDefaultVerifiedRole: sql.NullString{Valid: true, String: "tscheme_channelverified"},
 			TeamSchemeDefaultAdminRole:    sql.NullString{Valid: true, String: "tscheme_channeladmin"},
 			ChannelSchemeDefaultGuestRole: sql.NullString{Valid: false},
 			ChannelSchemeDefaultUserRole:  sql.NullString{Valid: false},
+			ChannelSchemeDefaultVerifiedRole:  sql.NullString{Valid: false},
 			ChannelSchemeDefaultAdminRole: sql.NullString{Valid: false},
 		}
 
 		cm := db.ToModel()
 
-		assert.Equal(t, "custom_role tscheme_channeluser tscheme_channeladmin", cm.Roles)
+		assert.Equal(t, "custom_role tscheme_channeluser tscheme_channelverified tscheme_channeladmin", cm.Roles)
 		assert.Equal(t, false, cm.SchemeGuest)
 		assert.Equal(t, true, cm.SchemeUser)
+		assert.Equal(t, true, cm.SchemeVerified)
 		assert.Equal(t, true, cm.SchemeAdmin)
 		assert.Equal(t, "custom_role", cm.ExplicitRoles)
 	})
@@ -768,12 +883,15 @@ func testChannelMemberWithSchemeRolesToModel(t *testing.T) {
 			Roles:                         "custom_role",
 			SchemeGuest:                   sql.NullBool{Valid: true, Bool: true},
 			SchemeUser:                    sql.NullBool{Valid: true, Bool: false},
+			SchemeVerified:                sql.NullBool{Valid: true, Bool: false},
 			SchemeAdmin:                   sql.NullBool{Valid: true, Bool: false},
 			TeamSchemeDefaultGuestRole:    sql.NullString{Valid: true, String: "tscheme_channelguest"},
 			TeamSchemeDefaultUserRole:     sql.NullString{Valid: true, String: "tscheme_channeluser"},
+			TeamSchemeDefaultVerifiedRole:     sql.NullString{Valid: true, String: "tscheme_channelverified"},
 			TeamSchemeDefaultAdminRole:    sql.NullString{Valid: true, String: "tscheme_channeladmin"},
 			ChannelSchemeDefaultGuestRole: sql.NullString{Valid: false},
 			ChannelSchemeDefaultUserRole:  sql.NullString{Valid: false},
+			ChannelSchemeDefaultVerifiedRole:  sql.NullString{Valid: false},
 			ChannelSchemeDefaultAdminRole: sql.NullString{Valid: false},
 		}
 
@@ -782,6 +900,7 @@ func testChannelMemberWithSchemeRolesToModel(t *testing.T) {
 		assert.Equal(t, "custom_role tscheme_channelguest", cm.Roles)
 		assert.Equal(t, true, cm.SchemeGuest)
 		assert.Equal(t, false, cm.SchemeUser)
+		assert.Equal(t, false, cm.SchemeVerified)
 		assert.Equal(t, false, cm.SchemeAdmin)
 		assert.Equal(t, "custom_role", cm.ExplicitRoles)
 	})
@@ -791,12 +910,15 @@ func testChannelMemberWithSchemeRolesToModel(t *testing.T) {
 			Roles:                         "",
 			SchemeGuest:                   sql.NullBool{Valid: true, Bool: false},
 			SchemeUser:                    sql.NullBool{Valid: true, Bool: false},
+			SchemeVerified:                sql.NullBool{Valid: true, Bool: false},
 			SchemeAdmin:                   sql.NullBool{Valid: true, Bool: false},
 			TeamSchemeDefaultGuestRole:    sql.NullString{Valid: true, String: "tscheme_channelguest"},
 			TeamSchemeDefaultUserRole:     sql.NullString{Valid: true, String: "tscheme_channeluser"},
+			TeamSchemeDefaultVerifiedRole:     sql.NullString{Valid: true, String: "tscheme_channelverified"},
 			TeamSchemeDefaultAdminRole:    sql.NullString{Valid: true, String: "tscheme_channeladmin"},
 			ChannelSchemeDefaultGuestRole: sql.NullString{Valid: false},
 			ChannelSchemeDefaultUserRole:  sql.NullString{Valid: false},
+			ChannelSchemeDefaultVerifiedRole:  sql.NullString{Valid: false},
 			ChannelSchemeDefaultAdminRole: sql.NullString{Valid: false},
 		}
 
@@ -805,6 +927,7 @@ func testChannelMemberWithSchemeRolesToModel(t *testing.T) {
 		assert.Equal(t, "", cm.Roles)
 		assert.Equal(t, false, cm.SchemeGuest)
 		assert.Equal(t, false, cm.SchemeUser)
+		assert.Equal(t, false, cm.SchemeVerified)
 		assert.Equal(t, false, cm.SchemeAdmin)
 		assert.Equal(t, "", cm.ExplicitRoles)
 	})
@@ -815,20 +938,24 @@ func testChannelMemberWithSchemeRolesToModel(t *testing.T) {
 			Roles:                         "",
 			SchemeGuest:                   sql.NullBool{Valid: true, Bool: false},
 			SchemeUser:                    sql.NullBool{Valid: true, Bool: true},
+			SchemeVerified:                    sql.NullBool{Valid: true, Bool: true},
 			SchemeAdmin:                   sql.NullBool{Valid: true, Bool: false},
 			TeamSchemeDefaultGuestRole:    sql.NullString{Valid: true, String: "tscheme_channelguest"},
 			TeamSchemeDefaultUserRole:     sql.NullString{Valid: true, String: "tscheme_channeluser"},
+			TeamSchemeDefaultVerifiedRole:     sql.NullString{Valid: true, String: "tscheme_channelverified"},
 			TeamSchemeDefaultAdminRole:    sql.NullString{Valid: true, String: "tscheme_channeladmin"},
 			ChannelSchemeDefaultGuestRole: sql.NullString{Valid: true, String: "cscheme_guest"},
 			ChannelSchemeDefaultUserRole:  sql.NullString{Valid: true, String: "cscheme_user"},
+			ChannelSchemeDefaultVerifiedRole:  sql.NullString{Valid: true, String: "cscheme_verified"},
 			ChannelSchemeDefaultAdminRole: sql.NullString{Valid: true, String: "cscheme_admin"},
 		}
 
 		cm := db.ToModel()
 
-		assert.Equal(t, "cscheme_user", cm.Roles)
+		assert.Equal(t, "cscheme_user cscheme_verified", cm.Roles)
 		assert.Equal(t, false, cm.SchemeGuest)
 		assert.Equal(t, true, cm.SchemeUser)
+		assert.Equal(t, true, cm.SchemeVerified)
 		assert.Equal(t, false, cm.SchemeAdmin)
 		assert.Equal(t, "", cm.ExplicitRoles)
 	})
@@ -838,20 +965,24 @@ func testChannelMemberWithSchemeRolesToModel(t *testing.T) {
 			Roles:                         "",
 			SchemeGuest:                   sql.NullBool{Valid: true, Bool: false},
 			SchemeUser:                    sql.NullBool{Valid: true, Bool: true},
+			SchemeVerified:                    sql.NullBool{Valid: true, Bool: true},
 			SchemeAdmin:                   sql.NullBool{Valid: true, Bool: true},
 			TeamSchemeDefaultGuestRole:    sql.NullString{Valid: true, String: "tscheme_channelguest"},
-			TeamSchemeDefaultUserRole:     sql.NullString{Valid: true, String: "tscheme_channeluser"},
+			TeamSchemeDefaultVerifiedRole:     sql.NullString{Valid: true, String: "tscheme_channelverified"},
 			TeamSchemeDefaultAdminRole:    sql.NullString{Valid: true, String: "tscheme_channeladmin"},
 			ChannelSchemeDefaultGuestRole: sql.NullString{Valid: true, String: "cscheme_guest"},
 			ChannelSchemeDefaultUserRole:  sql.NullString{Valid: true, String: "cscheme_user"},
+			ChannelSchemeDefaultVerifiedRole:  sql.NullString{Valid: true, String: "cscheme_verified"},
 			ChannelSchemeDefaultAdminRole: sql.NullString{Valid: true, String: "cscheme_admin"},
 		}
 
 		cm := db.ToModel()
 
-		assert.Equal(t, "cscheme_user cscheme_admin", cm.Roles)
+		// assert.Equal(t, "cscheme_user cscheme_admin", cm.Roles)
+		assert.Equal(t, "cscheme_user cscheme_verified cscheme_admin", cm.Roles)
 		assert.Equal(t, false, cm.SchemeGuest)
 		assert.Equal(t, true, cm.SchemeUser)
+		assert.Equal(t, true, cm.SchemeVerified)
 		assert.Equal(t, true, cm.SchemeAdmin)
 		assert.Equal(t, "", cm.ExplicitRoles)
 	})
@@ -861,12 +992,15 @@ func testChannelMemberWithSchemeRolesToModel(t *testing.T) {
 			Roles:                         "",
 			SchemeGuest:                   sql.NullBool{Valid: true, Bool: true},
 			SchemeUser:                    sql.NullBool{Valid: true, Bool: false},
+			SchemeVerified:                    sql.NullBool{Valid: true, Bool: false},
 			SchemeAdmin:                   sql.NullBool{Valid: true, Bool: false},
 			TeamSchemeDefaultGuestRole:    sql.NullString{Valid: true, String: "tscheme_channelguest"},
 			TeamSchemeDefaultUserRole:     sql.NullString{Valid: true, String: "tscheme_channeluser"},
+			TeamSchemeDefaultVerifiedRole:     sql.NullString{Valid: true, String: "tscheme_channelverified"},
 			TeamSchemeDefaultAdminRole:    sql.NullString{Valid: true, String: "tscheme_channeladmin"},
 			ChannelSchemeDefaultGuestRole: sql.NullString{Valid: true, String: "cscheme_guest"},
 			ChannelSchemeDefaultUserRole:  sql.NullString{Valid: true, String: "cscheme_user"},
+			ChannelSchemeDefaultVerifiedRole:  sql.NullString{Valid: true, String: "cscheme_verified"},
 			ChannelSchemeDefaultAdminRole: sql.NullString{Valid: true, String: "cscheme_admin"},
 		}
 
@@ -875,6 +1009,7 @@ func testChannelMemberWithSchemeRolesToModel(t *testing.T) {
 		assert.Equal(t, "cscheme_guest", cm.Roles)
 		assert.Equal(t, true, cm.SchemeGuest)
 		assert.Equal(t, false, cm.SchemeUser)
+		assert.Equal(t, false, cm.SchemeVerified)
 		assert.Equal(t, false, cm.SchemeAdmin)
 		assert.Equal(t, "", cm.ExplicitRoles)
 	})
@@ -884,12 +1019,15 @@ func testChannelMemberWithSchemeRolesToModel(t *testing.T) {
 			Roles:                         "custom_role",
 			SchemeGuest:                   sql.NullBool{Valid: true, Bool: false},
 			SchemeUser:                    sql.NullBool{Valid: true, Bool: false},
+			SchemeVerified:                    sql.NullBool{Valid: true, Bool: false},
 			SchemeAdmin:                   sql.NullBool{Valid: true, Bool: false},
 			TeamSchemeDefaultGuestRole:    sql.NullString{Valid: true, String: "tscheme_channelguest"},
 			TeamSchemeDefaultUserRole:     sql.NullString{Valid: true, String: "tscheme_channeluser"},
+			TeamSchemeDefaultVerifiedRole:     sql.NullString{Valid: true, String: "tscheme_channelverified"},
 			TeamSchemeDefaultAdminRole:    sql.NullString{Valid: true, String: "tscheme_channeladmin"},
 			ChannelSchemeDefaultGuestRole: sql.NullString{Valid: true, String: "cscheme_guest"},
 			ChannelSchemeDefaultUserRole:  sql.NullString{Valid: true, String: "cscheme_user"},
+			ChannelSchemeDefaultVerifiedRole:  sql.NullString{Valid: true, String: "cscheme_verified"},
 			ChannelSchemeDefaultAdminRole: sql.NullString{Valid: true, String: "cscheme_admin"},
 		}
 
@@ -907,20 +1045,24 @@ func testChannelMemberWithSchemeRolesToModel(t *testing.T) {
 			Roles:                         "custom_role",
 			SchemeGuest:                   sql.NullBool{Valid: true, Bool: false},
 			SchemeUser:                    sql.NullBool{Valid: true, Bool: true},
+			SchemeVerified:                sql.NullBool{Valid: true, Bool: true},
 			SchemeAdmin:                   sql.NullBool{Valid: true, Bool: false},
 			TeamSchemeDefaultGuestRole:    sql.NullString{Valid: true, String: "tscheme_channelguest"},
 			TeamSchemeDefaultUserRole:     sql.NullString{Valid: true, String: "tscheme_channeluser"},
+			TeamSchemeDefaultVerifiedRole:     sql.NullString{Valid: true, String: "tscheme_channelverified"},
 			TeamSchemeDefaultAdminRole:    sql.NullString{Valid: true, String: "tscheme_channeladmin"},
 			ChannelSchemeDefaultGuestRole: sql.NullString{Valid: true, String: "cscheme_guest"},
 			ChannelSchemeDefaultUserRole:  sql.NullString{Valid: true, String: "cscheme_user"},
+			ChannelSchemeDefaultVerifiedRole:  sql.NullString{Valid: true, String: "cscheme_verified"},
 			ChannelSchemeDefaultAdminRole: sql.NullString{Valid: true, String: "cscheme_admin"},
 		}
 
 		cm := db.ToModel()
 
-		assert.Equal(t, "custom_role cscheme_user", cm.Roles)
+		assert.Equal(t, "custom_role cscheme_user cscheme_verified", cm.Roles)
 		assert.Equal(t, false, cm.SchemeGuest)
 		assert.Equal(t, true, cm.SchemeUser)
+		assert.Equal(t, true, cm.SchemeVerified)
 		assert.Equal(t, false, cm.SchemeAdmin)
 		assert.Equal(t, "custom_role", cm.ExplicitRoles)
 	})
@@ -930,20 +1072,24 @@ func testChannelMemberWithSchemeRolesToModel(t *testing.T) {
 			Roles:                         "custom_role",
 			SchemeGuest:                   sql.NullBool{Valid: true, Bool: false},
 			SchemeUser:                    sql.NullBool{Valid: true, Bool: true},
+			SchemeVerified:                sql.NullBool{Valid: true, Bool: true},
 			SchemeAdmin:                   sql.NullBool{Valid: true, Bool: true},
 			TeamSchemeDefaultGuestRole:    sql.NullString{Valid: true, String: "tscheme_channelguest"},
 			TeamSchemeDefaultUserRole:     sql.NullString{Valid: true, String: "tscheme_channeluser"},
+			TeamSchemeDefaultVerifiedRole:     sql.NullString{Valid: true, String: "tscheme_channelverified"},
 			TeamSchemeDefaultAdminRole:    sql.NullString{Valid: true, String: "tscheme_channeladmin"},
 			ChannelSchemeDefaultGuestRole: sql.NullString{Valid: true, String: "cscheme_guest"},
 			ChannelSchemeDefaultUserRole:  sql.NullString{Valid: true, String: "cscheme_user"},
+			ChannelSchemeDefaultVerifiedRole:  sql.NullString{Valid: true, String: "cscheme_verified"},
 			ChannelSchemeDefaultAdminRole: sql.NullString{Valid: true, String: "cscheme_admin"},
 		}
 
 		cm := db.ToModel()
 
-		assert.Equal(t, "custom_role cscheme_user cscheme_admin", cm.Roles)
+		assert.Equal(t, "custom_role cscheme_user cscheme_verified cscheme_admin", cm.Roles)
 		assert.Equal(t, false, cm.SchemeGuest)
 		assert.Equal(t, true, cm.SchemeUser)
+		assert.Equal(t, true, cm.SchemeVerified)
 		assert.Equal(t, true, cm.SchemeAdmin)
 		assert.Equal(t, "custom_role", cm.ExplicitRoles)
 	})
@@ -953,12 +1099,15 @@ func testChannelMemberWithSchemeRolesToModel(t *testing.T) {
 			Roles:                         "custom_role",
 			SchemeGuest:                   sql.NullBool{Valid: true, Bool: true},
 			SchemeUser:                    sql.NullBool{Valid: true, Bool: false},
+			SchemeVerified:                    sql.NullBool{Valid: true, Bool: false},
 			SchemeAdmin:                   sql.NullBool{Valid: true, Bool: false},
 			TeamSchemeDefaultGuestRole:    sql.NullString{Valid: true, String: "tscheme_channelguest"},
 			TeamSchemeDefaultUserRole:     sql.NullString{Valid: true, String: "tscheme_channeluser"},
+			TeamSchemeDefaultVerifiedRole:     sql.NullString{Valid: true, String: "tscheme_channelverified"},
 			TeamSchemeDefaultAdminRole:    sql.NullString{Valid: true, String: "tscheme_channeladmin"},
 			ChannelSchemeDefaultGuestRole: sql.NullString{Valid: true, String: "cscheme_guest"},
 			ChannelSchemeDefaultUserRole:  sql.NullString{Valid: true, String: "cscheme_user"},
+			ChannelSchemeDefaultVerifiedRole:  sql.NullString{Valid: true, String: "cscheme_verified"},
 			ChannelSchemeDefaultAdminRole: sql.NullString{Valid: true, String: "cscheme_admin"},
 		}
 
@@ -967,6 +1116,7 @@ func testChannelMemberWithSchemeRolesToModel(t *testing.T) {
 		assert.Equal(t, "custom_role cscheme_guest", cm.Roles)
 		assert.Equal(t, true, cm.SchemeGuest)
 		assert.Equal(t, false, cm.SchemeUser)
+		assert.Equal(t, false, cm.SchemeVerified)
 		assert.Equal(t, false, cm.SchemeAdmin)
 		assert.Equal(t, "custom_role", cm.ExplicitRoles)
 	})
@@ -976,12 +1126,15 @@ func testChannelMemberWithSchemeRolesToModel(t *testing.T) {
 			Roles:                         "",
 			SchemeGuest:                   sql.NullBool{Valid: true, Bool: false},
 			SchemeUser:                    sql.NullBool{Valid: true, Bool: false},
+			SchemeVerified:                sql.NullBool{Valid: true, Bool: false},
 			SchemeAdmin:                   sql.NullBool{Valid: true, Bool: false},
 			TeamSchemeDefaultGuestRole:    sql.NullString{Valid: true, String: "tscheme_channelguest"},
 			TeamSchemeDefaultUserRole:     sql.NullString{Valid: true, String: "tscheme_channeluser"},
+			TeamSchemeDefaultVerifiedRole: sql.NullString{Valid: true, String: "tscheme_channelverified"},
 			TeamSchemeDefaultAdminRole:    sql.NullString{Valid: true, String: "tscheme_channeladmin"},
 			ChannelSchemeDefaultGuestRole: sql.NullString{Valid: true, String: "cscheme_guest"},
 			ChannelSchemeDefaultUserRole:  sql.NullString{Valid: true, String: "cscheme_user"},
+			ChannelSchemeDefaultVerifiedRole:  sql.NullString{Valid: true, String: "cscheme_verified"},
 			ChannelSchemeDefaultAdminRole: sql.NullString{Valid: true, String: "cscheme_admin"},
 		}
 
@@ -1001,12 +1154,15 @@ func testAllChannelMemberProcess(t *testing.T) {
 			Roles:                         "channel_user",
 			SchemeGuest:                   sql.NullBool{Valid: false, Bool: false},
 			SchemeUser:                    sql.NullBool{Valid: false, Bool: false},
+			SchemeVerified:                    sql.NullBool{Valid: false, Bool: false},
 			SchemeAdmin:                   sql.NullBool{Valid: false, Bool: false},
 			TeamSchemeDefaultGuestRole:    sql.NullString{Valid: false},
 			TeamSchemeDefaultUserRole:     sql.NullString{Valid: false},
+			TeamSchemeDefaultVerifiedRole:     sql.NullString{Valid: false},
 			TeamSchemeDefaultAdminRole:    sql.NullString{Valid: false},
 			ChannelSchemeDefaultGuestRole: sql.NullString{Valid: false},
 			ChannelSchemeDefaultUserRole:  sql.NullString{Valid: false},
+			ChannelSchemeDefaultVerifiedRole:  sql.NullString{Valid: false},
 			ChannelSchemeDefaultAdminRole: sql.NullString{Valid: false},
 		}
 
@@ -1020,12 +1176,15 @@ func testAllChannelMemberProcess(t *testing.T) {
 			Roles:                         "channel_user channel_admin",
 			SchemeGuest:                   sql.NullBool{Valid: false, Bool: false},
 			SchemeUser:                    sql.NullBool{Valid: false, Bool: false},
+			SchemeVerified:                    sql.NullBool{Valid: false, Bool: false},
 			SchemeAdmin:                   sql.NullBool{Valid: false, Bool: false},
 			TeamSchemeDefaultGuestRole:    sql.NullString{Valid: false},
 			TeamSchemeDefaultUserRole:     sql.NullString{Valid: false},
+			TeamSchemeDefaultVerifiedRole:     sql.NullString{Valid: false},
 			TeamSchemeDefaultAdminRole:    sql.NullString{Valid: false},
 			ChannelSchemeDefaultGuestRole: sql.NullString{Valid: false},
 			ChannelSchemeDefaultUserRole:  sql.NullString{Valid: false},
+			ChannelSchemeDefaultVerifiedRole:  sql.NullString{Valid: false},
 			ChannelSchemeDefaultAdminRole: sql.NullString{Valid: false},
 		}
 
@@ -1039,12 +1198,15 @@ func testAllChannelMemberProcess(t *testing.T) {
 			Roles:                         "",
 			SchemeGuest:                   sql.NullBool{Valid: false, Bool: false},
 			SchemeUser:                    sql.NullBool{Valid: false, Bool: false},
+			SchemeVerified:                    sql.NullBool{Valid: false, Bool: false},
 			SchemeAdmin:                   sql.NullBool{Valid: false, Bool: false},
 			TeamSchemeDefaultGuestRole:    sql.NullString{Valid: false},
 			TeamSchemeDefaultUserRole:     sql.NullString{Valid: false},
+			TeamSchemeDefaultVerifiedRole:     sql.NullString{Valid: false},
 			TeamSchemeDefaultAdminRole:    sql.NullString{Valid: false},
 			ChannelSchemeDefaultGuestRole: sql.NullString{Valid: false},
 			ChannelSchemeDefaultUserRole:  sql.NullString{Valid: false},
+			ChannelSchemeDefaultVerifiedRole:  sql.NullString{Valid: false},
 			ChannelSchemeDefaultAdminRole: sql.NullString{Valid: false},
 		}
 
@@ -1058,12 +1220,15 @@ func testAllChannelMemberProcess(t *testing.T) {
 			Roles:                         "custom",
 			SchemeGuest:                   sql.NullBool{Valid: false, Bool: false},
 			SchemeUser:                    sql.NullBool{Valid: false, Bool: false},
+			SchemeVerified:                    sql.NullBool{Valid: false, Bool: false},
 			SchemeAdmin:                   sql.NullBool{Valid: false, Bool: false},
 			TeamSchemeDefaultGuestRole:    sql.NullString{Valid: false},
 			TeamSchemeDefaultUserRole:     sql.NullString{Valid: false},
+			TeamSchemeDefaultVerifiedRole:     sql.NullString{Valid: false},
 			TeamSchemeDefaultAdminRole:    sql.NullString{Valid: false},
 			ChannelSchemeDefaultGuestRole: sql.NullString{Valid: false},
 			ChannelSchemeDefaultUserRole:  sql.NullString{Valid: false},
+			ChannelSchemeDefaultVerifiedRole:  sql.NullString{Valid: false},
 			ChannelSchemeDefaultAdminRole: sql.NullString{Valid: false},
 		}
 
@@ -1077,18 +1242,21 @@ func testAllChannelMemberProcess(t *testing.T) {
 			Roles:                         "",
 			SchemeGuest:                   sql.NullBool{Valid: true, Bool: false},
 			SchemeUser:                    sql.NullBool{Valid: true, Bool: true},
+			SchemeVerified:                    sql.NullBool{Valid: true, Bool: true},
 			SchemeAdmin:                   sql.NullBool{Valid: true, Bool: false},
 			TeamSchemeDefaultGuestRole:    sql.NullString{Valid: false},
 			TeamSchemeDefaultUserRole:     sql.NullString{Valid: false},
+			TeamSchemeDefaultVerifiedRole:     sql.NullString{Valid: false},
 			TeamSchemeDefaultAdminRole:    sql.NullString{Valid: false},
 			ChannelSchemeDefaultGuestRole: sql.NullString{Valid: false},
 			ChannelSchemeDefaultUserRole:  sql.NullString{Valid: false},
+			ChannelSchemeDefaultVerifiedRole:  sql.NullString{Valid: false},
 			ChannelSchemeDefaultAdminRole: sql.NullString{Valid: false},
 		}
 
 		_, roles := db.Process()
 
-		assert.Equal(t, "channel_user", roles)
+		assert.Equal(t, "channel_user channel_verified", roles)
 	})
 
 	t.Run("MigratedNoScheme_Admin", func(t *testing.T) {
@@ -1096,18 +1264,21 @@ func testAllChannelMemberProcess(t *testing.T) {
 			Roles:                         "",
 			SchemeGuest:                   sql.NullBool{Valid: true, Bool: false},
 			SchemeUser:                    sql.NullBool{Valid: true, Bool: true},
+			SchemeVerified:                    sql.NullBool{Valid: true, Bool: true},
 			SchemeAdmin:                   sql.NullBool{Valid: true, Bool: true},
 			TeamSchemeDefaultGuestRole:    sql.NullString{Valid: false},
 			TeamSchemeDefaultUserRole:     sql.NullString{Valid: false},
+			TeamSchemeDefaultVerifiedRole:     sql.NullString{Valid: false},
 			TeamSchemeDefaultAdminRole:    sql.NullString{Valid: false},
 			ChannelSchemeDefaultGuestRole: sql.NullString{Valid: false},
 			ChannelSchemeDefaultUserRole:  sql.NullString{Valid: false},
+			ChannelSchemeDefaultVerifiedRole:  sql.NullString{Valid: false},
 			ChannelSchemeDefaultAdminRole: sql.NullString{Valid: false},
 		}
 
 		_, roles := db.Process()
 
-		assert.Equal(t, "channel_user channel_admin", roles)
+		assert.Equal(t, "channel_user channel_verified channel_admin", roles)
 	})
 
 	t.Run("MigratedNoScheme_Guest", func(t *testing.T) {
@@ -1115,12 +1286,15 @@ func testAllChannelMemberProcess(t *testing.T) {
 			Roles:                         "",
 			SchemeGuest:                   sql.NullBool{Valid: true, Bool: true},
 			SchemeUser:                    sql.NullBool{Valid: true, Bool: false},
+			SchemeVerified:                sql.NullBool{Valid: true, Bool: false},
 			SchemeAdmin:                   sql.NullBool{Valid: true, Bool: false},
 			TeamSchemeDefaultGuestRole:    sql.NullString{Valid: false},
 			TeamSchemeDefaultUserRole:     sql.NullString{Valid: false},
+			TeamSchemeDefaultVerifiedRole: sql.NullString{Valid: false},
 			TeamSchemeDefaultAdminRole:    sql.NullString{Valid: false},
 			ChannelSchemeDefaultGuestRole: sql.NullString{Valid: false},
 			ChannelSchemeDefaultUserRole:  sql.NullString{Valid: false},
+			ChannelSchemeDefaultVerifiedRole:  sql.NullString{Valid: false},
 			ChannelSchemeDefaultAdminRole: sql.NullString{Valid: false},
 		}
 
@@ -1134,12 +1308,15 @@ func testAllChannelMemberProcess(t *testing.T) {
 			Roles:                         "",
 			SchemeGuest:                   sql.NullBool{Valid: true, Bool: false},
 			SchemeUser:                    sql.NullBool{Valid: true, Bool: false},
+			SchemeVerified:                sql.NullBool{Valid: true, Bool: false},
 			SchemeAdmin:                   sql.NullBool{Valid: true, Bool: false},
 			TeamSchemeDefaultGuestRole:    sql.NullString{Valid: false},
 			TeamSchemeDefaultUserRole:     sql.NullString{Valid: false},
+			TeamSchemeDefaultVerifiedRole: sql.NullString{Valid: false},
 			TeamSchemeDefaultAdminRole:    sql.NullString{Valid: false},
 			ChannelSchemeDefaultGuestRole: sql.NullString{Valid: false},
 			ChannelSchemeDefaultUserRole:  sql.NullString{Valid: false},
+			ChannelSchemeDefaultVerifiedRole:  sql.NullString{Valid: false},
 			ChannelSchemeDefaultAdminRole: sql.NullString{Valid: false},
 		}
 
@@ -1153,12 +1330,15 @@ func testAllChannelMemberProcess(t *testing.T) {
 			Roles:                         "",
 			SchemeGuest:                   sql.NullBool{Valid: true, Bool: false},
 			SchemeUser:                    sql.NullBool{Valid: true, Bool: true},
+			SchemeVerified:                sql.NullBool{Valid: true, Bool: false},
 			SchemeAdmin:                   sql.NullBool{Valid: true, Bool: false},
 			TeamSchemeDefaultGuestRole:    sql.NullString{Valid: false},
 			TeamSchemeDefaultUserRole:     sql.NullString{Valid: false},
+			TeamSchemeDefaultVerifiedRole: sql.NullString{Valid: false},
 			TeamSchemeDefaultAdminRole:    sql.NullString{Valid: false},
 			ChannelSchemeDefaultGuestRole: sql.NullString{Valid: true, String: "cscheme_guest"},
 			ChannelSchemeDefaultUserRole:  sql.NullString{Valid: true, String: "cscheme_user"},
+			ChannelSchemeDefaultVerifiedRole:  sql.NullString{Valid: true, String: "cscheme_verified"},
 			ChannelSchemeDefaultAdminRole: sql.NullString{Valid: true, String: "cscheme_admin"},
 		}
 
@@ -1172,18 +1352,21 @@ func testAllChannelMemberProcess(t *testing.T) {
 			Roles:                         "",
 			SchemeGuest:                   sql.NullBool{Valid: true, Bool: false},
 			SchemeUser:                    sql.NullBool{Valid: true, Bool: true},
+			SchemeVerified:                    sql.NullBool{Valid: true, Bool: true},
 			SchemeAdmin:                   sql.NullBool{Valid: true, Bool: true},
 			TeamSchemeDefaultGuestRole:    sql.NullString{Valid: false},
 			TeamSchemeDefaultUserRole:     sql.NullString{Valid: false},
+			TeamSchemeDefaultVerifiedRole:     sql.NullString{Valid: false},
 			TeamSchemeDefaultAdminRole:    sql.NullString{Valid: false},
 			ChannelSchemeDefaultGuestRole: sql.NullString{Valid: true, String: "cscheme_guest"},
 			ChannelSchemeDefaultUserRole:  sql.NullString{Valid: true, String: "cscheme_user"},
+			ChannelSchemeDefaultVerifiedRole:  sql.NullString{Valid: true, String: "cscheme_verified"},
 			ChannelSchemeDefaultAdminRole: sql.NullString{Valid: true, String: "cscheme_admin"},
 		}
 
 		_, roles := db.Process()
 
-		assert.Equal(t, "cscheme_user cscheme_admin", roles)
+		assert.Equal(t, "cscheme_user cscheme_verified cscheme_admin", roles)
 	})
 
 	t.Run("MigratedChannelScheme_Guest", func(t *testing.T) {
@@ -1191,12 +1374,15 @@ func testAllChannelMemberProcess(t *testing.T) {
 			Roles:                         "",
 			SchemeGuest:                   sql.NullBool{Valid: true, Bool: true},
 			SchemeUser:                    sql.NullBool{Valid: true, Bool: false},
+			SchemeVerified:                    sql.NullBool{Valid: true, Bool: false},
 			SchemeAdmin:                   sql.NullBool{Valid: true, Bool: false},
 			TeamSchemeDefaultGuestRole:    sql.NullString{Valid: false},
 			TeamSchemeDefaultUserRole:     sql.NullString{Valid: false},
+			TeamSchemeDefaultVerifiedRole:     sql.NullString{Valid: false},
 			TeamSchemeDefaultAdminRole:    sql.NullString{Valid: false},
 			ChannelSchemeDefaultGuestRole: sql.NullString{Valid: true, String: "cscheme_guest"},
 			ChannelSchemeDefaultUserRole:  sql.NullString{Valid: true, String: "cscheme_user"},
+			ChannelSchemeDefaultVerifiedRole:  sql.NullString{Valid: true, String: "cscheme_verified"},
 			ChannelSchemeDefaultAdminRole: sql.NullString{Valid: true, String: "cscheme_admin"},
 		}
 
@@ -1210,12 +1396,15 @@ func testAllChannelMemberProcess(t *testing.T) {
 			Roles:                         "",
 			SchemeGuest:                   sql.NullBool{Valid: true, Bool: false},
 			SchemeUser:                    sql.NullBool{Valid: true, Bool: false},
+			SchemeVerified:                sql.NullBool{Valid: true, Bool: false},
 			SchemeAdmin:                   sql.NullBool{Valid: true, Bool: false},
 			TeamSchemeDefaultGuestRole:    sql.NullString{Valid: false},
 			TeamSchemeDefaultUserRole:     sql.NullString{Valid: false},
+			TeamSchemeDefaultVerifiedRole: sql.NullString{Valid: false},
 			TeamSchemeDefaultAdminRole:    sql.NullString{Valid: false},
 			ChannelSchemeDefaultGuestRole: sql.NullString{Valid: true, String: "cscheme_guest"},
 			ChannelSchemeDefaultUserRole:  sql.NullString{Valid: true, String: "cscheme_user"},
+			ChannelSchemeDefaultVerifiedRole:  sql.NullString{Valid: true, String: "cscheme_verified"},
 			ChannelSchemeDefaultAdminRole: sql.NullString{Valid: true, String: "cscheme_admin"},
 		}
 
@@ -1229,18 +1418,21 @@ func testAllChannelMemberProcess(t *testing.T) {
 			Roles:                         "",
 			SchemeGuest:                   sql.NullBool{Valid: true, Bool: false},
 			SchemeUser:                    sql.NullBool{Valid: true, Bool: true},
+			SchemeVerified:                sql.NullBool{Valid: true, Bool: true},
 			SchemeAdmin:                   sql.NullBool{Valid: true, Bool: false},
 			TeamSchemeDefaultGuestRole:    sql.NullString{Valid: true, String: "tscheme_channelguest"},
 			TeamSchemeDefaultUserRole:     sql.NullString{Valid: true, String: "tscheme_channeluser"},
+			TeamSchemeDefaultVerifiedRole:     sql.NullString{Valid: true, String: "tscheme_channelverified"},
 			TeamSchemeDefaultAdminRole:    sql.NullString{Valid: true, String: "tscheme_channeladmin"},
 			ChannelSchemeDefaultGuestRole: sql.NullString{Valid: false},
 			ChannelSchemeDefaultUserRole:  sql.NullString{Valid: false},
+			ChannelSchemeDefaultVerifiedRole:  sql.NullString{Valid: false},
 			ChannelSchemeDefaultAdminRole: sql.NullString{Valid: false},
 		}
 
 		_, roles := db.Process()
 
-		assert.Equal(t, "tscheme_channeluser", roles)
+		assert.Equal(t, "tscheme_channeluser tscheme_channelverified", roles)
 	})
 
 	t.Run("MigratedTeamScheme_Admin", func(t *testing.T) {
@@ -1248,18 +1440,21 @@ func testAllChannelMemberProcess(t *testing.T) {
 			Roles:                         "",
 			SchemeGuest:                   sql.NullBool{Valid: true, Bool: false},
 			SchemeUser:                    sql.NullBool{Valid: true, Bool: true},
+			SchemeVerified:                sql.NullBool{Valid: true, Bool: true},
 			SchemeAdmin:                   sql.NullBool{Valid: true, Bool: true},
 			TeamSchemeDefaultGuestRole:    sql.NullString{Valid: true, String: "tscheme_channelguest"},
 			TeamSchemeDefaultUserRole:     sql.NullString{Valid: true, String: "tscheme_channeluser"},
+			TeamSchemeDefaultVerifiedRole:     sql.NullString{Valid: true, String: "tscheme_channelverified"},
 			TeamSchemeDefaultAdminRole:    sql.NullString{Valid: true, String: "tscheme_channeladmin"},
 			ChannelSchemeDefaultGuestRole: sql.NullString{Valid: false},
 			ChannelSchemeDefaultUserRole:  sql.NullString{Valid: false},
+			ChannelSchemeDefaultVerifiedRole:  sql.NullString{Valid: false},
 			ChannelSchemeDefaultAdminRole: sql.NullString{Valid: false},
 		}
 
 		_, roles := db.Process()
 
-		assert.Equal(t, "tscheme_channeluser tscheme_channeladmin", roles)
+		assert.Equal(t, "tscheme_channeluser tscheme_channelverified tscheme_channeladmin", roles)
 	})
 
 	t.Run("MigratedTeamScheme_Guest", func(t *testing.T) {
@@ -1267,12 +1462,15 @@ func testAllChannelMemberProcess(t *testing.T) {
 			Roles:                         "",
 			SchemeGuest:                   sql.NullBool{Valid: true, Bool: true},
 			SchemeUser:                    sql.NullBool{Valid: true, Bool: false},
+			SchemeVerified:                    sql.NullBool{Valid: true, Bool: false},
 			SchemeAdmin:                   sql.NullBool{Valid: true, Bool: false},
 			TeamSchemeDefaultGuestRole:    sql.NullString{Valid: true, String: "tscheme_channelguest"},
 			TeamSchemeDefaultUserRole:     sql.NullString{Valid: true, String: "tscheme_channeluser"},
+			TeamSchemeDefaultVerifiedRole:     sql.NullString{Valid: true, String: "tscheme_channelverified"},
 			TeamSchemeDefaultAdminRole:    sql.NullString{Valid: true, String: "tscheme_channeladmin"},
 			ChannelSchemeDefaultGuestRole: sql.NullString{Valid: false},
 			ChannelSchemeDefaultUserRole:  sql.NullString{Valid: false},
+			ChannelSchemeDefaultVerifiedRole:  sql.NullString{Valid: false},
 			ChannelSchemeDefaultAdminRole: sql.NullString{Valid: false},
 		}
 
@@ -1286,12 +1484,15 @@ func testAllChannelMemberProcess(t *testing.T) {
 			Roles:                         "",
 			SchemeGuest:                   sql.NullBool{Valid: true, Bool: false},
 			SchemeUser:                    sql.NullBool{Valid: true, Bool: false},
+			SchemeVerified:                sql.NullBool{Valid: true, Bool: false},
 			SchemeAdmin:                   sql.NullBool{Valid: true, Bool: false},
 			TeamSchemeDefaultGuestRole:    sql.NullString{Valid: true, String: "tscheme_channelguest"},
 			TeamSchemeDefaultUserRole:     sql.NullString{Valid: true, String: "tscheme_channeluser"},
+			TeamSchemeDefaultVerifiedRole:     sql.NullString{Valid: true, String: "tscheme_channelverified"},
 			TeamSchemeDefaultAdminRole:    sql.NullString{Valid: true, String: "tscheme_channeladmin"},
 			ChannelSchemeDefaultGuestRole: sql.NullString{Valid: false},
 			ChannelSchemeDefaultUserRole:  sql.NullString{Valid: false},
+			ChannelSchemeDefaultVerifiedRole:  sql.NullString{Valid: false},
 			ChannelSchemeDefaultAdminRole: sql.NullString{Valid: false},
 		}
 
@@ -1305,18 +1506,21 @@ func testAllChannelMemberProcess(t *testing.T) {
 			Roles:                         "",
 			SchemeGuest:                   sql.NullBool{Valid: true, Bool: false},
 			SchemeUser:                    sql.NullBool{Valid: true, Bool: true},
+			SchemeVerified:                sql.NullBool{Valid: true, Bool: true},
 			SchemeAdmin:                   sql.NullBool{Valid: true, Bool: false},
 			TeamSchemeDefaultGuestRole:    sql.NullString{Valid: true, String: "tscheme_channelguest"},
 			TeamSchemeDefaultUserRole:     sql.NullString{Valid: true, String: "tscheme_channeluser"},
+			TeamSchemeDefaultVerifiedRole: sql.NullString{Valid: true, String: "tscheme_channelverified"},
 			TeamSchemeDefaultAdminRole:    sql.NullString{Valid: true, String: "tscheme_channeladmin"},
 			ChannelSchemeDefaultGuestRole: sql.NullString{Valid: true, String: "cscheme_guest"},
 			ChannelSchemeDefaultUserRole:  sql.NullString{Valid: true, String: "cscheme_user"},
+			ChannelSchemeDefaultVerifiedRole:  sql.NullString{Valid: true, String: "cscheme_verified"},
 			ChannelSchemeDefaultAdminRole: sql.NullString{Valid: true, String: "cscheme_admin"},
 		}
 
 		_, roles := db.Process()
 
-		assert.Equal(t, "cscheme_user", roles)
+		assert.Equal(t, "cscheme_user cscheme_verified", roles)
 	})
 
 	t.Run("MigratedTeamAndChannelScheme_Admin", func(t *testing.T) {
@@ -1324,18 +1528,21 @@ func testAllChannelMemberProcess(t *testing.T) {
 			Roles:                         "",
 			SchemeGuest:                   sql.NullBool{Valid: true, Bool: false},
 			SchemeUser:                    sql.NullBool{Valid: true, Bool: true},
+			SchemeVerified:                sql.NullBool{Valid: true, Bool: true},
 			SchemeAdmin:                   sql.NullBool{Valid: true, Bool: true},
 			TeamSchemeDefaultGuestRole:    sql.NullString{Valid: true, String: "tscheme_channelguest"},
 			TeamSchemeDefaultUserRole:     sql.NullString{Valid: true, String: "tscheme_channeluser"},
+			TeamSchemeDefaultVerifiedRole: sql.NullString{Valid: true, String: "tscheme_channelverified"},
 			TeamSchemeDefaultAdminRole:    sql.NullString{Valid: true, String: "tscheme_channeladmin"},
 			ChannelSchemeDefaultGuestRole: sql.NullString{Valid: true, String: "cscheme_guest"},
 			ChannelSchemeDefaultUserRole:  sql.NullString{Valid: true, String: "cscheme_user"},
+			ChannelSchemeDefaultVerifiedRole:  sql.NullString{Valid: true, String: "cscheme_verified"},
 			ChannelSchemeDefaultAdminRole: sql.NullString{Valid: true, String: "cscheme_admin"},
 		}
 
 		_, roles := db.Process()
 
-		assert.Equal(t, "cscheme_user cscheme_admin", roles)
+		assert.Equal(t, "cscheme_user cscheme_verified cscheme_admin", roles)
 	})
 
 	t.Run("MigratedTeamAndChannelScheme_Guest", func(t *testing.T) {
@@ -1343,12 +1550,15 @@ func testAllChannelMemberProcess(t *testing.T) {
 			Roles:                         "",
 			SchemeGuest:                   sql.NullBool{Valid: true, Bool: true},
 			SchemeUser:                    sql.NullBool{Valid: true, Bool: false},
+			SchemeVerified:                sql.NullBool{Valid: true, Bool: false},
 			SchemeAdmin:                   sql.NullBool{Valid: true, Bool: false},
 			TeamSchemeDefaultGuestRole:    sql.NullString{Valid: true, String: "tscheme_channelguest"},
 			TeamSchemeDefaultUserRole:     sql.NullString{Valid: true, String: "tscheme_channeluser"},
+			TeamSchemeDefaultVerifiedRole: sql.NullString{Valid: true, String: "tscheme_channelverified"},
 			TeamSchemeDefaultAdminRole:    sql.NullString{Valid: true, String: "tscheme_channeladmin"},
 			ChannelSchemeDefaultGuestRole: sql.NullString{Valid: true, String: "cscheme_guest"},
 			ChannelSchemeDefaultUserRole:  sql.NullString{Valid: true, String: "cscheme_user"},
+			ChannelSchemeDefaultVerifiedRole:  sql.NullString{Valid: true, String: "cscheme_verified"},
 			ChannelSchemeDefaultAdminRole: sql.NullString{Valid: true, String: "cscheme_admin"},
 		}
 
@@ -1362,12 +1572,15 @@ func testAllChannelMemberProcess(t *testing.T) {
 			Roles:                         "",
 			SchemeGuest:                   sql.NullBool{Valid: true, Bool: false},
 			SchemeUser:                    sql.NullBool{Valid: true, Bool: false},
+			SchemeVerified:                sql.NullBool{Valid: true, Bool: false},
 			SchemeAdmin:                   sql.NullBool{Valid: true, Bool: false},
 			TeamSchemeDefaultGuestRole:    sql.NullString{Valid: true, String: "tscheme_channelguest"},
 			TeamSchemeDefaultUserRole:     sql.NullString{Valid: true, String: "tscheme_channeluser"},
+			TeamSchemeDefaultVerifiedRole:     sql.NullString{Valid: true, String: "tscheme_channelverified"},
 			TeamSchemeDefaultAdminRole:    sql.NullString{Valid: true, String: "tscheme_channeladmin"},
 			ChannelSchemeDefaultGuestRole: sql.NullString{Valid: true, String: "cscheme_guest"},
 			ChannelSchemeDefaultUserRole:  sql.NullString{Valid: true, String: "cscheme_user"},
+			ChannelSchemeDefaultVerifiedRole:  sql.NullString{Valid: true, String: "cscheme_verified"},
 			ChannelSchemeDefaultAdminRole: sql.NullString{Valid: true, String: "cscheme_admin"},
 		}
 
@@ -1381,12 +1594,15 @@ func testAllChannelMemberProcess(t *testing.T) {
 			Roles:                         "channel_user",
 			SchemeGuest:                   sql.NullBool{Valid: true, Bool: false},
 			SchemeUser:                    sql.NullBool{Valid: true, Bool: true},
+			SchemeVerified:                sql.NullBool{Valid: true, Bool: false},
 			SchemeAdmin:                   sql.NullBool{Valid: true, Bool: false},
 			TeamSchemeDefaultGuestRole:    sql.NullString{Valid: false},
 			TeamSchemeDefaultUserRole:     sql.NullString{Valid: false},
+			TeamSchemeDefaultVerifiedRole: sql.NullString{Valid: false},
 			TeamSchemeDefaultAdminRole:    sql.NullString{Valid: false},
 			ChannelSchemeDefaultGuestRole: sql.NullString{Valid: false},
 			ChannelSchemeDefaultUserRole:  sql.NullString{Valid: false},
+			ChannelSchemeDefaultVerifiedRole:  sql.NullString{Valid: false},
 			ChannelSchemeDefaultAdminRole: sql.NullString{Valid: false},
 		}
 

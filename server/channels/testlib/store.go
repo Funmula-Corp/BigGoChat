@@ -7,10 +7,10 @@ import (
 	"net/http"
 	"strconv"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store/storetest/mocks"
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin/plugintest/mock"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store/storetest/mocks"
 )
 
 type TestStore struct {
@@ -81,6 +81,7 @@ func GetMockStoreForSetupFunctions() *mocks.Store {
 	systemStore.On("GetByName", "elasticsearch_fix_channel_index_migration").Return(&model.System{Name: "elasticsearch_fix_channel_index_migration", Value: "true"}, nil)
 	systemStore.On("GetByName", model.CustomChannelReadOnlyRoleCreationMigrationKey).Return(&model.System{Name: model.CustomChannelReadOnlyRoleCreationMigrationKey, Value: "true"}, nil)
 	systemStore.On("GetByName", model.CustomSystemVerifiedRoleCreationMigrationKey).Return(&model.System{Name: model.CustomSystemVerifiedRoleCreationMigrationKey, Value: "true"}, nil)
+	systemStore.On("GetByName", model.CustomVerifiedTierMigrationMigrationKey).Return(&model.System{Name: model.CustomSystemVerifiedRoleCreationMigrationKey, Value: "true"}, nil)
 	systemStore.On("InsertIfExists", mock.AnythingOfType("*model.System")).Return(&model.System{}, nil).Once()
 	systemStore.On("Save", mock.AnythingOfType("*model.System")).Return(nil)
 
