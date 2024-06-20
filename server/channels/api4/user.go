@@ -1108,6 +1108,14 @@ func searchUsers(c *Context, w http.ResponseWriter, r *http.Request) {
 		options.AllowMobilephones = *c.App.Config().PrivacySettings.ShowMobilephone
 	}
 
+	if *c.App.Config().PrivacySettings.AllowAnonymousEmailSearch {
+		options.AllowEmails = true
+	}
+
+	if *c.App.Config().PrivacySettings.AllowAnonymousMobilephoneSearch {
+		options.AllowMobilephones = true
+	}
+
 	options, appErr := c.App.RestrictUsersSearchByPermissions(c.AppContext, c.AppContext.Session().UserId, options)
 	if appErr != nil {
 		c.Err = appErr
@@ -1120,20 +1128,20 @@ func searchUsers(c *Context, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// bypass clientside filter on serverside filtered anonymous fields
+	for _, profile := range profiles {
+		if profile.Email == "" && *c.App.Config().PrivacySettings.AllowAnonymousMobilephoneSearch {
+			profile.Email = props.Term
+		}
+		if profile.Mobilephone == "" && *c.App.Config().PrivacySettings.AllowAnonymousMobilephoneSearch {
+			profile.Mobilephone = props.Term
+		}
+	}
+
 	js, err := json.Marshal(profiles)
 	if err != nil {
 		c.Err = model.NewAppError("searchUsers", "api.marshal_error", nil, "", http.StatusInternalServerError).Wrap(err)
 		return
-	}
-
-	// bypass clientside filter on serverside filtered anonymous fields
-	for _, profile := range profiles {
-		if profile.Email == "" {
-			profile.Email = props.Term
-		}
-		if profile.Mobilephone == "" {
-			profile.Mobilephone = props.Term
-		}
 	}
 
 	w.Write(js)

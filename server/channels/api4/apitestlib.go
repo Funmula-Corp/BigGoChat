@@ -23,6 +23,10 @@ import (
 	"github.com/minio/minio-go/v7/pkg/credentials"
 	"github.com/stretchr/testify/require"
 
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin/plugintest/mock"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store/storetest/mocks"
@@ -31,10 +35,6 @@ import (
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/wsapi"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/config"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/services/searchengine"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin/plugintest/mock"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
 )
 
 type TestHelper struct {
@@ -586,12 +586,13 @@ func (th *TestHelper) CreateUserWithClient(client *model.Client4) *model.User {
 	id := model.NewId()
 
 	user := &model.User{
-		Email:     th.GenerateTestEmail(),
-		Username:  GenerateTestUsername(),
-		Nickname:  "nn_" + id,
-		FirstName: "f_" + id,
-		LastName:  "l_" + id,
-		Password:  "Pa$$word11",
+		Email:       th.GenerateTestEmail(),
+		Username:    GenerateTestUsername(),
+		Nickname:    "nn_" + id,
+		FirstName:   "f_" + id,
+		LastName:    "l_" + id,
+		Password:    "Pa$$word11",
+		Mobilephone: th.GenerateTestMobilephone(),
 	}
 
 	ruser, _, err := client.CreateUser(context.Background(), user)
@@ -615,6 +616,7 @@ func (th *TestHelper) CreateUserWithAuth(authService string) *model.User {
 		Nickname:      "nn_" + id,
 		EmailVerified: true,
 		AuthService:   authService,
+		Mobilephone:   th.GenerateTestMobilephone(),
 	}
 	user, err := th.App.CreateUser(th.Context, user)
 	if err != nil {
@@ -636,6 +638,7 @@ func (th *TestHelper) CreateGuestAndClient() (*model.User, *model.Client4) {
 		Nickname:      "guest_" + id,
 		Password:      "Password1",
 		EmailVerified: true,
+		Mobilephone:   th.GenerateTestMobilephone(),
 	})
 	if cgErr != nil {
 		panic(cgErr)
@@ -957,6 +960,15 @@ func (th *TestHelper) GenerateTestEmail() string {
 		return strings.ToLower("success+" + model.NewId() + "@simulator.amazonses.com")
 	}
 	return strings.ToLower(model.NewId() + "@localhost")
+}
+
+func (th *TestHelper) GenerateTestMobilephone() string {
+	var letterRunes = []rune("0123456789")
+	b := make([]rune, 15)
+	for i := range b {
+		b[i] = letterRunes[rand.Intn(len(letterRunes))]
+	}
+	return "886" + string(b)
 }
 
 func (th *TestHelper) CreateGroup() *model.Group {

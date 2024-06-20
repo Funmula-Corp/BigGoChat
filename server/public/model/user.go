@@ -172,6 +172,7 @@ type UserPatch struct {
 	Locale      *string   `json:"locale"`
 	Timezone    StringMap `json:"timezone"`
 	RemoteId    *string   `json:"remote_id"`
+	Mobilephone *string   `json:"mobilephone"`
 }
 
 func (u *UserPatch) Auditable() map[string]interface{} {
@@ -626,6 +627,10 @@ func (u *User) Patch(patch *UserPatch) {
 	if patch.RemoteId != nil {
 		u.RemoteId = patch.RemoteId
 	}
+
+	if patch.Mobilephone != nil {
+		u.Mobilephone = *patch.Mobilephone
+	}
 }
 
 // Generate a valid strong etag so the browser can cache the results
@@ -917,6 +922,7 @@ func (u *User) ToPatch() *UserPatch {
 		Position: &u.Position, Email: &u.Email,
 		Props: u.Props, NotifyProps: u.NotifyProps,
 		Locale: &u.Locale, Timezone: u.Timezone,
+		Mobilephone: &u.Mobilephone,
 	}
 }
 
@@ -934,6 +940,8 @@ func (u *UserPatch) SetField(fieldName string, fieldValue string) {
 		u.Position = &fieldValue
 	case "Username":
 		u.Username = &fieldValue
+	case "Mobilephone":
+		u.Mobilephone = &fieldValue
 	}
 }
 
