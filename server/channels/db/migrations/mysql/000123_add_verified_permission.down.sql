@@ -57,5 +57,3 @@ SET @preparedStatement = (SELECT IF(
 PREPARE addColumnIfExists FROM @preparedStatement;
 EXECUTE addColumnIfExists;
 DEALLOCATE PREPARE addColumnIfExists;
-
-DELETE FROM `Roles` WHERE name in ('team_verified', 'channel_verified');
