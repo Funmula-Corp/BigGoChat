@@ -50,6 +50,15 @@ var ShowRoleCmd = &cobra.Command{
 	RunE:       withClient(showRoleCmdF),
 }
 
+var ShowRolesCmd = &cobra.Command{
+	Use:        "csv",
+	Short:      "List all the role information",
+	Long:       "List all the information of all roles.",
+	Example:    `  permissions csv`,
+	Args:       cobra.ExactArgs(0),
+	RunE:       withClient(showRolesCmdF),
+}
+
 var ResetCmd = &cobra.Command{
 	Use:   "reset <role_name>",
 	Short: "Reset default permissions for role (EE Only)",
@@ -65,6 +74,7 @@ func init() {
 		AddPermissionsCmd,
 		RemovePermissionsCmd,
 		ShowRoleCmd,
+		ShowRolesCmd,
 		ResetCmd,
 	)
 
