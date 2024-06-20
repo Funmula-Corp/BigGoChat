@@ -787,6 +787,7 @@ func TestGetUser(t *testing.T) {
 	// Check against privacy config settings
 	th.App.UpdateConfig(func(cfg *model.Config) { *cfg.PrivacySettings.ShowEmailAddress = false })
 	th.App.UpdateConfig(func(cfg *model.Config) { *cfg.PrivacySettings.ShowFullName = false })
+	th.App.UpdateConfig(func(cfg *model.Config) { *cfg.PrivacySettings.ShowMobilephone = false })
 
 	ruser, _, err := th.Client.GetUser(context.Background(), user.Id, "")
 	require.NoError(t, err)
@@ -794,6 +795,7 @@ func TestGetUser(t *testing.T) {
 	require.Empty(t, ruser.Email, "email should be blank")
 	require.Empty(t, ruser.FirstName, "first name should be blank")
 	require.Empty(t, ruser.LastName, "last name should be blank")
+	require.Empty(t, ruser.Mobilephone, "mobilephone should be blank")
 
 	th.Client.Logout(context.Background())
 	_, resp, err := th.Client.GetUser(context.Background(), user.Id, "")
@@ -805,6 +807,7 @@ func TestGetUser(t *testing.T) {
 	require.NotEmpty(t, ruser.Email, "email should not be blank")
 	require.NotEmpty(t, ruser.FirstName, "first name should not be blank")
 	require.NotEmpty(t, ruser.LastName, "last name should not be blank")
+	require.NotEmpty(t, ruser.Mobilephone, "mobilephone should not be blank")
 }
 
 func TestGetUserWithAcceptedTermsOfServiceForOtherUser(t *testing.T) {

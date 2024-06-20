@@ -27,6 +27,7 @@ func TestUserStoreCache(t *testing.T) {
 		Id:          "123",
 		AuthData:    model.NewString("authData"),
 		AuthService: "authService",
+		Mobilephone: "+8860900000000",
 	}}
 
 	t.Run("first call not cached, second cached and returning same data", func(t *testing.T) {
