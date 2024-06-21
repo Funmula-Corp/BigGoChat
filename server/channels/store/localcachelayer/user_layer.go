@@ -9,9 +9,10 @@ import (
 	"sort"
 	"sync"
 
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store/sqlstore"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 )
 
 type LocalCacheUserStore struct {
@@ -178,6 +179,10 @@ func (s *LocalCacheUserStore) GetProfileByIds(ctx context.Context, userIds []str
 			ctx = sqlstore.WithMaster(ctx)
 		}
 		remainingUsers, err := s.UserStore.GetProfileByIds(ctx, remainingUserIds, options, false)
+		mlog.Warn("DEBUGGING",
+			mlog.Any("remainingUserIds", remainingUserIds),
+			mlog.Any("remainingUsers", remainingUsers),
+		)
 		if err != nil {
 			return nil, err
 		}

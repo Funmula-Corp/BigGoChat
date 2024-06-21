@@ -1289,7 +1289,7 @@ func TestSearchUsers(t *testing.T) {
 
 	require.False(t, findUserInList(th.BasicUser2.Id, users), "should not have found user")
 
-	search.Term = th.BasicUser2.Mobilephone
+	search.Term = *th.BasicUser2.Mobilephone
 	users, _, err = th.Client.SearchUsers(context.Background(), search)
 	require.NoError(t, err)
 
