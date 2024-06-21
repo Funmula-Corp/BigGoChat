@@ -886,7 +886,7 @@ export function removeDeleteBySelfPostBlock(block: PostOrderBlock, posts: Record
     return {
         ...block,
         order: removeDeleteBySelfPostBlockOrder(block.order, posts),
-    }
+    };
 }
 
 export function removeDeleteBySelfPostBlocks(blocks: PostOrderBlock[], posts: Record<string, Post>) {
