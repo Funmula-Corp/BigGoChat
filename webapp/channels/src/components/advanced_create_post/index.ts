@@ -57,6 +57,7 @@ import type {PostDraft} from 'types/store/draft';
 import type {GlobalState} from 'types/store/index.js';
 
 import AdvancedCreatePost from './advanced_create_post';
+import { haveIVerified } from 'mattermost-redux/selectors/entities/roles_helpers';
 
 function makeMapStateToProps() {
     const getMessageInHistoryItem = makeGetMessageInHistoryItem(Posts.MESSAGE_TYPES.POST as any);
@@ -65,6 +66,7 @@ function makeMapStateToProps() {
     return (state: GlobalState) => {
         const config = getConfig(state);
         const license = getLicense(state);
+        const isPhoneVerified = haveIVerified(state);
         const currentChannel = getCurrentChannel(state);
         const currentChannelTeammateUsername = currentChannel ? getUser(state, currentChannel.teammate_id || '')?.username : undefined;
         const draft = getChannelDraft(state, currentChannel?.id || '');
@@ -77,7 +79,7 @@ function makeMapStateToProps() {
         const currentUserId = getCurrentUserId(state);
         const userIsOutOfOffice = getStatusForUserId(state, currentUserId) === UserStatuses.OUT_OF_OFFICE;
         const badConnection = connectionErrorCount(state) > 1;
-        const canPost = haveICurrentChannelPermission(state, Permissions.CREATE_POST);
+        const canPost = isPhoneVerified && haveICurrentChannelPermission(state, Permissions.CREATE_POST);
         const useChannelMentions = haveICurrentChannelPermission(state, Permissions.USE_CHANNEL_MENTIONS);
         const isLDAPEnabled = license?.IsLicensed === 'true' && license?.LDAPGroups === 'true';
         const useCustomGroupMentions = isCustomGroupsEnabled(state) && haveICurrentChannelPermission(state, Permissions.USE_GROUP_MENTIONS);
@@ -134,6 +136,7 @@ function makeMapStateToProps() {
             useCustomGroupMentions,
             isPostPriorityEnabled: isPostPriorityEnabled(state),
             postEditorActions,
+            isPhoneVerified,
         };
     };
 }

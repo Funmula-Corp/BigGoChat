@@ -196,6 +196,9 @@ func (us SqlUserStore) Update(rctx request.CTX, user *model.User, trustedUpdateD
 	user.MfaSecret = oldUser.MfaSecret
 	user.MfaActive = oldUser.MfaActive
 	user.LastLogin = oldUser.LastLogin
+	if user.Mobilephone == nil || *user.Mobilephone == "" {
+		user.Mobilephone = oldUser.Mobilephone
+	}
 
 	if !trustedUpdateData {
 		user.Roles = oldUser.Roles
@@ -875,7 +878,14 @@ func (us SqlUserStore) GetAllProfilesInChannel(ctx context.Context, channelID st
 	for rows.Next() {
 		var user model.User
 		var props, notifyProps, timezone []byte
-		if err = rows.Scan(&user.Id, &user.CreateAt, &user.UpdateAt, &user.DeleteAt, &user.Username, &user.Password, &user.AuthData, &user.AuthService, &user.Email, &user.EmailVerified, &user.Nickname, &user.FirstName, &user.LastName, &user.Position, &user.Roles, &user.AllowMarketing, &props, &notifyProps, &user.LastPasswordUpdate, &user.LastPictureUpdate, &user.FailedAttempts, &user.Locale, &timezone, &user.MfaActive, &user.MfaSecret, &user.IsBot, &user.BotDescription, &user.BotLastIconUpdate, &user.RemoteId, &user.LastLogin); err != nil {
+		if err = rows.Scan(
+			&user.Id, &user.CreateAt, &user.UpdateAt, &user.DeleteAt, &user.Username, &user.Password,
+			&user.AuthData, &user.AuthService, &user.Email, &user.EmailVerified, &user.Nickname,
+			&user.FirstName, &user.LastName, &user.Position, &user.Roles, &user.AllowMarketing,
+			&props, &notifyProps, &user.LastPasswordUpdate, &user.LastPictureUpdate, &user.FailedAttempts,
+			&user.Locale, &timezone, &user.MfaActive, &user.MfaSecret, &user.IsBot, &user.BotDescription,
+			&user.BotLastIconUpdate, &user.RemoteId, &user.LastLogin, &user.Mobilephone,
+		); err != nil {
 			return nil, errors.Wrap(err, "failed to scan values from rows into User entity")
 		}
 		if err = json.Unmarshal(props, &user.Props); err != nil {
@@ -1642,17 +1652,9 @@ func (us SqlUserStore) performSearch(query sq.SelectBuilder, term string, option
 	// ===========================================================================
 	// generally allow the search via email address and via phone number thrue API
 	// ===========================================================================
-	var found bool
-	for _, sType := range searchType {
-		if sType == "Email" {
-			found = true
-			break
-		}
+	if options.AllowMobilephones {
+		searchType = append(searchType, "Mobilephone")
 	}
-	if !found {
-		searchType = append(searchType, "Email")
-	}
-	searchType = append(searchType, "Mobilephone")
 	// ===========================================================================
 
 	isPostgreSQL := us.DriverName() == model.DatabaseDriverPostgres

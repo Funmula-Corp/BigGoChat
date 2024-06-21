@@ -170,6 +170,9 @@ export type Props = {
     // Called when parent component should be scrolled to bottom
     scrollToBottom?: () => void;
 
+    // phone verified
+    isPhoneVerified: boolean;
+
     // Group member mention
     getChannelMemberCountsByGroup: (channelID: string) => void;
     groupsWithAllowReference: Map<string, Group> | null;
@@ -1121,6 +1124,7 @@ class AdvancedCreateComment extends React.PureComponent<Props, State> {
                     onMessageChange={this.onMessageChange}
                     caretPosition={this.state.caretPosition}
                     placeholder={this.props.placeholder}
+                    isPhoneVerified={this.props.isPhoneVerified}
                 />
             </form>
         );

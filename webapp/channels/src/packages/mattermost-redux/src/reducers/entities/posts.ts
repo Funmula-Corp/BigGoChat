@@ -196,6 +196,10 @@ export function handlePosts(state: IDMappedObjects<Post> = {}, action: AnyAction
                 state: Posts.POST_DELETED,
                 file_ids: [],
                 has_reactions: false,
+                props: {
+                    ...state[post.id].props,
+                    deleteBy: action.data.props.deleteBy,
+                }
             },
         };
 
@@ -349,14 +353,12 @@ function handlePostReceived(nextState: any, post: Post, nestedPermalinkLevel?: n
 
     if (post.delete_at > 0) {
         // We've received a deleted post, so mark the post as deleted if we already have it
-        if (currentState[post.id] || post.props.deleteBy !== post.user_id) {
-            currentState[post.id] = {
-                ...removeUnneededMetadata(post),
-                state: Posts.POST_DELETED,
-                file_ids: [],
-                has_reactions: false,
-            };
-        }
+        currentState[post.id] = {
+            ...removeUnneededMetadata(post),
+            state: Posts.POST_DELETED,
+            file_ids: [],
+            has_reactions: false,
+        };
     } else if (post.metadata && post.metadata.embeds) {
         post.metadata.embeds.forEach((embed) => {
             if (embed.type === 'permalink') {
@@ -683,7 +685,6 @@ export function postsInChannel(state: Record<string, PostOrderBlock[]> = {}, act
 
         let nextPostsForChannel = [...postsForChannel, newBlock];
         nextPostsForChannel = mergePostBlocks(nextPostsForChannel, nextPosts);
-
         return {
             ...state,
             [action.channelId]: nextPostsForChannel,
@@ -773,7 +774,7 @@ export function postsInChannel(state: Record<string, PostOrderBlock[]> = {}, act
             const block = nextPostsForChannel[i];
 
             // Remove any comments for this post
-            const nextOrder = block.order.filter((postId: string) => prevPosts[postId]?.root_id !== post.id);
+            const nextOrder = block.order.filter((postId: string) => prevPosts[postId].root_id !== post.id);
 
             if (nextOrder.length !== block.order.length) {
                 nextPostsForChannel[i] = {
@@ -815,7 +816,7 @@ export function postsInChannel(state: Record<string, PostOrderBlock[]> = {}, act
         for (let i = 0; i < nextPostsForChannel.length; i++) {
             const block = nextPostsForChannel[i];
 
-            const nextOrder = block.order.filter((postId: string) => postId !== post.id && prevPosts[postId]?.root_id !== post.id);
+            const nextOrder = block.order.filter((postId: string) => postId !== post.id && prevPosts[postId].root_id !== post.id);
 
             if (nextOrder.length !== block.order.length) {
                 nextPostsForChannel[i] = {
@@ -873,11 +874,24 @@ export function removeNonRecentEmptyPostBlocks(blocks: PostOrderBlock[]) {
     return blocks.filter((block: PostOrderBlock) => block.order.length !== 0 || block.recent);
 }
 
+export function removeDeleteBySelfPostBlocks(blocks: PostOrderBlock[], posts: Record<string, Post>) {
+    return blocks.map((block: PostOrderBlock) => ({
+        ...block,
+        order: block.order.filter((postId: string) => posts[postId].props.deleteBy !== posts[postId].user_id),
+    } as PostOrderBlock));
+}
+
+export function IsBlocksEqual(blocks: PostOrderBlock[], otherBlocks: PostOrderBlock[]) {
+    return blocks.length === otherBlocks.length &&
+        blocks.every((block, i) => block.order.length == otherBlocks[i].order.length);
+}
+
 export function mergePostBlocks(blocks: PostOrderBlock[], posts: Record<string, Post>) {
     let nextBlocks = [...blocks];
 
+    nextBlocks = removeDeleteBySelfPostBlocks(nextBlocks, posts);
     // Remove any blocks that may have become empty by removing posts
-    nextBlocks = removeNonRecentEmptyPostBlocks(blocks);
+    nextBlocks = removeNonRecentEmptyPostBlocks(nextBlocks);
 
     // If a channel does not have any posts(Experimental feature where join and leave messages don't exist)
     // return the previous state i.e an empty block
@@ -922,7 +936,7 @@ export function mergePostBlocks(blocks: PostOrderBlock[], posts: Record<string, 
         }
     }
 
-    if (blocks.length === nextBlocks.length) {
+    if (IsBlocksEqual(blocks, nextBlocks)) {
         // No changes were made
         return blocks;
     }

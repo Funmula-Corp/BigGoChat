@@ -1996,22 +1996,32 @@ func (s *RateLimitSettings) SetDefaults() {
 }
 
 type PrivacySettings struct {
-	ShowEmailAddress *bool `access:"site_users_and_teams"`
-	ShowFullName     *bool `access:"site_users_and_teams"`
-	ShowMobilephone  *bool `access:"site_users_and_teams"`
+	ShowEmailAddress                *bool `access:"site_users_and_teams"`
+	ShowFullName                    *bool `access:"site_users_and_teams"`
+	ShowMobilephone                 *bool `access:"site_users_and_teams"`
+	AllowAnonymousEmailSearch       *bool `access:"site_users_and_teams"`
+	AllowAnonymousMobilephoneSearch *bool `access:"site_users_and_teams"`
 }
 
 func (s *PrivacySettings) setDefaults() {
 	if s.ShowEmailAddress == nil {
-		s.ShowEmailAddress = NewBool(false)
+		s.ShowEmailAddress = NewBool(true)
 	}
 
 	if s.ShowFullName == nil {
-		s.ShowFullName = NewBool(false)
+		s.ShowFullName = NewBool(true)
 	}
 
 	if s.ShowMobilephone == nil {
-		s.ShowMobilephone = NewBool(false)
+		s.ShowMobilephone = NewBool(true)
+	}
+
+	if s.AllowAnonymousEmailSearch == nil {
+		s.AllowAnonymousEmailSearch = NewBool(false)
+	}
+
+	if s.AllowAnonymousMobilephoneSearch == nil {
+		s.AllowAnonymousMobilephoneSearch = NewBool(false)
 	}
 }
 

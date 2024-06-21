@@ -51,6 +51,12 @@
         }
     }
 
+    &.not-verified {
+        .custom-textarea {
+            text-align: center;
+        }
+    }
+
     /* stylelint-disable length-zero-no-unit */
     --right-padding-for-scrollbar: 0px;
     --right-padding-for-preview-button: 0px;
@@ -194,6 +200,13 @@
             font-size: 0.85em;
             font-weight: normal;
         }
+    }
+
+    &__verified-button {
+        display: flex;
+        justify-content: center;
+        padding-bottom: 8px;
+        background-color: rgba(63, 67, 80, 0.1);
     }
 }
 

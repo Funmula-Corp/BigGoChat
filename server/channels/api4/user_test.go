@@ -21,11 +21,11 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/utils/testutils"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/einterfaces/mocks"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/shared/mail"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 
 	_ "git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app/oauthproviders/gitlab"
 )
@@ -787,6 +787,7 @@ func TestGetUser(t *testing.T) {
 	// Check against privacy config settings
 	th.App.UpdateConfig(func(cfg *model.Config) { *cfg.PrivacySettings.ShowEmailAddress = false })
 	th.App.UpdateConfig(func(cfg *model.Config) { *cfg.PrivacySettings.ShowFullName = false })
+	th.App.UpdateConfig(func(cfg *model.Config) { *cfg.PrivacySettings.ShowMobilephone = false })
 
 	ruser, _, err := th.Client.GetUser(context.Background(), user.Id, "")
 	require.NoError(t, err)
@@ -794,6 +795,7 @@ func TestGetUser(t *testing.T) {
 	require.Empty(t, ruser.Email, "email should be blank")
 	require.Empty(t, ruser.FirstName, "first name should be blank")
 	require.Empty(t, ruser.LastName, "last name should be blank")
+	require.Empty(t, ruser.Mobilephone, "mobilephone should be blank")
 
 	th.Client.Logout(context.Background())
 	_, resp, err := th.Client.GetUser(context.Background(), user.Id, "")
@@ -805,6 +807,7 @@ func TestGetUser(t *testing.T) {
 	require.NotEmpty(t, ruser.Email, "email should not be blank")
 	require.NotEmpty(t, ruser.FirstName, "first name should not be blank")
 	require.NotEmpty(t, ruser.LastName, "last name should not be blank")
+	require.NotEmpty(t, ruser.Mobilephone, "mobilephone should not be blank")
 }
 
 func TestGetUserWithAcceptedTermsOfServiceForOtherUser(t *testing.T) {
@@ -1259,6 +1262,9 @@ func TestSearchUsers(t *testing.T) {
 
 	th.App.UpdateConfig(func(cfg *model.Config) { *cfg.PrivacySettings.ShowEmailAddress = false })
 	th.App.UpdateConfig(func(cfg *model.Config) { *cfg.PrivacySettings.ShowFullName = false })
+	th.App.UpdateConfig(func(cfg *model.Config) { *cfg.PrivacySettings.ShowMobilephone = false })
+	th.App.UpdateConfig(func(cfg *model.Config) { *cfg.PrivacySettings.AllowAnonymousEmailSearch = false })
+	th.App.UpdateConfig(func(cfg *model.Config) { *cfg.PrivacySettings.AllowAnonymousMobilephoneSearch = false })
 
 	_, appErr = th.App.UpdateActive(th.Context, th.BasicUser2, true)
 	require.Nil(t, appErr)
@@ -1278,6 +1284,12 @@ func TestSearchUsers(t *testing.T) {
 	require.False(t, findUserInList(th.BasicUser2.Id, users), "should not have found user")
 
 	search.Term = th.BasicUser2.LastName
+	users, _, err = th.Client.SearchUsers(context.Background(), search)
+	require.NoError(t, err)
+
+	require.False(t, findUserInList(th.BasicUser2.Id, users), "should not have found user")
+
+	search.Term = *th.BasicUser2.Mobilephone
 	users, _, err = th.Client.SearchUsers(context.Background(), search)
 	require.NoError(t, err)
 
