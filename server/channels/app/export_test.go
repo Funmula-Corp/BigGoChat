@@ -820,6 +820,9 @@ func TestExportRoles(t *testing.T) {
 
 		th2 := Setup(t)
 		defer th2.TearDown()
+		err := th2.App.Srv().Store().System().Save(&model.System{Name: model.MigrationKeyAdvancedPermissionsPhase2, Value: "true"})
+		require.NoError(t, err)
+
 		appErr, i := th2.App.BulkImport(th2.Context, &b, nil, false, 1)
 		assert.Nil(t, appErr)
 		assert.Equal(t, 0, i)
@@ -851,6 +854,9 @@ func TestExportRoles(t *testing.T) {
 
 		th2 := Setup(t)
 		defer th2.TearDown()
+		err := th2.App.Srv().Store().System().Save(&model.System{Name: model.MigrationKeyAdvancedPermissionsPhase2, Value: "true"})
+		require.NoError(t, err)
+
 		appErr, i := th2.App.BulkImport(th2.Context, &b, nil, false, 1)
 		require.Nil(t, appErr)
 		require.Equal(t, 0, i)
@@ -888,6 +894,9 @@ func TestExportRoles(t *testing.T) {
 
 		th2 := Setup(t)
 		defer th2.TearDown()
+		err := th2.App.Srv().Store().System().Save(&model.System{Name: model.MigrationKeyAdvancedPermissionsPhase2, Value: "true"})
+		require.NoError(t, err)
+
 		appErr, i := th2.App.BulkImport(th2.Context, &b, nil, false, 1)
 		require.Nil(t, appErr)
 		require.Equal(t, 0, i)
@@ -915,7 +924,7 @@ func TestExportSchemes(t *testing.T) {
 
 		schemes, err := th1.App.Srv().Store().Scheme().GetAllPage(model.SchemeScopeChannel, 0, 1)
 		require.NoError(t, err)
-		require.Empty(t, schemes)
+		require.Len(t, schemes, 1)
 
 		schemes, err = th1.App.Srv().Store().Scheme().GetAllPage(model.SchemeScopeTeam, 0, 1)
 		require.NoError(t, err)
@@ -940,7 +949,7 @@ func TestExportSchemes(t *testing.T) {
 
 		schemes, err = th2.App.Srv().Store().Scheme().GetAllPage(model.SchemeScopeChannel, 0, 1)
 		require.NoError(t, err)
-		require.Empty(t, schemes)
+		require.Len(t, schemes, 1)
 
 		schemes, err = th2.App.Srv().Store().Scheme().GetAllPage(model.SchemeScopeTeam, 0, 1)
 		require.NoError(t, err)
