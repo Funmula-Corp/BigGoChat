@@ -6,7 +6,7 @@ package main
 import (
 	"net/http"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
+	"github.com/mattermost/mattermost/server/public/plugin"
 )
 
 type Plugin struct {
