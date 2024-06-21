@@ -1133,8 +1133,8 @@ func searchUsers(c *Context, w http.ResponseWriter, r *http.Request) {
 		if profile.Email == "" && *c.App.Config().PrivacySettings.AllowAnonymousMobilephoneSearch {
 			profile.Email = props.Term
 		}
-		if profile.Mobilephone == "" && *c.App.Config().PrivacySettings.AllowAnonymousMobilephoneSearch {
-			profile.Mobilephone = props.Term
+		if (profile.Mobilephone == nil || *profile.Mobilephone == "") && *c.App.Config().PrivacySettings.AllowAnonymousMobilephoneSearch {
+			profile.Mobilephone = &props.Term
 		}
 	}
 

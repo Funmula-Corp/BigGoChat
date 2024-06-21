@@ -215,10 +215,22 @@ func (z *User) DecodeMsg(dc *msgp.Reader) (err error) {
 		err = msgp.WrapError(err, "LastLogin")
 		return
 	}
-	z.Mobilephone, err = dc.ReadString()
-	if err != nil {
-		err = msgp.WrapError(err, "Mobilephone")
-		return
+	if dc.IsNil() {
+		err = dc.ReadNil()
+		if err != nil {
+			err = msgp.WrapError(err, "Mobilephone")
+			return
+		}
+		z.Mobilephone = nil
+	} else {
+		if z.Mobilephone == nil {
+			z.Mobilephone = new(string)
+		}
+		*z.Mobilephone, err = dc.ReadString()
+		if err != nil {
+			err = msgp.WrapError(err, "Mobilephone")
+			return
+		}
 	}
 	return
 }
@@ -414,10 +426,17 @@ func (z *User) EncodeMsg(en *msgp.Writer) (err error) {
 		err = msgp.WrapError(err, "LastLogin")
 		return
 	}
-	err = en.WriteString(z.Mobilephone)
-	if err != nil {
-		err = msgp.WrapError(err, "Mobilephone")
-		return
+	if z.Mobilephone == nil {
+		err = en.WriteNil()
+		if err != nil {
+			return
+		}
+	} else {
+		err = en.WriteString(*z.Mobilephone)
+		if err != nil {
+			err = msgp.WrapError(err, "Mobilephone")
+			return
+		}
 	}
 	return
 }
@@ -481,7 +500,11 @@ func (z *User) MarshalMsg(b []byte) (o []byte, err error) {
 	o = msgp.AppendInt64(o, z.TermsOfServiceCreateAt)
 	o = msgp.AppendBool(o, z.DisableWelcomeEmail)
 	o = msgp.AppendInt64(o, z.LastLogin)
-	o = msgp.AppendString(o, z.Mobilephone)
+	if z.Mobilephone == nil {
+		o = msgp.AppendNil(o)
+	} else {
+		o = msgp.AppendString(o, *z.Mobilephone)
+	}
 	return
 }
 
@@ -689,10 +712,21 @@ func (z *User) UnmarshalMsg(bts []byte) (o []byte, err error) {
 		err = msgp.WrapError(err, "LastLogin")
 		return
 	}
-	z.Mobilephone, bts, err = msgp.ReadStringBytes(bts)
-	if err != nil {
-		err = msgp.WrapError(err, "Mobilephone")
-		return
+	if msgp.IsNil(bts) {
+		bts, err = msgp.ReadNilBytes(bts)
+		if err != nil {
+			return
+		}
+		z.Mobilephone = nil
+	} else {
+		if z.Mobilephone == nil {
+			z.Mobilephone = new(string)
+		}
+		*z.Mobilephone, bts, err = msgp.ReadStringBytes(bts)
+		if err != nil {
+			err = msgp.WrapError(err, "Mobilephone")
+			return
+		}
 	}
 	o = bts
 	return
@@ -712,7 +746,12 @@ func (z *User) Msgsize() (s int) {
 	} else {
 		s += msgp.StringPrefixSize + len(*z.RemoteId)
 	}
-	s += msgp.Int64Size + msgp.BoolSize + msgp.StringPrefixSize + len(z.BotDescription) + msgp.Int64Size + msgp.StringPrefixSize + len(z.TermsOfServiceId) + msgp.Int64Size + msgp.BoolSize + msgp.Int64Size + msgp.StringPrefixSize + len(z.Mobilephone)
+	s += msgp.Int64Size + msgp.BoolSize + msgp.StringPrefixSize + len(z.BotDescription) + msgp.Int64Size + msgp.StringPrefixSize + len(z.TermsOfServiceId) + msgp.Int64Size + msgp.BoolSize + msgp.Int64Size
+	if z.Mobilephone == nil {
+		s += msgp.NilSize
+	} else {
+		s += msgp.StringPrefixSize + len(*z.Mobilephone)
+	}
 	return
 }
 

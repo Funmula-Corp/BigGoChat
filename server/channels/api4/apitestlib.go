@@ -592,7 +592,7 @@ func (th *TestHelper) CreateUserWithClient(client *model.Client4) *model.User {
 		FirstName:   "f_" + id,
 		LastName:    "l_" + id,
 		Password:    "Pa$$word11",
-		Mobilephone: th.GenerateTestMobilephone(),
+		Mobilephone: model.NewString(th.GenerateTestMobilephone()),
 	}
 
 	ruser, _, err := client.CreateUser(context.Background(), user)
@@ -616,7 +616,7 @@ func (th *TestHelper) CreateUserWithAuth(authService string) *model.User {
 		Nickname:      "nn_" + id,
 		EmailVerified: true,
 		AuthService:   authService,
-		Mobilephone:   th.GenerateTestMobilephone(),
+		Mobilephone:   model.NewString(th.GenerateTestMobilephone()),
 	}
 	user, err := th.App.CreateUser(th.Context, user)
 	if err != nil {
@@ -638,7 +638,7 @@ func (th *TestHelper) CreateGuestAndClient() (*model.User, *model.Client4) {
 		Nickname:      "guest_" + id,
 		Password:      "Password1",
 		EmailVerified: true,
-		Mobilephone:   th.GenerateTestMobilephone(),
+		Mobilephone:   model.NewString(th.GenerateTestMobilephone()),
 	})
 	if cgErr != nil {
 		panic(cgErr)
