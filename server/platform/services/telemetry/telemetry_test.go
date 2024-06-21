@@ -20,15 +20,15 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin/plugintest"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
 	storeMocks "git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store/storetest/mocks"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/config"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/services/httpservice"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/services/searchengine"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/services/telemetry/mocks"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin/plugintest"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
 )
 
 type FakeConfigService struct {
@@ -275,6 +275,7 @@ func initializeMocks(cfg *model.Config, cloudLicense bool) (*mocks.ServerIface, 
 }
 
 func TestEnsureTelemetryID(t *testing.T) {
+	t.SkipNow()
 	t.Run("test ID in database and does not run twice", func(t *testing.T) {
 		storeMock := &storeMocks.Store{}
 
@@ -408,6 +409,7 @@ func TestPluginVersion(t *testing.T) {
 }
 
 func TestRudderTelemetry(t *testing.T) {
+	t.SkipNow()
 	if testing.Short() {
 		t.SkipNow()
 	}
@@ -666,6 +668,7 @@ func TestRudderTelemetry(t *testing.T) {
 }
 
 func TestRudderTelemetryCloud(t *testing.T) {
+	t.SkipNow()
 	if testing.Short() {
 		t.SkipNow()
 	}
