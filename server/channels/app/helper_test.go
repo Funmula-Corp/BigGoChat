@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"math/rand"
 	"os"
 	"path/filepath"
 	"strings"
@@ -19,16 +20,16 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store/sqlstore"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store/storetest/mocks"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/testlib"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/config"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/einterfaces"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
 )
 
 type TestHelper struct {
@@ -322,6 +323,7 @@ func (th *TestHelper) CreateUserOrGuest(guest bool) *model.User {
 		Nickname:      "nn_" + id,
 		Password:      "Password1",
 		EmailVerified: true,
+		Mobilephone:   model.NewString(th.GenerateTestMobilephone()),
 	}
 
 	var err *model.AppError
@@ -360,6 +362,15 @@ func WithShared(v bool) ChannelOption {
 	return func(channel *model.Channel) {
 		channel.Shared = model.NewBool(v)
 	}
+}
+
+func (th *TestHelper) GenerateTestMobilephone() string {
+	var letterRunes = []rune("0123456789")
+	b := make([]rune, 15)
+	for i := range b {
+		b[i] = letterRunes[rand.Intn(len(letterRunes))]
+	}
+	return "886" + string(b)
 }
 
 func WithCreateAt(v int64) ChannelOption {

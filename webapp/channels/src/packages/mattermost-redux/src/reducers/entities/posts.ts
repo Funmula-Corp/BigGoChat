@@ -860,11 +860,23 @@ export function removeNonRecentEmptyPostBlocks(blocks: PostOrderBlock[]) {
     return blocks.filter((block: PostOrderBlock) => block.order.length !== 0 || block.recent);
 }
 
-export function removeDeleteBySelfPostBlocks(blocks: PostOrderBlock[], posts: Record<string, Post>) {
-    return blocks.map((block: PostOrderBlock) => ({
+export function isNotDeleteBySelf(post: Post) {
+    return post.props.deleteBy !== post.user_id;
+}
+
+export function removeDeleteBySelfPostBlockOrder(order: string[], posts: Record<string, Post>) {
+    return order.filter((postId: string) => isNotDeleteBySelf(posts[postId]));
+}
+
+export function removeDeleteBySelfPostBlock(block: PostOrderBlock, posts: Record<string, Post>): PostOrderBlock {
+    return {
         ...block,
-        order: block.order.filter((postId: string) => posts[postId].props.deleteBy !== posts[postId].user_id),
-    } as PostOrderBlock));
+        order: removeDeleteBySelfPostBlockOrder(block.order, posts),
+    };
+}
+
+export function removeDeleteBySelfPostBlocks(blocks: PostOrderBlock[], posts: Record<string, Post>) {
+    return blocks.map((block) => removeDeleteBySelfPostBlock(block, posts));
 }
 
 export function IsBlocksEqual(blocks: PostOrderBlock[], otherBlocks: PostOrderBlock[]) {
@@ -999,7 +1011,7 @@ export function postsInThread(state: RelationOneToMany<Post, Post> = {}, action:
     case PostTypes.RECEIVED_POSTS_BEFORE:
     case PostTypes.RECEIVED_POSTS_IN_CHANNEL:
     case PostTypes.RECEIVED_POSTS_SINCE: {
-        const newPosts: Post[] = Object.values(action.data.posts);
+        const newPosts: Post[] = (Object.values(action.data.posts) as Post[]).filter(isNotDeleteBySelf);
 
         if (newPosts.length === 0) {
             // Nothing to add
@@ -1212,7 +1224,9 @@ export function reactions(state: RelationOneToOne<Post, Record<string, Reaction>
     case PostTypes.RECEIVED_POSTS: {
         const posts: Post[] = Object.values(action.data.posts);
 
-        return posts.reduce(storeReactionsForPost, state);
+        return posts
+            .filter(isNotDeleteBySelf)
+            .reduce(storeReactionsForPost, state);
     }
 
     case PostTypes.POST_DELETED:
