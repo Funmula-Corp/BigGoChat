@@ -751,7 +751,7 @@ export function postsInChannel(state: Record<string, PostOrderBlock[]> = {}, act
 
         let nextPostsForChannel = [...postsForChannel];
         nextPostsForChannel[recentBlockIndex] = nextRecentBlock;
-        nextPostsForChannel = removeDeleteBySelfPostBlocks(nextPostsForChannel, nextPosts)
+        nextPostsForChannel = removeDeleteBySelfPostBlocks(nextPostsForChannel, nextPosts);
 
         return {
             ...state,
