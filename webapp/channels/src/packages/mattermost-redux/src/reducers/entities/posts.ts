@@ -579,8 +579,9 @@ export function postsInChannel(state: Record<string, PostOrderBlock[]> = {}, act
 
         nextRecentBlock.order[index] = post.id;
 
-        const nextPostsForChannel = [...postsForChannel];
+        let nextPostsForChannel = [...postsForChannel];
         nextPostsForChannel[recentBlockIndex] = nextRecentBlock;
+        nextPostsForChannel = removeDeleteBySelfPostBlocks(nextPostsForChannel, nextPosts)
 
         return {
             ...state,
@@ -748,8 +749,9 @@ export function postsInChannel(state: Record<string, PostOrderBlock[]> = {}, act
             return comparePosts(nextPosts[a], nextPosts[b]);
         });
 
-        const nextPostsForChannel = [...postsForChannel];
-        nextPostsForChannel[recentBlockIndex] = removeDeleteBySelfPostBlock(nextRecentBlock, nextPosts);
+        let nextPostsForChannel = [...postsForChannel];
+        nextPostsForChannel[recentBlockIndex] = nextRecentBlock;
+        nextPostsForChannel = removeDeleteBySelfPostBlocks(nextPostsForChannel, nextPosts);
 
         return {
             ...state,
@@ -767,8 +769,6 @@ export function postsInChannel(state: Record<string, PostOrderBlock[]> = {}, act
             return state;
         }
 
-        let changed = false;
-
         let nextPostsForChannel = [...postsForChannel];
         for (let i = 0; i < nextPostsForChannel.length; i++) {
             const block = nextPostsForChannel[i];
@@ -781,16 +781,10 @@ export function postsInChannel(state: Record<string, PostOrderBlock[]> = {}, act
                     ...block,
                     order: nextOrder,
                 };
-
-                changed = true;
             }
         }
 
-        if (!changed) {
-            // Nothing was removed
-            return state;
-        }
-
+        nextPostsForChannel = removeDeleteBySelfPostBlocks(nextPostsForChannel, nextPosts);
         nextPostsForChannel = removeNonRecentEmptyPostBlocks(nextPostsForChannel);
 
         return {
@@ -809,8 +803,6 @@ export function postsInChannel(state: Record<string, PostOrderBlock[]> = {}, act
             return state;
         }
 
-        let changed = false;
-
         // Remove the post and its comments from the channel
         let nextPostsForChannel = [...postsForChannel];
         for (let i = 0; i < nextPostsForChannel.length; i++) {
@@ -823,16 +815,10 @@ export function postsInChannel(state: Record<string, PostOrderBlock[]> = {}, act
                     ...block,
                     order: nextOrder,
                 };
-
-                changed = true;
             }
         }
 
-        if (!changed) {
-            // Nothing was removed
-            return state;
-        }
-
+        nextPostsForChannel = removeDeleteBySelfPostBlocks(nextPostsForChannel, nextPosts);
         nextPostsForChannel = removeNonRecentEmptyPostBlocks(nextPostsForChannel);
 
         return {
