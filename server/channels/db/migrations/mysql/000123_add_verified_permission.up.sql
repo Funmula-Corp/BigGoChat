@@ -21,7 +21,7 @@ SET @preparedStatement = (SELECT IF(
         AND column_name = 'DefaultTeamVerifiedRole'
     ) > 0,
     'SELECT 1;',
-    'ALTER TABLE Schemes ADD COLUMN DefaultTeamVerifiedRole varchar(64);'
+    'ALTER TABLE Schemes ADD COLUMN DefaultTeamVerifiedRole varchar(64) DEFAULT=\'\'';'
 ));
 
 PREPARE addColumnIfExists FROM @preparedStatement;
@@ -36,7 +36,7 @@ SET @preparedStatement = (SELECT IF(
         AND column_name = 'DefaultChannelVerifiedRole'
     ) > 0,
     'SELECT 1;',
-    'ALTER TABLE Schemes ADD COLUMN DefaultChannelVerifiedRole varchar(64);'
+    'ALTER TABLE Schemes ADD COLUMN DefaultChannelVerifiedRole varchar(64) DEFAULT=\'\'';'
 ));
 
 PREPARE addColumnIfExists FROM @preparedStatement;

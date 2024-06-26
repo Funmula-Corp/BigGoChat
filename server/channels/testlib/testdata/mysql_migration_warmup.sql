@@ -59,6 +59,10 @@ INSERT INTO `Systems` VALUES ('test_email_ancillary_permission','true');
 INSERT INTO `Systems` VALUES ('Version','5.31.0');
 INSERT INTO `Systems` VALUES ('view_members_new_permission','true');
 INSERT INTO `Systems` VALUES ('webhook_permissions_split','true');
+-- INSERT INTO `systems` VALUES ('MigrationKeyBigGoRolesPermissions', 'true');
+-- INSERT INTO `systems` VALUES ('MigrationBigGoSchemeRolesCreation', 'true');
+-- INSERT INTO `systems` VALUES ('CustomChannelReadOnlyRoleCreationMigrationComplete' , 'true');
+-- INSERT INTO `systems` VALUES ('CustomSystemVerifiedRoleCreationMigrationComplete' , 'true');
 /*!40000 ALTER TABLE `Systems` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -91,9 +95,9 @@ INSERT INTO `Roles` VALUES ('x768jnyzw3rkfx7xb66ehcac6o','channel_user','authent
 INSERT INTO `Roles` VALUES ('ynn8aynsn7n1trtbuq6p4cyzhe','channel_guest','authentication.roles.channel_guest.name','authentication.roles.channel_guest.description',1605167829001,1662271986975,0,' read_channel add_reaction remove_reaction upload_file edit_post create_post use_channel_mentions',1,1);
 INSERT INTO `Roles` VALUES ('yqyby79r9jggxg7a9dnenuawmo','run_member','authentication.roles.run_member.name','authentication.roles.run_member.description',1662271985813,1662271986979,0,' run_view',1,1);
 INSERT INTO `Roles` VALUES ('zzehkfnp67bg5g1owh6eptdcxc','system_user','authentication.roles.global_user.name','authentication.roles.global_user.description',0,1662271986983,0,' create_emojis join_public_teams list_public_teams edit_custom_group delete_emojis create_team create_group_channel manage_custom_group_members view_members delete_custom_group create_custom_group create_direct_channel',1,1);
-INSERT INTO `Roles` VALUES ('biggoyyyyyyyyyyyyyyyyyyyyn','system_verified','authentication.roles.global_verified.name','authentication.roles.global_verified.description',0,1662271986983,0,' create_emojis join_public_teams list_public_teams edit_custom_group delete_emojis create_team create_group_channel manage_custom_group_members view_members delete_custom_group create_custom_group create_direct_channel',1,1);
-INSERT INTO `Roles` VALUES ('biggoyyyyyyyyyyyyyyyyyyyyd','team_verified','authentication.roles.team_verified.name','authentication.roles.team_verified.description',0,1662271986968,0,' invite_verified view_team read_public_channel playbook_public_create add_verified_to_team playbook_private_create create_private_channel list_team_channels create_public_channel join_public_channels',1,1);
-INSERT INTO `Roles` VALUES ('biggoyyyyyyyyyyyyyyyyyyyyr','channel_verified','authentication.roles.channel_verified.name','authentication.roles.channel_verified.description',0,1662271986972,0,' manage_public_channel_properties create_post manage_private_channel_properties delete_public_channel manage_private_channel_members get_public_link delete_post delete_private_channel upload_file edit_post remove_reaction use_channel_mentions add_reaction read_channel manage_public_channel_members',1,1);
+-- INSERT INTO `roles` VALUES ('biggoyyyyyyyyyyyyyyyyyyyyn', 'system_verified', 'authentication.roles.global_verified.name', 'authentication.roles.global_verified.description', 0, 1662230812038, 0, 'create_emojis edit_custom_group manage_custom_group_members view_members create_custom_group create_team create_direct_channel delete_custom_group list_public_teams delete_emojis create_group_channel join_public_teams', true, true);
+-- INSERT INTO `roles` VALUES ('biggoyyyyyyyyyyyyyyyyyyyyd', 'team_verified', 'authentication.roles.team_verified.name', 'authentication.roles.team_verified.description', 1605163387747, 1662230812023, 0, 'playbook_public_create view_team invite_user playbook_private_create list_team_channels join_public_channels create_private_channel add_user_to_team read_public_channel create_public_channel', true, true);
+-- INSERT INTO `roles` VALUES ('biggoyyyyyyyyyyyyyyyyyyyyr', 'channel_verified', 'authentication.roles.channel_verified.name', 'authentication.roles.channel_verified.description', 0, 1662230812029, 0, ' delete_post delete_public_channel use_channel_mentions manage_private_channel_properties manage_public_channel_properties delete_private_channel upload_file read_channel get_public_link remove_reaction create_post add_reaction manage_private_channel_members edit_post manage_public_channel_members', true, true);
 /*!40000 ALTER TABLE `Roles` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;

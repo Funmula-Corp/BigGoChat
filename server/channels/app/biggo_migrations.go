@@ -38,13 +38,14 @@ func (s *Server) doChannelReadOnlyRoleCreationMigration() {
 	}
 
 	scheme := &model.Scheme{
-		Id: ChannelReadOnlySchemeId,
-		Name: "announcement",
-		DisplayName: "announcement",
-		Scope: model.SchemeScopeChannel,
-		DefaultChannelAdminRole: model.ChannelAdminRoleId,
-		DefaultChannelUserRole: ChannelReadOnlyRoleName,
-		DefaultChannelGuestRole: model.ChannelGuestRoleId,
+		Id:                         ChannelReadOnlySchemeId,
+		Name:                       "announcement",
+		DisplayName:                "announcement",
+		Scope:                      model.SchemeScopeChannel,
+		DefaultChannelAdminRole:    model.ChannelAdminRoleId,
+		DefaultChannelVerifiedRole: ChannelReadOnlyRoleName,
+		DefaultChannelUserRole:     ChannelReadOnlyRoleName,
+		DefaultChannelGuestRole:    model.ChannelGuestRoleId,
 	}
 
 	if _, err := s.Store().Scheme().CreateScheme(scheme); err != nil {
@@ -53,7 +54,7 @@ func (s *Server) doChannelReadOnlyRoleCreationMigration() {
 	}
 
 	system := model.System{
-		Name: model.CustomChannelReadOnlyRoleCreationMigrationKey,
+		Name:  model.CustomChannelReadOnlyRoleCreationMigrationKey,
 		Value: "true",
 	}
 	if err := s.Store().System().Save(&system); err != nil {
@@ -62,7 +63,7 @@ func (s *Server) doChannelReadOnlyRoleCreationMigration() {
 }
 
 const (
-	SystemVerifiedRoleId = "biggoyyyyyyyyyyyyyyyyyyyyn"
+	SystemVerifiedRoleId   = "biggoyyyyyyyyyyyyyyyyyyyyn"
 	SystemVerifiedRoleName = "system_verified"
 )
 
@@ -71,7 +72,7 @@ func (s *Server) doSystemVerifiedRoleCreationMigration(c *request.Context) {
 		return
 	}
 
-	userRole, err := s.Store().Role().GetByName(c.Context(), model.SystemUserRoleId);
+	userRole, err := s.Store().Role().GetByName(c.Context(), model.SystemUserRoleId)
 	if err != nil {
 		mlog.Fatal("failed to get role by name", mlog.Err(err))
 		return
@@ -104,15 +105,129 @@ func (s *Server) doSystemVerifiedRoleCreationMigration(c *request.Context) {
 	}
 }
 
-func (a *App) removeChannelManageUserFromChannelUser() (permissionsMap, error) {
+const (
+	ChannelVerifiedRoleId  = "biggoryyyyyyyyyyyyyyyyyyyr"
+	ChannelVerifiedRoleName = "channel_verified"
+	TeamVerifiedRoleId  = "biggoryyyyyyyyyyyyyyyyyyyd"
+	TeamVerifiedRoleName = "team_verified"
+)
+func (s *Server) doMigrationKeySchemesRolesCreation(c *request.Context) {
+	// ChannelVerifiedRoleId
+	if _, err := s.Store().System().GetByName(model.MigrationBigGoSchemeRolesCreation); err == nil {
+		return
+	}
+
+	channelUserRole, err := s.Store().Role().GetByName(c.Context(), model.ChannelUserRoleId)
+	if err != nil {
+		mlog.Fatal("failed to get role by name", mlog.Err(err))
+		return
+	}
+	// inherit from channel_user
+	permissions := channelUserRole.Permissions
+	channelVerifiedRole := &model.Role{
+		Id:            ChannelVerifiedRoleId,
+		Name:          model.ChannelVerifiedRoleId,
+		DisplayName:   "authentication.roles.channel_verified.name",
+		Description:   "authentication.roles.channel_verified.description",
+		Permissions:   permissions,
+		SchemeManaged: true,
+		BuiltIn:       true,
+	}
+	if _, err := s.Store().Role().CreateRole(channelVerifiedRole); err != nil {
+		mlog.Fatal("Failed to create role to database.", mlog.Err(err))
+		return
+	}
+
+	teamUserRole, err := s.Store().Role().GetByName(c.Context(), model.TeamUserRoleId)
+	if err != nil {
+		mlog.Fatal("failed to get role by name", mlog.Err(err))
+		return
+	}
+	// inherit from team_user
+	permissions = teamUserRole.Permissions
+	teamVerifiedRole := &model.Role{
+		Id:            TeamVerifiedRoleId,
+		Name:          TeamVerifiedRoleName,
+		DisplayName:   "authentication.roles.team_verified.name",
+		Description:   "authentication.roles.team_verified.description",
+		Permissions:   permissions,
+		SchemeManaged: true,
+		BuiltIn:       true,
+	}
+	if _, err := s.Store().Role().CreateRole(teamVerifiedRole); err != nil {
+		mlog.Fatal("Failed to migrate role to database.", mlog.Err(err))
+		return
+	}
+
+	offset := 0
+	pageSize := 100
+	for _, scope := range []string{model.SchemeScopeTeam, model.SchemeScopeChannel} {
+		for {
+			schemes, err := s.Store().Scheme().GetAllPage(scope, offset, pageSize)
+			if err != nil {
+				mlog.Fatal("Failed to get schemes", mlog.String("scope", scope), mlog.Err(err))
+				return
+			}
+			for _, scheme := range schemes {
+				if scheme.Id == ChannelReadOnlySchemeId {
+					scheme.DefaultChannelVerifiedRole = ChannelReadOnlyRoleName
+				} else {
+					if scheme.Scope == model.SchemeScopeTeam {
+						scheme.DefaultTeamVerifiedRole = teamVerifiedRole.Id
+					}
+					scheme.DefaultChannelVerifiedRole = channelVerifiedRole.Id
+				}
+				if _, err := s.Store().Scheme().Save(scheme); err != nil {
+					mlog.Fatal("Failed to save schemes", mlog.String("scope", scope), mlog.String("scheme", scheme.Id), mlog.Err(err))
+				}
+			}
+			if len(schemes) < pageSize {
+				break
+			}else{
+				offset += pageSize
+			}
+		}
+	}
+	system := model.System{
+		Name:  model.MigrationBigGoSchemeRolesCreation,
+		Value: "true",
+	}
+	if err := s.Store().System().Save(&system); err != nil {
+		mlog.Fatal("Failed to create verified-tier roles migration as completed.", mlog.Err(err))
+	}
+
+	// TODO: update all TeamMember and ChannelMember
+	// PluginAPI 要有可以更新 TeamMember 和 ChannelMember 的地方
+	// TODO: a scheme for channel that unverified user can post
+}
+
+func (a *App) doMigrationKeyBigGoRolesPermissions() (permissionsMap, error) {
 	return permissionsMap{
 		permissionTransformation{
-			On: permissionAnd(isRole(model.ChannelUserRoleId), permissionExists(PermissionManagePublicChannelMembers)),
-			Remove: []string{PermissionManagePublicChannelMembers},
+			On:     permissionAnd(isRole(model.ChannelUserRoleId)),
+			Remove: []string{
+				PermissionManagePublicChannelMembers,
+				PermissionManagePrivateChannelMembers,
+				PermissionManagePublicChannelProperties,
+				PermissionManagePrivateChannelProperties,
+				PermissionDeletePublicChannel,
+				PermissionDeletePrivateChannel,
+				PermissionCreatePost,
+				PermissionAddReaction,
+				model.PermissionCreatePostEphemeral.Id,
+				model.PermissionUploadFile.Id,
+			},
 		},
 		permissionTransformation{
-			On: permissionAnd(isRole(model.ChannelUserRoleId), permissionExists(PermissionManagePrivateChannelMembers)),
-			Remove: []string{PermissionManagePrivateChannelMembers},
+			On:     permissionAnd(isRole(model.TeamUserRoleId)),
+			Remove: []string{
+				model.PermissionCreatePublicChannel.Id,
+				model.PermissionCreatePrivateChannel.Id,
+				model.PermissionPrivatePlaybookCreate.Id},
+		},
+		permissionTransformation{
+			On:     permissionAnd(isRole(model.SystemUserRoleId)),
+			Remove: []string{model.PermissionCreateTeam.Id},
 		},
 	}, nil
 }
@@ -123,7 +238,7 @@ func (s *Server) doBiggoPermissionMigration() error {
 		Key       string
 		Migration func() (permissionsMap, error)
 	}{
-		{Key: model.MigrationKeyRemoveChannelManageUserFromChannelUser, Migration: a.removeChannelManageUserFromChannelUser},
+		{Key: model.MigrationKeyBigGoRolesPermissions, Migration: a.doMigrationKeyBigGoRolesPermissions},
 	}
 
 	roles, err := s.Store().Role().GetAll()
@@ -146,6 +261,7 @@ func (s *Server) doBiggoPermissionMigration() error {
 func (s *Server) doBiggoMigration(c *request.Context) {
 	s.doChannelReadOnlyRoleCreationMigration()
 	s.doSystemVerifiedRoleCreationMigration(c)
+	s.doMigrationKeySchemesRolesCreation(c)
 
 	// must be the last, make sure all roles are created
 	if err := s.doBiggoPermissionMigration(); err != nil {

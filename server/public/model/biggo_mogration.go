@@ -4,5 +4,6 @@ const (
 	CustomChannelReadOnlyRoleCreationMigrationKey = "CustomChannelReadOnlyRoleCreationMigrationComplete"
 	CustomSystemVerifiedRoleCreationMigrationKey  = "CustomSystemVerifiedRoleCreationMigrationComplete"
 
-	MigrationKeyRemoveChannelManageUserFromChannelUser = "remove_channel_manage_user_from_channel_user"
+	MigrationKeyBigGoRolesPermissions = "MigrationKeyBigGoRolesPermissions"
+	MigrationBigGoSchemeRolesCreation = "MigrationBigGoSchemeRolesCreation"
 )
