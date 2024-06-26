@@ -387,6 +387,7 @@ const (
 	ChannelUserRoleId  = "channel_user"
 	ChannelAdminRoleId = "channel_admin"
 	ChannelVerifiedRoleId = "channel_verified"
+	ChannelReadOnlyRoleId = "channel_readonly"
 
 	CustomGroupUserRoleId = "custom_group_user"
 

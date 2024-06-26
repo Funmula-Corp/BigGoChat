@@ -65,6 +65,7 @@ func (s *Server) doChannelReadOnlyRoleCreationMigration() {
 const (
 	SystemVerifiedRoleId   = "biggoyyyyyyyyyyyyyyyyyyyyn"
 	SystemVerifiedRoleName = "system_verified"
+	SystemVerifiedRoleSpecialId = "biggoyyyyyyyyyyyyyyyyyyyyn"
 )
 
 func (s *Server) doSystemVerifiedRoleCreationMigration(c *request.Context) {
@@ -82,8 +83,8 @@ func (s *Server) doSystemVerifiedRoleCreationMigration(c *request.Context) {
 	permissions := userRole.Permissions
 
 	role := &model.Role{
-		Id: SystemVerifiedRoleId,
-		Name: SystemVerifiedRoleName,
+		Id: SystemVerifiedRoleSpecialId,
+		Name: model.SystemVerifiedRoleId,
 		DisplayName: "authentication.roles.system_verified.name",
 		Description: "authentication.roles.system_verified.description",
 		Permissions: permissions,

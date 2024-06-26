@@ -535,9 +535,11 @@ func (th *TestHelper) CreateScheme() (*model.Scheme, []*model.Role) {
 
 	roleNames := []string{
 		scheme.DefaultTeamAdminRole,
+		scheme.DefaultTeamVerifiedRole,
 		scheme.DefaultTeamUserRole,
 		scheme.DefaultTeamGuestRole,
 		scheme.DefaultChannelAdminRole,
+		scheme.DefaultChannelVerifiedRole,
 		scheme.DefaultChannelUserRole,
 		scheme.DefaultChannelGuestRole,
 	}
