@@ -483,6 +483,7 @@ type UserStore interface {
 	RefreshPostStatsForUsers() error
 	GetUserReport(filter *model.UserReportOptions) ([]*model.UserReportQuery, error)
 	GetUserCountForReport(filter *model.UserReportOptions) (int64, error)
+	UpdateMemberVerifiedStatus(rctx request.CTX, user *model.User) (error)
 }
 
 type BotStore interface {

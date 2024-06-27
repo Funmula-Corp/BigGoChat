@@ -12738,6 +12738,24 @@ func (s *OpenTracingLayerUserStore) UpdateLastPictureUpdate(userID string) error
 	return err
 }
 
+func (s *OpenTracingLayerUserStore) UpdateMemberVerifiedStatus(rctx request.CTX, user *model.User) error {
+	origCtx := s.Root.Store.Context()
+	span, newCtx := tracing.StartSpanWithParentByContext(s.Root.Store.Context(), "UserStore.UpdateMemberVerifiedStatus")
+	s.Root.Store.SetContext(newCtx)
+	defer func() {
+		s.Root.Store.SetContext(origCtx)
+	}()
+
+	defer span.Finish()
+	err := s.UserStore.UpdateMemberVerifiedStatus(rctx, user)
+	if err != nil {
+		span.LogFields(spanlog.Error(err))
+		ext.Error.Set(span, true)
+	}
+
+	return err
+}
+
 func (s *OpenTracingLayerUserStore) UpdateMfaActive(userID string, active bool) error {
 	origCtx := s.Root.Store.Context()
 	span, newCtx := tracing.StartSpanWithParentByContext(s.Root.Store.Context(), "UserStore.UpdateMfaActive")

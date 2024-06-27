@@ -14544,6 +14544,27 @@ func (s *RetryLayerUserStore) UpdateLastPictureUpdate(userID string) error {
 
 }
 
+func (s *RetryLayerUserStore) UpdateMemberVerifiedStatus(rctx request.CTX, user *model.User) error {
+
+	tries := 0
+	for {
+		err := s.UserStore.UpdateMemberVerifiedStatus(rctx, user)
+		if err == nil {
+			return nil
+		}
+		if !isRepeatableError(err) {
+			return err
+		}
+		tries++
+		if tries >= 3 {
+			err = errors.Wrap(err, "giving up after 3 consecutive repeatable transaction failures")
+			return err
+		}
+		timepkg.Sleep(100 * timepkg.Millisecond)
+	}
+
+}
+
 func (s *RetryLayerUserStore) UpdateMfaActive(userID string, active bool) error {
 
 	tries := 0
