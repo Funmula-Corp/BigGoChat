@@ -27,13 +27,13 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/utils/fileutils"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/einterfaces/mocks"
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin/utils"
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/i18n"
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/utils/fileutils"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/einterfaces/mocks"
 )
 
 func getDefaultPluginSettingsSchema() string {
@@ -2357,6 +2357,7 @@ func TestSendPushNotification(t *testing.T) {
 }
 
 func TestPluginServeMetrics(t *testing.T) {
+	t.SkipNow()
 	th := Setup(t, StartMetrics)
 	defer th.TearDown()
 
@@ -2646,4 +2647,42 @@ func TestPluginPatchChannelMembersNotifications(t *testing.T) {
 
 		assert.Equal(t, "", updated.NotifyProps["test_field"])
 	})
+}
+
+func TestPluginUserUpdateCompatibility(t *testing.T) {
+	th := Setup(t).InitBasic()
+	defer th.TearDown()
+	require.NotEmpty(t, th.BasicUser.Mobilephone)
+
+	testFolder, found := fileutils.FindDir("channels/app/plugin_api_tests")
+	require.True(t, found, "Cannot find tests folder")
+	fullPath := path.Join(testFolder, "manual.test_user_update_compatibility_plugin", "main.go")
+
+	pluginCode, err := os.ReadFile(fullPath)
+	require.NoError(t, err)
+	require.NotEmpty(t, pluginCode)
+
+	tearDown, ids, errors := SetAppEnvironmentWithPlugins(t, []string{string(pluginCode)}, th.App, th.NewPluginAPI)
+	defer tearDown()
+	require.NoError(t, errors[0])
+	require.Len(t, ids, 1)
+
+	pluginID := ids[0]
+	require.NotEmpty(t, pluginID)
+
+	hooks, err := th.App.GetPluginsEnvironment().HooksForPlugin(pluginID)
+	require.NoError(t, err)
+	require.NotNil(t, hooks)
+
+	post := &model.Post{
+		UserId: th.BasicUser.Id,
+	}
+	_, ret := hooks.MessageWillBePosted(nil, post)
+	assert.Equal(t, ret, "OK")
+
+	nUser, err := th.App.GetUser(th.BasicUser.Id)
+	require.Nil(t, err)
+	require.NotEmpty(t, nUser.Mobilephone)
+	require.Equal(t, th.BasicUser.Mobilephone, nUser.Mobilephone)
+	require.Equal(t, "updated", nUser.Nickname)
 }

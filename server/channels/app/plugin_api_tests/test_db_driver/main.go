@@ -7,13 +7,13 @@ import (
 	"database/sql"
 	"testing"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app/plugin_api_tests"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store/sqlstore"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store/storetest"
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/driver"
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app/plugin_api_tests"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store/sqlstore"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store/storetest"
 )
 
 type MyPlugin struct {

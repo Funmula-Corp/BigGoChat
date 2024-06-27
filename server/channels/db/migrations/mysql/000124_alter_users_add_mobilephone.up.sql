@@ -5,7 +5,7 @@ SET @preparedStatement = (SELECT IF (
     AND table_name = 'Users' 
     AND column_name = 'Mobilephone'
   ) = 0, 
-  'ALTER TABLE Users ADD COLUMN Mobilephone VARCHAR(24) NOT NULL DEFAULT \'\';', 
+  'ALTER TABLE Users ADD COLUMN Mobilephone VARCHAR(24);', 
   'select 0;'
 ));
 PREPARE alterIfExists FROM @preparedStatement;
