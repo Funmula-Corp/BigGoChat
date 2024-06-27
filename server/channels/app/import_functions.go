@@ -885,13 +885,14 @@ func (a *App) importUserTeams(rctx request.CTX, user *model.User, data *[]import
 		}
 
 		member := &model.TeamMember{
-			TeamId:      team.Id,
-			UserId:      user.Id,
-			SchemeGuest: user.IsGuest(),
-			SchemeUser:  !user.IsGuest(),
-			SchemeVerified: user.IsVerified(),
-			SchemeAdmin: team.Email == user.Email && !user.IsGuest(),
-			CreateAt:    model.GetMillis(),
+			TeamId:          team.Id,
+			UserId:          user.Id,
+			SchemeGuest:     user.IsGuest(),
+			SchemeUser:      !user.IsGuest(),
+			SchemeVerified:  user.IsVerified(),
+			SchemeModerator: false,
+			SchemeAdmin:     team.Email == user.Email && !user.IsGuest(),
+			CreateAt:        model.GetMillis(),
 		}
 		if !user.IsGuest() {
 			var userShouldBeAdmin bool
@@ -957,7 +958,7 @@ func (a *App) importUserTeams(rctx request.CTX, user *model.User, data *[]import
 			}
 		}
 
-		a.UpdateTeamMemberSchemeRoles(rctx, member.TeamId, user.Id, isGuestByTeamID[member.TeamId], isUserByTeamId[member.TeamId], isAdminByTeamID[member.TeamId])
+		a.UpdateTeamMemberSchemeRoles(rctx, member.TeamId, user.Id, isGuestByTeamID[member.TeamId], isUserByTeamId[member.TeamId], isAdminByTeamID[member.TeamId], false)
 	}
 
 	for _, team := range allTeams {
@@ -1052,13 +1053,13 @@ func (a *App) importUserChannels(rctx request.CTX, user *model.User, team *model
 		}
 
 		member := &model.ChannelMember{
-			ChannelId:   channel.Id,
-			UserId:      user.Id,
-			NotifyProps: model.GetDefaultChannelNotifyProps(),
-			SchemeGuest: user.IsGuest(),
-			SchemeUser:  !user.IsGuest(),
+			ChannelId:      channel.Id,
+			UserId:         user.Id,
+			NotifyProps:    model.GetDefaultChannelNotifyProps(),
+			SchemeGuest:    user.IsGuest(),
+			SchemeUser:     !user.IsGuest(),
 			SchemeVerified: user.IsVerified(),
-			SchemeAdmin: false,
+			SchemeAdmin:    false,
 		}
 		if !user.IsGuest() {
 			var userShouldBeAdmin bool

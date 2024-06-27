@@ -108,6 +108,9 @@ func ImportUserTeamDataFromTeamMember(member *model.TeamMemberForExport) *import
 	if member.SchemeGuest {
 		rolesList = append(rolesList, model.TeamGuestRoleId)
 	}
+	if member.SchemeModerator {
+		rolesList = append(rolesList, model.TeamModeratorRoleId)
+	}
 	roles := strings.Join(rolesList, " ")
 	return &imports.UserTeamImportData{
 		Name:  &member.TeamName,

@@ -17,8 +17,8 @@ func (z *TeamMember) DecodeMsg(dc *msgp.Reader) (err error) {
 		err = msgp.WrapError(err)
 		return
 	}
-	if zb0001 != 10 {
-		err = msgp.ArrayError{Wanted: 10, Got: zb0001}
+	if zb0001 != 11 {
+		err = msgp.ArrayError{Wanted: 11, Got: zb0001}
 		return
 	}
 	z.TeamId, err = dc.ReadString()
@@ -61,6 +61,11 @@ func (z *TeamMember) DecodeMsg(dc *msgp.Reader) (err error) {
 		err = msgp.WrapError(err, "SchemeAdmin")
 		return
 	}
+	z.SchemeModerator, err = dc.ReadBool()
+	if err != nil {
+		err = msgp.WrapError(err, "SchemeModerator")
+		return
+	}
 	z.ExplicitRoles, err = dc.ReadString()
 	if err != nil {
 		err = msgp.WrapError(err, "ExplicitRoles")
@@ -76,8 +81,8 @@ func (z *TeamMember) DecodeMsg(dc *msgp.Reader) (err error) {
 
 // EncodeMsg implements msgp.Encodable
 func (z *TeamMember) EncodeMsg(en *msgp.Writer) (err error) {
-	// array header, size 10
-	err = en.Append(0x9a)
+	// array header, size 11
+	err = en.Append(0x9b)
 	if err != nil {
 		return
 	}
@@ -121,6 +126,11 @@ func (z *TeamMember) EncodeMsg(en *msgp.Writer) (err error) {
 		err = msgp.WrapError(err, "SchemeAdmin")
 		return
 	}
+	err = en.WriteBool(z.SchemeModerator)
+	if err != nil {
+		err = msgp.WrapError(err, "SchemeModerator")
+		return
+	}
 	err = en.WriteString(z.ExplicitRoles)
 	if err != nil {
 		err = msgp.WrapError(err, "ExplicitRoles")
@@ -137,8 +147,8 @@ func (z *TeamMember) EncodeMsg(en *msgp.Writer) (err error) {
 // MarshalMsg implements msgp.Marshaler
 func (z *TeamMember) MarshalMsg(b []byte) (o []byte, err error) {
 	o = msgp.Require(b, z.Msgsize())
-	// array header, size 10
-	o = append(o, 0x9a)
+	// array header, size 11
+	o = append(o, 0x9b)
 	o = msgp.AppendString(o, z.TeamId)
 	o = msgp.AppendString(o, z.UserId)
 	o = msgp.AppendString(o, z.Roles)
@@ -147,6 +157,7 @@ func (z *TeamMember) MarshalMsg(b []byte) (o []byte, err error) {
 	o = msgp.AppendBool(o, z.SchemeUser)
 	o = msgp.AppendBool(o, z.SchemeVerified)
 	o = msgp.AppendBool(o, z.SchemeAdmin)
+	o = msgp.AppendBool(o, z.SchemeModerator)
 	o = msgp.AppendString(o, z.ExplicitRoles)
 	o = msgp.AppendInt64(o, z.CreateAt)
 	return
@@ -160,8 +171,8 @@ func (z *TeamMember) UnmarshalMsg(bts []byte) (o []byte, err error) {
 		err = msgp.WrapError(err)
 		return
 	}
-	if zb0001 != 10 {
-		err = msgp.ArrayError{Wanted: 10, Got: zb0001}
+	if zb0001 != 11 {
+		err = msgp.ArrayError{Wanted: 11, Got: zb0001}
 		return
 	}
 	z.TeamId, bts, err = msgp.ReadStringBytes(bts)
@@ -204,6 +215,11 @@ func (z *TeamMember) UnmarshalMsg(bts []byte) (o []byte, err error) {
 		err = msgp.WrapError(err, "SchemeAdmin")
 		return
 	}
+	z.SchemeModerator, bts, err = msgp.ReadBoolBytes(bts)
+	if err != nil {
+		err = msgp.WrapError(err, "SchemeModerator")
+		return
+	}
 	z.ExplicitRoles, bts, err = msgp.ReadStringBytes(bts)
 	if err != nil {
 		err = msgp.WrapError(err, "ExplicitRoles")
@@ -220,6 +236,6 @@ func (z *TeamMember) UnmarshalMsg(bts []byte) (o []byte, err error) {
 
 // Msgsize returns an upper bound estimate of the number of bytes occupied by the serialized message
 func (z *TeamMember) Msgsize() (s int) {
-	s = 1 + msgp.StringPrefixSize + len(z.TeamId) + msgp.StringPrefixSize + len(z.UserId) + msgp.StringPrefixSize + len(z.Roles) + msgp.Int64Size + msgp.BoolSize + msgp.BoolSize + msgp.BoolSize + msgp.BoolSize + msgp.StringPrefixSize + len(z.ExplicitRoles) + msgp.Int64Size
+	s = 1 + msgp.StringPrefixSize + len(z.TeamId) + msgp.StringPrefixSize + len(z.UserId) + msgp.StringPrefixSize + len(z.Roles) + msgp.Int64Size + msgp.BoolSize + msgp.BoolSize + msgp.BoolSize + msgp.BoolSize + msgp.BoolSize + msgp.StringPrefixSize + len(z.ExplicitRoles) + msgp.Int64Size
 	return
 }

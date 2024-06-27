@@ -380,12 +380,13 @@ const (
 	TeamUserRoleId          = "team_user"
 	TeamAdminRoleId         = "team_admin"
 	TeamVerifiedRoleId      = "team_verified"
+	TeamModeratorRoleId     = "team_moderator"
 	TeamPostAllRoleId       = "team_post_all"
 	TeamPostAllPublicRoleId = "team_post_all_public"
 
-	ChannelGuestRoleId = "channel_guest"
-	ChannelUserRoleId  = "channel_user"
-	ChannelAdminRoleId = "channel_admin"
+	ChannelGuestRoleId    = "channel_guest"
+	ChannelUserRoleId     = "channel_user"
+	ChannelAdminRoleId    = "channel_admin"
 	ChannelVerifiedRoleId = "channel_verified"
 	ChannelReadOnlyRoleId = "channel_readonly"
 

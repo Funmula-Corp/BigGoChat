@@ -18,16 +18,17 @@ const (
 //
 //msgp:tuple TeamMember
 type TeamMember struct {
-	TeamId        string `json:"team_id"`
-	UserId        string `json:"user_id"`
-	Roles         string `json:"roles"`
-	DeleteAt      int64  `json:"delete_at"`
-	SchemeGuest   bool   `json:"scheme_guest"`
-	SchemeUser    bool   `json:"scheme_user"`
-	SchemeVerified bool   `json:"scheme_verified"`
-	SchemeAdmin   bool   `json:"scheme_admin"`
-	ExplicitRoles string `json:"explicit_roles"`
-	CreateAt      int64  `json:"-"`
+	TeamId          string `json:"team_id"`
+	UserId          string `json:"user_id"`
+	Roles           string `json:"roles"`
+	DeleteAt        int64  `json:"delete_at"`
+	SchemeGuest     bool   `json:"scheme_guest"`
+	SchemeUser      bool   `json:"scheme_user"`
+	SchemeVerified  bool   `json:"scheme_verified"`
+	SchemeAdmin     bool   `json:"scheme_admin"`
+	SchemeModerator bool   `json:"scheme_moderator"`
+	ExplicitRoles   string `json:"explicit_roles"`
+	CreateAt        int64  `json:"-"`
 }
 
 func (o *TeamMember) Auditable() map[string]interface{} {

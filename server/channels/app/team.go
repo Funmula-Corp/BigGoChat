@@ -17,17 +17,17 @@ import (
 	"sort"
 	"strings"
 
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/i18n"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app/email"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app/imaging"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app/teams"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app/users"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store/sqlstore"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/i18n"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
 )
 
 func (a *App) AdjustTeamsFromProductLimits(teamLimits *model.TeamsLimits) *model.AppError {
@@ -373,21 +373,21 @@ func (a *App) sendTeamEvent(team *model.Team, event model.WebsocketEventType) *m
 	return nil
 }
 
-func (a *App) GetSchemeRolesForTeam(teamID string) (string, string, string, *model.AppError) {
+func (a *App) GetSchemeRolesForTeam(teamID string) (string, string, string, string, *model.AppError) {
 	team, err := a.GetTeam(teamID)
 	if err != nil {
-		return "", "", "", err
+		return "", "", "", "", err
 	}
 
 	if team.SchemeId != nil && *team.SchemeId != "" {
 		scheme, err := a.GetScheme(*team.SchemeId)
 		if err != nil {
-			return "", "", "", err
+			return "", "", "", "", err
 		}
-		return scheme.DefaultTeamGuestRole, scheme.DefaultTeamUserRole, scheme.DefaultTeamAdminRole, nil
+		return scheme.DefaultTeamGuestRole, scheme.DefaultTeamUserRole, scheme.DefaultTeamAdminRole, scheme.DefaultTeamModeratorRole, nil
 	}
 
-	return model.TeamGuestRoleId, model.TeamUserRoleId, model.TeamAdminRoleId, nil
+	return model.TeamGuestRoleId, model.TeamUserRoleId, model.TeamAdminRoleId, model.TeamModeratorRoleId, nil
 }
 
 func (a *App) UpdateTeamMemberRoles(c request.CTX, teamID string, userID string, newRoles string) (*model.TeamMember, *model.AppError) {
@@ -406,7 +406,7 @@ func (a *App) UpdateTeamMemberRoles(c request.CTX, teamID string, userID string,
 		return nil, model.NewAppError("UpdateTeamMemberRoles", "api.team.update_member_roles.not_a_member", nil, "userId="+userID+" teamId="+teamID, http.StatusBadRequest)
 	}
 
-	schemeGuestRole, schemeUserRole, schemeAdminRole, err := a.GetSchemeRolesForTeam(teamID)
+	schemeGuestRole, schemeUserRole, schemeAdminRole, schemeModeratorRole, err := a.GetSchemeRolesForTeam(teamID)
 	if err != nil {
 		return nil, err
 	}
@@ -417,6 +417,7 @@ func (a *App) UpdateTeamMemberRoles(c request.CTX, teamID string, userID string,
 	member.SchemeGuest = false
 	member.SchemeUser = false
 	member.SchemeAdmin = false
+	member.SchemeModerator = false
 
 	for _, roleName := range strings.Fields(newRoles) {
 		var role *model.Role
@@ -433,6 +434,8 @@ func (a *App) UpdateTeamMemberRoles(c request.CTX, teamID string, userID string,
 			switch roleName {
 			case schemeAdminRole:
 				member.SchemeAdmin = true
+			case schemeModeratorRole:
+				member.SchemeModerator = true
 			case schemeUserRole:
 				member.SchemeUser = true
 			case schemeGuestRole:
@@ -474,7 +477,7 @@ func (a *App) UpdateTeamMemberRoles(c request.CTX, teamID string, userID string,
 	return member, nil
 }
 
-func (a *App) UpdateTeamMemberSchemeRoles(c request.CTX, teamID string, userID string, isSchemeGuest bool, isSchemeUser bool, isSchemeAdmin bool) (*model.TeamMember, *model.AppError) {
+func (a *App) UpdateTeamMemberSchemeRoles(c request.CTX, teamID string, userID string, isSchemeGuest bool, isSchemeUser bool, isSchemeAdmin bool, isSchemeModerator bool) (*model.TeamMember, *model.AppError) {
 	member, err := a.GetTeamMember(c, teamID, userID)
 	if err != nil {
 		return nil, err
@@ -491,6 +494,7 @@ func (a *App) UpdateTeamMemberSchemeRoles(c request.CTX, teamID string, userID s
 	member.SchemeAdmin = isSchemeAdmin
 	member.SchemeUser = isSchemeUser
 	member.SchemeGuest = isSchemeGuest
+	member.SchemeModerator = isSchemeModerator
 
 	// If the migration is not completed, we also need to check the default team_admin/team_user roles are not present in the roles field.
 	if err = a.IsPhase2MigrationCompleted(); err != nil {
