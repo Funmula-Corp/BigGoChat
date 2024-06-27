@@ -11468,6 +11468,22 @@ func (s *TimerLayerUserStore) UpdateLastPictureUpdate(userID string) error {
 	return err
 }
 
+func (s *TimerLayerUserStore) UpdateMemberVerifiedStatus(rctx request.CTX, user *model.User) error {
+	start := time.Now()
+
+	err := s.UserStore.UpdateMemberVerifiedStatus(rctx, user)
+
+	elapsed := float64(time.Since(start)) / float64(time.Second)
+	if s.Root.Metrics != nil {
+		success := "false"
+		if err == nil {
+			success = "true"
+		}
+		s.Root.Metrics.ObserveStoreMethodDuration("UserStore.UpdateMemberVerifiedStatus", success, elapsed)
+	}
+	return err
+}
+
 func (s *TimerLayerUserStore) UpdateMfaActive(userID string, active bool) error {
 	start := time.Now()
 
