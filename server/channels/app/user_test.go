@@ -966,8 +966,8 @@ func TestCreateUserWithToken(t *testing.T) {
 
 		members, err := th.App.GetChannelMembersForUser(th.Context, th.BasicTeam.Id, newGuest.Id)
 		require.Nil(t, err)
-		require.Len(t, members, 1)
-		assert.Equal(t, members[0].ChannelId, th.BasicChannel.Id)
+		require.Len(t, members, 0)
+		// only channel admin has permission
 	})
 
 	t.Run("create guest having email domain restrictions", func(t *testing.T) {
@@ -1012,8 +1012,8 @@ func TestCreateUserWithToken(t *testing.T) {
 
 		members, err := th.App.GetChannelMembersForUser(th.Context, th.BasicTeam.Id, newGuest.Id)
 		require.Nil(t, err)
-		require.Len(t, members, 1)
-		assert.Equal(t, members[0].ChannelId, th.BasicChannel.Id)
+		require.Len(t, members, 0)
+		// only channel admin has permission
 	})
 
 	t.Run("create guest having team and system email domain restrictions", func(t *testing.T) {
@@ -1049,8 +1049,8 @@ func TestCreateUserWithToken(t *testing.T) {
 
 		members, err := th.App.GetChannelMembersForUser(th.Context, th.BasicTeam.Id, newGuest.Id)
 		require.Nil(t, err)
-		require.Len(t, members, 1)
-		assert.Equal(t, members[0].ChannelId, th.BasicChannel.Id)
+		require.Len(t, members, 0)
+		// only channel admin has permission
 	})
 }
 

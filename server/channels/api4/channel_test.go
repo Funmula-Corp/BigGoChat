@@ -3123,13 +3123,17 @@ func TestAddChannelMember(t *testing.T) {
 	require.NoError(t, err)
 
 	cm, resp, err := client.AddChannelMember(context.Background(), publicChannel.Id, user2.Id)
-	require.NoError(t, err)
-	CheckCreatedStatus(t, resp)
+	require.Error(t, err)
+	CheckForbiddenStatus(t, resp)
+	require.Nil(t, cm, "should never add channel member")
+	cm = th.AddUserToChannel(user2, publicChannel)
 	require.Equal(t, publicChannel.Id, cm.ChannelId, "should have returned exact channel")
 	require.Equal(t, user2.Id, cm.UserId, "should have returned exact user added to public channel")
 
 	cm, _, err = client.AddChannelMember(context.Background(), privateChannel.Id, user2.Id)
-	require.NoError(t, err)
+	require.Error(t, err)
+	require.Nil(t, cm, "should never add channel member")
+	cm = th.AddUserToChannel(user2, privateChannel)
 	require.Equal(t, privateChannel.Id, cm.ChannelId, "should have returned exact channel")
 	require.Equal(t, user2.Id, cm.UserId, "should have returned exact user added to private channel")
 
@@ -3159,10 +3163,6 @@ func TestAddChannelMember(t *testing.T) {
 	require.Error(t, err)
 	CheckBadRequestStatus(t, resp)
 	require.Nil(t, cm, "should return nothing")
-
-	_, resp, err = client.AddChannelMember(context.Background(), publicChannel.Id, GenerateTestID())
-	require.Error(t, err)
-	CheckNotFoundStatus(t, resp)
 
 	_, resp, err = client.AddChannelMember(context.Background(), "junk", user2.Id)
 	require.Error(t, err)
@@ -3470,10 +3470,11 @@ func TestRemoveChannelMember(t *testing.T) {
 	bot := th.CreateBotWithSystemAdminClient()
 	th.App.AddUserToTeam(th.Context, team.Id, bot.UserId, "")
 
-	_, err := client.RemoveUserFromChannel(context.Background(), th.BasicChannel.Id, th.BasicUser2.Id)
-	require.NoError(t, err)
+	resp, err := client.RemoveUserFromChannel(context.Background(), th.BasicChannel.Id, th.BasicUser2.Id)
+	require.Error(t, err)
+	CheckForbiddenStatus(t, resp)
 
-	resp, err := client.RemoveUserFromChannel(context.Background(), th.BasicChannel.Id, "junk")
+	resp, err = client.RemoveUserFromChannel(context.Background(), th.BasicChannel.Id, "junk")
 	require.Error(t, err)
 	CheckBadRequestStatus(t, resp)
 
@@ -3549,11 +3550,11 @@ func TestRemoveChannelMember(t *testing.T) {
 		})
 
 		_, err2 = client.RemoveUserFromChannel(context.Background(), th.BasicChannel2.Id, th.BasicUser.Id)
-		require.NoError(t, err2)
-		requirePost(&model.Post{
-			Message:   fmt.Sprintf("@%s removed from the channel.", th.BasicUser.Username),
-			ChannelId: th.BasicChannel2.Id,
-		})
+		require.Error(t, err2)
+		// requirePost(&model.Post{
+		// 	Message:   fmt.Sprintf("@%s removed from the channel.", th.BasicUser.Username),
+		// 	ChannelId: th.BasicChannel2.Id,
+		// })
 
 		_, err2 = th.SystemAdminClient.RemoveUserFromChannel(context.Background(), th.BasicChannel.Id, th.BasicUser.Id)
 		require.NoError(t, err2)
@@ -3584,7 +3585,8 @@ func TestRemoveChannelMember(t *testing.T) {
 	th.App.AddUserToChannel(th.Context, th.BasicUser2, private, false)
 
 	_, err = client.RemoveUserFromChannel(context.Background(), private.Id, th.BasicUser2.Id)
-	require.NoError(t, err)
+	require.Error(t, err)
+	CheckForbiddenStatus(t, resp)
 
 	th.LoginBasic2()
 	resp, err = client.RemoveUserFromChannel(context.Background(), private.Id, th.BasicUser.Id)
@@ -4254,8 +4256,12 @@ func TestGetChannelModerations(t *testing.T) {
 				require.Equal(t, moderation.Roles.Guests.Enabled, true)
 			}
 
-			require.Equal(t, moderation.Roles.Members.Value, true)
-			require.Equal(t, moderation.Roles.Members.Enabled, true)
+			if moderation.Name == "manage_members" {
+				require.Empty(t, moderation.Roles.Members)
+			} else {
+				require.Equal(t, moderation.Roles.Members.Value, true)
+				require.Equal(t, moderation.Roles.Members.Enabled, true)
+			}
 		}
 	})
 
@@ -4351,7 +4357,7 @@ func TestGetChannelModerations(t *testing.T) {
 		require.NoError(t, err)
 		for _, moderation := range moderations {
 			if moderation.Name == "manage_members" {
-				require.Equal(t, moderation.Roles.Members.Value, true)
+				require.Equal(t, moderation.Roles.Members.Value, false)
 			}
 		}
 	})
@@ -4470,9 +4476,13 @@ func TestPatchChannelModerations(t *testing.T) {
 				require.Equal(t, moderation.Roles.Guests.Value, true)
 				require.Equal(t, moderation.Roles.Guests.Enabled, true)
 			}
-
-			require.Equal(t, moderation.Roles.Members.Value, true)
-			require.Equal(t, moderation.Roles.Members.Enabled, true)
+			
+			if moderation.Name == "manage_members" {
+				require.Empty(t, moderation.Roles.Members)
+			} else {
+				require.Equal(t, moderation.Roles.Members.Value, true)
+				require.Equal(t, moderation.Roles.Members.Enabled, true)
+			}
 		}
 
 		require.Nil(t, channel.SchemeId)
@@ -4500,6 +4510,8 @@ func TestPatchChannelModerations(t *testing.T) {
 			if moderation.Name == createPosts {
 				require.Equal(t, moderation.Roles.Members.Value, false)
 				require.Equal(t, moderation.Roles.Members.Enabled, true)
+			} else if moderation.Name == "manage_members" {
+				require.Empty(t, moderation.Roles.Members)
 			} else {
 				require.Equal(t, moderation.Roles.Members.Value, true)
 				require.Equal(t, moderation.Roles.Members.Enabled, true)
@@ -4534,8 +4546,12 @@ func TestPatchChannelModerations(t *testing.T) {
 				require.Equal(t, moderation.Roles.Guests.Enabled, true)
 			}
 
-			require.Equal(t, moderation.Roles.Members.Value, true)
-			require.Equal(t, moderation.Roles.Members.Enabled, true)
+			if moderation.Name == "manage_members" {
+				require.Empty(t, moderation.Roles.Members)
+			} else {
+				require.Equal(t, moderation.Roles.Members.Value, true)
+				require.Equal(t, moderation.Roles.Members.Enabled, true)
+			}
 		}
 
 		channel, _ = th.App.GetChannel(th.Context, channel.Id)
@@ -4589,8 +4605,12 @@ func TestPatchChannelModerations(t *testing.T) {
 				require.Equal(t, moderation.Roles.Guests.Enabled, false)
 			}
 
-			require.Equal(t, moderation.Roles.Members.Value, true)
-			require.Equal(t, moderation.Roles.Members.Enabled, true)
+			if moderation.Name == "manage_members" {
+				require.Empty(t, moderation.Roles.Members)
+			} else {
+				require.Equal(t, moderation.Roles.Members.Value, true)
+				require.Equal(t, moderation.Roles.Members.Enabled, true)
+			}
 		}
 
 		patch := []*model.ChannelModerationPatch{
@@ -4611,8 +4631,12 @@ func TestPatchChannelModerations(t *testing.T) {
 				require.Equal(t, moderation.Roles.Guests.Enabled, false)
 			}
 
-			require.Equal(t, moderation.Roles.Members.Value, true)
-			require.Equal(t, moderation.Roles.Members.Enabled, true)
+			if moderation.Name == "manage_members" {
+				require.Empty(t, moderation.Roles.Members)
+			} else {
+				require.Equal(t, moderation.Roles.Members.Value, true)
+				require.Equal(t, moderation.Roles.Members.Enabled, true)
+			}
 		}
 	})
 }
