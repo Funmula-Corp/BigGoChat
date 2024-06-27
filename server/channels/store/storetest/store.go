@@ -10,10 +10,10 @@ import (
 
 	"github.com/stretchr/testify/mock"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store/storetest/mocks"
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store/storetest/mocks"
 )
 
 // Store can be used to provide mock stores for testing.
@@ -65,6 +65,8 @@ type Store struct {
 	PostPersistentNotificationStore mocks.PostPersistentNotificationStore
 	DesktopTokensStore              mocks.DesktopTokensStore
 	ChannelBookmarkStore            mocks.ChannelBookmarkStore
+	BlocklistStore                  mocks.BlocklistStore
+	
 }
 
 func (s *Store) SetContext(context context.Context)            { s.context = context }
@@ -147,6 +149,8 @@ func (s *Store) CheckIntegrity() <-chan model.IntegrityCheckResult {
 func (s *Store) ReplicaLagAbs() error  { return nil }
 func (s *Store) ReplicaLagTime() error { return nil }
 
+func (s *Store) Blocklist() store.BlocklistStore {return &s.BlocklistStore}
+
 func (s *Store) AssertExpectations(t mock.TestingT) bool {
 	return mock.AssertExpectationsForObjects(t,
 		&s.TeamStore,
@@ -188,5 +192,6 @@ func (s *Store) AssertExpectations(t mock.TestingT) bool {
 		&s.PostPersistentNotificationStore,
 		&s.DesktopTokensStore,
 		&s.ChannelBookmarkStore,
+		&s.BlocklistStore,
 	)
 }

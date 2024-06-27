@@ -29,8 +29,10 @@ type Scheme struct {
 	Scope                     string `json:"scope"`
 	DefaultTeamAdminRole      string `json:"default_team_admin_role"`
 	DefaultTeamUserRole       string `json:"default_team_user_role"`
+	DefaultTeamVerifiedRole   string `json:"default_team_verified_role"`
 	DefaultChannelAdminRole   string `json:"default_channel_admin_role"`
 	DefaultChannelUserRole    string `json:"default_channel_user_role"`
+	DefaultChannelVerifiedRole   string `json:"default_channel_verified_role"`
 	DefaultTeamGuestRole      string `json:"default_team_guest_role"`
 	DefaultChannelGuestRole   string `json:"default_channel_guest_role"`
 	DefaultPlaybookAdminRole  string `json:"default_playbook_admin_role"`
@@ -53,6 +55,8 @@ func (scheme *Scheme) Auditable() map[string]interface{} {
 		"default_team_user_role":       scheme.DefaultTeamUserRole,
 		"default_channel_admin_role":   scheme.DefaultChannelAdminRole,
 		"default_channel_user_role":    scheme.DefaultChannelUserRole,
+		"default_channel_verified_role":   scheme.DefaultChannelVerifiedRole,
+		"default_team_verified_role":   scheme.DefaultTeamVerifiedRole,
 		"default_team_guest_role":      scheme.DefaultTeamGuestRole,
 		"default_channel_guest_role":   scheme.DefaultChannelGuestRole,
 		"default_playbook_admin_role":  scheme.DefaultPlaybookAdminRole,
@@ -95,9 +99,11 @@ type SchemeConveyor struct {
 	TeamAdmin      string  `json:"default_team_admin_role"`
 	TeamUser       string  `json:"default_team_user_role"`
 	TeamGuest      string  `json:"default_team_guest_role"`
+	TeamVerified   string  `json:"default_team_verified_role"`
 	ChannelAdmin   string  `json:"default_channel_admin_role"`
 	ChannelUser    string  `json:"default_channel_user_role"`
 	ChannelGuest   string  `json:"default_channel_guest_role"`
+	ChannelVerified string `json:"default_channel_verified_role"`
 	PlaybookAdmin  string  `json:"default_playbook_admin_role"`
 	PlaybookMember string  `json:"default_playbook_member_role"`
 	RunAdmin       string  `json:"default_run_admin_role"`
@@ -114,9 +120,11 @@ func (sc *SchemeConveyor) Scheme() *Scheme {
 		DefaultTeamAdminRole:      sc.TeamAdmin,
 		DefaultTeamUserRole:       sc.TeamUser,
 		DefaultTeamGuestRole:      sc.TeamGuest,
+		DefaultTeamVerifiedRole:   sc.TeamVerified,
 		DefaultChannelAdminRole:   sc.ChannelAdmin,
 		DefaultChannelUserRole:    sc.ChannelUser,
 		DefaultChannelGuestRole:   sc.ChannelGuest,
+		DefaultChannelVerifiedRole: sc.ChannelVerified,
 		DefaultPlaybookAdminRole:  sc.PlaybookAdmin,
 		DefaultPlaybookMemberRole: sc.PlaybookMember,
 		DefaultRunAdminRole:       sc.RunAdmin,
@@ -128,6 +136,7 @@ type SchemeRoles struct {
 	SchemeAdmin bool `json:"scheme_admin"`
 	SchemeUser  bool `json:"scheme_user"`
 	SchemeGuest bool `json:"scheme_guest"`
+	SchemeVerified bool `json:"scheme_verified"`
 }
 
 func (s *SchemeRoles) Auditable() map[string]interface{} {
@@ -169,6 +178,10 @@ func (scheme *Scheme) IsValidForCreate() bool {
 		return false
 	}
 
+	if !IsValidRoleName(scheme.DefaultChannelVerifiedRole) {
+		return false
+	}
+
 	if !IsValidRoleName(scheme.DefaultChannelGuestRole) {
 		return false
 	}
@@ -183,6 +196,10 @@ func (scheme *Scheme) IsValidForCreate() bool {
 		}
 
 		if !IsValidRoleName(scheme.DefaultTeamGuestRole) {
+			return false
+		}
+
+		if !IsValidRoleName(scheme.DefaultTeamVerifiedRole) {
 			return false
 		}
 
@@ -213,6 +230,10 @@ func (scheme *Scheme) IsValidForCreate() bool {
 		}
 
 		if scheme.DefaultTeamGuestRole != "" {
+			return false
+		}
+
+		if scheme.DefaultTeamVerifiedRole != "" {
 			return false
 		}
 	}

@@ -19,17 +19,17 @@ import (
 
 	"golang.org/x/sync/errgroup"
 
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/i18n"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app/email"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app/imaging"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app/users"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/einterfaces"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/shared/mfa"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/i18n"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
 )
 
 const (

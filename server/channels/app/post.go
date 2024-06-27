@@ -1395,6 +1395,11 @@ func (a *App) DeletePost(c request.CTX, postID, deleteByID string) (*model.Post,
 		}
 	}
 
+	post, err = a.Srv().Store().Post().GetSingle(postID, true)
+	if err != nil {
+		return nil, model.NewAppError("DeletePost", "app.post.get.app_error", nil, "", http.StatusBadRequest).Wrap(err)
+	}
+
 	postJSON, err := json.Marshal(post)
 	if err != nil {
 		return nil, model.NewAppError("DeletePost", "api.marshal_error", nil, "", http.StatusInternalServerError).Wrap(err)

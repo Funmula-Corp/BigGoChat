@@ -48,6 +48,7 @@ func (us *UserService) SanitizeProfile(user *model.User, asAdmin bool) {
 func (us *UserService) GetSanitizeOptions(asAdmin bool) map[string]bool {
 	options := us.config().GetSanitizeOptions()
 	if asAdmin {
+		options["mobilephone"] = true
 		options["email"] = true
 		options["fullname"] = true
 		options["authservice"] = true

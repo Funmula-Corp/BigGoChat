@@ -8,7 +8,7 @@ import type {Dispatch} from 'redux';
 import {getChannelTimezones, getChannelMemberCountsByGroup} from 'mattermost-redux/actions/channels';
 import {moveHistoryIndexBack, moveHistoryIndexForward, resetCreatePostRequest, resetHistoryIndex} from 'mattermost-redux/actions/posts';
 import {savePreferences} from 'mattermost-redux/actions/preferences';
-import {Permissions, Preferences, Posts} from 'mattermost-redux/constants';
+import {Permissions, Preferences, Posts, General} from 'mattermost-redux/constants';
 import {getAllChannelStats, getChannelMemberCountsByGroup as selectChannelMemberCountsByGroup} from 'mattermost-redux/selectors/entities/channels';
 import {getCurrentUserId} from 'mattermost-redux/selectors/entities/common';
 import {getConfig, getLicense} from 'mattermost-redux/selectors/entities/general';
@@ -42,6 +42,7 @@ import type {PostDraft} from 'types/store/draft';
 import type {GlobalState} from 'types/store/index.js';
 
 import AdvancedCreateComment from './advanced_create_comment';
+import { haveIVerified } from 'mattermost-redux/selectors/entities/roles_helpers';
 
 type OwnProps = {
     rootId: string;
@@ -66,12 +67,13 @@ function makeMapStateToProps() {
 
         const config = getConfig(state);
         const license = getLicense(state);
+        const isPhoneVerified = haveIVerified(state);
         const currentUserId = getCurrentUserId(state);
         const enableConfirmNotificationsToChannel = config.EnableConfirmNotificationsToChannel === 'true';
         const enableEmojiPicker = config.EnableEmojiPicker === 'true';
         const enableGifPicker = config.EnableGifPicker === 'true';
         const badConnection = connectionErrorCount(state) > 1;
-        const canPost = haveIChannelPermission(state, channel.team_id, channel.id, Permissions.CREATE_POST);
+        const canPost = isPhoneVerified && haveIChannelPermission(state, channel.team_id, channel.id, Permissions.CREATE_POST);
         const useChannelMentions = haveIChannelPermission(state, channel.team_id, channel.id, Permissions.USE_CHANNEL_MENTIONS);
         const isLDAPEnabled = license?.IsLicensed === 'true' && license?.LDAPGroups === 'true';
         const useCustomGroupMentions = isCustomGroupsEnabled(state) && haveIChannelPermission(state, channel.team_id, channel.id, Permissions.USE_GROUP_MENTIONS);
@@ -112,6 +114,7 @@ function makeMapStateToProps() {
             canUploadFiles: canUploadFiles(config),
             postEditorActions,
             shouldFocusRHS,
+            isPhoneVerified,
         };
     };
 }

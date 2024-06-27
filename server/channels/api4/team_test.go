@@ -17,13 +17,13 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin/plugintest/mock"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/i18n"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/utils/testutils"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/einterfaces/mocks"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/shared/mail"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin/plugintest/mock"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/i18n"
 )
 
 func TestCreateTeam(t *testing.T) {
@@ -2940,6 +2940,7 @@ func TestUpdateTeamMemberSchemeRoles(t *testing.T) {
 
 	s1 := &model.SchemeRoles{
 		SchemeAdmin: false,
+		SchemeVerified:  false,
 		SchemeUser:  false,
 		SchemeGuest: false,
 	}
@@ -2949,11 +2950,13 @@ func TestUpdateTeamMemberSchemeRoles(t *testing.T) {
 	tm1, _, err := SystemAdminClient.GetTeamMember(context.Background(), th.BasicTeam.Id, th.BasicUser.Id, "")
 	require.NoError(t, err)
 	assert.Equal(t, false, tm1.SchemeGuest)
+	assert.Equal(t, false, tm1.SchemeVerified)
 	assert.Equal(t, false, tm1.SchemeUser)
 	assert.Equal(t, false, tm1.SchemeAdmin)
 
 	s2 := &model.SchemeRoles{
 		SchemeAdmin: false,
+		SchemeVerified:  true,
 		SchemeUser:  true,
 		SchemeGuest: false,
 	}
@@ -2963,6 +2966,7 @@ func TestUpdateTeamMemberSchemeRoles(t *testing.T) {
 	tm2, _, err := SystemAdminClient.GetTeamMember(context.Background(), th.BasicTeam.Id, th.BasicUser.Id, "")
 	require.NoError(t, err)
 	assert.Equal(t, false, tm2.SchemeGuest)
+	assert.Equal(t, true, tm2.SchemeVerified)
 	assert.Equal(t, true, tm2.SchemeUser)
 	assert.Equal(t, false, tm2.SchemeAdmin)
 
@@ -2973,6 +2977,7 @@ func TestUpdateTeamMemberSchemeRoles(t *testing.T) {
 
 	s3 := &model.SchemeRoles{
 		SchemeAdmin: true,
+		SchemeVerified: true,
 		SchemeUser:  false,
 		SchemeGuest: false,
 	}
@@ -2987,6 +2992,7 @@ func TestUpdateTeamMemberSchemeRoles(t *testing.T) {
 
 	s4 := &model.SchemeRoles{
 		SchemeAdmin: true,
+		SchemeVerified: true,
 		SchemeUser:  true,
 		SchemeGuest: false,
 	}
@@ -3001,6 +3007,7 @@ func TestUpdateTeamMemberSchemeRoles(t *testing.T) {
 
 	s5 := &model.SchemeRoles{
 		SchemeAdmin: false,
+		SchemeVerified: true,
 		SchemeUser:  false,
 		SchemeGuest: true,
 	}
@@ -3012,6 +3019,7 @@ func TestUpdateTeamMemberSchemeRoles(t *testing.T) {
 
 	s6 := &model.SchemeRoles{
 		SchemeAdmin: false,
+		SchemeVerified: true,
 		SchemeUser:  true,
 		SchemeGuest: true,
 	}

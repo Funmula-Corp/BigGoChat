@@ -33,6 +33,7 @@ import Constants, {ModalIdentifiers} from 'utils/constants';
 import type {GlobalState} from 'types/store';
 
 import './new_channel_modal.scss';
+import { haveIVerified } from 'mattermost-redux/selectors/entities/roles_helpers';
 
 export function getChannelTypeFromPermissions(canCreatePublicChannel: boolean, canCreatePrivateChannel: boolean) {
     let channelType = Constants.OPEN_CHANNEL;
@@ -61,8 +62,9 @@ const NewChannelModal = () => {
 
     const currentTeamId = useSelector(getCurrentTeam)?.id;
 
-    const canCreatePublicChannel = useSelector((state: GlobalState) => (currentTeamId ? haveICurrentChannelPermission(state, Permissions.CREATE_PUBLIC_CHANNEL) : false));
-    const canCreatePrivateChannel = useSelector((state: GlobalState) => (currentTeamId ? haveICurrentChannelPermission(state, Permissions.CREATE_PRIVATE_CHANNEL) : false));
+    const isVerified = useSelector(haveIVerified)
+    const canCreatePublicChannel = isVerified && useSelector((state: GlobalState) => (currentTeamId ? haveICurrentChannelPermission(state, Permissions.CREATE_PUBLIC_CHANNEL) : false));
+    const canCreatePrivateChannel = isVerified && useSelector((state: GlobalState) => (currentTeamId ? haveICurrentChannelPermission(state, Permissions.CREATE_PRIVATE_CHANNEL) : false));
     const dispatch = useDispatch();
 
     const [type, setType] = useState(getChannelTypeFromPermissions(canCreatePublicChannel, canCreatePrivateChannel));

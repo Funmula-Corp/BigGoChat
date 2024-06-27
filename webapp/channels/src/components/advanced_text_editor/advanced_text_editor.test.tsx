@@ -144,6 +144,7 @@ const baseProps = {
     loadNextMessage: jest.fn(),
     replyToLastPost: jest.fn(),
     caretPosition: 0,
+    isPhoneVerified: true,
 };
 
 describe('components/avanced_text_editor/advanced_text_editor', () => {

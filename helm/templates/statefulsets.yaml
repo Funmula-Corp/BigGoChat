@@ -1,0 +1,113 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ .Release.Name }}
+  annotations:
+    {}
+  labels:
+    app: {{ .Release.Name }}
+    workload.user.cattle.io/workloadselector: apps.statefulset-{{ .Release.Namespace }}-{{ .Release.Name }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  selector:
+    matchLabels:
+      workload.user.cattle.io/workloadselector: apps.statefulset-{{ .Release.Namespace }}-{{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}
+        workload.user.cattle.io/workloadselector: apps.statefulset-{{ .Release.Namespace }}-{{ .Release.Name }}
+      namespace: {{ .Release.Namespace }}
+    spec:
+      imagePullSecrets:
+        - name: {{ .Values.deployment.pullsecret }}
+      containers:
+        - imagePullPolicy: Always
+          name: container-0
+          securityContext:
+            runAsNonRoot: false
+            readOnlyRootFilesystem: false
+            privileged: false
+            allowPrivilegeEscalation: false
+          volumeMounts:
+            - name: {{ .Release.Name }}-plugins
+              mountPath: /mattermost/plugins
+            - name: {{ .Release.Name }}-config
+              mountPath: /mattermost/config
+            - name: {{ .Release.Name }}-client-plugins
+              mountPath: /mattermost/client/plugins
+          ports:
+            - name: http
+              protocol: TCP
+              containerPort: 8065
+            - name: rpc
+              protocol: TCP
+              containerPort: 8074
+            - name: rtc-tcp
+              protocol: TCP
+              containerPort: 8083
+            - name: rtc-udp
+              protocol: UDP
+              containerPort: 8083
+          env:
+            - name: MM_SQLSETTINGS_DATASOURCE
+              valueFrom:
+                secretKeyRef:
+                  key: DB_CONNECTION_STRING
+                  name: {{ .Release.Name }}-postgres
+                  optional: false
+            - name: MM_FILESETTINGS_AMAZONS3ACCESSKEYID
+              valueFrom:
+                secretKeyRef:
+                  key: accesskey
+                  name: {{ .Release.Name }}-minio-credential
+                  optional: false
+            - name: MM_FILESETTINGS_AMAZONS3SECRETACCESSKEY
+              valueFrom:
+                secretKeyRef:
+                  key: secretkey
+                  name: {{ .Release.Name }}-minio-credential
+                  optional: false
+            - name: MM_CLUSTERSETTINGS_CLUSTERNAME
+              value: {{ .Values.mattermost.clustername }}
+          image: {{ .Values.deployment.image }}
+      restartPolicy: Always
+      volumes:
+      - _type: persistentVolumeClaim
+        persistentVolumeClaim:
+          claimName: {{ .Release.Name }}-plugins
+        name: {{ .Release.Name }}-plugins
+        __newPvc:
+          type: persistentvolumeclaim
+          metadata:
+            namespace: {{ .Release.Namespace }}
+          spec:
+            storageClassName: ''
+            volumeName: ''
+            resources:
+              requests: {}
+  replicas: 1
+  serviceName: {{ .Release.Name }}-headless
+  volumeClaimTemplates:
+    - metadata:
+        namespace: {{ .Release.Namespace }}
+        name: {{ .Release.Name }}-config
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        storageClassName: longhorn
+        volumeName: ''
+        resources:
+          requests:
+            storage: 1Gi
+    - metadata:
+        namespace: {{ .Release.Namespace }}
+        name: {{ .Release.Name }}-client-plugins
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        storageClassName: longhorn
+        volumeName: ''
+        resources:
+          requests:
+            storage: 10Gi

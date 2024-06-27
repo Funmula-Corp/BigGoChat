@@ -16,6 +16,7 @@ import {getCurrentUserId} from 'mattermost-redux/selectors/entities/users';
 import {arePreviewsCollapsed} from 'selectors/preferences';
 import {getGlobalItem} from 'selectors/storage';
 
+import { General } from 'mattermost-redux/constants';
 import {StoragePrefixes} from 'utils/constants';
 
 import type {GlobalState} from 'types/store';
@@ -90,7 +91,7 @@ export function makeCanWrangler() {
                 allowedEmailDomains = WranglerAllowedEmailDomain?.split(',') || [];
             }
 
-            if (permittedUsers.length > 0 && !user.roles.includes('system_admin')) {
+            if (permittedUsers.length > 0 && !user.roles.includes(General.SYSTEM_ADMIN_ROLE)) {
                 const roles = user.roles.split(' ');
                 const hasRole = roles.some((role) => permittedUsers.includes(role));
                 if (!hasRole) {

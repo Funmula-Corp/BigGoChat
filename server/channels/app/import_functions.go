@@ -16,14 +16,14 @@ import (
 	"strings"
 	"sync"
 
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app/imports"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app/teams"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app/users"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/utils"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
 )
 
 // -- Bulk Import Functions --
@@ -83,6 +83,17 @@ func (a *App) importScheme(rctx request.CTX, data *imports.SchemeImportData, dry
 			return err
 		}
 
+		if data.DefaultTeamVerifiedRole == nil {
+			data.DefaultTeamVerifiedRole = &imports.RoleImportData{
+				DisplayName:   model.NewString("Team Verified Role for Scheme"),
+				SchemeManaged: model.NewBool(true),
+			}
+		}
+		data.DefaultTeamVerifiedRole.Name = &scheme.DefaultTeamVerifiedRole
+		if err := a.importRole(rctx, data.DefaultTeamVerifiedRole, dryRun); err != nil {
+			return err
+		}
+
 		if data.DefaultTeamGuestRole == nil {
 			data.DefaultTeamGuestRole = &imports.RoleImportData{
 				DisplayName:   model.NewString("Team Guest Role for Scheme"),
@@ -103,6 +114,17 @@ func (a *App) importScheme(rctx request.CTX, data *imports.SchemeImportData, dry
 
 		data.DefaultChannelUserRole.Name = &scheme.DefaultChannelUserRole
 		if err := a.importRole(rctx, data.DefaultChannelUserRole, dryRun); err != nil {
+			return err
+		}
+
+		if data.DefaultChannelVerifiedRole == nil {
+			data.DefaultChannelVerifiedRole = &imports.RoleImportData{
+				DisplayName:   model.NewString("Channel Verified User Role for Scheme"),
+				SchemeManaged: model.NewBool(true),
+			}
+		}
+		data.DefaultChannelVerifiedRole.Name = &scheme.DefaultChannelVerifiedRole
+		if err := a.importRole(rctx, data.DefaultChannelVerifiedRole, dryRun); err != nil {
 			return err
 		}
 
@@ -867,6 +889,7 @@ func (a *App) importUserTeams(rctx request.CTX, user *model.User, data *[]import
 			UserId:      user.Id,
 			SchemeGuest: user.IsGuest(),
 			SchemeUser:  !user.IsGuest(),
+			SchemeVerified: user.IsVerified(),
 			SchemeAdmin: team.Email == user.Email && !user.IsGuest(),
 			CreateAt:    model.GetMillis(),
 		}
@@ -1034,6 +1057,7 @@ func (a *App) importUserChannels(rctx request.CTX, user *model.User, team *model
 			NotifyProps: model.GetDefaultChannelNotifyProps(),
 			SchemeGuest: user.IsGuest(),
 			SchemeUser:  !user.IsGuest(),
+			SchemeVerified: user.IsVerified(),
 			SchemeAdmin: false,
 		}
 		if !user.IsGuest() {

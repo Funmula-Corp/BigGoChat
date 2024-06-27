@@ -7,8 +7,8 @@ package mock_bot
 import (
 	reflect "reflect"
 
-	gomock "github.com/golang/mock/gomock"
 	model "git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	gomock "github.com/golang/mock/gomock"
 )
 
 // MockBot is a mock of Bot interface.

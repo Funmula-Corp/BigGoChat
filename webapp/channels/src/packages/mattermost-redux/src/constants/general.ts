@@ -38,6 +38,7 @@ export default {
     SYSTEM_USER_ACCESS_TOKEN_ROLE: 'system_user_access_token',
     SYSTEM_POST_ALL_ROLE: 'system_post_all',
     SYSTEM_POST_ALL_PUBLIC_ROLE: 'system_post_all_public',
+    SYSTEM_VERIFIED_ROLE: 'system_verified',
     PLAYBOOK_ADMIN_ROLE: 'playbook_admin',
     PLAYBOOK_MEMBER_ROLE: 'playbook_member',
     RUN_ADMIN_ROLE: 'run_admin',

@@ -7,8 +7,8 @@ import (
 	"errors"
 	"net/http"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
 )
 
 func (a *App) GetScheme(id string) (*model.Scheme, *model.AppError) {
@@ -78,9 +78,11 @@ func (a *App) CreateScheme(scheme *model.Scheme) (*model.Scheme, *model.AppError
 
 	// Clear any user-provided values for trusted properties.
 	scheme.DefaultTeamAdminRole = ""
+	scheme.DefaultTeamVerifiedRole = ""
 	scheme.DefaultTeamUserRole = ""
 	scheme.DefaultTeamGuestRole = ""
 	scheme.DefaultChannelAdminRole = ""
+	scheme.DefaultChannelVerifiedRole = ""
 	scheme.DefaultChannelUserRole = ""
 	scheme.DefaultChannelGuestRole = ""
 	scheme.DefaultPlaybookAdminRole = ""

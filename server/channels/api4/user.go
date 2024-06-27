@@ -1101,9 +1101,19 @@ func searchUsers(c *Context, w http.ResponseWriter, r *http.Request) {
 	if c.App.SessionHasPermissionTo(*c.AppContext.Session(), model.PermissionManageSystem) {
 		options.AllowEmails = true
 		options.AllowFullNames = true
+		options.AllowMobilephones = true
 	} else {
 		options.AllowEmails = *c.App.Config().PrivacySettings.ShowEmailAddress
 		options.AllowFullNames = *c.App.Config().PrivacySettings.ShowFullName
+		options.AllowMobilephones = *c.App.Config().PrivacySettings.ShowMobilephone
+	}
+
+	if *c.App.Config().PrivacySettings.AllowAnonymousEmailSearch {
+		options.AllowEmails = true
+	}
+
+	if *c.App.Config().PrivacySettings.AllowAnonymousMobilephoneSearch {
+		options.AllowMobilephones = true
 	}
 
 	options, appErr := c.App.RestrictUsersSearchByPermissions(c.AppContext, c.AppContext.Session().UserId, options)
@@ -1116,6 +1126,16 @@ func searchUsers(c *Context, w http.ResponseWriter, r *http.Request) {
 	if appErr != nil {
 		c.Err = appErr
 		return
+	}
+
+	// bypass clientside filter on serverside filtered anonymous fields
+	for _, profile := range profiles {
+		if profile.Email == "" && *c.App.Config().PrivacySettings.AllowAnonymousMobilephoneSearch {
+			profile.Email = props.Term
+		}
+		if (profile.Mobilephone == nil || *profile.Mobilephone == "") && *c.App.Config().PrivacySettings.AllowAnonymousMobilephoneSearch {
+			profile.Mobilephone = &props.Term
+		}
 	}
 
 	js, err := json.Marshal(profiles)

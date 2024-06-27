@@ -20,6 +20,7 @@ import (
 type OpenTracingLayer struct {
 	store.Store
 	AuditStore                      store.AuditStore
+	BlocklistStore                  store.BlocklistStore
 	BotStore                        store.BotStore
 	ChannelStore                    store.ChannelStore
 	ChannelBookmarkStore            store.ChannelBookmarkStore
@@ -68,6 +69,10 @@ type OpenTracingLayer struct {
 
 func (s *OpenTracingLayer) Audit() store.AuditStore {
 	return s.AuditStore
+}
+
+func (s *OpenTracingLayer) Blocklist() store.BlocklistStore {
+	return s.BlocklistStore
 }
 
 func (s *OpenTracingLayer) Bot() store.BotStore {
@@ -248,6 +253,11 @@ func (s *OpenTracingLayer) Webhook() store.WebhookStore {
 
 type OpenTracingLayerAuditStore struct {
 	store.AuditStore
+	Root *OpenTracingLayer
+}
+
+type OpenTracingLayerBlocklistStore struct {
+	store.BlocklistStore
 	Root *OpenTracingLayer
 }
 
@@ -523,6 +533,186 @@ func (s *OpenTracingLayerAuditStore) Save(audit *model.Audit) error {
 	}
 
 	return err
+}
+
+func (s *OpenTracingLayerBlocklistStore) DeleteChannelBlockUser(channelId string, userId string) error {
+	origCtx := s.Root.Store.Context()
+	span, newCtx := tracing.StartSpanWithParentByContext(s.Root.Store.Context(), "BlocklistStore.DeleteChannelBlockUser")
+	s.Root.Store.SetContext(newCtx)
+	defer func() {
+		s.Root.Store.SetContext(origCtx)
+	}()
+
+	defer span.Finish()
+	err := s.BlocklistStore.DeleteChannelBlockUser(channelId, userId)
+	if err != nil {
+		span.LogFields(spanlog.Error(err))
+		ext.Error.Set(span, true)
+	}
+
+	return err
+}
+
+func (s *OpenTracingLayerBlocklistStore) DeleteUserBlockUser(userId string, blockedId string) error {
+	origCtx := s.Root.Store.Context()
+	span, newCtx := tracing.StartSpanWithParentByContext(s.Root.Store.Context(), "BlocklistStore.DeleteUserBlockUser")
+	s.Root.Store.SetContext(newCtx)
+	defer func() {
+		s.Root.Store.SetContext(origCtx)
+	}()
+
+	defer span.Finish()
+	err := s.BlocklistStore.DeleteUserBlockUser(userId, blockedId)
+	if err != nil {
+		span.LogFields(spanlog.Error(err))
+		ext.Error.Set(span, true)
+	}
+
+	return err
+}
+
+func (s *OpenTracingLayerBlocklistStore) GetChannelBlockUser(channelId string, userId string) (*model.ChannelBlockUser, error) {
+	origCtx := s.Root.Store.Context()
+	span, newCtx := tracing.StartSpanWithParentByContext(s.Root.Store.Context(), "BlocklistStore.GetChannelBlockUser")
+	s.Root.Store.SetContext(newCtx)
+	defer func() {
+		s.Root.Store.SetContext(origCtx)
+	}()
+
+	defer span.Finish()
+	result, err := s.BlocklistStore.GetChannelBlockUser(channelId, userId)
+	if err != nil {
+		span.LogFields(spanlog.Error(err))
+		ext.Error.Set(span, true)
+	}
+
+	return result, err
+}
+
+func (s *OpenTracingLayerBlocklistStore) GetUserBlockUser(userId string, blockedId string) (*model.UserBlockUser, error) {
+	origCtx := s.Root.Store.Context()
+	span, newCtx := tracing.StartSpanWithParentByContext(s.Root.Store.Context(), "BlocklistStore.GetUserBlockUser")
+	s.Root.Store.SetContext(newCtx)
+	defer func() {
+		s.Root.Store.SetContext(origCtx)
+	}()
+
+	defer span.Finish()
+	result, err := s.BlocklistStore.GetUserBlockUser(userId, blockedId)
+	if err != nil {
+		span.LogFields(spanlog.Error(err))
+		ext.Error.Set(span, true)
+	}
+
+	return result, err
+}
+
+func (s *OpenTracingLayerBlocklistStore) ListChannelBlockUsers(channelId string) (*model.ChannelBlockUserList, error) {
+	origCtx := s.Root.Store.Context()
+	span, newCtx := tracing.StartSpanWithParentByContext(s.Root.Store.Context(), "BlocklistStore.ListChannelBlockUsers")
+	s.Root.Store.SetContext(newCtx)
+	defer func() {
+		s.Root.Store.SetContext(origCtx)
+	}()
+
+	defer span.Finish()
+	result, err := s.BlocklistStore.ListChannelBlockUsers(channelId)
+	if err != nil {
+		span.LogFields(spanlog.Error(err))
+		ext.Error.Set(span, true)
+	}
+
+	return result, err
+}
+
+func (s *OpenTracingLayerBlocklistStore) ListChannelBlockUsersByBlockedUser(blockedId string) (*model.ChannelBlockUserList, error) {
+	origCtx := s.Root.Store.Context()
+	span, newCtx := tracing.StartSpanWithParentByContext(s.Root.Store.Context(), "BlocklistStore.ListChannelBlockUsersByBlockedUser")
+	s.Root.Store.SetContext(newCtx)
+	defer func() {
+		s.Root.Store.SetContext(origCtx)
+	}()
+
+	defer span.Finish()
+	result, err := s.BlocklistStore.ListChannelBlockUsersByBlockedUser(blockedId)
+	if err != nil {
+		span.LogFields(spanlog.Error(err))
+		ext.Error.Set(span, true)
+	}
+
+	return result, err
+}
+
+func (s *OpenTracingLayerBlocklistStore) ListUserBlockUsers(userId string) (*model.UserBlockUserList, error) {
+	origCtx := s.Root.Store.Context()
+	span, newCtx := tracing.StartSpanWithParentByContext(s.Root.Store.Context(), "BlocklistStore.ListUserBlockUsers")
+	s.Root.Store.SetContext(newCtx)
+	defer func() {
+		s.Root.Store.SetContext(origCtx)
+	}()
+
+	defer span.Finish()
+	result, err := s.BlocklistStore.ListUserBlockUsers(userId)
+	if err != nil {
+		span.LogFields(spanlog.Error(err))
+		ext.Error.Set(span, true)
+	}
+
+	return result, err
+}
+
+func (s *OpenTracingLayerBlocklistStore) ListUserBlockUsersByBlockedUser(blockedId string) (*model.UserBlockUserList, error) {
+	origCtx := s.Root.Store.Context()
+	span, newCtx := tracing.StartSpanWithParentByContext(s.Root.Store.Context(), "BlocklistStore.ListUserBlockUsersByBlockedUser")
+	s.Root.Store.SetContext(newCtx)
+	defer func() {
+		s.Root.Store.SetContext(origCtx)
+	}()
+
+	defer span.Finish()
+	result, err := s.BlocklistStore.ListUserBlockUsersByBlockedUser(blockedId)
+	if err != nil {
+		span.LogFields(spanlog.Error(err))
+		ext.Error.Set(span, true)
+	}
+
+	return result, err
+}
+
+func (s *OpenTracingLayerBlocklistStore) SaveChannelBlockUser(blockUser *model.ChannelBlockUser) (*model.ChannelBlockUser, error) {
+	origCtx := s.Root.Store.Context()
+	span, newCtx := tracing.StartSpanWithParentByContext(s.Root.Store.Context(), "BlocklistStore.SaveChannelBlockUser")
+	s.Root.Store.SetContext(newCtx)
+	defer func() {
+		s.Root.Store.SetContext(origCtx)
+	}()
+
+	defer span.Finish()
+	result, err := s.BlocklistStore.SaveChannelBlockUser(blockUser)
+	if err != nil {
+		span.LogFields(spanlog.Error(err))
+		ext.Error.Set(span, true)
+	}
+
+	return result, err
+}
+
+func (s *OpenTracingLayerBlocklistStore) SaveUserBlockUser(userBlockUser *model.UserBlockUser) (*model.UserBlockUser, error) {
+	origCtx := s.Root.Store.Context()
+	span, newCtx := tracing.StartSpanWithParentByContext(s.Root.Store.Context(), "BlocklistStore.SaveUserBlockUser")
+	s.Root.Store.SetContext(newCtx)
+	defer func() {
+		s.Root.Store.SetContext(origCtx)
+	}()
+
+	defer span.Finish()
+	result, err := s.BlocklistStore.SaveUserBlockUser(userBlockUser)
+	if err != nil {
+		span.LogFields(spanlog.Error(err))
+		ext.Error.Set(span, true)
+	}
+
+	return result, err
 }
 
 func (s *OpenTracingLayerBotStore) Get(userID string, includeDeleted bool) (*model.Bot, error) {
@@ -13408,6 +13598,7 @@ func New(childStore store.Store, ctx context.Context) *OpenTracingLayer {
 	}
 
 	newStore.AuditStore = &OpenTracingLayerAuditStore{AuditStore: childStore.Audit(), Root: &newStore}
+	newStore.BlocklistStore = &OpenTracingLayerBlocklistStore{BlocklistStore: childStore.Blocklist(), Root: &newStore}
 	newStore.BotStore = &OpenTracingLayerBotStore{BotStore: childStore.Bot(), Root: &newStore}
 	newStore.ChannelStore = &OpenTracingLayerChannelStore{ChannelStore: childStore.Channel(), Root: &newStore}
 	newStore.ChannelBookmarkStore = &OpenTracingLayerChannelBookmarkStore{ChannelBookmarkStore: childStore.ChannelBookmark(), Root: &newStore}

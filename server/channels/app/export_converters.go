@@ -6,8 +6,8 @@ package app
 import (
 	"strings"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app/imports"
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app/imports"
 )
 
 func ImportLineFromTeam(team *model.TeamForExport) *imports.LineImportData {
@@ -254,12 +254,14 @@ func ImportLineFromScheme(scheme *model.Scheme, rolesMap map[string]*model.Role)
 
 	if scheme.Scope == model.SchemeScopeTeam {
 		data.DefaultTeamAdminRole = ImportRoleDataFromRole(rolesMap[scheme.DefaultTeamAdminRole])
+		data.DefaultTeamVerifiedRole = ImportRoleDataFromRole(rolesMap[scheme.DefaultTeamVerifiedRole])
 		data.DefaultTeamUserRole = ImportRoleDataFromRole(rolesMap[scheme.DefaultTeamUserRole])
 		data.DefaultTeamGuestRole = ImportRoleDataFromRole(rolesMap[scheme.DefaultTeamGuestRole])
 	}
 
 	if scheme.Scope == model.SchemeScopeTeam || scheme.Scope == model.SchemeScopeChannel {
 		data.DefaultChannelAdminRole = ImportRoleDataFromRole(rolesMap[scheme.DefaultChannelAdminRole])
+		data.DefaultChannelVerifiedRole = ImportRoleDataFromRole(rolesMap[scheme.DefaultChannelVerifiedRole])
 		data.DefaultChannelUserRole = ImportRoleDataFromRole(rolesMap[scheme.DefaultChannelUserRole])
 		data.DefaultChannelGuestRole = ImportRoleDataFromRole(rolesMap[scheme.DefaultChannelGuestRole])
 	}

@@ -8,9 +8,9 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
 )
 
 func createAudit(ss store.Store, userId, sessionId string) *model.Audit {
@@ -238,6 +238,15 @@ func createDefaultRoles(ss store.Store) {
 	})
 
 	ss.Role().Save(&model.Role{
+		Name:        model.TeamVerifiedRoleId,
+		DisplayName: model.TeamVerifiedRoleId,
+		Permissions: []string{
+			model.PermissionViewTeam.Id,
+			model.PermissionAddUserToTeam.Id,
+		},
+	})
+
+	ss.Role().Save(&model.Role{
 		Name:        model.TeamGuestRoleId,
 		DisplayName: model.TeamGuestRoleId,
 		Permissions: []string{
@@ -257,6 +266,16 @@ func createDefaultRoles(ss store.Store) {
 	ss.Role().Save(&model.Role{
 		Name:        model.ChannelUserRoleId,
 		DisplayName: model.ChannelUserRoleId,
+		Permissions: []string{
+			model.PermissionReadChannel.Id,
+			model.PermissionReadChannelContent.Id,
+			model.PermissionCreatePost.Id,
+		},
+	})
+
+	ss.Role().Save(&model.Role{
+		Name:        model.ChannelVerifiedRoleId,
+		DisplayName: model.ChannelVerifiedRoleId,
 		Permissions: []string{
 			model.PermissionReadChannel.Id,
 			model.PermissionReadChannelContent.Id,

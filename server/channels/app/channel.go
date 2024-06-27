@@ -14,13 +14,13 @@ import (
 
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/utils"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store/sqlstore"
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/i18n"
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store/sqlstore"
 )
 
 const (
@@ -88,6 +88,7 @@ func (a *App) JoinDefaultChannels(c request.CTX, teamID string, user *model.User
 			SchemeGuest: user.IsGuest(),
 			SchemeUser:  !user.IsGuest(),
 			SchemeAdmin: shouldBeAdmin,
+			SchemeVerified: user.IsVerified(),
 			NotifyProps: model.GetDefaultChannelNotifyProps(),
 		}
 
@@ -265,6 +266,7 @@ func (a *App) CreateChannel(c request.CTX, channel *model.Channel, addMember boo
 			SchemeGuest: user.IsGuest(),
 			SchemeUser:  !user.IsGuest(),
 			SchemeAdmin: true,
+			SchemeVerified: user.IsVerified(),
 			NotifyProps: model.GetDefaultChannelNotifyProps(),
 		}
 
@@ -562,6 +564,7 @@ func (a *App) createGroupChannel(c request.CTX, userIDs []string) (*model.Channe
 			NotifyProps: model.GetDefaultChannelNotifyProps(),
 			SchemeGuest: user.IsGuest(),
 			SchemeUser:  !user.IsGuest(),
+			SchemeVerified: user.IsVerified(),
 		}
 
 		if _, nErr = a.Srv().Store().Channel().SaveMember(c, cm); nErr != nil {
@@ -859,7 +862,7 @@ func (a *App) PatchChannel(c request.CTX, channel *model.Channel, patch *model.C
 }
 
 // GetSchemeRolesForChannel Checks if a channel or its team has an override scheme for channel roles and returns the scheme roles or default channel roles.
-func (a *App) GetSchemeRolesForChannel(c request.CTX, channelID string) (guestRoleName, userRoleName, adminRoleName string, err *model.AppError) {
+func (a *App) GetSchemeRolesForChannel(c request.CTX, channelID string) (guestRoleName, userRoleName, verifiedRoleName, adminRoleName string, err *model.AppError) {
 	channel, err := a.GetChannel(c, channelID)
 	if err != nil {
 		return
@@ -875,6 +878,7 @@ func (a *App) GetSchemeRolesForChannel(c request.CTX, channelID string) (guestRo
 		guestRoleName = scheme.DefaultChannelGuestRole
 		userRoleName = scheme.DefaultChannelUserRole
 		adminRoleName = scheme.DefaultChannelAdminRole
+		verifiedRoleName = scheme.DefaultChannelVerifiedRole
 
 		return
 	}
@@ -883,7 +887,7 @@ func (a *App) GetSchemeRolesForChannel(c request.CTX, channelID string) (guestRo
 }
 
 // GetTeamSchemeChannelRoles Checks if a team has an override scheme and returns the scheme channel role names or default channel role names.
-func (a *App) GetTeamSchemeChannelRoles(c request.CTX, teamID string) (guestRoleName, userRoleName, adminRoleName string, err *model.AppError) {
+func (a *App) GetTeamSchemeChannelRoles(c request.CTX, teamID string) (guestRoleName, userRoleName, verifiedRoleName, adminRoleName string, err *model.AppError) {
 	team, err := a.GetTeam(teamID)
 	if err != nil {
 		return
@@ -899,10 +903,12 @@ func (a *App) GetTeamSchemeChannelRoles(c request.CTX, teamID string) (guestRole
 		guestRoleName = scheme.DefaultChannelGuestRole
 		userRoleName = scheme.DefaultChannelUserRole
 		adminRoleName = scheme.DefaultChannelAdminRole
+		verifiedRoleName = scheme.DefaultChannelVerifiedRole
 	} else {
 		guestRoleName = model.ChannelGuestRoleId
 		userRoleName = model.ChannelUserRoleId
 		adminRoleName = model.ChannelAdminRoleId
+		verifiedRoleName = model.ChannelVerifiedRoleId
 	}
 
 	return
@@ -910,7 +916,7 @@ func (a *App) GetTeamSchemeChannelRoles(c request.CTX, teamID string) (guestRole
 
 // GetChannelModerationsForChannel Gets a channels ChannelModerations from either the higherScoped roles or from the channel scheme roles.
 func (a *App) GetChannelModerationsForChannel(c request.CTX, channel *model.Channel) ([]*model.ChannelModeration, *model.AppError) {
-	guestRoleName, memberRoleName, _, err := a.GetSchemeRolesForChannel(c, channel.Id)
+	guestRoleName, memberRoleName, _, _, err := a.GetSchemeRolesForChannel(c, channel.Id)
 	if err != nil {
 		return nil, err
 	}
@@ -928,7 +934,7 @@ func (a *App) GetChannelModerationsForChannel(c request.CTX, channel *model.Chan
 		}
 	}
 
-	higherScopedGuestRoleName, higherScopedMemberRoleName, _, err := a.GetTeamSchemeChannelRoles(c, channel.TeamId)
+	higherScopedGuestRoleName, higherScopedMemberRoleName, _, _, err := a.GetTeamSchemeChannelRoles(c, channel.TeamId)
 	if err != nil {
 		return nil, err
 	}
@@ -950,7 +956,7 @@ func (a *App) GetChannelModerationsForChannel(c request.CTX, channel *model.Chan
 
 // PatchChannelModerationsForChannel Updates a channels scheme roles based on a given ChannelModerationPatch, if the permissions match the higher scoped role the scheme is deleted.
 func (a *App) PatchChannelModerationsForChannel(c request.CTX, channel *model.Channel, channelModerationsPatch []*model.ChannelModerationPatch) ([]*model.ChannelModeration, *model.AppError) {
-	higherScopedGuestRoleName, higherScopedMemberRoleName, _, err := a.GetTeamSchemeChannelRoles(c, channel.TeamId)
+	higherScopedGuestRoleName, higherScopedMemberRoleName, _, _, err := a.GetTeamSchemeChannelRoles(c, channel.TeamId)
 	if err != nil {
 		return nil, err
 	}
@@ -1149,17 +1155,19 @@ func (a *App) UpdateChannelMemberRoles(c request.CTX, channelID string, userID s
 		return nil, err
 	}
 
-	schemeGuestRole, schemeUserRole, schemeAdminRole, err := a.GetSchemeRolesForChannel(c, channelID)
+	schemeGuestRole, schemeUserRole, schemeVerifiedRole, schemeAdminRole, err := a.GetSchemeRolesForChannel(c, channelID)
 	if err != nil {
 		return nil, err
 	}
 
 	prevSchemeGuestValue := member.SchemeGuest
+	prevSchemeVerifiedValue := member.SchemeVerified
 
 	var newExplicitRoles []string
 	member.SchemeGuest = false
 	member.SchemeUser = false
 	member.SchemeAdmin = false
+	member.SchemeVerified = false
 
 	for _, roleName := range strings.Fields(newRoles) {
 		var role *model.Role
@@ -1181,6 +1189,8 @@ func (a *App) UpdateChannelMemberRoles(c request.CTX, channelID string, userID s
 				member.SchemeUser = true
 			case schemeGuestRole:
 				member.SchemeGuest = true
+			case schemeVerifiedRole:
+				member.SchemeVerified = true
 			default:
 				// If not part of the scheme for this channel, then it is not allowed to apply it as an explicit role.
 				return nil, model.NewAppError("UpdateChannelMemberRoles", "api.channel.update_channel_member_roles.scheme_role.app_error", nil, "role_name="+roleName, http.StatusBadRequest)
@@ -1196,12 +1206,17 @@ func (a *App) UpdateChannelMemberRoles(c request.CTX, channelID string, userID s
 		return nil, model.NewAppError("UpdateChannelMemberRoles", "api.channel.update_channel_member_roles.changing_guest_role.app_error", nil, "", http.StatusBadRequest)
 	}
 
+	if prevSchemeVerifiedValue != member.SchemeVerified {
+		return nil, model.NewAppError("UpdateChannelMemberRoles", "api.channel.update_channel_member_roles.changing_verified_role.app_error", nil, "", http.StatusBadRequest)
+	}
+
 	member.ExplicitRoles = strings.Join(newExplicitRoles, " ")
 
 	return a.updateChannelMember(c, member)
 }
 
 func (a *App) UpdateChannelMemberSchemeRoles(c request.CTX, channelID string, userID string, isSchemeGuest bool, isSchemeUser bool, isSchemeAdmin bool) (*model.ChannelMember, *model.AppError) {
+	// XXX VerifiedPhone
 	member, err := a.GetChannelMember(c, channelID, userID)
 	if err != nil {
 		return nil, err
@@ -1536,6 +1551,7 @@ func (a *App) addUserToChannel(c request.CTX, user *model.User, channel *model.C
 		NotifyProps: model.GetDefaultChannelNotifyProps(),
 		SchemeGuest: user.IsGuest(),
 		SchemeUser:  !user.IsGuest(),
+		SchemeVerified: user.IsVerified(),
 	}
 
 	if !user.IsGuest() {
@@ -1625,6 +1641,12 @@ func (a *App) AddChannelMember(c request.CTX, userID string, channel *model.Chan
 
 	if user.DeleteAt > 0 {
 		return nil, model.NewAppError("AddChannelMember", "app.channel.add_member.deleted_user.app_error", nil, "", http.StatusForbidden)
+	}
+
+	if blocked, err := a.Srv().Store().Blocklist().GetChannelBlockUser(channel.Id, userID); err != nil {
+		return nil, model.NewAppError("AddChannelMember", "app.channel.add_member.check_channel_block_user.app_error", nil, "", http.StatusInternalServerError).Wrap(err)
+	} else if blocked != nil {
+		return nil, model.NewAppError("AddChannelMember", "app.channel.add_member.blocked_user.app_error", nil, "", http.StatusForbidden)
 	}
 
 	var userRequestor *model.User
