@@ -111,6 +111,9 @@ const (
 	ChannelVerifiedRoleName = "channel_verified"
 	TeamVerifiedRoleId  = "biggoryyyyyyyyyyyyyyyyyyyd"
 	TeamVerifiedRoleName = "team_verified"
+
+	ChannelAllowUnverifiedSchemeId = "biggosyyyyyyyyyyyyyyyyyyyf"
+	ChannelAllowUnverifiedSchemeName = "allow_unverified"
 )
 func (s *Server) doMigrationKeySchemesRolesCreation(c *request.Context) {
 	// ChannelVerifiedRoleId
@@ -160,6 +163,7 @@ func (s *Server) doMigrationKeySchemesRolesCreation(c *request.Context) {
 		return
 	}
 
+	// migrate schemes
 	offset := 0
 	pageSize := 100
 	for _, scope := range []string{model.SchemeScopeTeam, model.SchemeScopeChannel} {
@@ -189,6 +193,39 @@ func (s *Server) doMigrationKeySchemesRolesCreation(c *request.Context) {
 			}
 		}
 	}
+
+	scheme := &model.Scheme{
+		Id:                         ChannelAllowUnverifiedSchemeId,
+		Name:                       ChannelAllowUnverifiedSchemeName,
+		DisplayName:                ChannelAllowUnverifiedSchemeName,
+		Scope:                      model.SchemeScopeChannel,
+		DefaultChannelAdminRole:    model.ChannelAdminRoleId,
+		DefaultChannelVerifiedRole: model.ChannelVerifiedRoleId,
+		DefaultChannelUserRole:     model.ChannelVerifiedRoleId,
+		DefaultChannelGuestRole:    model.ChannelGuestRoleId,
+	}
+
+	if _, err := s.Store().Scheme().CreateScheme(scheme); err != nil {
+		mlog.Fatal("Failed to create scheme to database.", mlog.Err(err))
+		return
+	}
+
+	// migrate TeamMembers and ChannelMembers
+	users, err := s.Store().User().GetAll()
+	if err != nil {
+		mlog.Fatal("Failed to get user", mlog.Err(err))
+		return
+	}
+	for _, user := range(users){
+		if s.Store().User().UpdateMemberVerifiedStatus(c, user) != nil {
+			mlog.Fatal("Failed to update MemberVerifiedStatus", mlog.String("userId", user.Id))
+			panic("")
+		}
+	}
+
+	// PluginAPI 要有可以更新 TeamMember 和 ChannelMember 的地方
+	// TODO: a scheme for channel that unverified user can post
+
 	system := model.System{
 		Name:  model.MigrationBigGoSchemeRolesCreation,
 		Value: "true",
@@ -196,10 +233,6 @@ func (s *Server) doMigrationKeySchemesRolesCreation(c *request.Context) {
 	if err := s.Store().System().Save(&system); err != nil {
 		mlog.Fatal("Failed to create verified-tier roles migration as completed.", mlog.Err(err))
 	}
-
-	// TODO: update all TeamMember and ChannelMember
-	// PluginAPI 要有可以更新 TeamMember 和 ChannelMember 的地方
-	// TODO: a scheme for channel that unverified user can post
 }
 
 func (a *App) doMigrationKeyBigGoRolesPermissions() (permissionsMap, error) {

@@ -859,6 +859,18 @@ func IsInRole(userRoles string, inRole string) bool {
 	return false
 }
 
+func (u *User) AddRole(role string) bool {
+	if !IsValidRoleName(role) {
+		return false
+	}
+	if IsInRole(u.Roles, role) {
+		return false
+	}else{
+		u.Roles += " " + role
+		return true
+	}
+}
+
 func (u *User) IsSSOUser() bool {
 	return u.AuthService != "" && u.AuthService != UserAuthServiceEmail
 }

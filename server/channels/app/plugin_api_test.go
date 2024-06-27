@@ -2686,3 +2686,32 @@ func TestPluginUserUpdateCompatibility(t *testing.T) {
 	require.Equal(t, th.BasicUser.Mobilephone, nUser.Mobilephone)
 	require.Equal(t, "updated", nUser.Nickname)
 }
+
+func TestPluginMarkUserVerified(t *testing.T){
+	th := Setup(t).InitBasic()
+	defer th.TearDown()
+	api := th.SetupPluginAPI()
+	cm2, err := th.App.AddUserToChannel(th.Context, th.BasicUnverified, th.BasicChannel, false)
+	require.Nil(t, err)
+	require.False(t, cm2.SchemeVerified)
+
+	th.BasicUnverified.Mobilephone = model.NewString(th.GenerateTestMobilephone())
+	th.BasicUnverified.Roles += " " + model.SystemVerifiedRoleId
+	_, err = th.App.UpdateUser(th.Context, th.BasicUnverified, false)
+	require.Nil(t, err)
+
+	err = api.MarkUserVerified(th.BasicUnverified.Id)
+	require.Nil(t, err)
+	allTm , err := th.App.GetTeamMembersForUser(th.Context, th.BasicUnverified.Id, "", false)
+	require.Nil(t, err)
+	require.Len(t, allTm, 1)
+	for _, tm := range(allTm){
+		require.True(t, tm.SchemeVerified)
+	}
+	allCm, err := th.App.GetChannelMembersForUser(th.Context, th.BasicTeam.Id, th.BasicUnverified.Id)
+	require.Nil(t, err)
+	require.Greater(t, len(allCm), 0)
+	for _, cm := range(allCm){
+		require.True(t, cm.SchemeVerified)
+	}
+}

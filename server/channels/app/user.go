@@ -2855,6 +2855,25 @@ func (a *App) GetUsersWithInvalidEmails(page int, perPage int) ([]*model.User, *
 	return users, nil
 }
 
+func (a *App) MarkUserVerified(c request.CTX, id string) *model.AppError {
+	user, err := a.Srv().Store().User().Get(c.Context(), id)
+	if err != nil {
+		return model.NewAppError("AddVerifiedRoleToUser", "app.user.get.app_error", nil, "", http.StatusInternalServerError).Wrap(err)
+	}
+	if user.AddRole(model.SystemVerifiedRoleId){
+		uu, err := a.Srv().Store().User().Update(c, user, true)
+		if err != nil {
+			return model.NewAppError("AddVerifiedRoleToUser", "app.user.update_role.app_error", nil, "", http.StatusInternalServerError).Wrap(err)
+		}
+		err = a.Srv().Store().User().UpdateMemberVerifiedStatus(c, uu.New)
+		if err != nil {
+			return model.NewAppError("AddVerifiedRoleToUser", "app.user.update_teammember_channelmember.app_error", nil, "", http.StatusInternalServerError).Wrap(err)
+		}
+		a.InvalidateCacheForUser(id)
+	}
+	return nil
+}
+
 func getProfileImagePath(userID string) string {
 	return filepath.Join("users", userID, "profile.png")
 }

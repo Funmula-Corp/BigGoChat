@@ -6634,3 +6634,31 @@ func (s *apiRPCServer) BDPublishWebSocketEvent(args *Z_BDPublishWebSocketEventAr
 	}
 	return nil
 }
+
+type Z_MarkUserVerifiedArgs struct {
+	A string
+}
+
+type Z_MarkUserVerifiedReturns struct {
+	A *model.AppError
+}
+
+func (g *apiRPCClient) MarkUserVerified(userId string) *model.AppError {
+	_args := &Z_MarkUserVerifiedArgs{userId}
+	_returns := &Z_MarkUserVerifiedReturns{}
+	if err := g.client.Call("Plugin.MarkUserVerified", _args, _returns); err != nil {
+		log.Printf("RPC call to MarkUserVerified API failed: %s", err.Error())
+	}
+	return _returns.A
+}
+
+func (s *apiRPCServer) MarkUserVerified(args *Z_MarkUserVerifiedArgs, returns *Z_MarkUserVerifiedReturns) error {
+	if hook, ok := s.impl.(interface {
+		MarkUserVerified(userId string) *model.AppError
+	}); ok {
+		returns.A = hook.MarkUserVerified(args.A)
+	} else {
+		return encodableError(fmt.Errorf("API MarkUserVerified called but not implemented."))
+	}
+	return nil
+}
