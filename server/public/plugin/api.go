@@ -1307,6 +1307,13 @@ type API interface {
 	// @tag WebSocketEvent
 	// Minimum server version: 9.8
 	BDPublishWebSocketEvent(event model.WebsocketEventType, teamId string, channelId string, userId string, omitUsers map[string]bool, omitConnectionId string, data map[string]any)
+
+	// MarkUserVerified
+	// it updates TeamMembers and ChannelMembers too.
+	//
+	// @tag User
+	// Minimum server version: 9.9.0-bc2
+	MarkUserVerified(userId string) *model.AppError
 }
 
 var handshake = plugin.HandshakeConfig{
