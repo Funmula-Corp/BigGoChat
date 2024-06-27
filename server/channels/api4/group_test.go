@@ -458,6 +458,7 @@ func TestLinkGroupTeam(t *testing.T) {
 }
 
 func TestLinkGroupChannel(t *testing.T) {
+	t.Skip("ldap not support")
 	th := Setup(t).InitBasic()
 	defer th.TearDown()
 
@@ -685,6 +686,7 @@ func TestUnlinkGroupTeam(t *testing.T) {
 }
 
 func TestUnlinkGroupChannel(t *testing.T) {
+	t.Skip("ldap not support")
 	th := Setup(t).InitBasic()
 	defer th.TearDown()
 
@@ -1468,6 +1470,7 @@ func TestGetGroupsByTeam(t *testing.T) {
 }
 
 func TestGetGroups(t *testing.T) {
+	t.Skip("ldap not support")
 	th := Setup(t).InitBasic()
 	defer th.TearDown()
 

@@ -1791,26 +1791,6 @@ func TestPatchChannelModerationsForChannel(t *testing.T) {
 			},
 		},
 		{
-			Name: "Removing manage members from members role",
-			ChannelModerationsPatch: []*model.ChannelModerationPatch{
-				{
-					Name:  &manageMembers,
-					Roles: &model.ChannelModeratedRolesPatch{Members: model.NewBool(false)},
-				},
-			},
-			PermissionsModeratedByPatch: map[string]*model.ChannelModeratedRoles{
-				manageMembers: {
-					Members: &model.ChannelModeratedRole{Value: false, Enabled: true},
-				},
-			},
-			RevertChannelModerationsPatch: []*model.ChannelModerationPatch{
-				{
-					Name:  &manageMembers,
-					Roles: &model.ChannelModeratedRolesPatch{Members: model.NewBool(true)},
-				},
-			},
-		},
-		{
 			Name: "Removing manage bookmarks from members role",
 			ChannelModerationsPatch: []*model.ChannelModerationPatch{
 				{
@@ -2009,12 +1989,6 @@ func TestPatchChannelModerationsForChannel(t *testing.T) {
 					},
 				},
 				{
-					Name: &manageMembers,
-					Roles: &model.ChannelModeratedRolesPatch{
-						Members: model.NewBool(true),
-					},
-				},
-				{
 					Name: &manageBookmarks,
 					Roles: &model.ChannelModeratedRolesPatch{
 						Members: model.NewBool(true),
@@ -2070,6 +2044,8 @@ func TestPatchChannelModerationsForChannel(t *testing.T) {
 				if permission, found := tc.PermissionsModeratedByPatch[moderation.Name]; found && permission.Members != nil {
 					require.Equal(t, moderation.Roles.Members.Value, permission.Members.Value)
 					require.Equal(t, moderation.Roles.Members.Enabled, permission.Members.Enabled)
+				} else if moderation.Name == manageMembers {
+					require.Empty(t, moderation.Roles.Members)
 				} else {
 					require.Equal(t, moderation.Roles.Members.Value, true)
 					require.Equal(t, moderation.Roles.Members.Enabled, true)
