@@ -89,7 +89,8 @@ func TestMigratedChannelPrivacyConvert(t *testing.T) {
 		require.False(t, th.App.SessionHasPermissionToChannels(th.Context, session, []string{channel.Id}, model.PermissionConvertPrivateChannelToPublic))
 		require.True(t, th.App.SessionHasPermissionToChannels(th.Context, session, []string{channel.Id}, model.PermissionConvertPublicChannelToPrivate))
 
-		_, err = th.App.UpdateTeamMemberSchemeRoles(th.Context, th.BasicTeam.Id, th.BasicUser2.Id, false, true, true)
+		// BasicUser2 can convert BasicChannel to private after promotion to a team moderator.
+		_, err = th.App.UpdateTeamMemberSchemeRoles(th.Context, th.BasicTeam.Id, th.BasicUser2.Id, false, true, true, true, false)
 		require.Nil(t, err)
 		sessions, err := th.App.GetSessions(th.Context, th.BasicUser2.Id)
 		require.Nil(t, err)

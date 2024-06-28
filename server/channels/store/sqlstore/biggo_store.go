@@ -47,6 +47,9 @@ func (s *SqlSchemeStore) createSchemeWithoutCreateRoles(scheme *model.Scheme, tr
 	if scheme.DefaultTeamAdminRole != "" {
 		schemeRoleNames = append(schemeRoleNames, scheme.DefaultTeamAdminRole)
 	}
+	if scheme.DefaultTeamModeratorRole != "" {
+		schemeRoleNames = append(schemeRoleNames, scheme.DefaultTeamModeratorRole)
+	}
 	if scheme.DefaultTeamUserRole != "" {
 		schemeRoleNames = append(schemeRoleNames, scheme.DefaultTeamUserRole)
 	}

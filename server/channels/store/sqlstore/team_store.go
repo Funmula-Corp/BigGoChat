@@ -34,9 +34,9 @@ type teamMember struct {
 	DeleteAt        int64
 	SchemeUser      sql.NullBool
 	SchemeVerified  sql.NullBool
+	SchemeModerator sql.NullBool
 	SchemeAdmin     sql.NullBool
 	SchemeGuest     sql.NullBool
-	SchemeModerator sql.NullBool
 	CreateAt        int64
 }
 
@@ -48,9 +48,9 @@ func NewTeamMemberFromModel(tm *model.TeamMember) *teamMember {
 		DeleteAt:        tm.DeleteAt,
 		SchemeGuest:     sql.NullBool{Valid: true, Bool: tm.SchemeGuest},
 		SchemeUser:      sql.NullBool{Valid: true, Bool: tm.SchemeUser},
+		SchemeModerator: sql.NullBool{Valid: true, Bool: tm.SchemeModerator},
 		SchemeVerified:  sql.NullBool{Valid: true, Bool: tm.SchemeVerified},
 		SchemeAdmin:     sql.NullBool{Valid: true, Bool: tm.SchemeAdmin},
-		SchemeModerator: sql.NullBool{Valid: true, Bool: tm.SchemeModerator},
 		CreateAt:        tm.CreateAt,
 	}
 }
@@ -68,15 +68,15 @@ type teamMemberWithSchemeRoles struct {
 	TeamSchemeDefaultGuestRole     sql.NullString
 	TeamSchemeDefaultUserRole      sql.NullString
 	TeamSchemeDefaultVerifiedRole  sql.NullString
-	TeamSchemeDefaultAdminRole     sql.NullString
 	TeamSchemeDefaultModeratorRole sql.NullString
+	TeamSchemeDefaultAdminRole     sql.NullString
 	CreateAt                       int64
 }
 
 type teamMemberWithSchemeRolesList []teamMemberWithSchemeRoles
 
 func teamMemberSliceColumns() []string {
-	return []string{"TeamId", "UserId", "Roles", "DeleteAt", "SchemeUser", "SchemeVerified", "SchemeAdmin", "SchemeGuest", "CreateAt", "SchemeModerator"}
+	return []string{"TeamId", "UserId", "Roles", "DeleteAt", "SchemeUser", "SchemeVerified", "SchemeModerator", "SchemeAdmin", "SchemeGuest", "CreateAt"}
 }
 
 func teamMemberToSlice(member *model.TeamMember) []any {
@@ -87,10 +87,10 @@ func teamMemberToSlice(member *model.TeamMember) []any {
 	resultSlice = append(resultSlice, member.DeleteAt)
 	resultSlice = append(resultSlice, member.SchemeUser)
 	resultSlice = append(resultSlice, member.SchemeVerified)
+	resultSlice = append(resultSlice, member.SchemeModerator)
 	resultSlice = append(resultSlice, member.SchemeAdmin)
 	resultSlice = append(resultSlice, member.SchemeGuest)
 	resultSlice = append(resultSlice, member.CreateAt)
-	resultSlice = append(resultSlice, member.SchemeModerator)
 	return resultSlice
 }
 
@@ -104,19 +104,19 @@ type rolesInfo struct {
 	schemeGuest     bool
 	schemeUser      bool
 	schemeVerified  bool
-	schemeAdmin     bool
 	schemeModerator bool
+	schemeAdmin     bool
 }
 
-func getTeamRoles(schemeGuest, schemeUser, schemeVerified, schemeAdmin, schemeModerator bool, defaultTeamGuestRole, defaultTeamUserRole, defaultTeamVerifiedRole, defaultTeamAdminRole, defaultTeamModeratorRole string, roles []string) rolesInfo {
+func getTeamRoles(schemeGuest, schemeUser, schemeVerified, schemeModerator, schemeAdmin bool, defaultTeamGuestRole, defaultTeamUserRole, defaultTeamVerifiedRole, defaultTeamModeratorRole, defaultTeamAdminRole string, roles []string) rolesInfo {
 	result := rolesInfo{
 		roles:           []string{},
 		explicitRoles:   []string{},
 		schemeGuest:     schemeGuest,
 		schemeUser:      schemeUser,
 		schemeVerified:  schemeVerified,
-		schemeAdmin:     schemeAdmin,
 		schemeModerator: schemeModerator,
+		schemeAdmin:     schemeAdmin,
 	}
 	// Identify any scheme derived roles that are in "Roles" field due to not yet being migrated, and exclude
 	// them from ExplicitRoles field.
@@ -128,10 +128,10 @@ func getTeamRoles(schemeGuest, schemeUser, schemeVerified, schemeAdmin, schemeMo
 			result.schemeUser = true
 		case model.TeamVerifiedRoleId:
 			result.schemeVerified = true
-		case model.TeamAdminRoleId:
-			result.schemeAdmin = true
 		case model.TeamModeratorRoleId:
 			result.schemeModerator = true
+		case model.TeamAdminRoleId:
+			result.schemeAdmin = true
 		default:
 			result.explicitRoles = append(result.explicitRoles, role)
 			result.roles = append(result.roles, role)
@@ -162,18 +162,18 @@ func getTeamRoles(schemeGuest, schemeUser, schemeVerified, schemeAdmin, schemeMo
 			schemeImpliedRoles = append(schemeImpliedRoles, model.TeamVerifiedRoleId)
 		}
 	}
-	if result.schemeAdmin {
-		if defaultTeamAdminRole != "" {
-			schemeImpliedRoles = append(schemeImpliedRoles, defaultTeamAdminRole)
-		} else {
-			schemeImpliedRoles = append(schemeImpliedRoles, model.TeamAdminRoleId)
-		}
-	}
 	if result.schemeModerator {
 		if defaultTeamModeratorRole != "" {
 			schemeImpliedRoles = append(schemeImpliedRoles, defaultTeamModeratorRole)
 		} else {
 			schemeImpliedRoles = append(schemeImpliedRoles, model.TeamModeratorRoleId)
+		}
+	}
+	if result.schemeAdmin {
+		if defaultTeamAdminRole != "" {
+			schemeImpliedRoles = append(schemeImpliedRoles, defaultTeamAdminRole)
+		} else {
+			schemeImpliedRoles = append(schemeImpliedRoles, model.TeamAdminRoleId)
 		}
 	}
 	for _, impliedRole := range schemeImpliedRoles {
@@ -196,8 +196,8 @@ func (db teamMemberWithSchemeRoles) ToModel() *model.TeamMember {
 	schemeGuest := db.SchemeGuest.Valid && db.SchemeGuest.Bool
 	schemeUser := db.SchemeUser.Valid && db.SchemeUser.Bool
 	schemeVerified := db.SchemeVerified.Valid && db.SchemeVerified.Bool
-	schemeAdmin := db.SchemeAdmin.Valid && db.SchemeAdmin.Bool
 	schemeModerator := db.SchemeModerator.Valid && db.SchemeModerator.Bool
+	schemeAdmin := db.SchemeAdmin.Valid && db.SchemeAdmin.Bool
 
 	defaultTeamGuestRole := ""
 	if db.TeamSchemeDefaultGuestRole.Valid {
@@ -214,17 +214,17 @@ func (db teamMemberWithSchemeRoles) ToModel() *model.TeamMember {
 		defaultTeamVerifiedRole = db.TeamSchemeDefaultVerifiedRole.String
 	}
 
-	defaultTeamAdminRole := ""
-	if db.TeamSchemeDefaultAdminRole.Valid {
-		defaultTeamAdminRole = db.TeamSchemeDefaultAdminRole.String
-	}
-
 	defaultTeamModeratorRole := ""
 	if db.TeamSchemeDefaultModeratorRole.Valid {
 		defaultTeamModeratorRole = db.TeamSchemeDefaultModeratorRole.String
 	}
 
-	rolesResult := getTeamRoles(schemeGuest, schemeUser, schemeVerified, schemeAdmin, schemeModerator, defaultTeamGuestRole, defaultTeamUserRole, defaultTeamVerifiedRole, defaultTeamAdminRole, defaultTeamModeratorRole, strings.Fields(db.Roles))
+	defaultTeamAdminRole := ""
+	if db.TeamSchemeDefaultAdminRole.Valid {
+		defaultTeamAdminRole = db.TeamSchemeDefaultAdminRole.String
+	}
+
+	rolesResult := getTeamRoles(schemeGuest, schemeUser, schemeVerified, schemeModerator, schemeAdmin, defaultTeamGuestRole, defaultTeamUserRole, defaultTeamVerifiedRole, defaultTeamModeratorRole, defaultTeamAdminRole, strings.Fields(db.Roles))
 
 	tm := &model.TeamMember{
 		TeamId:          db.TeamId,
@@ -234,8 +234,8 @@ func (db teamMemberWithSchemeRoles) ToModel() *model.TeamMember {
 		SchemeGuest:     rolesResult.schemeGuest,
 		SchemeUser:      rolesResult.schemeUser,
 		SchemeVerified:  rolesResult.schemeVerified,
-		SchemeAdmin:     rolesResult.schemeAdmin,
 		SchemeModerator: rolesResult.schemeModerator,
+		SchemeAdmin:     rolesResult.schemeAdmin,
 		ExplicitRoles:   strings.Join(rolesResult.explicitRoles, " "),
 		CreateAt:        db.CreateAt,
 	}
@@ -759,6 +759,7 @@ func (s SqlTeamStore) getTeamMembersWithSchemeSelectQuery() sq.SelectBuilder {
 			"TeamScheme.DefaultTeamGuestRole TeamSchemeDefaultGuestRole",
 			"TeamScheme.DefaultTeamUserRole TeamSchemeDefaultUserRole",
 			"TeamScheme.DefaultTeamVerifiedRole TeamSchemeDefaultVerifiedRole",
+			"TeamScheme.DefaultTeamModeratorRole TeamSchemeDefaultModeratorRole",
 			"TeamScheme.DefaultTeamAdminRole TeamSchemeDefaultAdminRole",
 		).
 		From("TeamMembers").
@@ -792,8 +793,8 @@ func (s SqlTeamStore) SaveMultipleMembers(members []*model.TeamMember, maxUsersP
 		Guest     sql.NullString
 		User      sql.NullString
 		Verified  sql.NullString
-		Admin     sql.NullString
 		Moderator sql.NullString
+		Admin     sql.NullString
 	}{}
 
 	queryRoles := s.getQueryBuilder().
@@ -802,6 +803,7 @@ func (s SqlTeamStore) SaveMultipleMembers(members []*model.TeamMember, maxUsersP
 			"TeamScheme.DefaultTeamGuestRole as Guest",
 			"TeamScheme.DefaultTeamUserRole as User",
 			"TeamScheme.DefaultTeamVerifiedRole as Verified",
+			"TeamScheme.DefaultTeamModeratorRole as Moderator",
 			"TeamScheme.DefaultTeamAdminRole as Admin",
 		).
 		From("Teams").
@@ -817,8 +819,8 @@ func (s SqlTeamStore) SaveMultipleMembers(members []*model.TeamMember, maxUsersP
 		Guest     sql.NullString
 		User      sql.NullString
 		Verified  sql.NullString
-		Admin     sql.NullString
 		Moderator sql.NullString
+		Admin     sql.NullString
 	}{}
 	err = s.GetMasterX().Select(&defaultTeamsRoles, sqlRolesQuery, argsRoles...)
 	if err != nil {
@@ -894,13 +896,13 @@ func (s SqlTeamStore) SaveMultipleMembers(members []*model.TeamMember, maxUsersP
 		defaultTeamVerifiedRole := defaultTeamRolesByTeam[member.TeamId].Verified.String
 		defaultTeamAdminRole := defaultTeamRolesByTeam[member.TeamId].Admin.String
 		defaultTeamModeratorRole := defaultTeamRolesByTeam[member.TeamId].Moderator.String
-		rolesResult := getTeamRoles(member.SchemeGuest, member.SchemeUser, member.SchemeVerified, member.SchemeAdmin, member.SchemeModerator, defaultTeamGuestRole, defaultTeamUserRole, defaultTeamVerifiedRole, defaultTeamAdminRole, defaultTeamModeratorRole, strings.Fields(member.ExplicitRoles))
+		rolesResult := getTeamRoles(member.SchemeGuest, member.SchemeUser, member.SchemeVerified, member.SchemeModerator, member.SchemeAdmin, defaultTeamGuestRole, defaultTeamUserRole, defaultTeamVerifiedRole, defaultTeamModeratorRole, defaultTeamAdminRole, strings.Fields(member.ExplicitRoles))
 		newMember := *member
 		newMember.SchemeGuest = rolesResult.schemeGuest
 		newMember.SchemeUser = rolesResult.schemeUser
 		newMember.SchemeVerified = rolesResult.schemeVerified
-		newMember.SchemeAdmin = rolesResult.schemeAdmin
 		newMember.SchemeModerator = rolesResult.schemeModerator
+		newMember.SchemeAdmin = rolesResult.schemeAdmin
 		newMember.Roles = strings.Join(rolesResult.roles, " ")
 		newMember.ExplicitRoles = strings.Join(rolesResult.explicitRoles, " ")
 		newMembers = append(newMembers, &newMember)
@@ -930,8 +932,8 @@ func (s SqlTeamStore) UpdateMultipleMembers(members []*model.TeamMember) ([]*mod
 
 		if _, err := s.GetMasterX().NamedExec(`UPDATE TeamMembers
 				SET Roles=:Roles, DeleteAt=:DeleteAt, CreateAt=:CreateAt, SchemeGuest=:SchemeGuest,
-					SchemeUser=:SchemeUser, SchemeVerified=:SchemeVerified, SchemeAdmin=:SchemeAdmin,
-					SchemeModerator=:SchemeModerator
+					SchemeUser=:SchemeUser, SchemeVerified=:SchemeVerified,
+					SchemeModerator=:SchemeModerator, SchemeAdmin=:SchemeAdmin
 				WHERE TeamId=:TeamId AND UserId=:UserId`, newTeamMember); err != nil {
 			return nil, errors.Wrap(err, "failed to update TeamMember")
 		}
@@ -944,8 +946,8 @@ func (s SqlTeamStore) UpdateMultipleMembers(members []*model.TeamMember) ([]*mod
 			"TeamScheme.DefaultTeamGuestRole as Guest",
 			"TeamScheme.DefaultTeamUserRole as User",
 			"TeamScheme.DefaultTeamVerifiedRole as Verified",
-			"TeamScheme.DefaultTeamAdminRole as Admin",
 			"TeamScheme.DefaultTeamModeratorRole as Moderator",
+			"TeamScheme.DefaultTeamAdminRole as Admin",
 		).
 		From("Teams").
 		LeftJoin("Schemes TeamScheme ON Teams.SchemeId = TeamScheme.Id").
@@ -960,8 +962,8 @@ func (s SqlTeamStore) UpdateMultipleMembers(members []*model.TeamMember) ([]*mod
 		Guest     sql.NullString
 		User      sql.NullString
 		Verified  sql.NullString
-		Admin     sql.NullString
 		Moderator sql.NullString
+		Admin     sql.NullString
 	}{}
 	err = s.GetMasterX().Select(&defaultTeamsRoles, sqlQuery, args...)
 	if err != nil {
@@ -973,8 +975,8 @@ func (s SqlTeamStore) UpdateMultipleMembers(members []*model.TeamMember) ([]*mod
 		Guest     sql.NullString
 		User      sql.NullString
 		Verified  sql.NullString
-		Admin     sql.NullString
 		Moderator sql.NullString
+		Admin     sql.NullString
 	}{}
 	for _, defaultRoles := range defaultTeamsRoles {
 		defaultTeamRolesByTeam[defaultRoles.Id] = defaultRoles
@@ -988,7 +990,7 @@ func (s SqlTeamStore) UpdateMultipleMembers(members []*model.TeamMember) ([]*mod
 		defaultTeamVerifiedRole := defaultTeamRolesByTeam[member.TeamId].Verified.String
 		defaultTeamAdminRole := defaultTeamRolesByTeam[member.TeamId].Admin.String
 		defaultTeamModeratorRole := defaultTeamRolesByTeam[member.TeamId].Moderator.String
-		rolesResult := getTeamRoles(member.SchemeGuest, member.SchemeUser, member.SchemeVerified, member.SchemeAdmin, member.SchemeModerator, defaultTeamGuestRole, defaultTeamUserRole, defaultTeamVerifiedRole, defaultTeamAdminRole, defaultTeamModeratorRole, strings.Fields(member.ExplicitRoles))
+		rolesResult := getTeamRoles(member.SchemeGuest, member.SchemeUser, member.SchemeVerified, member.SchemeModerator, member.SchemeAdmin, defaultTeamGuestRole, defaultTeamUserRole, defaultTeamVerifiedRole, defaultTeamModeratorRole, defaultTeamAdminRole, strings.Fields(member.ExplicitRoles))
 		updatedMember := *member
 		updatedMember.SchemeGuest = rolesResult.schemeGuest
 		updatedMember.SchemeUser = rolesResult.schemeUser

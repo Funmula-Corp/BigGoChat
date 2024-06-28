@@ -16,13 +16,14 @@ import (
 
 const (
 	SchemeRoleDisplayNameTeamAdmin = "Team Admin Role for Scheme"
-	SchemeRoleDisplayNameTeamUser  = "Team User Role for Scheme"
+	SchemeRoleDisplayNameTeamModerator  = "Team Moderator Role for Scheme"
 	SchemeRoleDisplayNameTeamVerified  = "Team Verified User Role for Scheme"
+	SchemeRoleDisplayNameTeamUser  = "Team User Role for Scheme"
 	SchemeRoleDisplayNameTeamGuest = "Team Guest Role for Scheme"
 
 	SchemeRoleDisplayNameChannelAdmin = "Channel Admin Role for Scheme"
-	SchemeRoleDisplayNameChannelUser  = "Channel User Role for Scheme"
 	SchemeRoleDisplayNameChannelVerified  = "Channel Verified User Role for Scheme"
+	SchemeRoleDisplayNameChannelUser  = "Channel User Role for Scheme"
 	SchemeRoleDisplayNameChannelGuest = "Channel Guest Role for Scheme"
 
 	SchemeRoleDisplayNamePlaybookAdmin  = "Playbook Admin Role for Scheme"
@@ -66,7 +67,7 @@ func (s *SqlSchemeStore) Save(scheme *model.Scheme) (_ *model.Scheme, err error)
 
 	res, err := s.GetMasterX().NamedExec(`UPDATE Schemes
 		SET UpdateAt=:UpdateAt, CreateAt=:CreateAt, DeleteAt=:DeleteAt, Name=:Name, DisplayName=:DisplayName, Description=:Description, Scope=:Scope,
-		 DefaultTeamAdminRole=:DefaultTeamAdminRole, DefaultTeamVerifiedRole=:DefaultTeamVerifiedRole, DefaultTeamUserRole=:DefaultTeamUserRole, DefaultTeamGuestRole=:DefaultTeamGuestRole,
+		 DefaultTeamAdminRole=:DefaultTeamAdminRole, DefaultTeamModeratorRole=:DefaultTeamModeratorRole, DefaultTeamVerifiedRole=:DefaultTeamVerifiedRole, DefaultTeamUserRole=:DefaultTeamUserRole, DefaultTeamGuestRole=:DefaultTeamGuestRole,
 		 DefaultChannelAdminRole=:DefaultChannelAdminRole, DefaultChannelVerifiedRole=:DefaultChannelVerifiedRole, DefaultChannelUserRole=:DefaultChannelUserRole, DefaultChannelGuestRole=:DefaultChannelGuestRole,
 		 DefaultPlaybookMemberRole=:DefaultPlaybookMemberRole, DefaultPlaybookAdminRole=:DefaultPlaybookAdminRole, DefaultRunMemberRole=:DefaultRunMemberRole, DefaultRunAdminRole=:DefaultRunAdminRole
 		 WHERE Id=:Id`, scheme)
@@ -90,6 +91,7 @@ func (s *SqlSchemeStore) createScheme(scheme *model.Scheme, transaction *sqlxTxW
 	// Fetch the default system scheme roles to populate default permissions.
 	defaultRoleNames := []string{
 		model.TeamAdminRoleId,
+		model.TeamModeratorRoleId,
 		model.TeamVerifiedRoleId,
 		model.TeamUserRoleId,
 		model.TeamGuestRoleId,
@@ -132,19 +134,19 @@ func (s *SqlSchemeStore) createScheme(scheme *model.Scheme, transaction *sqlxTxW
 		}
 		scheme.DefaultTeamAdminRole = savedRole.Name
 
-		// Team User Role
-		teamUserRole := &model.Role{
+		// Team Moderator Role
+		teamModeratorRole := &model.Role{
 			Name:          model.NewId(),
-			DisplayName:   fmt.Sprintf("%s %s", SchemeRoleDisplayNameTeamUser, scheme.Name),
-			Permissions:   defaultRoles[model.TeamUserRoleId].Permissions,
+			DisplayName:   fmt.Sprintf("%s %s", SchemeRoleDisplayNameTeamModerator, scheme.Name),
+			Permissions:   defaultRoles[model.TeamModeratorRoleId].Permissions,
 			SchemeManaged: true,
 		}
 
-		savedRole, err = s.SqlStore.Role().(*SqlRoleStore).createRole(teamUserRole, transaction)
+		savedRole, err = s.SqlStore.Role().(*SqlRoleStore).createRole(teamModeratorRole, transaction)
 		if err != nil {
 			return nil, err
 		}
-		scheme.DefaultTeamUserRole = savedRole.Name
+		scheme.DefaultTeamModeratorRole = savedRole.Name
 
 		// Team Verified Role
 		teamVerifiedRole := &model.Role{
@@ -159,6 +161,20 @@ func (s *SqlSchemeStore) createScheme(scheme *model.Scheme, transaction *sqlxTxW
 			return nil, err
 		}
 		scheme.DefaultTeamVerifiedRole = savedRole.Name
+
+		// Team User Role
+		teamUserRole := &model.Role{
+			Name:          model.NewId(),
+			DisplayName:   fmt.Sprintf("%s %s", SchemeRoleDisplayNameTeamUser, scheme.Name),
+			Permissions:   defaultRoles[model.TeamUserRoleId].Permissions,
+			SchemeManaged: true,
+		}
+
+		savedRole, err = s.SqlStore.Role().(*SqlRoleStore).createRole(teamUserRole, transaction)
+		if err != nil {
+			return nil, err
+		}
+		scheme.DefaultTeamUserRole = savedRole.Name
 
 		// Team Guest Role
 		teamGuestRole := &model.Role{
@@ -246,6 +262,18 @@ func (s *SqlSchemeStore) createScheme(scheme *model.Scheme, transaction *sqlxTxW
 		}
 		scheme.DefaultChannelAdminRole = savedRole.Name
 
+		// Channel Validated Role
+		channelVerifiedRole := &model.Role{
+			Name:          model.NewId(),
+			DisplayName:   fmt.Sprintf("Channel Verified User Role for Scheme %s", scheme.Name),
+			Permissions:   defaultRoles[model.ChannelVerifiedRoleId].Permissions,
+			SchemeManaged: true,
+		}
+
+		if scheme.Scope == model.SchemeScopeChannel {
+			channelVerifiedRole.Permissions = filterModerated(channelVerifiedRole.Permissions)
+		}
+
 		// Channel User Role
 		channelUserRole := &model.Role{
 			Name:          model.NewId(),
@@ -263,18 +291,6 @@ func (s *SqlSchemeStore) createScheme(scheme *model.Scheme, transaction *sqlxTxW
 			return nil, err
 		}
 		scheme.DefaultChannelUserRole = savedRole.Name
-
-		// Channel Validated Role
-		channelVerifiedRole := &model.Role{
-			Name:          model.NewId(),
-			DisplayName:   fmt.Sprintf("Channel Verified User Role for Scheme %s", scheme.Name),
-			Permissions:   defaultRoles[model.ChannelVerifiedRoleId].Permissions,
-			SchemeManaged: true,
-		}
-
-		if scheme.Scope == model.SchemeScopeChannel {
-			channelVerifiedRole.Permissions = filterModerated(channelVerifiedRole.Permissions)
-		}
 
 		savedRole, err = s.SqlStore.Role().(*SqlRoleStore).createRole(channelVerifiedRole, transaction)
 		if err != nil {
@@ -555,6 +571,9 @@ func (s *SqlSchemeStore) CloneScheme(old *model.Scheme) (*model.Scheme, error){
 		case old.DefaultTeamAdminRole:
 			nRole.DisplayName = fmt.Sprintf("%s %s", SchemeRoleDisplayNameTeamAdmin, scheme.Name)
 			scheme.DefaultTeamAdminRole = nRole.Name
+		case old.DefaultTeamModeratorRole:
+			nRole.DisplayName = fmt.Sprintf("%s %s", SchemeRoleDisplayNameTeamModerator, scheme.Name)
+			scheme.DefaultTeamModeratorRole = nRole.Name
 		case old.DefaultTeamVerifiedRole:
 			nRole.DisplayName = fmt.Sprintf("%s %s", SchemeRoleDisplayNameTeamVerified, scheme.Name)
 			scheme.DefaultTeamVerifiedRole = nRole.Name
@@ -616,7 +635,7 @@ func (s *SqlSchemeStore) CloneScheme(old *model.Scheme) (*model.Scheme, error){
 
 func (s *SqlSchemeStore) insertInto(scheme *model.Scheme, transaction *sqlxTxWrapper) (sql.Result, error){
 	return transaction.NamedExec(
-		`INSERT INTO Schemes (Id, Name, DisplayName, Description, Scope, DefaultTeamAdminRole, DefaultTeamUserRole, DefaultTeamGuestRole, DefaultChannelAdminRole, DefaultChannelUserRole, DefaultChannelGuestRole, CreateAt, UpdateAt, DeleteAt, DefaultPlaybookAdminRole, DefaultPlaybookMemberRole, DefaultRunAdminRole, DefaultRunMemberRole)
+		`INSERT INTO Schemes (Id, Name, DisplayName, Description, Scope, DefaultTeamAdminRole, DefaultTeamModeratorRole, DefaultTeamVerifiedRole, DefaultTeamUserRole, DefaultTeamGuestRole, DefaultChannelAdminRole, DefaultChannelUserRole, DefaultChannelGuestRole, CreateAt, UpdateAt, DeleteAt, DefaultPlaybookAdminRole, DefaultPlaybookMemberRole, DefaultRunAdminRole, DefaultRunMemberRole)
 		VALUES
-		(:Id, :Name, :DisplayName, :Description, :Scope, :DefaultTeamAdminRole, :DefaultTeamUserRole, :DefaultTeamGuestRole, :DefaultChannelAdminRole, :DefaultChannelUserRole, :DefaultChannelGuestRole, :CreateAt, :UpdateAt, :DeleteAt, :DefaultPlaybookAdminRole, :DefaultPlaybookMemberRole, :DefaultRunAdminRole, :DefaultRunMemberRole)`, scheme)
+		(:Id, :Name, :DisplayName, :Description, :Scope, :DefaultTeamAdminRole, :DefaultTeamModeratorRole, :DefaultTeamVerifiedRole, :DefaultTeamUserRole, :DefaultTeamGuestRole, :DefaultChannelAdminRole, :DefaultChannelUserRole, :DefaultChannelGuestRole, :CreateAt, :UpdateAt, :DeleteAt, :DefaultPlaybookAdminRole, :DefaultPlaybookMemberRole, :DefaultRunAdminRole, :DefaultRunMemberRole)`, scheme)
 }

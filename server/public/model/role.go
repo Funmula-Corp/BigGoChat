@@ -38,6 +38,7 @@ func init() {
 		TeamGuestRoleId,
 		TeamUserRoleId,
 		TeamVerifiedRoleId,
+		TeamModeratorRoleId,
 		TeamAdminRoleId,
 		TeamPostAllRoleId,
 		TeamPostAllPublicRoleId,

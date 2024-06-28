@@ -38,6 +38,23 @@ func createDefaultRoles(ss store.Store) {
 	})
 
 	ss.Role().Save(&model.Role{
+		Name:        model.TeamModeratorRoleId,
+		DisplayName: model.TeamModeratorRoleId,
+		Permissions: []string{
+			model.PermissionDeleteOthersPosts.Id,
+		},
+	})
+
+	ss.Role().Save(&model.Role{
+		Name:        model.TeamVerifiedRoleId,
+		DisplayName: model.TeamVerifiedRoleId,
+		Permissions: []string{
+			model.PermissionViewTeam.Id,
+			model.PermissionAddUserToTeam.Id,
+		},
+	})
+
+	ss.Role().Save(&model.Role{
 		Name:        model.TeamUserRoleId,
 		DisplayName: model.TeamUserRoleId,
 		Permissions: []string{
@@ -73,8 +90,8 @@ func createDefaultRoles(ss store.Store) {
 	})
 
 	ss.Role().Save(&model.Role{
-		Name:        model.ChannelUserRoleId,
-		DisplayName: model.ChannelUserRoleId,
+		Name:        model.ChannelVerifiedRoleId,
+		DisplayName: model.ChannelVerifiedRoleId,
 		Permissions: []string{
 			model.PermissionReadChannel.Id,
 			model.PermissionReadChannelContent.Id,
@@ -83,8 +100,8 @@ func createDefaultRoles(ss store.Store) {
 	})
 
 	ss.Role().Save(&model.Role{
-		Name:        model.ChannelVerifiedRoleId,
-		DisplayName: model.ChannelVerifiedRoleId,
+		Name:        model.ChannelUserRoleId,
+		DisplayName: model.ChannelUserRoleId,
 		Permissions: []string{
 			model.PermissionReadChannel.Id,
 			model.PermissionReadChannelContent.Id,

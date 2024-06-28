@@ -417,8 +417,8 @@ func (a *App) UpdateTeamMemberRoles(c request.CTX, teamID string, userID string,
 	member.SchemeGuest = false
 	member.SchemeUser = false
 	member.SchemeVerified = false
-	member.SchemeAdmin = false
 	member.SchemeModerator = false
+	member.SchemeAdmin = false
 
 	for _, roleName := range strings.Fields(newRoles) {
 		var role *model.Role
@@ -480,7 +480,7 @@ func (a *App) UpdateTeamMemberRoles(c request.CTX, teamID string, userID string,
 	return member, nil
 }
 
-func (a *App) UpdateTeamMemberSchemeRoles(c request.CTX, teamID string, userID string, isSchemeGuest bool, isSchemeUser bool, isSchemeAdmin bool, isSchemeModerator bool) (*model.TeamMember, *model.AppError) {
+func (a *App) UpdateTeamMemberSchemeRoles(c request.CTX, teamID string, userID string, isSchemeGuest bool, isSchemeUser bool, isSchemeVerified bool, isSchemeModerator bool, isSchemeAdmin bool) (*model.TeamMember, *model.AppError) {
 	member, err := a.GetTeamMember(c, teamID, userID)
 	if err != nil {
 		return nil, err
@@ -495,9 +495,10 @@ func (a *App) UpdateTeamMemberSchemeRoles(c request.CTX, teamID string, userID s
 	}
 
 	member.SchemeAdmin = isSchemeAdmin
+	member.SchemeModerator = isSchemeModerator
+	member.SchemeVerified = isSchemeVerified
 	member.SchemeUser = isSchemeUser
 	member.SchemeGuest = isSchemeGuest
-	member.SchemeModerator = isSchemeModerator
 
 	// If the migration is not completed, we also need to check the default team_admin/team_user roles are not present in the roles field.
 	if err = a.IsPhase2MigrationCompleted(); err != nil {

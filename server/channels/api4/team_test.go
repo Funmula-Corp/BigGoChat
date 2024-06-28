@@ -86,7 +86,7 @@ func TestCreateTeam(t *testing.T) {
 			th.RestoreDefaultRolePermissions(defaultRolePermissions)
 		}()
 
-		th.RemovePermissionFromRole(model.PermissionCreateTeam.Id, model.SystemUserRoleId)
+		th.RemovePermissionFromRole(model.PermissionCreateTeam.Id, model.SystemVerifiedRoleId)
 		th.AddPermissionToRole(model.PermissionCreateTeam.Id, model.SystemAdminRoleId)
 
 		_, resp, err = th.Client.CreateTeam(context.Background(), team)

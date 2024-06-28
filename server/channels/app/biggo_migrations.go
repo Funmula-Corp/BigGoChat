@@ -111,12 +111,14 @@ const (
 	ChannelVerifiedRoleName = "channel_verified"
 	TeamVerifiedRoleId  = "biggoryyyyyyyyyyyyyyyyyyyd"
 	TeamVerifiedRoleName = "team_verified"
+	TeamModeratorRoleId  = "biggoryyyyyyyyyyyyyyyyyyyf"
+	TeamModeratorRoleName = "team_moderator"
 
 	ChannelAllowUnverifiedSchemeId = "biggosyyyyyyyyyyyyyyyyyyyf"
 	ChannelAllowUnverifiedSchemeName = model.ChannelAllowUnverifiedSchemeName
 )
 func (s *Server) doMigrationKeySchemesRolesCreation(c *request.Context) {
-	// ChannelVerifiedRoleId
+
 	if _, err := s.Store().System().GetByName(model.MigrationBigGoSchemeRolesCreation); err == nil {
 		return
 	}
@@ -163,6 +165,32 @@ func (s *Server) doMigrationKeySchemesRolesCreation(c *request.Context) {
 		return
 	}
 
+	teamAdminRole, err := s.Store().Role().GetByName(c.Context(), model.TeamAdminRoleId)
+	if err != nil {
+		mlog.Fatal("failed to get role by name", mlog.Err(err))
+		return
+	}
+	// inherit from team_admin
+	permissions = []string{}
+	for _, p := range(teamAdminRole.Permissions){
+		if p != model.PermissionManageTeamRoles.Id {
+			permissions = append(permissions, p)
+		}
+	}
+	teamModeratorRole := &model.Role{
+		Id:            TeamModeratorRoleId,
+		Name:          TeamModeratorRoleName,
+		DisplayName:   "authentication.roles.team_moderator.name",
+		Description:   "authentication.roles.team_moderator.description",
+		Permissions:   permissions,
+		SchemeManaged: true,
+		BuiltIn:       true,
+	}
+	if _, err := s.Store().Role().CreateRole(teamModeratorRole); err != nil {
+		mlog.Fatal("Failed to migrate role to database.", mlog.Err(err))
+		panic("failed")
+	}
+
 	// migrate schemes
 	offset := 0
 	pageSize := 100
@@ -178,6 +206,7 @@ func (s *Server) doMigrationKeySchemesRolesCreation(c *request.Context) {
 					scheme.DefaultChannelVerifiedRole = ChannelReadOnlyRoleName
 				} else {
 					if scheme.Scope == model.SchemeScopeTeam {
+						scheme.DefaultTeamModeratorRole = teamModeratorRole.Id
 						scheme.DefaultTeamVerifiedRole = teamVerifiedRole.Id
 					}
 					scheme.DefaultChannelVerifiedRole = channelVerifiedRole.Id

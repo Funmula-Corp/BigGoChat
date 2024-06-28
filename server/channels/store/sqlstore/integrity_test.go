@@ -229,8 +229,16 @@ func createDefaultRoles(ss store.Store) {
 	})
 
 	ss.Role().Save(&model.Role{
-		Name:        model.TeamUserRoleId,
-		DisplayName: model.TeamUserRoleId,
+		Name:        model.TeamModeratorRoleId,
+		DisplayName: model.TeamModeratorRoleId,
+		Permissions: []string{
+			model.PermissionDeleteOthersPosts.Id,
+		},
+	})
+
+	ss.Role().Save(&model.Role{
+		Name:        model.TeamVerifiedRoleId,
+		DisplayName: model.TeamVerifiedRoleId,
 		Permissions: []string{
 			model.PermissionViewTeam.Id,
 			model.PermissionAddUserToTeam.Id,
@@ -238,8 +246,8 @@ func createDefaultRoles(ss store.Store) {
 	})
 
 	ss.Role().Save(&model.Role{
-		Name:        model.TeamVerifiedRoleId,
-		DisplayName: model.TeamVerifiedRoleId,
+		Name:        model.TeamUserRoleId,
+		DisplayName: model.TeamUserRoleId,
 		Permissions: []string{
 			model.PermissionViewTeam.Id,
 			model.PermissionAddUserToTeam.Id,
@@ -264,8 +272,8 @@ func createDefaultRoles(ss store.Store) {
 	})
 
 	ss.Role().Save(&model.Role{
-		Name:        model.ChannelUserRoleId,
-		DisplayName: model.ChannelUserRoleId,
+		Name:        model.ChannelVerifiedRoleId,
+		DisplayName: model.ChannelVerifiedRoleId,
 		Permissions: []string{
 			model.PermissionReadChannel.Id,
 			model.PermissionReadChannelContent.Id,
@@ -274,8 +282,8 @@ func createDefaultRoles(ss store.Store) {
 	})
 
 	ss.Role().Save(&model.Role{
-		Name:        model.ChannelVerifiedRoleId,
-		DisplayName: model.ChannelVerifiedRoleId,
+		Name:        model.ChannelUserRoleId,
+		DisplayName: model.ChannelUserRoleId,
 		Permissions: []string{
 			model.PermissionReadChannel.Id,
 			model.PermissionReadChannelContent.Id,
@@ -733,6 +741,7 @@ func TestCheckSchemesChannelsIntegrity(t *testing.T) {
 		t.Run("should generate a report with one record", func(t *testing.T) {
 			createDefaultRoles(ss)
 			scheme := createScheme(ss)
+			require.NotNil(t, scheme)
 			schemeId := scheme.Id
 			channel := createChannelWithSchemeId(rctx, ss, &schemeId)
 			dbmap.Exec(`DELETE FROM Schemes WHERE Id=?`, scheme.Id)
@@ -764,6 +773,7 @@ func TestCheckSchemesTeamsIntegrity(t *testing.T) {
 		t.Run("should generate a report with one record", func(t *testing.T) {
 			createDefaultRoles(ss)
 			scheme := createScheme(ss)
+			require.NotNil(t, scheme)
 			schemeId := scheme.Id
 			team := createTeamWithSchemeId(ss, &schemeId)
 			dbmap.Exec(`DELETE FROM Schemes WHERE Id=?`, scheme.Id)
