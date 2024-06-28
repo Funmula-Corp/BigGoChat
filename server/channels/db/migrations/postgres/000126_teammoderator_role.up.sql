@@ -1,2 +1,0 @@
-ALTER TABLE public.schemes ADD COLUMN IF NOT EXISTS defaultteammoderatorrole varchar(64) DEFAULT ''::character varying NULL;
-ALTER TABLE public.teammembers ADD COLUMN IF NOT EXISTS schememoderator bool DEFAULT false NULL;
