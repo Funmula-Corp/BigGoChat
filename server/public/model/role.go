@@ -826,6 +826,7 @@ func MakeDefaultRoles() map[string]*Role {
 		DisplayName: "authentication.roles.channel_admin.name",
 		Description: "authentication.roles.channel_admin.description",
 		Permissions: []string{
+			PermissionConvertPublicChannelToPrivate.Id,
 			PermissionManageChannelRoles.Id,
 			PermissionUseGroupMentions.Id,
 			PermissionAddBookmarkPublicChannel.Id,
@@ -910,7 +911,6 @@ func MakeDefaultRoles() map[string]*Role {
 			PermissionManageOthersSlashCommands.Id,
 			PermissionManageIncomingWebhooks.Id,
 			PermissionManageOutgoingWebhooks.Id,
-			PermissionConvertPublicChannelToPrivate.Id,
 			PermissionConvertPrivateChannelToPublic.Id,
 			PermissionDeletePost.Id,
 			PermissionDeleteOthersPosts.Id,

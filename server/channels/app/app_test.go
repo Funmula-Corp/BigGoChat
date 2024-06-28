@@ -14,8 +14,8 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store/storetest/mocks"
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store/storetest/mocks"
 )
 
 /* TODO: Temporarily comment out until MM-11108
@@ -135,6 +135,7 @@ func TestDoAdvancedPermissionsMigration(t *testing.T) {
 			model.PermissionOrderBookmarkPrivateChannel.Id,
 		},
 		"channel_admin": {
+			model.PermissionConvertPublicChannelToPrivate.Id,
 			model.PermissionManageChannelRoles.Id,
 			model.PermissionUseGroupMentions.Id,
 			model.PermissionAddBookmarkPublicChannel.Id,
@@ -176,7 +177,6 @@ func TestDoAdvancedPermissionsMigration(t *testing.T) {
 			model.PermissionManageOthersSlashCommands.Id,
 			model.PermissionManageIncomingWebhooks.Id,
 			model.PermissionManageOutgoingWebhooks.Id,
-			model.PermissionConvertPublicChannelToPrivate.Id,
 			model.PermissionConvertPrivateChannelToPublic.Id,
 			model.PermissionDeletePost.Id,
 			model.PermissionDeleteOthersPosts.Id,

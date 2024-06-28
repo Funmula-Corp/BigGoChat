@@ -263,6 +263,15 @@ func (a *App) doMigrationKeyBigGoRolesPermissions() (permissionsMap, error) {
 			On:     permissionAnd(isRole(model.SystemUserRoleId)),
 			Remove: []string{model.PermissionCreateTeam.Id},
 		},
+		permissionTransformation{
+			On:     permissionAnd(isRole(model.TeamAdminRoleId)),
+			Remove: []string{model.PermissionConvertPrivateChannelToPublic.Id},
+		},
+		permissionTransformation{
+			On:     permissionAnd(isRole(model.ChannelAdminRoleId)),
+			Remove: []string{model.PermissionConvertPrivateChannelToPublic.Id},
+			Add: []string{model.PermissionConvertPublicChannelToPrivate.Id},
+		},
 	}, nil
 }
 
