@@ -373,21 +373,21 @@ func (a *App) sendTeamEvent(team *model.Team, event model.WebsocketEventType) *m
 	return nil
 }
 
-func (a *App) GetSchemeRolesForTeam(teamID string) (string, string, string, string, *model.AppError) {
+func (a *App) GetSchemeRolesForTeam(teamID string) (string, string, string, string, string, *model.AppError) {
 	team, err := a.GetTeam(teamID)
 	if err != nil {
-		return "", "", "", "", err
+		return "", "", "", "", "", err
 	}
 
 	if team.SchemeId != nil && *team.SchemeId != "" {
 		scheme, err := a.GetScheme(*team.SchemeId)
 		if err != nil {
-			return "", "", "", "", err
+			return "", "", "", "", "", err
 		}
-		return scheme.DefaultTeamGuestRole, scheme.DefaultTeamUserRole, scheme.DefaultTeamAdminRole, scheme.DefaultTeamModeratorRole, nil
+		return scheme.DefaultTeamGuestRole, scheme.DefaultTeamUserRole, scheme.DefaultTeamVerifiedRole, scheme.DefaultTeamModeratorRole, scheme.DefaultTeamAdminRole, nil
 	}
 
-	return model.TeamGuestRoleId, model.TeamUserRoleId, model.TeamAdminRoleId, model.TeamModeratorRoleId, nil
+	return model.TeamGuestRoleId, model.TeamUserRoleId, model.TeamVerifiedRoleId, model.TeamModeratorRoleId, model.TeamAdminRoleId, nil
 }
 
 func (a *App) UpdateTeamMemberRoles(c request.CTX, teamID string, userID string, newRoles string) (*model.TeamMember, *model.AppError) {
@@ -406,7 +406,7 @@ func (a *App) UpdateTeamMemberRoles(c request.CTX, teamID string, userID string,
 		return nil, model.NewAppError("UpdateTeamMemberRoles", "api.team.update_member_roles.not_a_member", nil, "userId="+userID+" teamId="+teamID, http.StatusBadRequest)
 	}
 
-	schemeGuestRole, schemeUserRole, schemeAdminRole, schemeModeratorRole, err := a.GetSchemeRolesForTeam(teamID)
+	schemeGuestRole, schemeUserRole, schemeVerifiedRole, schemeModeratorRole, schemeAdminRole, err := a.GetSchemeRolesForTeam(teamID)
 	if err != nil {
 		return nil, err
 	}
@@ -416,6 +416,7 @@ func (a *App) UpdateTeamMemberRoles(c request.CTX, teamID string, userID string,
 	var newExplicitRoles []string
 	member.SchemeGuest = false
 	member.SchemeUser = false
+	member.SchemeVerified = false
 	member.SchemeAdmin = false
 	member.SchemeModerator = false
 
@@ -436,6 +437,8 @@ func (a *App) UpdateTeamMemberRoles(c request.CTX, teamID string, userID string,
 				member.SchemeAdmin = true
 			case schemeModeratorRole:
 				member.SchemeModerator = true
+			case schemeVerifiedRole:
+				member.SchemeVerified = true
 			case schemeUserRole:
 				member.SchemeUser = true
 			case schemeGuestRole:

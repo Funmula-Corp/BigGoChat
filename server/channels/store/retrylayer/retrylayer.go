@@ -9864,6 +9864,27 @@ func (s *RetryLayerRoleStore) Save(role *model.Role) (*model.Role, error) {
 
 }
 
+func (s *RetryLayerSchemeStore) CloneScheme(scheme *model.Scheme) (*model.Scheme, error) {
+
+	tries := 0
+	for {
+		result, err := s.SchemeStore.CloneScheme(scheme)
+		if err == nil {
+			return result, nil
+		}
+		if !isRepeatableError(err) {
+			return result, err
+		}
+		tries++
+		if tries >= 3 {
+			err = errors.Wrap(err, "giving up after 3 consecutive repeatable transaction failures")
+			return result, err
+		}
+		timepkg.Sleep(100 * timepkg.Millisecond)
+	}
+
+}
+
 func (s *RetryLayerSchemeStore) CountByScope(scope string) (int64, error) {
 
 	tries := 0
@@ -9906,11 +9927,11 @@ func (s *RetryLayerSchemeStore) CountWithoutPermission(scope string, permissionI
 
 }
 
-func (s *RetryLayerSchemeStore) CreateScheme(scheme *model.Scheme) (*model.Scheme, error) {
+func (s *RetryLayerSchemeStore) CreateBuiltInScheme(scheme *model.Scheme) (*model.Scheme, error) {
 
 	tries := 0
 	for {
-		result, err := s.SchemeStore.CreateScheme(scheme)
+		result, err := s.SchemeStore.CreateBuiltInScheme(scheme)
 		if err == nil {
 			return result, nil
 		}
@@ -14528,6 +14549,27 @@ func (s *RetryLayerUserStore) UpdateLastPictureUpdate(userID string) error {
 	tries := 0
 	for {
 		err := s.UserStore.UpdateLastPictureUpdate(userID)
+		if err == nil {
+			return nil
+		}
+		if !isRepeatableError(err) {
+			return err
+		}
+		tries++
+		if tries >= 3 {
+			err = errors.Wrap(err, "giving up after 3 consecutive repeatable transaction failures")
+			return err
+		}
+		timepkg.Sleep(100 * timepkg.Millisecond)
+	}
+
+}
+
+func (s *RetryLayerUserStore) UpdateMemberVerifiedStatus(rctx request.CTX, user *model.User) error {
+
+	tries := 0
+	for {
+		err := s.UserStore.UpdateMemberVerifiedStatus(rctx, user)
 		if err == nil {
 			return nil
 		}

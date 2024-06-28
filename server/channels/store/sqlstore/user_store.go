@@ -2435,3 +2435,25 @@ func (us SqlUserStore) GetUserReport(filter *model.UserReportOptions) ([]*model.
 
 	return userResults, nil
 }
+
+func (s SqlUserStore) UpdateMemberVerifiedStatus(rctx request.CTX, user *model.User) (err error) {
+	var transaction *sqlxTxWrapper
+
+	if transaction, err = s.GetMasterX().Beginx(); err != nil {
+		return errors.Wrap(err, "begin_transaction")
+	}
+	defer finalizeTransactionX(transaction, &err)
+	verified := user.IsVerified()
+	if _, err := transaction.Exec(`UPDATE TeamMembers
+		SET SchemeVerified= ? WHERE UserId= ?`, verified, user.Id); err != nil {
+		return errors.Wrap(err, "failed to update TeamMember")
+	}
+	if _, err := transaction.Exec(`UPDATE ChannelMembers
+		SET SchemeVerified= ? WHERE UserId= ?`, verified, user.Id); err != nil {
+		return errors.Wrap(err, "failed to update ChannelMember")
+	}
+	if err := transaction.Commit(); err != nil {
+		return errors.Wrap(err, "commit_transaction")
+	}
+	return nil
+}

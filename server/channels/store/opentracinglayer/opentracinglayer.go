@@ -8648,6 +8648,24 @@ func (s *OpenTracingLayerRoleStore) Save(role *model.Role) (*model.Role, error) 
 	return result, err
 }
 
+func (s *OpenTracingLayerSchemeStore) CloneScheme(scheme *model.Scheme) (*model.Scheme, error) {
+	origCtx := s.Root.Store.Context()
+	span, newCtx := tracing.StartSpanWithParentByContext(s.Root.Store.Context(), "SchemeStore.CloneScheme")
+	s.Root.Store.SetContext(newCtx)
+	defer func() {
+		s.Root.Store.SetContext(origCtx)
+	}()
+
+	defer span.Finish()
+	result, err := s.SchemeStore.CloneScheme(scheme)
+	if err != nil {
+		span.LogFields(spanlog.Error(err))
+		ext.Error.Set(span, true)
+	}
+
+	return result, err
+}
+
 func (s *OpenTracingLayerSchemeStore) CountByScope(scope string) (int64, error) {
 	origCtx := s.Root.Store.Context()
 	span, newCtx := tracing.StartSpanWithParentByContext(s.Root.Store.Context(), "SchemeStore.CountByScope")
@@ -8684,16 +8702,16 @@ func (s *OpenTracingLayerSchemeStore) CountWithoutPermission(scope string, permi
 	return result, err
 }
 
-func (s *OpenTracingLayerSchemeStore) CreateScheme(scheme *model.Scheme) (*model.Scheme, error) {
+func (s *OpenTracingLayerSchemeStore) CreateBuiltInScheme(scheme *model.Scheme) (*model.Scheme, error) {
 	origCtx := s.Root.Store.Context()
-	span, newCtx := tracing.StartSpanWithParentByContext(s.Root.Store.Context(), "SchemeStore.CreateScheme")
+	span, newCtx := tracing.StartSpanWithParentByContext(s.Root.Store.Context(), "SchemeStore.CreateBuiltInScheme")
 	s.Root.Store.SetContext(newCtx)
 	defer func() {
 		s.Root.Store.SetContext(origCtx)
 	}()
 
 	defer span.Finish()
-	result, err := s.SchemeStore.CreateScheme(scheme)
+	result, err := s.SchemeStore.CreateBuiltInScheme(scheme)
 	if err != nil {
 		span.LogFields(spanlog.Error(err))
 		ext.Error.Set(span, true)
@@ -12730,6 +12748,24 @@ func (s *OpenTracingLayerUserStore) UpdateLastPictureUpdate(userID string) error
 
 	defer span.Finish()
 	err := s.UserStore.UpdateLastPictureUpdate(userID)
+	if err != nil {
+		span.LogFields(spanlog.Error(err))
+		ext.Error.Set(span, true)
+	}
+
+	return err
+}
+
+func (s *OpenTracingLayerUserStore) UpdateMemberVerifiedStatus(rctx request.CTX, user *model.User) error {
+	origCtx := s.Root.Store.Context()
+	span, newCtx := tracing.StartSpanWithParentByContext(s.Root.Store.Context(), "UserStore.UpdateMemberVerifiedStatus")
+	s.Root.Store.SetContext(newCtx)
+	defer func() {
+		s.Root.Store.SetContext(origCtx)
+	}()
+
+	defer span.Finish()
+	err := s.UserStore.UpdateMemberVerifiedStatus(rctx, user)
 	if err != nil {
 		span.LogFields(spanlog.Error(err))
 		ext.Error.Set(span, true)

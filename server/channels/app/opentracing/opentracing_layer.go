@@ -9515,7 +9515,7 @@ func (a *OpenTracingAppLayer) GetSchemeRolesForChannel(c request.CTX, channelID 
 	return resultVar0, resultVar1, resultVar2, resultVar3, resultVar4
 }
 
-func (a *OpenTracingAppLayer) GetSchemeRolesForTeam(teamID string) (string, string, string, string, *model.AppError) {
+func (a *OpenTracingAppLayer) GetSchemeRolesForTeam(teamID string) (string, string, string, string, string, *model.AppError) {
 	origCtx := a.ctx
 	span, newCtx := tracing.StartSpanWithParentByContext(a.ctx, "app.GetSchemeRolesForTeam")
 
@@ -9527,14 +9527,14 @@ func (a *OpenTracingAppLayer) GetSchemeRolesForTeam(teamID string) (string, stri
 	}()
 
 	defer span.Finish()
-	resultVar0, resultVar1, resultVar2, resultVar3, resultVar4 := a.app.GetSchemeRolesForTeam(teamID)
+	resultVar0, resultVar1, resultVar2, resultVar3, resultVar4, resultVar5 := a.app.GetSchemeRolesForTeam(teamID)
 
-	if resultVar4 != nil {
-		span.LogFields(spanlog.Error(resultVar4))
+	if resultVar5 != nil {
+		span.LogFields(spanlog.Error(resultVar5))
 		ext.Error.Set(span, true)
 	}
 
-	return resultVar0, resultVar1, resultVar2, resultVar3, resultVar4
+	return resultVar0, resultVar1, resultVar2, resultVar3, resultVar4, resultVar5
 }
 
 func (a *OpenTracingAppLayer) GetSchemes(scope string, offset int, limit int) ([]*model.Scheme, *model.AppError) {
@@ -13025,6 +13025,28 @@ func (a *OpenTracingAppLayer) MarkChannelsAsViewed(c request.CTX, channelIDs []s
 	}
 
 	return resultVar0, resultVar1
+}
+
+func (a *OpenTracingAppLayer) MarkUserVerified(c request.CTX, id string) *model.AppError {
+	origCtx := a.ctx
+	span, newCtx := tracing.StartSpanWithParentByContext(a.ctx, "app.MarkUserVerified")
+
+	a.ctx = newCtx
+	a.app.Srv().Store().SetContext(newCtx)
+	defer func() {
+		a.app.Srv().Store().SetContext(origCtx)
+		a.ctx = origCtx
+	}()
+
+	defer span.Finish()
+	resultVar0 := a.app.MarkUserVerified(c, id)
+
+	if resultVar0 != nil {
+		span.LogFields(spanlog.Error(resultVar0))
+		ext.Error.Set(span, true)
+	}
+
+	return resultVar0
 }
 
 func (a *OpenTracingAppLayer) MaxPostSize() int {

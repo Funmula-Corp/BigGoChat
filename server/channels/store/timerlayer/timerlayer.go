@@ -7795,6 +7795,22 @@ func (s *TimerLayerRoleStore) Save(role *model.Role) (*model.Role, error) {
 	return result, err
 }
 
+func (s *TimerLayerSchemeStore) CloneScheme(scheme *model.Scheme) (*model.Scheme, error) {
+	start := time.Now()
+
+	result, err := s.SchemeStore.CloneScheme(scheme)
+
+	elapsed := float64(time.Since(start)) / float64(time.Second)
+	if s.Root.Metrics != nil {
+		success := "false"
+		if err == nil {
+			success = "true"
+		}
+		s.Root.Metrics.ObserveStoreMethodDuration("SchemeStore.CloneScheme", success, elapsed)
+	}
+	return result, err
+}
+
 func (s *TimerLayerSchemeStore) CountByScope(scope string) (int64, error) {
 	start := time.Now()
 
@@ -7827,10 +7843,10 @@ func (s *TimerLayerSchemeStore) CountWithoutPermission(scope string, permissionI
 	return result, err
 }
 
-func (s *TimerLayerSchemeStore) CreateScheme(scheme *model.Scheme) (*model.Scheme, error) {
+func (s *TimerLayerSchemeStore) CreateBuiltInScheme(scheme *model.Scheme) (*model.Scheme, error) {
 	start := time.Now()
 
-	result, err := s.SchemeStore.CreateScheme(scheme)
+	result, err := s.SchemeStore.CreateBuiltInScheme(scheme)
 
 	elapsed := float64(time.Since(start)) / float64(time.Second)
 	if s.Root.Metrics != nil {
@@ -7838,7 +7854,7 @@ func (s *TimerLayerSchemeStore) CreateScheme(scheme *model.Scheme) (*model.Schem
 		if err == nil {
 			success = "true"
 		}
-		s.Root.Metrics.ObserveStoreMethodDuration("SchemeStore.CreateScheme", success, elapsed)
+		s.Root.Metrics.ObserveStoreMethodDuration("SchemeStore.CreateBuiltInScheme", success, elapsed)
 	}
 	return result, err
 }
@@ -11464,6 +11480,22 @@ func (s *TimerLayerUserStore) UpdateLastPictureUpdate(userID string) error {
 			success = "true"
 		}
 		s.Root.Metrics.ObserveStoreMethodDuration("UserStore.UpdateLastPictureUpdate", success, elapsed)
+	}
+	return err
+}
+
+func (s *TimerLayerUserStore) UpdateMemberVerifiedStatus(rctx request.CTX, user *model.User) error {
+	start := time.Now()
+
+	err := s.UserStore.UpdateMemberVerifiedStatus(rctx, user)
+
+	elapsed := float64(time.Since(start)) / float64(time.Second)
+	if s.Root.Metrics != nil {
+		success := "false"
+		if err == nil {
+			success = "true"
+		}
+		s.Root.Metrics.ObserveStoreMethodDuration("UserStore.UpdateMemberVerifiedStatus", success, elapsed)
 	}
 	return err
 }

@@ -3691,6 +3691,26 @@ func (_m *API) LogWarn(msg string, keyValuePairs ...interface{}) {
 	_m.Called(_ca...)
 }
 
+// MarkUserVerified provides a mock function with given fields: userId
+func (_m *API) MarkUserVerified(userId string) *model.AppError {
+	ret := _m.Called(userId)
+
+	if len(ret) == 0 {
+		panic("no return value specified for MarkUserVerified")
+	}
+
+	var r0 *model.AppError
+	if rf, ok := ret.Get(0).(func(string) *model.AppError); ok {
+		r0 = rf(userId)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.AppError)
+		}
+	}
+
+	return r0
+}
+
 // OpenInteractiveDialog provides a mock function with given fields: dialog
 func (_m *API) OpenInteractiveDialog(dialog model.OpenDialogRequest) *model.AppError {
 	ret := _m.Called(dialog)

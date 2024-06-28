@@ -758,6 +758,7 @@ func (s SqlTeamStore) getTeamMembersWithSchemeSelectQuery() sq.SelectBuilder {
 			"TeamMembers.*",
 			"TeamScheme.DefaultTeamGuestRole TeamSchemeDefaultGuestRole",
 			"TeamScheme.DefaultTeamUserRole TeamSchemeDefaultUserRole",
+			"TeamScheme.DefaultTeamVerifiedRole TeamSchemeDefaultVerifiedRole",
 			"TeamScheme.DefaultTeamAdminRole TeamSchemeDefaultAdminRole",
 		).
 		From("TeamMembers").
@@ -800,6 +801,7 @@ func (s SqlTeamStore) SaveMultipleMembers(members []*model.TeamMember, maxUsersP
 			"Teams.Id as Id",
 			"TeamScheme.DefaultTeamGuestRole as Guest",
 			"TeamScheme.DefaultTeamUserRole as User",
+			"TeamScheme.DefaultTeamVerifiedRole as Verified",
 			"TeamScheme.DefaultTeamAdminRole as Admin",
 		).
 		From("Teams").
@@ -896,6 +898,7 @@ func (s SqlTeamStore) SaveMultipleMembers(members []*model.TeamMember, maxUsersP
 		newMember := *member
 		newMember.SchemeGuest = rolesResult.schemeGuest
 		newMember.SchemeUser = rolesResult.schemeUser
+		newMember.SchemeVerified = rolesResult.schemeVerified
 		newMember.SchemeAdmin = rolesResult.schemeAdmin
 		newMember.SchemeModerator = rolesResult.schemeModerator
 		newMember.Roles = strings.Join(rolesResult.roles, " ")
@@ -940,6 +943,7 @@ func (s SqlTeamStore) UpdateMultipleMembers(members []*model.TeamMember) ([]*mod
 			"Teams.Id as Id",
 			"TeamScheme.DefaultTeamGuestRole as Guest",
 			"TeamScheme.DefaultTeamUserRole as User",
+			"TeamScheme.DefaultTeamVerifiedRole as Verified",
 			"TeamScheme.DefaultTeamAdminRole as Admin",
 			"TeamScheme.DefaultTeamModeratorRole as Moderator",
 		).
@@ -988,6 +992,7 @@ func (s SqlTeamStore) UpdateMultipleMembers(members []*model.TeamMember) ([]*mod
 		updatedMember := *member
 		updatedMember.SchemeGuest = rolesResult.schemeGuest
 		updatedMember.SchemeUser = rolesResult.schemeUser
+		updatedMember.SchemeVerified = rolesResult.schemeVerified
 		updatedMember.SchemeAdmin = rolesResult.schemeAdmin
 		updatedMember.SchemeModerator = rolesResult.schemeModerator
 		updatedMember.Roles = strings.Join(rolesResult.roles, " ")
@@ -1366,6 +1371,9 @@ func (s SqlTeamStore) MigrateTeamMembers(fromTeamId string, fromUserId string) (
 		if !member.SchemeAdmin.Valid {
 			member.SchemeAdmin = sql.NullBool{Bool: false, Valid: true}
 		}
+		if !member.SchemeVerified.Valid {
+			member.SchemeVerified = sql.NullBool{Bool: false, Valid: true}
+		}
 		if !member.SchemeUser.Valid {
 			member.SchemeUser = sql.NullBool{Bool: false, Valid: true}
 		}
@@ -1375,6 +1383,8 @@ func (s SqlTeamStore) MigrateTeamMembers(fromTeamId string, fromUserId string) (
 		for _, role := range roles {
 			if role == model.TeamAdminRoleId {
 				member.SchemeAdmin = sql.NullBool{Bool: true, Valid: true}
+			} else if role == model.TeamVerifiedRoleId {
+				member.SchemeUser = sql.NullBool{Bool: true, Valid: true}
 			} else if role == model.TeamUserRoleId {
 				member.SchemeUser = sql.NullBool{Bool: true, Valid: true}
 			} else if role == model.TeamGuestRoleId {
@@ -1391,6 +1401,7 @@ func (s SqlTeamStore) MigrateTeamMembers(fromTeamId string, fromUserId string) (
 				Roles=:Roles,
 				DeleteAt=:DeleteAt,
 				SchemeUser=:SchemeUser,
+				SchemeVerified=:SchemeVerified,
 				SchemeAdmin=:SchemeAdmin,
 				SchemeGuest=:SchemeGuest
 			WHERE TeamId=:TeamId AND UserId=:UserId`, &member); err != nil {
@@ -1616,7 +1627,7 @@ func (s SqlTeamStore) GetTeamMembersForExport(userId string) ([]*model.TeamMembe
 	query, args, err := s.getQueryBuilder().
 		Select("TeamMembers.TeamId", "TeamMembers.UserId", "TeamMembers.Roles", "TeamMembers.DeleteAt",
 			"(TeamMembers.SchemeGuest IS NOT NULL AND TeamMembers.SchemeGuest) as SchemeGuest",
-			"TeamMembers.SchemeUser", "TeamMembers.SchemeAdmin", "Teams.Name as TeamName").
+			"TeamMembers.SchemeUser", "TeamMembers.SchemeVerified", "TeamMembers.SchemeAdmin", "Teams.Name as TeamName").
 		From("TeamMembers").
 		Join("Teams ON TeamMembers.TeamId = Teams.Id").
 		Where(sq.Eq{"TeamMembers.UserId": userId, "Teams.DeleteAt": 0}).ToSql()

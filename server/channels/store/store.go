@@ -483,6 +483,7 @@ type UserStore interface {
 	RefreshPostStatsForUsers() error
 	GetUserReport(filter *model.UserReportOptions) ([]*model.UserReportQuery, error)
 	GetUserCountForReport(filter *model.UserReportOptions) (int64, error)
+	UpdateMemberVerifiedStatus(rctx request.CTX, user *model.User) (error)
 }
 
 type BotStore interface {
@@ -828,7 +829,8 @@ type SchemeStore interface {
 	CountWithoutPermission(scope, permissionID string, roleScope model.RoleScope, roleType model.RoleType) (int64, error)
 
 	// create scheme with customized id
-	CreateScheme(scheme *model.Scheme) (*model.Scheme, error)
+	CreateBuiltInScheme(scheme *model.Scheme) (*model.Scheme, error)
+	CloneScheme(scheme *model.Scheme) (*model.Scheme, error)
 }
 
 type TermsOfServiceStore interface {

@@ -29,6 +29,7 @@ func init() {
 	BuiltInSchemeManagedRoleIDs = append([]string{
 		SystemGuestRoleId,
 		SystemUserRoleId,
+		SystemVerifiedRoleId,
 		SystemAdminRoleId,
 		SystemPostAllRoleId,
 		SystemPostAllPublicRoleId,
@@ -36,12 +37,14 @@ func init() {
 
 		TeamGuestRoleId,
 		TeamUserRoleId,
+		TeamVerifiedRoleId,
 		TeamAdminRoleId,
 		TeamPostAllRoleId,
 		TeamPostAllPublicRoleId,
 
 		ChannelGuestRoleId,
 		ChannelUserRoleId,
+		ChannelVerifiedRoleId,
 		ChannelAdminRoleId,
 
 		CustomGroupUserRoleId,
@@ -796,7 +799,6 @@ func MakeDefaultRoles() map[string]*Role {
 			PermissionReadChannelContent.Id,
 			PermissionAddReaction.Id,
 			PermissionRemoveReaction.Id,
-			PermissionManagePublicChannelMembers.Id,
 			PermissionUploadFile.Id,
 			PermissionGetPublicLink.Id,
 			PermissionCreatePost.Id,
@@ -805,7 +807,6 @@ func MakeDefaultRoles() map[string]*Role {
 			PermissionDeletePublicChannel.Id,
 			PermissionManagePrivateChannelProperties.Id,
 			PermissionDeletePrivateChannel.Id,
-			PermissionManagePrivateChannelMembers.Id,
 			PermissionDeletePost.Id,
 			PermissionEditPost.Id,
 			PermissionAddBookmarkPublicChannel.Id,

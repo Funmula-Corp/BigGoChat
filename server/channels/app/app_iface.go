@@ -807,7 +807,7 @@ type AppIface interface {
 	GetSanitizeOptions(asAdmin bool) map[string]bool
 	GetScheme(id string) (*model.Scheme, *model.AppError)
 	GetSchemeByName(name string) (*model.Scheme, *model.AppError)
-	GetSchemeRolesForTeam(teamID string) (string, string, string, string, *model.AppError)
+	GetSchemeRolesForTeam(teamID string) (string, string, string, string, string, *model.AppError)
 	GetSchemes(scope string, offset int, limit int) ([]*model.Scheme, *model.AppError)
 	GetSchemesPage(scope string, page int, perPage int) ([]*model.Scheme, *model.AppError)
 	GetServerLimits() (*model.ServerLimits, *model.AppError)
@@ -963,6 +963,7 @@ type AppIface interface {
 	Log() *mlog.Logger
 	LoginByOAuth(c request.CTX, service string, userData io.Reader, teamID string, tokenUser *model.User) (*model.User, *model.AppError)
 	MarkChannelsAsViewed(c request.CTX, channelIDs []string, userID string, currentSessionId string, collapsedThreadsSupported, isCRTEnabled bool) (map[string]int64, *model.AppError)
+	MarkUserVerified(c request.CTX, id string) *model.AppError
 	MaxPostSize() int
 	MessageExport() einterfaces.MessageExportInterface
 	Metrics() einterfaces.MetricsInterface

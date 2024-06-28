@@ -8,6 +8,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 	"path/filepath"
 	"strings"
@@ -18,6 +19,8 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
 	oauthgitlab "git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app/oauthproviders/gitlab"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app/users"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
@@ -25,8 +28,6 @@ import (
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/utils/testutils"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/einterfaces"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/einterfaces/mocks"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
 )
 
 func TestCreateOAuthUser(t *testing.T) {
@@ -966,8 +967,8 @@ func TestCreateUserWithToken(t *testing.T) {
 
 		members, err := th.App.GetChannelMembersForUser(th.Context, th.BasicTeam.Id, newGuest.Id)
 		require.Nil(t, err)
-		require.Len(t, members, 1)
-		assert.Equal(t, members[0].ChannelId, th.BasicChannel.Id)
+		require.Len(t, members, 0)
+		// only channel admin has permission
 	})
 
 	t.Run("create guest having email domain restrictions", func(t *testing.T) {
@@ -1012,8 +1013,8 @@ func TestCreateUserWithToken(t *testing.T) {
 
 		members, err := th.App.GetChannelMembersForUser(th.Context, th.BasicTeam.Id, newGuest.Id)
 		require.Nil(t, err)
-		require.Len(t, members, 1)
-		assert.Equal(t, members[0].ChannelId, th.BasicChannel.Id)
+		require.Len(t, members, 0)
+		// only channel admin has permission
 	})
 
 	t.Run("create guest having team and system email domain restrictions", func(t *testing.T) {
@@ -1049,8 +1050,8 @@ func TestCreateUserWithToken(t *testing.T) {
 
 		members, err := th.App.GetChannelMembersForUser(th.Context, th.BasicTeam.Id, newGuest.Id)
 		require.Nil(t, err)
-		require.Len(t, members, 1)
-		assert.Equal(t, members[0].ChannelId, th.BasicChannel.Id)
+		require.Len(t, members, 0)
+		// only channel admin has permission
 	})
 }
 
@@ -2112,6 +2113,40 @@ func TestCreateUserOrGuest(t *testing.T) {
 		require.Nil(t, appErr)
 		require.Equal(t, "username_123", createdUser.Username)
 	})
+}
+
+func TestMarkUserVerified(t *testing.T) {
+	// options := func(s *Server) error { s.joinCluster = false; return nil }
+	th := Setup(t).InitBasic()
+	defer th.TearDown()
+	cm1, err := th.App.AddUserToChannel(th.Context, th.BasicUser, th.BasicChannel, false)
+	require.Nil(t, err, fmt.Sprintf("err %v", err))
+	require.True(t, cm1.SchemeVerified)
+
+	cm2, err := th.App.AddUserToChannel(th.Context, th.BasicUnverified, th.BasicChannel, false)
+	require.Nil(t, err)
+	require.False(t, cm2.SchemeVerified)
+
+	th.BasicUnverified.Mobilephone = model.NewString(th.GenerateTestMobilephone())
+	th.BasicUnverified.Roles += " " + model.SystemVerifiedRoleId
+	updatedUser, err := th.App.UpdateUser(th.Context, th.BasicUnverified, false)
+	require.Nil(t, err)
+
+	err = th.App.MarkUserVerified(th.Context, updatedUser.Id)
+	require.Nil(t, err)
+
+	allTm , err := th.App.GetTeamMembersForUser(th.Context, th.BasicUnverified.Id, "", false)
+	require.Nil(t, err)
+	require.Len(t, allTm, 1)
+	for _, tm := range(allTm){
+		require.True(t, tm.SchemeVerified)
+	}
+	allCm, err := th.App.GetChannelMembersForUser(th.Context, th.BasicTeam.Id, th.BasicUnverified.Id)
+	require.Nil(t, err)
+	require.Greater(t, len(allCm), 0)
+	for _, cm := range(allCm){
+		require.True(t, cm.SchemeVerified)
+	}
 }
 
 func userCreationMocks(t *testing.T, th *TestHelper, userID string, activeUserCount int64) {

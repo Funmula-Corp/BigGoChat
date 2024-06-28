@@ -1377,3 +1377,10 @@ func (api *apiTimerLayer) BDPublishWebSocketEvent(event model.WebsocketEventType
 	api.apiImpl.BDPublishWebSocketEvent(event, teamId, channelId, userId, omitUsers, omitConnectionId, data)
 	api.recordTime(startTime, "BDPublishWebSocketEvent", true)
 }
+
+func (api *apiTimerLayer) MarkUserVerified(userId string) *model.AppError {
+	startTime := timePkg.Now()
+	_returnsA := api.apiImpl.MarkUserVerified(userId)
+	api.recordTime(startTime, "MarkUserVerified", _returnsA == nil)
+	return _returnsA
+}
