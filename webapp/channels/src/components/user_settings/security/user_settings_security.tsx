@@ -407,7 +407,7 @@ export class SecurityTab extends React.PureComponent<Props, State> {
                         <div className='pb-3'>
                             <FormattedMessage
                                 id='user.settings.security.passwordGoogleCantUpdate'
-                                defaultMessage='Login occurs through Biggo. Password cannot be updated.'
+                                defaultMessage='Login occurs through BigGo. Password cannot be updated.'
                             />
                         </div>
                     </div>,
@@ -509,7 +509,7 @@ export class SecurityTab extends React.PureComponent<Props, State> {
             describe = (
                 <FormattedMessage
                     id='user.settings.security.loginBiggo'
-                    defaultMessage='Login done through Biggo Apps'
+                    defaultMessage='Login done through BigGo Apps'
                 />
             );
         } else if (
@@ -621,7 +621,7 @@ export class SecurityTab extends React.PureComponent<Props, State> {
                             >
                                 <FormattedMessage
                                     id='user.settings.security.switchBiggo'
-                                    defaultMessage='Switch to Using Biggo SSO'
+                                    defaultMessage='Switch to Using BigGo SSO'
                                 />
                             </Link>
                             <br/>

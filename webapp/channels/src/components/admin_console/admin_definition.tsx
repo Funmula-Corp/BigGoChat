@@ -4597,7 +4597,7 @@ const AdminDefinition: AdminDefinitionType = {
                                 },
                                 {
                                     value: Constants.BIGGO_SERVICE,
-                                    display_name: defineMessage({id: 'admin.oauth.biggo', defaultMessage: 'Biggo'}),
+                                    display_name: defineMessage({id: 'admin.oauth.biggo', defaultMessage: 'BigGo'}),
                                     //help_text: defineMessage({id: 'admin.biggo.EnableMarkdownDesc', defaultMessage: ''}),
                                     //help_text_values: {
                                     //    loginUrlChunk: (chunk: string) => `<${chunk}>/login/biggo/complete`,
@@ -4947,7 +4947,7 @@ const AdminDefinition: AdminDefinitionType = {
                                 },
                                 {
                                     value: Constants.BIGGO_SERVICE,
-                                    display_name: defineMessage({id: 'admin.openid.biggo', defaultMessage: 'Biggo'}),
+                                    display_name: defineMessage({id: 'admin.openid.biggo', defaultMessage: 'BigGo'}),
                                     //help_text: defineMessage({id: 'admin.biggo.EnableMarkdownDesc', defaultMessage: ''}),
                                     //help_text_values: {
                                     //    loginUrlChunk: (chunk: string) => `<${chunk}>/login/biggo/complete`,
