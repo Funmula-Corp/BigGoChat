@@ -807,7 +807,7 @@ type AppIface interface {
 	GetSanitizeOptions(asAdmin bool) map[string]bool
 	GetScheme(id string) (*model.Scheme, *model.AppError)
 	GetSchemeByName(name string) (*model.Scheme, *model.AppError)
-	GetSchemeRolesForTeam(teamID string) (string, string, string, *model.AppError)
+	GetSchemeRolesForTeam(teamID string) (string, string, string, string, *model.AppError)
 	GetSchemes(scope string, offset int, limit int) ([]*model.Scheme, *model.AppError)
 	GetSchemesPage(scope string, page int, perPage int) ([]*model.Scheme, *model.AppError)
 	GetServerLimits() (*model.ServerLimits, *model.AppError)
