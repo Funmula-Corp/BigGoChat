@@ -17,11 +17,11 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin/plugintest/mock"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store/storetest/mocks"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/utils/testutils"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin/plugintest/mock"
 )
 
 func TestCreateChannel(t *testing.T) {
@@ -168,11 +168,18 @@ func TestUpdateChannel(t *testing.T) {
 	client := th.Client
 	team := th.BasicTeam
 
+	// only team moderator/admin can create channel
+	_, appErr := th.App.UpdateTeamMemberSchemeRoles(th.Context, th.BasicTeam.Id, th.BasicUser.Id, false, true, true, true, true)
+	require.Nil(t, appErr)
+
 	channel := &model.Channel{DisplayName: "Test API Name", Name: GenerateTestChannelName(), Type: model.ChannelTypeOpen, TeamId: team.Id}
 	private := &model.Channel{DisplayName: "Test API Name", Name: GenerateTestChannelName(), Type: model.ChannelTypePrivate, TeamId: team.Id}
 
-	channel, _, _ = client.CreateChannel(context.Background(), channel)
-	private, _, _ = client.CreateChannel(context.Background(), private)
+	var err error
+	channel, _, err = client.CreateChannel(context.Background(), channel)
+	require.NoError(t, err)
+	private, _, err = client.CreateChannel(context.Background(), private)
+	require.NoError(t, err)
 
 	//Update a open channel
 	channel.DisplayName = "My new display name"

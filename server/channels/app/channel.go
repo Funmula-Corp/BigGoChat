@@ -1215,7 +1215,7 @@ func (a *App) UpdateChannelMemberRoles(c request.CTX, channelID string, userID s
 	return a.updateChannelMember(c, member)
 }
 
-func (a *App) UpdateChannelMemberSchemeRoles(c request.CTX, channelID string, userID string, isSchemeGuest bool, isSchemeUser bool, isSchemeAdmin bool) (*model.ChannelMember, *model.AppError) {
+func (a *App) UpdateChannelMemberSchemeRoles(c request.CTX, channelID string, userID string, isSchemeGuest bool, isSchemeUser bool, isSchemeVerified bool, isSchemeAdmin bool) (*model.ChannelMember, *model.AppError) {
 	// XXX VerifiedPhone
 	member, err := a.GetChannelMember(c, channelID, userID)
 	if err != nil {
@@ -1231,6 +1231,7 @@ func (a *App) UpdateChannelMemberSchemeRoles(c request.CTX, channelID string, us
 	}
 
 	member.SchemeAdmin = isSchemeAdmin
+	member.SchemeVerified = isSchemeVerified
 	member.SchemeUser = isSchemeUser
 	member.SchemeGuest = isSchemeGuest
 
@@ -3575,7 +3576,7 @@ func (a *App) ConvertGroupMessageToChannel(c request.CTX, convertedByUserId stri
 	_ = a.postMessageForConvertGroupMessageToChannel(c, gmConversionRequest.ChannelID, convertedByUserId, users)
 
 	// the user conversion the GM becomes the channel admin.
-	_, appErr = a.UpdateChannelMemberSchemeRoles(c, gmConversionRequest.ChannelID, convertedByUserId, false, true, true)
+	_, appErr = a.UpdateChannelMemberSchemeRoles(c, gmConversionRequest.ChannelID, convertedByUserId, false, true, true, true)
 	if appErr != nil {
 		return nil, appErr
 	}
