@@ -24,7 +24,7 @@ func (s *SqlRoleStore) CreateRole(role *model.Role) (_ *model.Role, err error) {
 	return createdRole, nil
 }
 
-func (s *SqlSchemeStore) CreateScheme(scheme *model.Scheme) (_ *model.Scheme, err error) {
+func (s *SqlSchemeStore) CreateBuiltInScheme(scheme *model.Scheme) (_ *model.Scheme, err error) {
 	transaction, terr := s.GetMasterX().Beginx()
 	if terr != nil {
 		return nil, errors.Wrap(terr, "begin_transaction")

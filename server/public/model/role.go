@@ -29,6 +29,7 @@ func init() {
 	BuiltInSchemeManagedRoleIDs = append([]string{
 		SystemGuestRoleId,
 		SystemUserRoleId,
+		SystemVerifiedRoleId,
 		SystemAdminRoleId,
 		SystemPostAllRoleId,
 		SystemPostAllPublicRoleId,
@@ -36,12 +37,14 @@ func init() {
 
 		TeamGuestRoleId,
 		TeamUserRoleId,
+		TeamVerifiedRoleId,
 		TeamAdminRoleId,
 		TeamPostAllRoleId,
 		TeamPostAllPublicRoleId,
 
 		ChannelGuestRoleId,
 		ChannelUserRoleId,
+		ChannelVerifiedRoleId,
 		ChannelAdminRoleId,
 
 		CustomGroupUserRoleId,

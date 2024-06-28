@@ -16,7 +16,12 @@ const (
 	SchemeScopeChannel         = "channel"
 	SchemeScopePlaybook        = "playbook"
 	SchemeScopeRun             = "run"
+
+	ChannelAllowUnverifiedSchemeName = "allow_unverified"
+	ChannelReadOnlySchemeName  = "announcement"
 )
+
+var BuiltInSchemes []string
 
 type Scheme struct {
 	Id                        string `json:"id"`
@@ -39,6 +44,13 @@ type Scheme struct {
 	DefaultPlaybookMemberRole string `json:"default_playbook_member_role"`
 	DefaultRunAdminRole       string `json:"default_run_admin_role"`
 	DefaultRunMemberRole      string `json:"default_run_member_role"`
+}
+
+func init(){
+	BuiltInSchemes = []string{
+		ChannelAllowUnverifiedSchemeName,
+		ChannelReadOnlySchemeName,
+	}
 }
 
 func (scheme *Scheme) Auditable() map[string]interface{} {
@@ -256,4 +268,13 @@ func (scheme *Scheme) Patch(patch *SchemePatch) {
 func IsValidSchemeName(name string) bool {
 	re := regexp.MustCompile(fmt.Sprintf("^[a-z0-9_]{2,%d}$", SchemeNameMaxLength))
 	return re.MatchString(name)
+}
+
+func (s *Scheme) IsBuiltIn() bool {
+	for _, n := range(BuiltInSchemes){
+		if n == s.Name {
+			return true
+		}
+	}
+	return false
 }

@@ -9,7 +9,7 @@ import (
 // should define in `model` package
 const (
 	ChannelReadOnlyRoleId = "biggoryyyyyyyyyyyyyyyyyyyb"
-	ChannelReadOnlyRoleName = "channel_readonly"
+	ChannelReadOnlyRoleName = model.ChannelReadOnlyRoleId
 
 	ChannelReadOnlySchemeId = "biggosyyyyyyyyyyyyyyyyyyyd"
 )
@@ -39,8 +39,8 @@ func (s *Server) doChannelReadOnlyRoleCreationMigration() {
 
 	scheme := &model.Scheme{
 		Id:                         ChannelReadOnlySchemeId,
-		Name:                       "announcement",
-		DisplayName:                "announcement",
+		Name:                       model.ChannelReadOnlySchemeName,
+		DisplayName:                model.ChannelReadOnlySchemeName,
 		Scope:                      model.SchemeScopeChannel,
 		DefaultChannelAdminRole:    model.ChannelAdminRoleId,
 		DefaultChannelVerifiedRole: ChannelReadOnlyRoleName,
@@ -48,7 +48,7 @@ func (s *Server) doChannelReadOnlyRoleCreationMigration() {
 		DefaultChannelGuestRole:    model.ChannelGuestRoleId,
 	}
 
-	if _, err := s.Store().Scheme().CreateScheme(scheme); err != nil {
+	if _, err := s.Store().Scheme().CreateBuiltInScheme(scheme); err != nil {
 		mlog.Fatal("Failed to migrate scheme to database.", mlog.Err(err))
 		return
 	}
@@ -64,7 +64,7 @@ func (s *Server) doChannelReadOnlyRoleCreationMigration() {
 
 const (
 	SystemVerifiedRoleId   = "biggoyyyyyyyyyyyyyyyyyyyyn"
-	SystemVerifiedRoleName = "system_verified"
+	SystemVerifiedRoleName =  model.SystemVerifiedRoleId
 	SystemVerifiedRoleSpecialId = "biggoyyyyyyyyyyyyyyyyyyyyn"
 )
 
@@ -113,7 +113,7 @@ const (
 	TeamVerifiedRoleName = "team_verified"
 
 	ChannelAllowUnverifiedSchemeId = "biggosyyyyyyyyyyyyyyyyyyyf"
-	ChannelAllowUnverifiedSchemeName = "allow_unverified"
+	ChannelAllowUnverifiedSchemeName = model.ChannelAllowUnverifiedSchemeName
 )
 func (s *Server) doMigrationKeySchemesRolesCreation(c *request.Context) {
 	// ChannelVerifiedRoleId
@@ -205,7 +205,7 @@ func (s *Server) doMigrationKeySchemesRolesCreation(c *request.Context) {
 		DefaultChannelGuestRole:    model.ChannelGuestRoleId,
 	}
 
-	if _, err := s.Store().Scheme().CreateScheme(scheme); err != nil {
+	if _, err := s.Store().Scheme().CreateBuiltInScheme(scheme); err != nil {
 		mlog.Fatal("Failed to create scheme to database.", mlog.Err(err))
 		return
 	}

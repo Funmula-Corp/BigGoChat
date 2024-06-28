@@ -829,7 +829,8 @@ type SchemeStore interface {
 	CountWithoutPermission(scope, permissionID string, roleScope model.RoleScope, roleType model.RoleType) (int64, error)
 
 	// create scheme with customized id
-	CreateScheme(scheme *model.Scheme) (*model.Scheme, error)
+	CreateBuiltInScheme(scheme *model.Scheme) (*model.Scheme, error)
+	CloneScheme(scheme *model.Scheme) (*model.Scheme, error)
 }
 
 type TermsOfServiceStore interface {
