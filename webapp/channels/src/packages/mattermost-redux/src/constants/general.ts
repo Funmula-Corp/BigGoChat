@@ -26,6 +26,7 @@ export default {
     TEAM_GUEST_ROLE: 'team_guest',
     TEAM_USER_ROLE: 'team_user',
     TEAM_ADMIN_ROLE: 'team_admin',
+    TEAM_MODERATOR_ROLE: 'team_moderator',
     CHANNEL_GUEST_ROLE: 'channel_guest',
     CHANNEL_USER_ROLE: 'channel_user',
     CHANNEL_ADMIN_ROLE: 'channel_admin',

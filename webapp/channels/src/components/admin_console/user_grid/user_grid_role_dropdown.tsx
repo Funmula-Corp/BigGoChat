@@ -21,6 +21,7 @@ export type BaseMembership = {
     user_id: string;
     scheme_user: boolean;
     scheme_admin: boolean;
+    scheme_moderator: boolean;
 }
 
 type Props = {
@@ -31,13 +32,14 @@ type Props = {
     isDisabled?: boolean;
 }
 
-export type Role = 'system_admin' | 'team_admin' | 'team_user' | 'channel_admin' | 'channel_user' | 'shared_member' | 'guest';
+export type Role = 'system_admin' | 'team_admin' | 'team_moderator' | 'team_user' | 'channel_admin' | 'channel_user' | 'shared_member' | 'guest';
 
 export default class UserGridRoleDropdown extends React.PureComponent<Props> {
     private getDropDownOptions = () => {
         if (this.props.scope === 'team') {
             return {
                 makeAdmin: Utils.localizeMessage('team_members_dropdown.makeAdmin', 'Make Team Admin'),
+                makeModerator: Utils.localizeMessage('team_members_dropdown.makeModerator', 'Make Team Moderator'),
                 makeMember: Utils.localizeMessage('team_members_dropdown.makeMember', 'Make Team Member'),
             };
         }
@@ -59,6 +61,8 @@ export default class UserGridRoleDropdown extends React.PureComponent<Props> {
                     return 'shared_member';
                 } else if (membership.scheme_admin) {
                     return 'team_admin';
+                } else if (membership.scheme_moderator) {
+                    return 'team_moderator';
                 } else if (membership.scheme_user) {
                     return 'team_user';
                 }
@@ -84,6 +88,8 @@ export default class UserGridRoleDropdown extends React.PureComponent<Props> {
             return Utils.localizeMessage('admin.user_grid.system_admin', 'System Admin');
         case 'team_admin':
             return Utils.localizeMessage('admin.user_grid.team_admin', 'Team Admin');
+        case 'team_moderator':
+            return Utils.localizeMessage('admin.user_grid.team_moderator', 'Team Moderator');
         case 'channel_admin':
             return Utils.localizeMessage('admin.user_grid.channel_admin', 'Channel Admin');
         case 'shared_member':
@@ -101,6 +107,16 @@ export default class UserGridRoleDropdown extends React.PureComponent<Props> {
             user_id: this.props.user.id,
             scheme_admin: true,
             scheme_user: true,
+            scheme_moderator: false,
+        });
+    };
+
+    private handleMakeModerator = () => {
+        this.props.handleUpdateMembership({
+            user_id: this.props.user.id,
+            scheme_admin: false,
+            scheme_user: true,
+            scheme_moderator: true,
         });
     };
 
@@ -109,6 +125,7 @@ export default class UserGridRoleDropdown extends React.PureComponent<Props> {
             user_id: this.props.user.id,
             scheme_admin: false,
             scheme_user: true,
+            scheme_moderator: false,
         });
     };
 
@@ -127,7 +144,7 @@ export default class UserGridRoleDropdown extends React.PureComponent<Props> {
 
         const {user, isDisabled} = this.props;
 
-        const {makeAdmin, makeMember} = this.getDropDownOptions();
+        const {makeAdmin, makeMember, makeModerator} = this.getDropDownOptions();
         const currentRole = this.getCurrentRole();
         const localizedRole = this.getLocalizedRole(currentRole);
         const ariaLabel = this.getAriaLabel();
@@ -159,8 +176,9 @@ export default class UserGridRoleDropdown extends React.PureComponent<Props> {
         }
 
         const dropdownEnabled = !['system_admin', 'guest'].includes(currentRole);
-        const showMakeAdmin = ['channel_user', 'team_user'].includes(currentRole);
-        const showMakeMember = ['channel_admin', 'team_admin'].includes(currentRole);
+        const showMakeAdmin = ['channel_user', 'team_user', 'team_moderator'].includes(currentRole);
+        const showMakeMember = ['channel_admin', 'team_admin', 'team_moderator'].includes(currentRole);
+        const showMakeModerator = ['team_user', 'team_admin'].includes(currentRole);
 
         if (!dropdownEnabled) {
             return localizedRole;
@@ -184,6 +202,11 @@ export default class UserGridRoleDropdown extends React.PureComponent<Props> {
                         show={showMakeAdmin}
                         onClick={this.handleMakeAdmin}
                         text={makeAdmin}
+                    />
+                    <Menu.ItemAction
+                        show={showMakeModerator}
+                        onClick={this.handleMakeModerator}
+                        text={makeModerator}
                     />
                     <Menu.ItemAction
                         show={showMakeMember}

@@ -49,7 +49,7 @@ export type Props = {
         patchGroupSyncable: (groupId: string, syncableId: string, syncableType: SyncableType, patch: Partial<SyncablePatch>) => Promise<ActionResult>;
         addUserToTeam: (teamId: string, userId: string) => Promise<ActionResult>;
         removeUserFromTeam: (teamId: string, userId: string) => Promise<ActionResult>;
-        updateTeamMemberSchemeRoles: (teamId: string, userId: string, isSchemeUser: boolean, isSchemeAdmin: boolean) => Promise<ActionResult>;
+        updateTeamMemberSchemeRoles: (teamId: string, userId: string, isSchemeUser: boolean, isSchemeAdmin: boolean, isSchemeModerator: boolean) => Promise<ActionResult>;
         deleteTeam: (teamId: string) => Promise<ActionResult>;
         unarchiveTeam: (teamId: string) => Promise<ActionResult>;
     };
@@ -70,6 +70,7 @@ type State = {
         [userId: string]: {
             schemeUser: boolean;
             schemeAdmin: boolean;
+            schemeModerator: boolean;
         };
     };
     totalGroups: number;
@@ -258,11 +259,11 @@ export default class TeamDetails extends React.PureComponent<Props, State> {
             const rolesToPromote: Array<Promise<ActionResult>> = [];
             const rolesToDemote: Array<Promise<ActionResult>> = [];
             userRolesToUpdate.forEach((userId) => {
-                const {schemeUser, schemeAdmin} = rolesToUpdate[userId];
+                const {schemeUser, schemeAdmin, schemeModerator} = rolesToUpdate[userId];
                 if (schemeAdmin) {
-                    rolesToPromote.push(updateTeamMemberSchemeRoles(teamID, userId, schemeUser, schemeAdmin));
+                    rolesToPromote.push(updateTeamMemberSchemeRoles(teamID, userId, schemeUser, schemeAdmin, schemeModerator));
                 } else {
-                    rolesToDemote.push(updateTeamMemberSchemeRoles(teamID, userId, schemeUser, schemeAdmin));
+                    rolesToDemote.push(updateTeamMemberSchemeRoles(teamID, userId, schemeUser, schemeAdmin, schemeModerator));
                 }
             });
 
@@ -371,9 +372,9 @@ export default class TeamDetails extends React.PureComponent<Props, State> {
         this.props.actions.setNavigationBlocked(true);
     };
 
-    addRolesToUpdate = (userId: string, schemeUser: boolean, schemeAdmin: boolean) => {
+    addRolesToUpdate = (userId: string, schemeUser: boolean, schemeAdmin: boolean, schemeModerator: boolean) => {
         const {rolesToUpdate} = this.state;
-        rolesToUpdate[userId] = {schemeUser, schemeAdmin};
+        rolesToUpdate[userId] = {schemeUser, schemeAdmin, schemeModerator};
         this.setState({rolesToUpdate: {...rolesToUpdate}, saveNeeded: true});
         this.props.actions.setNavigationBlocked(true);
     };

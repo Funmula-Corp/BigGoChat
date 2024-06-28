@@ -1573,8 +1573,8 @@ export default class Client4 {
         );
     };
 
-    updateTeamMemberSchemeRoles = (teamId: string, userId: string, isSchemeUser: boolean, isSchemeAdmin: boolean) => {
-        const body = {scheme_user: isSchemeUser, scheme_admin: isSchemeAdmin};
+    updateTeamMemberSchemeRoles = (teamId: string, userId: string, isSchemeUser: boolean, isSchemeAdmin: boolean, isSchemeModerator: boolean) => {
+        const body = {scheme_user: isSchemeUser, scheme_admin: isSchemeAdmin, scheme_moderator: isSchemeModerator};
         return this.doFetch<StatusOK>(
             `${this.getTeamRoute(teamId)}/members/${userId}/schemeRoles`,
             {method: 'put', body: JSON.stringify(body)},

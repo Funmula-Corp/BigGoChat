@@ -20,6 +20,7 @@ type Props = {
     onRowClick?: () => void;
     doRemoveUserFromTeam: (teamId: string) => Promise<void>;
     doMakeUserTeamAdmin: (teamId: string) => Promise<void>;
+    doMakeUserTeamModerator: (teamId: string) => Promise<void>;
     doMakeUserTeamMember: (teamId: string) => Promise<void>;
     readOnly?: boolean;
 }
@@ -63,6 +64,14 @@ export default class TeamRow extends React.PureComponent<Props> {
                 <FormattedMessage
                     id={'admin.systemUserDetail.teamList.teamRole.admin'}
                     defaultMessage={'Team Admin'}
+                />
+            );
+        }
+        if (team.scheme_moderator && !team.scheme_guest) {
+            return (
+                <FormattedMessage
+                    id={'admin.systemUserDetail.teamList.teamRole.moderator'}
+                    defaultMessage={'Team Moderator'}
                 />
             );
         }
@@ -113,6 +122,7 @@ export default class TeamRow extends React.PureComponent<Props> {
                             team={team}
                             doRemoveUserFromTeam={this.props.doRemoveUserFromTeam}
                             doMakeUserTeamAdmin={this.props.doMakeUserTeamAdmin}
+                            doMakeUserTeamModerator={this.props.doMakeUserTeamModerator}
                             doMakeUserTeamMember={this.props.doMakeUserTeamMember}
                             isDisabled={this.props.readOnly}
                         />
