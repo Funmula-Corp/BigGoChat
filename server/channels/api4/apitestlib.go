@@ -422,11 +422,13 @@ func (th *TestHelper) InitLogin() *TestHelper {
 		th.BasicUser = th.CreateUser()
 		th.BasicUser, _ = th.App.GetUser(th.BasicUser.Id)
 		th.App.UpdateUserRoles(th.Context, th.BasicUser.Id, model.SystemUserRoleId+" "+model.SystemVerifiedRoleId, false)
+		th.BasicUser, _ = th.App.GetUser(th.BasicUser.Id)
 		userCache.BasicUser = th.BasicUser.DeepCopy()
 
 		th.BasicUser2 = th.CreateUser()
 		th.BasicUser2, _ = th.App.GetUser(th.BasicUser2.Id)
 		th.App.UpdateUserRoles(th.Context, th.BasicUser2.Id, model.SystemUserRoleId+" "+model.SystemVerifiedRoleId, false)
+		th.BasicUser2, _ = th.App.GetUser(th.BasicUser2.Id)
 		userCache.BasicUser2 = th.BasicUser2.DeepCopy()
 	})
 	// restore cached users
