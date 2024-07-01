@@ -11,11 +11,46 @@ import (
 )
 
 func TestBlocklistStore(t *testing.T, rctx request.CTX, ss store.Store) {
+	t.Run("SaveTeamBlockUser", func(t *testing.T) { testSaveTeamBlockUser(t, rctx, ss) })
 	t.Run("SaveChannelBlockUser", func(t *testing.T) { testSaveChannelBlockUser(t, rctx, ss) })
 	t.Run("SaveUserBlockUser", func(t *testing.T) { testSaveUserBlockUser(t, rctx, ss) })
 	t.Run("SaveUserBlockUserDM", func(t *testing.T) { testSaveUserBlockUserDM(t, rctx, ss) })
+	t.Run("ListTeamBlockUser", func(t *testing.T) { testListTeamBlockUser(t, rctx, ss) })
 	t.Run("ListChannelBlockUser", func(t *testing.T) { testListChannelBlockUser(t, rctx, ss) })
 	t.Run("ListUserBlockUser", func(t *testing.T) { testListUserBlockUser(t, rctx, ss) })
+}
+
+func testSaveTeamBlockUser(t *testing.T, _ request.CTX, ss store.Store) {
+	teamBlockUser := model.TeamBlockUser{
+		TeamId: "000000",
+		BlockedId: "abcdefg",
+		CreateBy:  "abcdfg",
+	}
+
+	var err error
+	var newBlockUser, getBlockUser *model.TeamBlockUser
+	newBlockUser, err = ss.Blocklist().SaveTeamBlockUser(&teamBlockUser)
+	require.NoError(t, err)
+	require.Greater(t, newBlockUser.CreateAt, model.GetMillis()-200)
+	assert.Equal(t, teamBlockUser.BlockedId, newBlockUser.BlockedId)
+	assert.Equal(t, teamBlockUser.TeamId, newBlockUser.TeamId)
+	assert.Equal(t, teamBlockUser.CreateBy, newBlockUser.CreateBy)
+
+	getBlockUser, err = ss.Blocklist().GetTeamBlockUser(teamBlockUser.TeamId, teamBlockUser.BlockedId)
+	require.NoError(t, err)
+	assert.Equal(t, teamBlockUser.BlockedId, getBlockUser.BlockedId)
+	assert.Equal(t, teamBlockUser.TeamId, getBlockUser.TeamId)
+	assert.Equal(t, newBlockUser.CreateBy, getBlockUser.CreateBy)
+
+	err = ss.Blocklist().DeleteTeamBlockUser(teamBlockUser.TeamId, teamBlockUser.BlockedId)
+	require.NoError(t, err)
+
+	getBlockUser, err = ss.Blocklist().GetTeamBlockUser(teamBlockUser.TeamId, teamBlockUser.BlockedId)
+	require.NoError(t, err)
+	assert.Nil(t, getBlockUser)
+
+	err = ss.Blocklist().DeleteTeamBlockUser(teamBlockUser.TeamId, teamBlockUser.BlockedId)
+	require.NoError(t, err)
 }
 
 func testSaveChannelBlockUser(t *testing.T, _ request.CTX, ss store.Store) {
@@ -143,6 +178,56 @@ func testSaveUserBlockUserDM(t *testing.T, ctx request.CTX, ss store.Store) {
 	for _, cm := range(channelMembers){
 		assert.True(t, cm.SchemeUser)
 	}
+}
+
+func testListTeamBlockUser(t *testing.T, _ request.CTX, ss store.Store) {
+	user1 := "biggouyyyyyyyyyyyyyyyyyyyy"
+	user2 := "biggouyyyyyyyyyyyyyyyyyyyb"
+	user3 := "biggouyyyyyyyyyyyyyyyyyyyn"
+	user4 := "biggouyyyyyyyyyyyyyyyyyyyd"
+	Team1 := "biggocyyyyyyyyyyyyyyyyyyyy"
+	Team2 := "biggocyyyyyyyyyyyyyyyyyyyb"
+	Team3 := "biggocyyyyyyyyyyyyyyyyyyyn"
+	createAt := model.GetMillis()
+	sampleData := model.TeamBlockUserList{}
+	sampleData = append(sampleData, &model.TeamBlockUser{TeamId: Team1, BlockedId: user2, CreateBy: user1, CreateAt: createAt})
+	sampleData = append(sampleData, &model.TeamBlockUser{TeamId: Team1, BlockedId: user3, CreateBy: user1, CreateAt: createAt})
+	sampleData = append(sampleData, &model.TeamBlockUser{TeamId: Team2, BlockedId: user1, CreateBy: user2, CreateAt: createAt})
+	sampleData = append(sampleData, &model.TeamBlockUser{TeamId: Team2, BlockedId: user3, CreateBy: user2, CreateAt: createAt})
+	for _, TeamBlockUser := range(sampleData) {
+		_, err := ss.Blocklist().SaveTeamBlockUser(TeamBlockUser)
+		require.NoError(t, err)
+	}
+
+	var err error
+	var retCBUL *model.TeamBlockUserList
+	retCBUL, err = ss.Blocklist().ListTeamBlockUsers(Team1)
+	require.NoError(t, err)
+	assert.Len(t, *retCBUL, 2)
+
+	retCBUL, err = ss.Blocklist().ListTeamBlockUsers(Team2)
+	require.NoError(t, err)
+	assert.Len(t, *retCBUL, 2)
+
+	retCBUL, err = ss.Blocklist().ListTeamBlockUsers(Team3)
+	require.NoError(t, err)
+	assert.Len(t, *retCBUL, 0)
+
+	retCBUL, err = ss.Blocklist().ListTeamBlockUsersByBlockedUser(user1)
+	require.NoError(t, err)
+	assert.Len(t, *retCBUL, 1)
+
+	retCBUL, err = ss.Blocklist().ListTeamBlockUsersByBlockedUser(user2)
+	require.NoError(t, err)
+	assert.Len(t, *retCBUL, 1)
+
+	retCBUL, err = ss.Blocklist().ListTeamBlockUsersByBlockedUser(user3)
+	require.NoError(t, err)
+	assert.Len(t, *retCBUL, 2)
+
+	retCBUL, err = ss.Blocklist().ListTeamBlockUsersByBlockedUser(user4)
+	require.NoError(t, err)
+	assert.Len(t, *retCBUL, 0)
 }
 
 func testListChannelBlockUser(t *testing.T, _ request.CTX, ss store.Store) {

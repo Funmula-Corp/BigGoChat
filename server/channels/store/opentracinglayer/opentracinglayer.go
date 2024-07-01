@@ -553,6 +553,24 @@ func (s *OpenTracingLayerBlocklistStore) DeleteChannelBlockUser(channelId string
 	return err
 }
 
+func (s *OpenTracingLayerBlocklistStore) DeleteTeamBlockUser(channelId string, userId string) error {
+	origCtx := s.Root.Store.Context()
+	span, newCtx := tracing.StartSpanWithParentByContext(s.Root.Store.Context(), "BlocklistStore.DeleteTeamBlockUser")
+	s.Root.Store.SetContext(newCtx)
+	defer func() {
+		s.Root.Store.SetContext(origCtx)
+	}()
+
+	defer span.Finish()
+	err := s.BlocklistStore.DeleteTeamBlockUser(channelId, userId)
+	if err != nil {
+		span.LogFields(spanlog.Error(err))
+		ext.Error.Set(span, true)
+	}
+
+	return err
+}
+
 func (s *OpenTracingLayerBlocklistStore) DeleteUserBlockUser(userId string, blockedId string) error {
 	origCtx := s.Root.Store.Context()
 	span, newCtx := tracing.StartSpanWithParentByContext(s.Root.Store.Context(), "BlocklistStore.DeleteUserBlockUser")
@@ -581,6 +599,24 @@ func (s *OpenTracingLayerBlocklistStore) GetChannelBlockUser(channelId string, u
 
 	defer span.Finish()
 	result, err := s.BlocklistStore.GetChannelBlockUser(channelId, userId)
+	if err != nil {
+		span.LogFields(spanlog.Error(err))
+		ext.Error.Set(span, true)
+	}
+
+	return result, err
+}
+
+func (s *OpenTracingLayerBlocklistStore) GetTeamBlockUser(channelId string, userId string) (*model.TeamBlockUser, error) {
+	origCtx := s.Root.Store.Context()
+	span, newCtx := tracing.StartSpanWithParentByContext(s.Root.Store.Context(), "BlocklistStore.GetTeamBlockUser")
+	s.Root.Store.SetContext(newCtx)
+	defer func() {
+		s.Root.Store.SetContext(origCtx)
+	}()
+
+	defer span.Finish()
+	result, err := s.BlocklistStore.GetTeamBlockUser(channelId, userId)
 	if err != nil {
 		span.LogFields(spanlog.Error(err))
 		ext.Error.Set(span, true)
@@ -643,6 +679,42 @@ func (s *OpenTracingLayerBlocklistStore) ListChannelBlockUsersByBlockedUser(bloc
 	return result, err
 }
 
+func (s *OpenTracingLayerBlocklistStore) ListTeamBlockUsers(channelId string) (*model.TeamBlockUserList, error) {
+	origCtx := s.Root.Store.Context()
+	span, newCtx := tracing.StartSpanWithParentByContext(s.Root.Store.Context(), "BlocklistStore.ListTeamBlockUsers")
+	s.Root.Store.SetContext(newCtx)
+	defer func() {
+		s.Root.Store.SetContext(origCtx)
+	}()
+
+	defer span.Finish()
+	result, err := s.BlocklistStore.ListTeamBlockUsers(channelId)
+	if err != nil {
+		span.LogFields(spanlog.Error(err))
+		ext.Error.Set(span, true)
+	}
+
+	return result, err
+}
+
+func (s *OpenTracingLayerBlocklistStore) ListTeamBlockUsersByBlockedUser(blockedId string) (*model.TeamBlockUserList, error) {
+	origCtx := s.Root.Store.Context()
+	span, newCtx := tracing.StartSpanWithParentByContext(s.Root.Store.Context(), "BlocklistStore.ListTeamBlockUsersByBlockedUser")
+	s.Root.Store.SetContext(newCtx)
+	defer func() {
+		s.Root.Store.SetContext(origCtx)
+	}()
+
+	defer span.Finish()
+	result, err := s.BlocklistStore.ListTeamBlockUsersByBlockedUser(blockedId)
+	if err != nil {
+		span.LogFields(spanlog.Error(err))
+		ext.Error.Set(span, true)
+	}
+
+	return result, err
+}
+
 func (s *OpenTracingLayerBlocklistStore) ListUserBlockUsers(userId string) (*model.UserBlockUserList, error) {
 	origCtx := s.Root.Store.Context()
 	span, newCtx := tracing.StartSpanWithParentByContext(s.Root.Store.Context(), "BlocklistStore.ListUserBlockUsers")
@@ -689,6 +761,24 @@ func (s *OpenTracingLayerBlocklistStore) SaveChannelBlockUser(blockUser *model.C
 
 	defer span.Finish()
 	result, err := s.BlocklistStore.SaveChannelBlockUser(blockUser)
+	if err != nil {
+		span.LogFields(spanlog.Error(err))
+		ext.Error.Set(span, true)
+	}
+
+	return result, err
+}
+
+func (s *OpenTracingLayerBlocklistStore) SaveTeamBlockUser(blockUser *model.TeamBlockUser) (*model.TeamBlockUser, error) {
+	origCtx := s.Root.Store.Context()
+	span, newCtx := tracing.StartSpanWithParentByContext(s.Root.Store.Context(), "BlocklistStore.SaveTeamBlockUser")
+	s.Root.Store.SetContext(newCtx)
+	defer func() {
+		s.Root.Store.SetContext(origCtx)
+	}()
+
+	defer span.Finish()
+	result, err := s.BlocklistStore.SaveTeamBlockUser(blockUser)
 	if err != nil {
 		span.LogFields(spanlog.Error(err))
 		ext.Error.Set(span, true)

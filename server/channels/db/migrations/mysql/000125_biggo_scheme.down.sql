@@ -85,3 +85,5 @@ SET @preparedStatement = (SELECT IF (
 PREPARE alterIfExists FROM @preparedStatement;
 EXECUTE alterIfExists;
 DEALLOCATE PREPARE alterIfExists;
+
+DROP TABLE IF EXISTS TeamBlockUsers;
