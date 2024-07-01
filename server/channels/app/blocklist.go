@@ -5,6 +5,60 @@ import (
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
 )
 
+func (a *App) AddTeamBlockUser(rctx request.CTX, teamId string, blockedId string) (*model.TeamBlockUser, *model.AppError) {
+	userId := rctx.Session().UserId
+	newTBU := model.TeamBlockUser{
+		TeamId: teamId,
+		BlockedId: blockedId,
+		CreateBy:  userId,
+	}
+	if err := a.RemoveUserFromTeam(rctx, teamId, blockedId, userId); err != nil {
+		// block a user who is not a team member.
+		if err.Id != "api.team.remove_user_from_team.missing.app_error" {
+			return nil, err
+		}
+	}
+	if saved, err := a.Srv().Store().Blocklist().SaveTeamBlockUser(&newTBU); err != nil {
+		return nil, model.NewAppError("AddTeamBlockUser", "app.team.add_blocklist.add.app_error", nil, "", 500).Wrap(err)
+	} else {
+		a.InvalidateCacheForUser(blockedId)
+		return saved, nil
+	}
+}
+
+func (a *App) DeleteTeamBlockUser(rctx request.CTX, teamId string, blockedId string) *model.AppError {
+	if err := a.Srv().Store().Blocklist().DeleteTeamBlockUser(teamId, blockedId); err != nil {
+		return model.NewAppError("DeleteTeamBlockUser", "app.delete_blocklist.delete.app_error", nil, "", 500).Wrap(err)
+	} else {
+		return nil
+	}
+}
+
+func (a *App) ListTeamBlockUsers(rctx request.CTX, teamId string) (*model.TeamBlockUserList, *model.AppError) {
+	if cbul, err := a.Srv().Store().Blocklist().ListTeamBlockUsers(teamId); err != nil {
+		return nil, model.NewAppError("ListTeamBlockUsers", "app.team.get_blocklist.list.app_error", nil, "", 500).Wrap(err)
+	} else {
+		return cbul, nil
+	}
+}
+
+func (a *App) GetTeamBlockUser(rctx request.CTX, teamId string, blockedId string) (*model.TeamBlockUser, *model.AppError) {
+	if cbu, err := a.Srv().Store().Blocklist().GetTeamBlockUser(teamId, blockedId); err != nil {
+		return nil, model.NewAppError("GetTeamBlockUser", "app.team.get_blocklist.get.app_error", nil, "", 500).Wrap(err)
+	} else {
+		return cbu, nil
+	}
+}
+
+func (a *App) ListTeamsByBlockedUser(rctx request.CTX, blockedId string) (*model.TeamBlockUserList, *model.AppError) {
+	if cbul, err := a.Srv().Store().Blocklist().ListTeamBlockUsersByBlockedUser(blockedId); err != nil {
+		return nil, model.NewAppError("ListTeamByBlockedUser", "app.user.get_team_blocklist.by_blocked_user.app_err", nil, "", 500).Wrap(err)
+	} else {
+		return cbul, nil
+	}
+}
+
+//
 func (a *App) AddChannelBlockUser(rctx request.CTX, channelId string, blockedId string) (*model.ChannelBlockUser, *model.AppError) {
 	userId := rctx.Session().UserId
 	newCBU := model.ChannelBlockUser{

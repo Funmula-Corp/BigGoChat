@@ -172,9 +172,6 @@ func (s *SqlBlocklistStore) SaveTeamBlockUser(blockUser *model.TeamBlockUser) (*
 		return nil, errors.Wrap(err, "save_team_block_user_tosql")
 	}
 
-	if _, err := transaction.Exec(`DELETE FROM TeamMembers WHERE TeamId = ? and UserId = ?`, blockUser.TeamId, blockUser.BlockedId); err != nil {
-		return nil, errors.Wrapf(err, "failed to delete blocked user %s from team %s", blockUser.BlockedId, blockUser.TeamId)
-	}
 	if _, err := transaction.Exec(sql, args...); err != nil {
 		if IsUniqueConstraintError(err, []string{"Name", "team_block_users_key"}) {
 			dup := model.TeamBlockUser{}

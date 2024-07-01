@@ -588,6 +588,14 @@ func (c *Client4) bookmarkRoute(channelId, bookmarkId string) string {
 	return fmt.Sprintf(c.bookmarksRoute(channelId)+"/%v", bookmarkId)
 }
 
+func (c *Client4) teamBlockUsersRoute(teamId string) string {
+	return c.teamRoute(teamId) + "/blockuser"
+}
+
+func (c *Client4) teamBlockUserRoute(teamId string, blockedId string) string {
+	return fmt.Sprintf(c.teamBlockUsersRoute(teamId)+"/%v", blockedId)
+}
+
 func (c *Client4) channelBlockUsersRoute(channelId string) string {
 	return c.channelRoute(channelId) + "/blockuser"
 }
@@ -8878,7 +8886,7 @@ func (c *Client4) AddChannelBlockUser(ctx context.Context, channelId string, blo
 	}
 	var cbu ChannelBlockUser
 	if err := json.NewDecoder(r.Body).Decode(&cbu); err != nil {
-		return nil, nil, NewAppError("AddChannelBLockUser", "api.unmarshal_error", nil, "", http.StatusInternalServerError).Wrap(err)
+		return nil, nil, NewAppError("AddChannelBlockUser", "api.unmarshal_error", nil, "", http.StatusInternalServerError).Wrap(err)
 	}
 	return &cbu, BuildResponse(r), err
 }
@@ -8897,7 +8905,7 @@ func (c *Client4) ListChannelBlockUsers(ctx context.Context, channelId string) (
 	defer closeBody(r)
 	var b ChannelBlockUserList
 	if err := json.NewDecoder(r.Body).Decode(&b); err != nil {
-		return nil, nil, NewAppError("ListUserBLockUsers", "api.unmarshal_error", nil, "", http.StatusInternalServerError).Wrap(err)
+		return nil, nil, NewAppError("ListUserBlockUsers", "api.unmarshal_error", nil, "", http.StatusInternalServerError).Wrap(err)
 	}
 	return &b, BuildResponse(r), nil
 }
@@ -8910,7 +8918,7 @@ func (c *Client4) AddUserBlockUser(ctx context.Context, userId string, blockedId
 	}
 	var ubu UserBlockUser
 	if err := json.NewDecoder(r.Body).Decode(&ubu); err != nil {
-		return nil, nil, NewAppError("LAddChannelBLockUser", "api.unmarshal_error", nil, "", http.StatusInternalServerError).Wrap(err)
+		return nil, nil, NewAppError("LAddChannelBlockUser", "api.unmarshal_error", nil, "", http.StatusInternalServerError).Wrap(err)
 	}
 	return &ubu, BuildResponse(r), err
 }
@@ -8929,7 +8937,39 @@ func (c *Client4) ListUserBlockUsers(ctx context.Context, userId string) (*UserB
 	defer closeBody(r)
 	var b UserBlockUserList
 	if err := json.NewDecoder(r.Body).Decode(&b); err != nil {
-		return nil, nil, NewAppError("ListUserBLockUsers", "api.unmarshal_error", nil, "", http.StatusInternalServerError).Wrap(err)
+		return nil, nil, NewAppError("ListUserBlockUsers", "api.unmarshal_error", nil, "", http.StatusInternalServerError).Wrap(err)
+	}
+	return &b, BuildResponse(r), nil
+}
+
+func (c *Client4) AddTeamBlockUser(ctx context.Context, teamId string, blockedId string) (*TeamBlockUser, *Response, error) {
+	r, err := c.DoAPIPut(ctx, c.teamBlockUserRoute(teamId, blockedId), "")
+	defer closeBody(r)
+	if err != nil {
+		return nil, BuildResponse(r), err
+	}
+	var cbu TeamBlockUser
+	if err := json.NewDecoder(r.Body).Decode(&cbu); err != nil {
+		return nil, nil, NewAppError("AddTeamBlockUser", "api.unmarshal_error", nil, "", http.StatusInternalServerError).Wrap(err)
+	}
+	return &cbu, BuildResponse(r), err
+}
+
+func (c *Client4) DeleteTeamBlockUser(ctx context.Context, teamId string, blockedId string) (string, *Response, error) {
+	r, err := c.DoAPIDelete(ctx, c.teamBlockUserRoute(teamId, blockedId))
+	defer closeBody(r)
+	return "", BuildResponse(r), err
+}
+
+func (c *Client4) ListTeamBlockUsers(ctx context.Context, teamId string) (*TeamBlockUserList, *Response, error) {
+	r, err := c.DoAPIGet(ctx, c.teamBlockUsersRoute(teamId), "")
+	if err != nil {
+		return nil, BuildResponse(r), err
+	}
+	defer closeBody(r)
+	var b TeamBlockUserList
+	if err := json.NewDecoder(r.Body).Decode(&b); err != nil {
+		return nil, nil, NewAppError("ListTeamBlockUsers", "api.unmarshal_error", nil, "", http.StatusInternalServerError).Wrap(err)
 	}
 	return &b, BuildResponse(r), nil
 }

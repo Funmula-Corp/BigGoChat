@@ -751,6 +751,20 @@ func addTeamMember(c *Context, w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	if blocked, err := c.App.GetTeamBlockUser(c.AppContext, member.TeamId, member.UserId); err != nil {
+		c.Err = model.NewAppError("addTeamMeber", "api.team.add_member.get_block_user.error", nil, "", http.StatusInternalServerError).Wrap(err)
+		return
+	}else if blocked != nil {
+		var retCode int
+		if c.AppContext.Session().UserId == member.UserId {
+			retCode = http.StatusForbidden
+		}else {
+			retCode = http.StatusBadRequest
+		}
+		c.Err = model.NewAppError("addTeamMember", "api.team.add_member.blocked_user.app_err", nil, "", retCode)
+		return
+	}
+
 	var tm *model.TeamMember
 	tm, err = c.App.AddTeamMember(c.AppContext, member.TeamId, member.UserId)
 	if err != nil {
@@ -896,6 +910,13 @@ func addTeamMembers(c *Context, w http.ResponseWriter, r *http.Request) {
 				c.SetPermissionError(model.PermissionInviteGuest)
 				return
 			}
+		}
+		if blocked, err := c.App.GetTeamBlockUser(c.AppContext, member.TeamId, member.UserId); err != nil {
+			c.Err = model.NewAppError("addTeamMeber", "api.team.add_member.get_block_user.error", nil, "", http.StatusInternalServerError).Wrap(err)
+			return
+		}else if blocked != nil {
+			c.Err = model.NewAppError("addTeamMember", "api.team.add_member.blocked_user.app_err", nil, "", http.StatusBadRequest)
+			return
 		}
 		userIDs = append(userIDs, member.UserId)
 	}
