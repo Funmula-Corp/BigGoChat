@@ -342,6 +342,28 @@ func TestUpdateChannel(t *testing.T) {
 		require.Error(t, err)
 		CheckBadRequestStatus(t, resp)
 	})
+
+	t.Run("only channel admin can update", func(t *testing.T){
+		user := th.CreateUser()
+		th.LinkUserToTeam(user, th.BasicTeam)
+		client.Logout(context.Background())
+		client.Login(context.Background(), user.Email, user.Password)
+		_, resp, err := th.SystemAdminClient.AddChannelMember(context.Background(), th.BasicChannel2.Id, user.Id)
+		require.NoError(t, err)
+		CheckCreatedStatus(t, resp)
+		channel1 := &model.Channel{DisplayName: "Test API Name for apiv4", Name: GenerateTestChannelName(), Type: model.ChannelTypeOpen, TeamId: team.Id, Id: channel.Id}
+		_, resp, err = client.UpdateChannel(context.Background(), channel1)
+		require.Error(t, err, "only channel admin can update channel")
+		CheckForbiddenStatus(t, resp)
+		resp, err = th.SystemAdminClient.UpdateTeamMemberSchemeRoles(context.Background(), team.Id, user.Id, &model.SchemeRoles{
+			SchemeModerator: true,
+		})
+		require.NoError(t, err)
+		CheckOKStatus(t, resp)
+		_, resp, err = client.UpdateChannel(context.Background(), channel1)
+		require.NoError(t, err, "team moderator can update channel")
+		CheckOKStatus(t, resp)
+	})
 }
 
 func TestPatchChannel(t *testing.T) {
@@ -524,6 +546,35 @@ func TestPatchChannel(t *testing.T) {
 		_, resp, err = client.PatchChannel(context.Background(), directChannel.Id, directChannelPatch3)
 		require.Error(t, err)
 		CheckBadRequestStatus(t, resp)
+	})
+
+	t.Run("only channel admin can patch", func(t *testing.T){
+		user := th.CreateUser()
+		th.LinkUserToTeam(user, th.BasicTeam)
+		client.Logout(context.Background())
+		client.Login(context.Background(), user.Email, user.Password)
+
+		_, resp, err := th.SystemAdminClient.AddChannelMember(context.Background(), th.BasicChannel2.Id, user.Id)
+		require.NoError(t, err)
+		CheckCreatedStatus(t, resp)
+		_, resp, err = client.PatchChannel(context.Background(), th.BasicChannel2.Id, patch)
+		require.Error(t, err, "only channel admin can patch channel")
+		CheckForbiddenStatus(t, resp)
+
+		resp, err = th.SystemAdminClient.UpdateTeamMemberSchemeRoles(context.Background(), team.Id, user.Id, &model.SchemeRoles{
+			SchemeModerator: true,
+		})
+		require.NoError(t, err)
+		CheckOKStatus(t, resp)
+		_, resp, err = client.PatchChannel(context.Background(), th.BasicChannel2.Id, patch)
+		require.NoError(t, err, "team moderator can patch channel")
+		CheckOKStatus(t, resp)
+
+		client.Logout(context.Background())
+		client.Login(context.Background(), th.BasicUser2.Email, th.BasicUser2.Password)
+		_, resp, err = client.PatchChannel(context.Background(), th.BasicChannel2.Id, patch)
+		require.Error(t, err, "only channel admin can patch channel. (this is a verified user)")
+		CheckForbiddenStatus(t, resp)
 	})
 }
 
