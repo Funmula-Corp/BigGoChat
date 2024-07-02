@@ -15,10 +15,10 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/utils"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/utils/fileutils"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 )
 
 func TestCreateEmoji(t *testing.T) {
@@ -188,7 +188,7 @@ func TestCreateEmoji(t *testing.T) {
 	CheckForbiddenStatus(t, resp)
 
 	// try to create an emoji without permissions
-	th.RemovePermissionFromRole(model.PermissionCreateEmojis.Id, model.SystemUserRoleId)
+	th.RemovePermissionFromRole(model.PermissionCreateEmojis.Id, model.SystemVerifiedRoleId)
 
 	emoji = &model.Emoji{
 		CreatorId: th.BasicUser.Id,
@@ -200,7 +200,7 @@ func TestCreateEmoji(t *testing.T) {
 	CheckForbiddenStatus(t, resp)
 
 	// create an emoji with permissions in one team
-	th.AddPermissionToRole(model.PermissionCreateEmojis.Id, model.TeamUserRoleId)
+	th.AddPermissionToRole(model.PermissionCreateEmojis.Id, model.TeamVerifiedRoleId)
 
 	emoji = &model.Emoji{
 		CreatorId: th.BasicUser.Id,

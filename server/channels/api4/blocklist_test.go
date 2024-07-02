@@ -210,9 +210,16 @@ func TestChannelBlockUserPost(t *testing.T) {
 	if lErr != nil {
 		panic(lErr)
 	}
+	resp, err := th.SystemAdminClient.UpdateChannelMemberSchemeRoles(context.Background(), th.BasicChannel.Id, th.BasicUser.Id, &model.SchemeRoles{
+		SchemeAdmin: true,
+		SchemeVerified: true,
+		SchemeUser: true,
+	})
+	require.NoError(t, err)
+	CheckOKStatus(t, resp)
 
 	post := &model.Post{ChannelId: th.BasicChannel.Id, Message: "msg1"}
-	_, resp, err := client.CreatePost(context.Background(), post)
+	_, resp, err = client.CreatePost(context.Background(), post)
 	require.NoError(t, err)
 	CheckCreatedStatus(t, resp)
 

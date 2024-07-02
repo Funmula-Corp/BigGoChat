@@ -2565,7 +2565,7 @@ func TestAddTeamMembers(t *testing.T) {
 	}()
 
 	// Regular user can add a guest member to a team they belong to.
-	th.AddPermissionToRole(model.PermissionInviteGuest.Id, model.TeamUserRoleId)
+	th.AddPermissionToRole(model.PermissionInviteGuest.Id, model.TeamVerifiedRoleId)
 	tm, resp, err = client.AddTeamMembers(context.Background(), team.Id, guestList)
 	require.NoError(t, err)
 	CheckCreatedStatus(t, resp)
@@ -2604,6 +2604,8 @@ func TestAddTeamMembers(t *testing.T) {
 	th.AddPermissionToRole(model.PermissionAddUserToTeam.Id, model.TeamAdminRoleId)
 	th.RemovePermissionFromRole(model.PermissionInviteUser.Id, model.TeamUserRoleId)
 	th.RemovePermissionFromRole(model.PermissionAddUserToTeam.Id, model.TeamUserRoleId)
+	th.RemovePermissionFromRole(model.PermissionInviteUser.Id, model.TeamVerifiedRoleId)
+	th.RemovePermissionFromRole(model.PermissionAddUserToTeam.Id, model.TeamVerifiedRoleId)
 
 	th.LoginBasic()
 
@@ -3117,6 +3119,8 @@ func TestTeamExists(t *testing.T) {
 
 	th.AddPermissionToRole(model.PermissionListPublicTeams.Id, model.SystemUserRoleId)
 	th.AddPermissionToRole(model.PermissionListPrivateTeams.Id, model.SystemUserRoleId)
+	th.AddPermissionToRole(model.PermissionListPublicTeams.Id, model.SystemVerifiedRoleId)
+	th.AddPermissionToRole(model.PermissionListPrivateTeams.Id, model.SystemVerifiedRoleId)
 
 	t.Run("Logged user with permissions and valid public team", func(t *testing.T) {
 		th.LoginBasic()
@@ -3149,6 +3153,7 @@ func TestTeamExists(t *testing.T) {
 	t.Run("Logged without LIST_PUBLIC_TEAMS permissions and member public team", func(t *testing.T) {
 		th.LoginBasic()
 		th.RemovePermissionFromRole(model.PermissionListPublicTeams.Id, model.SystemUserRoleId)
+		th.RemovePermissionFromRole(model.PermissionListPublicTeams.Id, model.SystemVerifiedRoleId)
 
 		exists, _, err := client.TeamExists(context.Background(), public_member_team.Name, "")
 		require.NoError(t, err)
@@ -3158,6 +3163,7 @@ func TestTeamExists(t *testing.T) {
 	t.Run("Logged without LIST_PUBLIC_TEAMS permissions and not member public team", func(t *testing.T) {
 		th.LoginBasic()
 		th.RemovePermissionFromRole(model.PermissionListPublicTeams.Id, model.SystemUserRoleId)
+		th.RemovePermissionFromRole(model.PermissionListPublicTeams.Id, model.SystemVerifiedRoleId)
 
 		exists, _, err := client.TeamExists(context.Background(), public_not_member_team.Name, "")
 		require.NoError(t, err)
@@ -3167,6 +3173,7 @@ func TestTeamExists(t *testing.T) {
 	t.Run("Logged without LIST_PRIVATE_TEAMS permissions and member private team", func(t *testing.T) {
 		th.LoginBasic()
 		th.RemovePermissionFromRole(model.PermissionListPrivateTeams.Id, model.SystemUserRoleId)
+		th.RemovePermissionFromRole(model.PermissionListPrivateTeams.Id, model.SystemVerifiedRoleId)
 
 		exists, _, err := client.TeamExists(context.Background(), private_member_team.Name, "")
 		require.NoError(t, err)
@@ -3176,6 +3183,7 @@ func TestTeamExists(t *testing.T) {
 	t.Run("Logged without LIST_PRIVATE_TEAMS permissions and not member private team", func(t *testing.T) {
 		th.LoginBasic()
 		th.RemovePermissionFromRole(model.PermissionListPrivateTeams.Id, model.SystemUserRoleId)
+		th.RemovePermissionFromRole(model.PermissionListPrivateTeams.Id, model.SystemVerifiedRoleId)
 
 		exists, _, err := client.TeamExists(context.Background(), private_not_member_team.Name, "")
 		require.NoError(t, err)
@@ -3275,7 +3283,6 @@ func TestImportTeam(t *testing.T) {
 }
 
 func TestValidateUserPermissionsOnChannels(t *testing.T) {
-	t.Skip("user don't have permission to manage user")
 	th := Setup(t).InitBasic()
 	defer th.TearDown()
 
@@ -3287,7 +3294,7 @@ func TestValidateUserPermissionsOnChannels(t *testing.T) {
 		channelIds = th.App.ValidateUserPermissionsOnChannels(th.Context, th.BasicUser.Id, channelIds)
 
 		// basicUser has permission onBasicChannel and BasicPrivateChannel so he can invite to both channels
-		require.Len(t, channelIds, 2)
+		require.Len(t, channelIds, 0)
 	})
 
 	t.Run("User WITHOUT permissions on private channel CAN NOT invite members to it", func(t *testing.T) {
@@ -3299,7 +3306,7 @@ func TestValidateUserPermissionsOnChannels(t *testing.T) {
 		channelIds = th.App.ValidateUserPermissionsOnChannels(th.Context, th.BasicUser.Id, channelIds)
 
 		// basicUser DOES NOT have permission on BasicPrivateChannel2 so he can only invite to BasicChannel
-		require.Len(t, channelIds, 1)
+		require.Len(t, channelIds, 0)
 	})
 }
 

@@ -18,7 +18,7 @@ const (
 	SchemeScopeRun             = "run"
 
 	ChannelAllowUnverifiedSchemeName = "allow_unverified"
-	ChannelReadOnlySchemeName  = "announcement"
+	ChannelReadOnlySchemeName        = "announcement"
 )
 
 var BuiltInSchemes []string
@@ -47,7 +47,7 @@ type Scheme struct {
 	DefaultRunMemberRole       string `json:"default_run_member_role"`
 }
 
-func init(){
+func init() {
 	BuiltInSchemes = []string{
 		ChannelAllowUnverifiedSchemeName,
 		ChannelReadOnlySchemeName,
@@ -273,10 +273,36 @@ func IsValidSchemeName(name string) bool {
 }
 
 func (s *Scheme) IsBuiltIn() bool {
-	for _, n := range(BuiltInSchemes){
+	for _, n := range BuiltInSchemes {
 		if n == s.Name {
 			return true
 		}
 	}
 	return false
+}
+
+type SchemeRolesPatch struct {
+	SchemeAdmin     *bool `json:"scheme_admin,omitempty"`
+	SchemeModerator *bool `json:"scheme_moderator,omitempty"`
+	SchemeVerified  *bool `json:"scheme_verified,omitempty"`
+	SchemeUser      *bool `json:"scheme_user,omitempty"`
+	SchemeGuest     *bool `json:"scheme_guest,omitempty"`
+}
+
+func (s *SchemeRoles) Patch(p *SchemeRolesPatch) {
+	if p.SchemeAdmin != nil {
+		s.SchemeAdmin = *p.SchemeAdmin
+	}
+	if p.SchemeModerator != nil {
+		s.SchemeModerator = *p.SchemeModerator
+	}
+	if p.SchemeVerified != nil {
+		s.SchemeVerified = *p.SchemeVerified
+	}
+	if p.SchemeUser != nil {
+		s.SchemeUser = *p.SchemeUser
+	}
+	if p.SchemeGuest != nil {
+		s.SchemeGuest = *p.SchemeGuest
+	}
 }

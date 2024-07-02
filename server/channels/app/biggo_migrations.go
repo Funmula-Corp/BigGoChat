@@ -279,6 +279,7 @@ func (a *App) doMigrationKeyBigGoRolesPermissions() (permissionsMap, error) {
 				PermissionAddReaction,
 				model.PermissionCreatePostEphemeral.Id,
 				model.PermissionUploadFile.Id,
+				// PermissionUseChannelMentions,
 			},
 		},
 		permissionTransformation{
@@ -331,6 +332,10 @@ func (a *App) doMigrationKeyBigGoRolesPermissions() (permissionsMap, error) {
 		permissionTransformation{
 			On:     permissionAnd(isRole(model.SystemUserRoleId)),
 			Remove: []string{model.PermissionCreateTeam.Id},
+		},
+		permissionTransformation{
+			On:     permissionAnd(isRole(model.SystemVerifiedRoleId)),
+			Add: []string{model.PermissionCreateTeam.Id},
 		},
 	}, nil
 }
