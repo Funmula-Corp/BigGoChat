@@ -363,6 +363,7 @@ class PermissionTeamSchemeSettings extends React.PureComponent<Props & RouteComp
     handleSubmit = async () => {
         const roles = this.getStateRoles();
         let teamAdmin = roles?.team_admin;
+        let teamModerator = roles?.team_moderator;
         let channelAdmin = roles?.channel_admin;
         let playbookAdmin = roles?.playbook_admin;
         let playbookMember = roles?.playbook_member;
@@ -447,6 +448,7 @@ class PermissionTeamSchemeSettings extends React.PureComponent<Props & RouteComp
             teamGuest = {...teamGuest, id: this.props.roles[newScheme.default_team_guest_role].id};
             teamUser = {...teamUser, id: this.props.roles[newScheme.default_team_user_role].id};
             teamAdmin = {...teamAdmin, id: this.props.roles[newScheme.default_team_admin_role].id} as Role;
+            teamModerator = {...teamModerator, id: this.props.roles[newScheme.default_team_moderator_role].id} as Role;
             channelGuest = {...channelGuest, id: this.props.roles[newScheme.default_channel_guest_role].id};
             channelUser = {...channelUser, id: this.props.roles[newScheme.default_channel_user_role].id};
             channelAdmin = {...channelAdmin, id: this.props.roles[newScheme.default_channel_admin_role].id} as Role;
@@ -456,11 +458,12 @@ class PermissionTeamSchemeSettings extends React.PureComponent<Props & RouteComp
         }
 
         const teamAdminPromise = this.props.actions.editRole(teamAdmin as Role);
+        const teamModeratorPromise = this.props.actions.editRole(teamModerator as Role);
         const channelAdminPromise = this.props.actions.editRole(channelAdmin as Role);
         const playbookAdminPromise = this.props.actions.editRole(playbookAdmin as Role);
         const playbookMemberPromise = this.props.actions.editRole(playbookMember as Role);
         const runMemberPromise = this.props.actions.editRole(runMember as Role);
-        const promises = [teamAdminPromise, channelAdminPromise, playbookAdminPromise, playbookMemberPromise, runMemberPromise];
+        const promises = [teamAdminPromise, teamModeratorPromise, channelAdminPromise, playbookAdminPromise, playbookMemberPromise, runMemberPromise];
 
         const teamUserPromise = this.props.actions.editRole(teamUser);
         const channelUserPromise = this.props.actions.editRole(channelUser);
@@ -823,7 +826,7 @@ class PermissionTeamSchemeSettings extends React.PureComponent<Props & RouteComp
                         >
                             <PermissionsTree
                                 parentRole={roles?.all_users}
-                                role={roles?.team_admin}
+                                role={roles?.team_moderator}
                                 scope={'team_scope'}
                                 onToggle={this.togglePermission}
                                 selectRow={this.selectRow}
