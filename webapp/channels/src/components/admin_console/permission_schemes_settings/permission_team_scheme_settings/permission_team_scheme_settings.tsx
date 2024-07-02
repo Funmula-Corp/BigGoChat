@@ -71,7 +71,9 @@ type State = {
         all_users: boolean;
         team_admin: boolean;
         team_moderator: boolean;
+        team_verified: boolean;
         channel_admin: boolean;
+        channel_verified: boolean;
         playbook_admin: boolean;
         guests: boolean;
     };
@@ -95,6 +97,8 @@ class PermissionTeamSchemeSettings extends React.PureComponent<Props & RouteComp
                 all_users: true,
                 team_admin: true,
                 team_moderator: true,
+                team_verified: true,
+                channel_verified: true,
                 channel_admin: true,
                 playbook_admin: true,
                 guests: true,
@@ -114,15 +118,15 @@ class PermissionTeamSchemeSettings extends React.PureComponent<Props & RouteComp
             GeneralConstants.TEAM_GUEST_ROLE,
             GeneralConstants.TEAM_USER_ROLE,
             GeneralConstants.TEAM_ADMIN_ROLE,
+            GeneralConstants.TEAM_MODERATOR_ROLE,
+            GeneralConstants.TEAM_VERIFIED_ROLE,
             GeneralConstants.CHANNEL_GUEST_ROLE,
             GeneralConstants.CHANNEL_USER_ROLE,
+            GeneralConstants.CHANNEL_VERIFIED_ROLE,
             GeneralConstants.CHANNEL_ADMIN_ROLE,
             GeneralConstants.PLAYBOOK_ADMIN_ROLE,
             GeneralConstants.PLAYBOOK_MEMBER_ROLE,
             GeneralConstants.RUN_MEMBER_ROLE,
-            GeneralConstants.TEAM_MODERATOR_ROLE,
-            GeneralConstants.TEAM_VERIFIED_ROLE,
-            GeneralConstants.CHANNEL_VERIFIED_ROLE,
         ];
         this.props.actions.loadRolesIfNeeded(rolesNeeded);
         if (this.props.schemeId) {
@@ -165,6 +169,7 @@ class PermissionTeamSchemeSettings extends React.PureComponent<Props & RouteComp
                 props.roles[props.scheme.default_channel_guest_role] &&
                 props.roles[props.scheme.default_channel_user_role] &&
                 props.roles[props.scheme.default_channel_admin_role] &&
+                props.roles[props.scheme.default_channel_verified_role] &&
                 props.roles[props.scheme.default_playbook_admin_role] &&
                 props.roles[props.scheme.default_playbook_member_role] &&
                 props.roles[props.scheme.default_run_member_role]) {
@@ -224,9 +229,11 @@ class PermissionTeamSchemeSettings extends React.PureComponent<Props & RouteComp
         let teamGuest;
         let teamUser;
         let teamAdmin;
+        let teamVerified;
         let teamModerator;
         let channelGuest;
         let channelUser;
+        let channelVerified;
         let channelAdmin;
         let playbookAdmin;
         let playbookMember;
@@ -237,9 +244,11 @@ class PermissionTeamSchemeSettings extends React.PureComponent<Props & RouteComp
                 teamGuest = this.props.roles[this.props.scheme.default_team_guest_role];
                 teamUser = this.props.roles[this.props.scheme.default_team_user_role];
                 teamAdmin = this.props.roles[this.props.scheme.default_team_admin_role];
+                teamVerified = this.props.roles[this.props.scheme.default_team_verified_role];
                 teamModerator = this.props.roles[this.props.scheme.default_team_moderator_role];
                 channelGuest = this.props.roles[this.props.scheme.default_channel_guest_role];
                 channelUser = this.props.roles[this.props.scheme.default_channel_user_role];
+                channelVerified = this.props.roles[this.props.scheme.default_channel_verified_role];
                 channelAdmin = this.props.roles[this.props.scheme.default_channel_admin_role];
                 playbookAdmin = this.props.roles[this.props.scheme.default_playbook_admin_role];
                 playbookMember = this.props.roles[this.props.scheme.default_playbook_member_role];
@@ -249,9 +258,11 @@ class PermissionTeamSchemeSettings extends React.PureComponent<Props & RouteComp
             teamGuest = this.props.roles.team_guest;
             teamUser = this.props.roles.team_user;
             teamAdmin = this.props.roles.team_admin;
+            teamVerified = this.props.roles.team_verified;
             teamModerator = this.props.roles.team_moderator;
             channelGuest = this.props.roles.channel_guest;
             channelUser = this.props.roles.channel_user;
+            channelVerified = this.props.roles.channel_verified;
             channelAdmin = this.props.roles.channel_admin;
             playbookAdmin = this.props.roles.playbook_admin;
             playbookMember = this.props.roles.playbook_member;
@@ -262,7 +273,9 @@ class PermissionTeamSchemeSettings extends React.PureComponent<Props & RouteComp
         return {
             team_admin: teamAdmin,
             team_moderator: teamModerator,
+            team_verified: teamVerified,
             channel_admin: channelAdmin,
+            channel_verified: channelVerified,
             playbook_admin: playbookAdmin,
             playbook_member: playbookMember,
             run_member: runMember,
@@ -364,6 +377,8 @@ class PermissionTeamSchemeSettings extends React.PureComponent<Props & RouteComp
         const roles = this.getStateRoles();
         let teamAdmin = roles?.team_admin;
         let teamModerator = roles?.team_moderator;
+        let teamVerified = roles?.team_verified;
+        let channelVerified = roles?.channel_verified;
         let channelAdmin = roles?.channel_admin;
         let playbookAdmin = roles?.playbook_admin;
         let playbookMember = roles?.playbook_member;
@@ -438,7 +453,10 @@ class PermissionTeamSchemeSettings extends React.PureComponent<Props & RouteComp
                 newScheme.default_team_guest_role,
                 newScheme.default_team_user_role,
                 newScheme.default_team_admin_role,
+                newScheme.default_team_moderator_role,
+                newScheme.default_team_verified_role,
                 newScheme.default_channel_guest_role,
+                newScheme.default_channel_verified_role,
                 newScheme.default_channel_user_role,
                 newScheme.default_channel_admin_role,
                 newScheme.default_playbook_admin_role,
@@ -448,9 +466,11 @@ class PermissionTeamSchemeSettings extends React.PureComponent<Props & RouteComp
             teamGuest = {...teamGuest, id: this.props.roles[newScheme.default_team_guest_role].id};
             teamUser = {...teamUser, id: this.props.roles[newScheme.default_team_user_role].id};
             teamAdmin = {...teamAdmin, id: this.props.roles[newScheme.default_team_admin_role].id} as Role;
+            teamVerified = {...teamVerified, id: this.props.roles[newScheme.default_team_verified_role].id} as Role;
             teamModerator = {...teamModerator, id: this.props.roles[newScheme.default_team_moderator_role].id} as Role;
             channelGuest = {...channelGuest, id: this.props.roles[newScheme.default_channel_guest_role].id};
             channelUser = {...channelUser, id: this.props.roles[newScheme.default_channel_user_role].id};
+            channelVerified = {...channelVerified, id: this.props.roles[newScheme.default_channel_verified_role].id} as Role;
             channelAdmin = {...channelAdmin, id: this.props.roles[newScheme.default_channel_admin_role].id} as Role;
             playbookAdmin = {...playbookAdmin, id: this.props.roles[newScheme.default_playbook_admin_role].id} as Role;
             playbookMember = {...playbookMember, id: this.props.roles[newScheme.default_playbook_member_role].id} as Role;
@@ -459,11 +479,13 @@ class PermissionTeamSchemeSettings extends React.PureComponent<Props & RouteComp
 
         const teamAdminPromise = this.props.actions.editRole(teamAdmin as Role);
         const teamModeratorPromise = this.props.actions.editRole(teamModerator as Role);
+        const teamVerifiedPromise = this.props.actions.editRole(teamVerified as Role);
+        const channelVerifiedPromise = this.props.actions.editRole(channelVerified as Role);
         const channelAdminPromise = this.props.actions.editRole(channelAdmin as Role);
         const playbookAdminPromise = this.props.actions.editRole(playbookAdmin as Role);
         const playbookMemberPromise = this.props.actions.editRole(playbookMember as Role);
         const runMemberPromise = this.props.actions.editRole(runMember as Role);
-        const promises = [teamAdminPromise, teamModeratorPromise, channelAdminPromise, playbookAdminPromise, playbookMemberPromise, runMemberPromise];
+        const promises = [teamAdminPromise, teamModeratorPromise, teamVerifiedPromise, channelVerifiedPromise, channelAdminPromise, playbookAdminPromise, playbookMemberPromise, runMemberPromise];
 
         const teamUserPromise = this.props.actions.editRole(teamUser);
         const channelUserPromise = this.props.actions.editRole(channelUser);
@@ -510,7 +532,7 @@ class PermissionTeamSchemeSettings extends React.PureComponent<Props & RouteComp
         this.props.history.push('/admin_console/user_management/permissions');
     };
 
-    toggleRole = (roleId: 'all_users' | 'team_admin' | 'team_moderator' | 'channel_admin' | 'guests' | 'playbook_admin') => {
+    toggleRole = (roleId: 'all_users' | 'team_admin' | 'team_verified' | 'team_moderator' | 'channel_admin' | 'channel_verified' | 'guests' | 'playbook_admin') => {
         const newOpenRoles = {...this.state.openRoles};
         newOpenRoles[roleId] = !newOpenRoles[roleId];
         this.setState({openRoles: newOpenRoles});
@@ -521,8 +543,12 @@ class PermissionTeamSchemeSettings extends React.PureComponent<Props & RouteComp
         let role = null;
         if (roles.team_admin.name === roleId) {
             role = {...roles.team_admin};
+        } else if (roles.team_verified.name === roleId) {
+            role = {...roles.team_verified};
         } else if (roles.team_moderator.name === roleId) {
             role = {...roles.team_moderator};
+        } else if (roles.channel_verified.name === roleId) {
+            role = {...roles.channel_verified};
         } else if (roles.channel_admin.name === roleId) {
             role = {...roles.channel_admin};
         } else if (roles.all_users.name === roleId) {
@@ -545,8 +571,12 @@ class PermissionTeamSchemeSettings extends React.PureComponent<Props & RouteComp
             role.permissions = newPermissions;
             if (roles.team_admin.name === roleId) {
                 roles.team_admin = role;
+            } else if (roles.team_verified.name === roleId) {
+                roles.team_verified = role;
             } else if (roles.team_moderator.name === roleId) {
                 roles.team_moderator = role;
+            } else if (roles.channel_verified.name === roleId) {
+                roles.channel_verified = role;
             } else if (roles.channel_admin.name === roleId) {
                 roles.channel_admin = role;
             } else if (roles.all_users.name === roleId) {
@@ -783,6 +813,23 @@ class PermissionTeamSchemeSettings extends React.PureComponent<Props & RouteComp
                         </AdminPanelTogglable>
 
                         <AdminPanelTogglable
+                            className='permissions-block channel_admin'
+                            open={this.state.openRoles.channel_verified}
+                            onToggle={() => this.toggleRole('channel_verified')}
+                            title={defineMessage({id: 'admin.permissions.systemScheme.channelVerifiedTitle', defaultMessage: 'Channel Verified User'})}
+                            subtitle={defineMessage({id: 'admin.permissions.systemScheme.channelVerifiedDescription', defaultMessage: 'Permissions granted to channel creators and any users promoted to Channel Verified User.'})}
+                        >
+                            <PermissionsTree
+                                parentRole={roles?.all_users}
+                                role={roles?.channel_verified}
+                                scope={'channel_scope'}
+                                onToggle={this.togglePermission}
+                                selectRow={this.selectRow}
+                                readOnly={this.props.isDisabled}
+                            />
+                        </AdminPanelTogglable>
+
+                        <AdminPanelTogglable
                             className='permissions-block'
                             open={this.state.openRoles.playbook_admin}
                             onToggle={() => this.toggleRole('playbook_admin')}
@@ -827,6 +874,23 @@ class PermissionTeamSchemeSettings extends React.PureComponent<Props & RouteComp
                             <PermissionsTree
                                 parentRole={roles?.all_users}
                                 role={roles?.team_moderator}
+                                scope={'team_scope'}
+                                onToggle={this.togglePermission}
+                                selectRow={this.selectRow}
+                                readOnly={this.props.isDisabled}
+                            />
+                        </AdminPanelTogglable>
+
+                        <AdminPanelTogglable
+                            className='permissions-block team_admin'
+                            open={this.state.openRoles.team_verified}
+                            onToggle={() => this.toggleRole('team_verified')}
+                            title={defineMessage({id: 'admin.permissions.systemScheme.teamVerifiedTitle', defaultMessage: 'Team Verified User'})}
+                            subtitle={defineMessage({id: 'admin.permissions.systemScheme.teamVerifiedDescription', defaultMessage: 'Permissions granted to team creators and any users promoted to Team Verified User.'})}
+                        >
+                            <PermissionsTree
+                                parentRole={roles?.all_users}
+                                role={roles?.team_verified}
                                 scope={'team_scope'}
                                 onToggle={this.togglePermission}
                                 selectRow={this.selectRow}
