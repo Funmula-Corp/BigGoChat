@@ -1888,6 +1888,8 @@
   "admin.permissions.systemScheme.systemAdminsTitle": "System Administrators",
   "admin.permissions.systemScheme.teamAdminsDescription": "Permissions granted to team creators and any users promoted to Team Administrator.",
   "admin.permissions.systemScheme.teamAdminsTitle": "Team Administrators",
+  "admin.permissions.systemScheme.teamModeratorsDescription": "Permissions granted to team creators and any users promoted to Team Moderator.",
+  "admin.permissions.systemScheme.teamModeratorsTitle": "Team Moderators",
   "admin.permissions.systemSchemeBannerButton": "Edit Scheme",
   "admin.permissions.systemSchemeBannerText": "Set the default permissions inherited by all teams unless a <link>Team Override Scheme</link> is applied.",
   "admin.permissions.systemSchemeBannerTitle": "System Scheme",
