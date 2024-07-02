@@ -1928,7 +1928,7 @@ func updateChannelScheme(c *Context, w http.ResponseWriter, r *http.Request) {
 	defer c.LogAuditRec(auditRec)
 
 	var p model.SchemeIDPatch
-	if jsonErr := json.NewDecoder(r.Body).Decode(&p); jsonErr != nil || p.SchemeID == nil || !model.IsValidId(*p.SchemeID) {
+	if jsonErr := json.NewDecoder(r.Body).Decode(&p); jsonErr != nil || p.SchemeID == nil || (*p.SchemeID != "" && !model.IsValidId(*p.SchemeID)) {
 		c.SetInvalidParamWithErr("scheme_id", jsonErr)
 		return
 	}
@@ -1936,36 +1936,55 @@ func updateChannelScheme(c *Context, w http.ResponseWriter, r *http.Request) {
 
 	audit.AddEventParameter(auditRec, "scheme_id", *schemeID)
 
-	if c.App.Channels().License() == nil {
-		c.Err = model.NewAppError("Api4.UpdateChannelScheme", "api.channel.update_channel_scheme.license.error", nil, "", http.StatusForbidden)
-		return
-	}
-
-	if !c.App.SessionHasPermissionTo(*c.AppContext.Session(), model.PermissionManageSystem) {
-		c.SetPermissionError(model.PermissionManageSystem)
-		return
-	}
-
-	scheme, err := c.App.GetScheme(*schemeID)
-	if err != nil {
-		c.Err = err
-		return
-	}
-
-	if scheme.Scope != model.SchemeScopeChannel {
-		c.Err = model.NewAppError("Api4.UpdateChannelScheme", "api.channel.update_channel_scheme.scheme_scope.error", nil, "", http.StatusBadRequest)
-		return
-	}
-
 	channel, err := c.App.GetChannel(c.AppContext, c.Params.ChannelId)
 	if err != nil {
 		c.Err = err
 		return
 	}
+	var scheme *model.Scheme
+
+	if *schemeID != ""  {
+		scheme, err = c.App.GetScheme(*schemeID)
+		if err != nil {
+			c.Err = err
+			return
+		}
+		if scheme.Scope != model.SchemeScopeChannel {
+			c.Err = model.NewAppError("Api4.UpdateChannelScheme", "api.channel.update_channel_scheme.scheme_scope.error", nil, "", http.StatusBadRequest)
+			return
+		}
+	}
+
+	session := c.AppContext.Session()
+	if !c.App.SessionHasPermissionTo(*session, model.PermissionManageSystem) {
+		if !c.App.SessionHasPermissionToChannel(c.AppContext, *session, channel.Id, model.PermissionManageChannelRoles) {
+			c.SetPermissionError(model.PermissionManageChannelRoles)
+			return
+		}
+		if scheme != nil && !scheme.IsBuiltIn() {
+			c.Err = model.NewAppError("Api4.UpdateChannelScheme", "api.channel.update_channel_scheme.builtin_scheme.error", nil, "", http.StatusBadRequest)
+			return
+		}
+		if channel.SchemeId != nil && len(*channel.SchemeId) > 0 {
+			oScheme, err := c.App.GetScheme(*channel.SchemeId)
+			if err != nil {
+				c.Err = err
+				return
+			}
+			if !oScheme.IsBuiltIn() {
+				c.Err = model.NewAppError("Api4.UpdateChannelScheme", "api.channel.update_channel_scheme.builtin_scheme.error", nil, "", http.StatusBadRequest)
+				return
+			}
+		}
+	}
 
 	auditRec.AddEventPriorState(channel)
 
-	channel.SchemeId = &scheme.Id
+	if scheme != nil {
+		channel.SchemeId = &scheme.Id
+	}else{
+		channel.SchemeId = model.NewString("")
+	}
 
 	updatedChannel, err := c.App.UpdateChannelScheme(c.AppContext, channel)
 	if err != nil {

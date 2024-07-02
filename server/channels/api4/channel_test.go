@@ -343,7 +343,7 @@ func TestUpdateChannel(t *testing.T) {
 		CheckBadRequestStatus(t, resp)
 	})
 
-	t.Run("only channel admin can update", func(t *testing.T){
+	t.Run("only channel admin can update", func(t *testing.T) {
 		user := th.CreateUser()
 		th.LinkUserToTeam(user, th.BasicTeam)
 		client.Logout(context.Background())
@@ -548,7 +548,7 @@ func TestPatchChannel(t *testing.T) {
 		CheckBadRequestStatus(t, resp)
 	})
 
-	t.Run("only channel admin can patch", func(t *testing.T){
+	t.Run("only channel admin can patch", func(t *testing.T) {
 		user := th.CreateUser()
 		th.LinkUserToTeam(user, th.BasicTeam)
 		client.Logout(context.Background())
@@ -4123,13 +4123,6 @@ func TestUpdateChannelScheme(t *testing.T) {
 	require.Error(t, err)
 	CheckForbiddenStatus(t, resp)
 
-	// Test that a license is required.
-	th.App.Srv().SetLicense(nil)
-	resp, err = th.SystemAdminClient.UpdateChannelScheme(context.Background(), channel.Id, channelScheme.Id)
-	require.Error(t, err)
-	CheckForbiddenStatus(t, resp)
-	th.App.Srv().SetLicense(model.NewTestLicense(""))
-
 	// Test an invalid scheme scope.
 	resp, err = th.SystemAdminClient.UpdateChannelScheme(context.Background(), channel.Id, teamScheme.Id)
 	require.Error(t, err)
@@ -4534,7 +4527,7 @@ func TestPatchChannelModerations(t *testing.T) {
 				require.Equal(t, moderation.Roles.Guests.Value, true)
 				require.Equal(t, moderation.Roles.Guests.Enabled, true)
 			}
-			
+
 			if moderation.Name == "manage_members" {
 				require.Empty(t, moderation.Roles.Members)
 			} else {
@@ -5077,4 +5070,121 @@ func TestViewChannelWithoutCollapsedThreads(t *testing.T) {
 	threads, _, err = client.GetUserThreads(context.Background(), user.Id, team.Id, model.GetUserThreadsOpts{})
 	require.NoError(t, err)
 	require.Zero(t, threads.TotalUnreadMentions)
+}
+
+func TestSwitchChannelScheme(t *testing.T) {
+	th := Setup(t).InitBasic()
+	defer th.TearDown()
+
+	th.App.SetPhase2PermissionsMigrationStatus(true)
+	th.App.Srv().SetLicense(model.NewTestLicense())
+
+	channelScheme, _, err := th.SystemAdminClient.CreateScheme(context.Background(), &model.Scheme{
+		DisplayName: "DisplayName",
+		Name:        model.NewId(),
+		Description: "Some description",
+		Scope:       model.SchemeScopeChannel,
+	})
+	require.NoError(t, err)
+	user1 := th.CreateUser()
+	th.LinkUserToTeam(user1, th.BasicTeam)
+	_, resp, err := th.SystemAdminClient.AddChannelMember(context.Background(), th.BasicChannel.Id, user1.Id)
+	require.NoError(t, err)
+	CheckCreatedStatus(t, resp)
+	resp, err = th.SystemAdminClient.UpdateChannelRoles(context.Background(), th.BasicChannel.Id, user1.Id, model.ChannelAdminRoleId)
+	require.NoError(t, err)
+	CheckOKStatus(t, resp)
+
+	t.Run("channel admin have permission to switch scheme", func(t *testing.T) {
+		client := th.CreateClient()
+		_, resp, err := client.Login(context.Background(), user1.Username, user1.Password)
+		require.NoError(t, err)
+		CheckOKStatus(t, resp)
+
+		// cannot switch to a non-built-in schemem
+		resp, err = client.UpdateChannelScheme(context.Background(), th.BasicChannel.Id, channelScheme.Id)
+		require.Error(t, err)
+		CheckBadRequestStatus(t, resp)
+
+		scheme, appErr := th.App.GetSchemeByName(model.ChannelReadOnlySchemeName)
+		require.Nil(t, appErr)
+		resp, err = client.UpdateChannelScheme(context.Background(), th.BasicChannel.Id, scheme.Id)
+		require.NoError(t, err)
+		CheckOKStatus(t, resp)
+		channel, resp, err := client.GetChannel(context.Background(), th.BasicChannel.Id, "")
+		require.NoError(t, err)
+		CheckOKStatus(t, resp)
+		require.Equal(t, scheme.Id, *channel.SchemeId)
+
+		scheme, appErr = th.App.GetSchemeByName(model.ChannelAllowUnverifiedSchemeName)
+		require.Nil(t, appErr)
+		resp, err = client.UpdateChannelScheme(context.Background(), th.BasicChannel.Id, scheme.Id)
+		require.NoError(t, err)
+		CheckOKStatus(t, resp)
+		channel, resp, err = client.GetChannel(context.Background(), th.BasicChannel.Id, "")
+		require.NoError(t, err)
+		CheckOKStatus(t, resp)
+		require.Equal(t, scheme.Id, *channel.SchemeId)
+
+		resp, err = client.UpdateChannelScheme(context.Background(), th.BasicChannel.Id, "")
+		require.NoError(t, err)
+		CheckOKStatus(t, resp)
+		channel, resp, err = client.GetChannel(context.Background(), th.BasicChannel.Id, "")
+		require.NoError(t, err)
+		CheckOKStatus(t, resp)
+		require.Equal(t, "", *channel.SchemeId)
+
+		// cannot switch from a non-built-in schemem
+		resp, err = th.SystemAdminClient.UpdateChannelScheme(context.Background(), th.BasicChannel.Id, channelScheme.Id)
+		require.NoError(t, err)
+		CheckOKStatus(t, resp)
+		resp, err = client.UpdateChannelScheme(context.Background(), th.BasicChannel.Id, "")
+		require.Error(t, err)
+		CheckBadRequestStatus(t, resp)
+	})
+
+	t.Run("team admin have permission to switch scheme", func(t *testing.T) {
+		client := th.CreateClient()
+		th.LoginTeamAdminWithClient(client)
+		// cannot switch to a non-built-in schemem
+		resp, err = client.UpdateChannelScheme(context.Background(), th.BasicChannel2.Id, channelScheme.Id)
+		require.Error(t, err)
+		CheckBadRequestStatus(t, resp)
+
+		scheme, appErr := th.App.GetSchemeByName(model.ChannelReadOnlySchemeName)
+		require.Nil(t, appErr)
+		resp, err = client.UpdateChannelScheme(context.Background(), th.BasicChannel2.Id, scheme.Id)
+		require.NoError(t, err)
+		CheckOKStatus(t, resp)
+		channel, resp, err := client.GetChannel(context.Background(), th.BasicChannel2.Id, "")
+		require.NoError(t, err)
+		CheckOKStatus(t, resp)
+		require.Equal(t, scheme.Id, *channel.SchemeId)
+
+		scheme, appErr = th.App.GetSchemeByName(model.ChannelAllowUnverifiedSchemeName)
+		require.Nil(t, appErr)
+		resp, err = client.UpdateChannelScheme(context.Background(), th.BasicChannel2.Id, scheme.Id)
+		require.NoError(t, err)
+		CheckOKStatus(t, resp)
+		channel, resp, err = client.GetChannel(context.Background(), th.BasicChannel2.Id, "")
+		require.NoError(t, err)
+		CheckOKStatus(t, resp)
+		require.Equal(t, scheme.Id, *channel.SchemeId)
+
+		resp, err = client.UpdateChannelScheme(context.Background(), th.BasicChannel2.Id, "")
+		require.NoError(t, err)
+		CheckOKStatus(t, resp)
+		channel, resp, err = client.GetChannel(context.Background(), th.BasicChannel2.Id, "")
+		require.NoError(t, err)
+		CheckOKStatus(t, resp)
+		require.Equal(t, "", *channel.SchemeId)
+
+		// cannot switch from a non-built-in schemem
+		resp, err = th.SystemAdminClient.UpdateChannelScheme(context.Background(), th.BasicChannel2.Id, channelScheme.Id)
+		require.NoError(t, err)
+		CheckOKStatus(t, resp)
+		resp, err = client.UpdateChannelScheme(context.Background(), th.BasicChannel2.Id, "")
+		require.Error(t, err)
+		CheckBadRequestStatus(t, resp)
+	})
 }
