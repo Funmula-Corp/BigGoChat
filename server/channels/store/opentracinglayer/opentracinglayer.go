@@ -571,7 +571,7 @@ func (s *OpenTracingLayerBlocklistStore) DeleteTeamBlockUser(channelId string, u
 	return err
 }
 
-func (s *OpenTracingLayerBlocklistStore) DeleteUserBlockUser(userId string, blockedId string) error {
+func (s *OpenTracingLayerBlocklistStore) DeleteUserBlockUser(userId string, blockedId string, userIsVerified bool, blockedIsVerified bool) error {
 	origCtx := s.Root.Store.Context()
 	span, newCtx := tracing.StartSpanWithParentByContext(s.Root.Store.Context(), "BlocklistStore.DeleteUserBlockUser")
 	s.Root.Store.SetContext(newCtx)
@@ -580,7 +580,7 @@ func (s *OpenTracingLayerBlocklistStore) DeleteUserBlockUser(userId string, bloc
 	}()
 
 	defer span.Finish()
-	err := s.BlocklistStore.DeleteUserBlockUser(userId, blockedId)
+	err := s.BlocklistStore.DeleteUserBlockUser(userId, blockedId, userIsVerified, blockedIsVerified)
 	if err != nil {
 		span.LogFields(spanlog.Error(err))
 		ext.Error.Set(span, true)

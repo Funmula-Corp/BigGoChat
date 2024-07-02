@@ -294,6 +294,8 @@ func (a *App) doMigrationKeyBigGoRolesPermissions() (permissionsMap, error) {
 			On:     permissionAnd(isRole(model.ChannelAdminRoleId)),
 			Remove: []string{model.PermissionConvertPrivateChannelToPublic.Id},
 			Add: []string{
+				PermissionManagePublicChannelMembers,
+				PermissionManagePrivateChannelMembers,
 				PermissionConvertPublicChannelToPrivate,
 				PermissionManagePublicChannelProperties,
 				PermissionManagePrivateChannelProperties,

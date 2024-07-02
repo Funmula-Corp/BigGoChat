@@ -381,7 +381,7 @@ func (s *SqlBlocklistStore) ListUserBlockUsersByBlockedUser(blockedId string) (*
 	return &userBlockUserList, nil
 }
 
-func (s *SqlBlocklistStore) DeleteUserBlockUser(userId string, blockedId string) error {
+func (s *SqlBlocklistStore) DeleteUserBlockUser(userId, blockedId string, userIsVerified, blockedIsVerified bool) error {
 	var blockedByPeer model.UserBlockUser
 
 	transaction, err := s.GetMasterX().Beginx()
@@ -403,7 +403,10 @@ func (s *SqlBlocklistStore) DeleteUserBlockUser(userId string, blockedId string)
 	err = transaction.Get(&blockedByPeer, `SELECT UserId, BlockedId, CreateAt FROM UserBlockUsers WHERE UserId = ? and BlockedId = ? FOR SHARE`, blockedId, userId)
 
 	if err == sql.ErrNoRows {
-		if _, err = transaction.Exec("UPDATE ChannelMembers SET SchemeUser=true WHERE ChannelId IN (SELECT Id FROM Channels WHERE Name= ?)", model.GetDMNameFromIds(userId, blockedId)); err != nil {
+		if _, err = transaction.Exec("UPDATE ChannelMembers SET SchemeVerified = ?, SchemeUser=true WHERE ChannelId IN (SELECT Id FROM Channels WHERE Name= ?) AND UserId = ?", userIsVerified, model.GetDMNameFromIds(userId, blockedId), userId); err != nil {
+			return errors.Wrapf(err, "unmark_dm_readonly: user_id=%s blocked_id %s", userId, blockedId)
+		}
+		if _, err = transaction.Exec("UPDATE ChannelMembers SET SchemeVerified = ?, SchemeUser=true WHERE ChannelId IN (SELECT Id FROM Channels WHERE Name= ?) AND UserId = ?", blockedIsVerified, model.GetDMNameFromIds(userId, blockedId), blockedId); err != nil {
 			return errors.Wrapf(err, "unmark_dm_readonly: user_id=%s blocked_id %s", userId, blockedId)
 		}
 	} else if err != nil {
@@ -448,7 +451,7 @@ func (s *SqlBlocklistStore) SaveUserBlockUser(userBlockUser *model.UserBlockUser
 		return nil, errors.Wrapf(err, "save_user_block_user: user_id=%s blocked_id=%s", userBlockUser.UserId, userBlockUser.BlockedId)
 	}
 
-	if _, err = transaction.Exec("UPDATE ChannelMembers SET SchemeUser=false, Roles='channel_readonly' WHERE ChannelId IN (SELECT Id FROM Channels WHERE Name= ?)", userBlockUser.GetDMName()); err != nil {
+	if _, err = transaction.Exec("UPDATE ChannelMembers SET SchemeVerified=false, SchemeUser=false, Roles='channel_readonly' WHERE ChannelId IN (SELECT Id FROM Channels WHERE Name= ?)", userBlockUser.GetDMName()); err != nil {
 		return nil, errors.Wrapf(err, "mark_dm_readonly: user_id=%s blocked_id %s", userBlockUser.UserId, userBlockUser.BlockedId)
 	}
 

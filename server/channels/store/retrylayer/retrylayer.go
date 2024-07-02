@@ -606,11 +606,11 @@ func (s *RetryLayerBlocklistStore) DeleteTeamBlockUser(channelId string, userId 
 
 }
 
-func (s *RetryLayerBlocklistStore) DeleteUserBlockUser(userId string, blockedId string) error {
+func (s *RetryLayerBlocklistStore) DeleteUserBlockUser(userId string, blockedId string, userIsVerified bool, blockedIsVerified bool) error {
 
 	tries := 0
 	for {
-		err := s.BlocklistStore.DeleteUserBlockUser(userId, blockedId)
+		err := s.BlocklistStore.DeleteUserBlockUser(userId, blockedId, userIsVerified, blockedIsVerified)
 		if err == nil {
 			return nil
 		}

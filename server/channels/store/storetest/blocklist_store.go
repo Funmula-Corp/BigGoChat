@@ -106,14 +106,14 @@ func testSaveUserBlockUser(t *testing.T, _ request.CTX, ss store.Store) {
 	assert.Equal(t, userBlockUser.UserId, getBlockUser.UserId)
 	assert.Equal(t, newBlockUser.CreateAt, getBlockUser.CreateAt)
 
-	err = ss.Blocklist().DeleteUserBlockUser(userBlockUser.UserId, userBlockUser.BlockedId)
+	err = ss.Blocklist().DeleteUserBlockUser(userBlockUser.UserId, userBlockUser.BlockedId, true, true)
 	require.NoError(t, err)
 
 	getBlockUser, err = ss.Blocklist().GetUserBlockUser(userBlockUser.UserId, userBlockUser.BlockedId)
 	require.NoError(t, err)
 	assert.Nil(t, getBlockUser)
 
-	err = ss.Blocklist().DeleteUserBlockUser(userBlockUser.UserId, userBlockUser.BlockedId)
+	err = ss.Blocklist().DeleteUserBlockUser(userBlockUser.UserId, userBlockUser.BlockedId, true, true)
 	require.NoError(t, err)
 }
 
@@ -163,7 +163,7 @@ func testSaveUserBlockUserDM(t *testing.T, ctx request.CTX, ss store.Store) {
 		assert.False(t, cm.SchemeUser)
 	}
 
-	err = ss.Blocklist().DeleteUserBlockUser(userB, userA)
+	err = ss.Blocklist().DeleteUserBlockUser(userB, userA, true, true)
 	require.NoError(t, err)
 	channelMembers, err = ss.Channel().GetMembersByIds(newChannel.Id, []string{userA, userB})
 	require.NoError(t, err)
@@ -171,7 +171,7 @@ func testSaveUserBlockUserDM(t *testing.T, ctx request.CTX, ss store.Store) {
 		assert.False(t, cm.SchemeUser)
 	}
 
-	err = ss.Blocklist().DeleteUserBlockUser(userA, userB)
+	err = ss.Blocklist().DeleteUserBlockUser(userA, userB, true, true)
 	require.NoError(t, err)
 	channelMembers, err = ss.Channel().GetMembersByIds(newChannel.Id, []string{userA, userB})
 	require.NoError(t, err)

@@ -1060,7 +1060,7 @@ type BlocklistStore interface {
 	GetUserBlockUser(userId string, blockedId string) (*model.UserBlockUser, error)
 	ListUserBlockUsers(userId string) (*model.UserBlockUserList, error)
 	ListUserBlockUsersByBlockedUser(blockedId string) (*model.UserBlockUserList, error)
-	DeleteUserBlockUser(userId string, blockedId string) error
+	DeleteUserBlockUser(userId, blockedId string, userIsVerified, blockedIsVerified bool) error
 	SaveUserBlockUser(userBlockUser *model.UserBlockUser) (*model.UserBlockUser, error)
 }
 

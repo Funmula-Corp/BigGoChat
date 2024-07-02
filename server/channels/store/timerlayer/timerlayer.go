@@ -561,10 +561,10 @@ func (s *TimerLayerBlocklistStore) DeleteTeamBlockUser(channelId string, userId 
 	return err
 }
 
-func (s *TimerLayerBlocklistStore) DeleteUserBlockUser(userId string, blockedId string) error {
+func (s *TimerLayerBlocklistStore) DeleteUserBlockUser(userId string, blockedId string, userIsVerified bool, blockedIsVerified bool) error {
 	start := time.Now()
 
-	err := s.BlocklistStore.DeleteUserBlockUser(userId, blockedId)
+	err := s.BlocklistStore.DeleteUserBlockUser(userId, blockedId, userIsVerified, blockedIsVerified)
 
 	elapsed := float64(time.Since(start)) / float64(time.Second)
 	if s.Root.Metrics != nil {

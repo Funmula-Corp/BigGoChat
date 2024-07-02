@@ -121,7 +121,15 @@ func (a *App) AddUserBlockUser(rctx request.CTX, userId string, blockedId string
 }
 
 func (a *App) DeleteUserBlockUser(rctx request.CTX, userId string, blockedId string) *model.AppError {
-	if err := a.Srv().Store().Blocklist().DeleteUserBlockUser(userId, blockedId); err != nil {
+	var user, blockedUser *model.User
+	var err error
+	if user, err = a.Srv().Store().User().Get(rctx.Context(), userId); err != nil {
+		return model.NewAppError("DeleteUserBlockUser", MissingAccountError, nil, "", 500).Wrap(err)
+	}
+	if blockedUser, err = a.Srv().Store().User().Get(rctx.Context(), blockedId); err != nil {
+		return model.NewAppError("DeleteUserBlockUser", MissingAccountError, nil, "", 500).Wrap(err)
+	}
+	if err = a.Srv().Store().Blocklist().DeleteUserBlockUser(userId, blockedId, user.IsVerified(), blockedUser.IsVerified()); err != nil {
 		return model.NewAppError("DeleteUserBlockUser", "app.user.delete_blocklist.delete.app_error", nil, "", 500).Wrap(err)
 	} else {
 		a.InvalidateCacheForUser(blockedId)

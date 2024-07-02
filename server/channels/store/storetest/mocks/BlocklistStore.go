@@ -50,17 +50,17 @@ func (_m *BlocklistStore) DeleteTeamBlockUser(channelId string, userId string) e
 	return r0
 }
 
-// DeleteUserBlockUser provides a mock function with given fields: userId, blockedId
-func (_m *BlocklistStore) DeleteUserBlockUser(userId string, blockedId string) error {
-	ret := _m.Called(userId, blockedId)
+// DeleteUserBlockUser provides a mock function with given fields: userId, blockedId, userIsVerified, blockedIsVerified
+func (_m *BlocklistStore) DeleteUserBlockUser(userId string, blockedId string, userIsVerified bool, blockedIsVerified bool) error {
+	ret := _m.Called(userId, blockedId, userIsVerified, blockedIsVerified)
 
 	if len(ret) == 0 {
 		panic("no return value specified for DeleteUserBlockUser")
 	}
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(string, string) error); ok {
-		r0 = rf(userId, blockedId)
+	if rf, ok := ret.Get(0).(func(string, string, bool, bool) error); ok {
+		r0 = rf(userId, blockedId, userIsVerified, blockedIsVerified)
 	} else {
 		r0 = ret.Error(0)
 	}

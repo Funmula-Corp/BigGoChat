@@ -144,6 +144,13 @@ func TestChannelBlockUser(t *testing.T) {
 	th := Setup(t).InitBasic()
 	defer th.TearDown()
 	client := th.Client
+	resp, err := th.SystemAdminClient.UpdateChannelMemberSchemeRoles(context.Background(), th.BasicChannel.Id, th.BasicUser.Id, &model.SchemeRoles{
+		SchemeAdmin: true,
+		SchemeVerified: true,
+		SchemeUser: true,
+	})
+	require.NoError(t, err)
+	CheckOKStatus(t, resp)
 	cbul0, resp0, err0 := client.ListChannelBlockUsers(context.Background(), th.BasicChannel.Id)
 	require.NoError(t, err0)
 	CheckOKStatus(t, resp0)
