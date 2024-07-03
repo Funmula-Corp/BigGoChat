@@ -412,6 +412,7 @@ func (a *App) UpdateTeamMemberRoles(c request.CTX, teamID string, userID string,
 	}
 
 	prevSchemeGuestValue := member.SchemeGuest
+	prevSchemeVerifiedValue := member.SchemeVerified
 
 	var newExplicitRoles []string
 	member.SchemeGuest = false
@@ -456,6 +457,10 @@ func (a *App) UpdateTeamMemberRoles(c request.CTX, teamID string, userID string,
 
 	if prevSchemeGuestValue != member.SchemeGuest {
 		return nil, model.NewAppError("UpdateTeamMemberRoles", "api.channel.update_team_member_roles.changing_guest_role.app_error", nil, "", http.StatusBadRequest)
+	}
+
+	if prevSchemeVerifiedValue != member.SchemeVerified {
+		return nil, model.NewAppError("UpdateTeamMemberRoles", "api.channel.update_team_member_roles.changing_verified_role.app_error", nil, "", http.StatusBadRequest)
 	}
 
 	member.ExplicitRoles = strings.Join(newExplicitRoles, " ")

@@ -1083,6 +1083,22 @@ func updateTeamMemberRoles(c *Context, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if user, err := c.App.GetUser(c.Params.UserId); err != nil {
+		c.Err = err
+		return
+	} else if user.IsVerified() {
+		hasVerified := false
+		for _, role := range(strings.Fields(newRoles)){
+			if role == model.TeamVerifiedRoleId {
+				hasVerified = true
+				break
+			}
+		}
+		if !hasVerified {
+			newRoles += " " + model.TeamVerifiedRoleId
+		}
+	}
+
 	teamMember, err := c.App.UpdateTeamMemberRoles(c.AppContext, c.Params.TeamId, c.Params.UserId, newRoles)
 	if err != nil {
 		c.Err = err
@@ -1115,6 +1131,13 @@ func updateTeamMemberSchemeRoles(c *Context, w http.ResponseWriter, r *http.Requ
 	if !c.App.SessionHasPermissionToTeam(*c.AppContext.Session(), c.Params.TeamId, model.PermissionManageTeamRoles) {
 		c.SetPermissionError(model.PermissionManageTeamRoles)
 		return
+	}
+
+	if user, err := c.App.GetUser(c.Params.UserId); err != nil {
+		c.Err = err
+		return
+	}else{
+		schemeRoles.SchemeVerified = user.IsVerified()
 	}
 
 	teamMember, err := c.App.UpdateTeamMemberSchemeRoles(c.AppContext, c.Params.TeamId, c.Params.UserId, schemeRoles.SchemeGuest, schemeRoles.SchemeUser, schemeRoles.SchemeVerified, schemeRoles.SchemeModerator, schemeRoles.SchemeAdmin)

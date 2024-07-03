@@ -1643,6 +1643,22 @@ func updateChannelMemberRoles(c *Context, w http.ResponseWriter, r *http.Request
 		return
 	}
 
+	if user, err := c.App.GetUser(c.Params.UserId); err != nil {
+		c.Err = err
+		return
+	} else if user.IsVerified() {
+		hasVerified := false
+		for _, role := range(strings.Fields(newRoles)){
+			if role == model.ChannelVerifiedRoleId {
+				hasVerified = true
+				break
+			}
+		}
+		if !hasVerified {
+			newRoles += " " + model.ChannelVerifiedRoleId
+		}
+	}
+
 	if _, err := c.App.UpdateChannelMemberRoles(c.AppContext, c.Params.ChannelId, c.Params.UserId, newRoles); err != nil {
 		c.Err = err
 		return
@@ -1673,6 +1689,13 @@ func updateChannelMemberSchemeRoles(c *Context, w http.ResponseWriter, r *http.R
 	if !c.App.SessionHasPermissionToChannel(c.AppContext, *c.AppContext.Session(), c.Params.ChannelId, model.PermissionManageChannelRoles) {
 		c.SetPermissionError(model.PermissionManageChannelRoles)
 		return
+	}
+
+	if user, err := c.App.GetUser(c.Params.UserId); err != nil {
+		c.Err = err
+		return
+	} else {
+		schemeRoles.SchemeVerified = user.IsVerified()
 	}
 
 	if _, err := c.App.UpdateChannelMemberSchemeRoles(c.AppContext, c.Params.ChannelId, c.Params.UserId, schemeRoles.SchemeGuest, schemeRoles.SchemeUser, schemeRoles.SchemeVerified, schemeRoles.SchemeAdmin); err != nil {
