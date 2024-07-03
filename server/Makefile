@@ -191,6 +191,7 @@ ifneq ($(DOCKER_SERVICES_OVERRIDE),true)
   ENABLED_DOCKER_SERVICES:=$(ENABLED_DOCKER_SERVICES) $(TEMP_DOCKER_SERVICES)
 endif
 
+MC_HOST="http://minioaccesskey:miniosecretkey@minio:9000"
 start-docker: ## Starts the docker containers for local development.
 ifneq ($(IS_CI),false)
 	@echo CI Build: skipping docker start
@@ -207,6 +208,7 @@ else
   ifneq (,$(findstring mysql-read-replica,$(ENABLED_DOCKER_SERVICES)))
 	./scripts/replica-mysql-config.sh
   endif
+	docker run --network mattermost-server_mm-test -e MC_HOST_A=$(MC_HOST) minio/mc mb A/mattermost-test || true
 endif
 
 update-docker: stop-docker ## Updates the docker containers for local development.
