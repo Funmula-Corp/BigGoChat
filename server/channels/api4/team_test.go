@@ -314,6 +314,7 @@ func TestGetTeamSanitization(t *testing.T) {
 
 	t.Run("team user without invite permissions", func(t *testing.T) {
 		th.RemovePermissionFromRole(model.PermissionInviteUser.Id, model.TeamUserRoleId)
+		th.RemovePermissionFromRole(model.PermissionInviteUser.Id, model.TeamVerifiedRoleId)
 		th.LinkUserToTeam(th.BasicUser2, team)
 
 		client := th.CreateClient()
@@ -1179,6 +1180,10 @@ func TestGetAllTeams(t *testing.T) {
 			th.RemovePermissionFromRole(model.PermissionJoinPublicTeams.Id, model.SystemUserRoleId)
 			th.RemovePermissionFromRole(model.PermissionListPrivateTeams.Id, model.SystemUserRoleId)
 			th.RemovePermissionFromRole(model.PermissionJoinPrivateTeams.Id, model.SystemUserRoleId)
+			th.RemovePermissionFromRole(model.PermissionListPublicTeams.Id, model.SystemVerifiedRoleId)
+			th.RemovePermissionFromRole(model.PermissionJoinPublicTeams.Id, model.SystemVerifiedRoleId)
+			th.RemovePermissionFromRole(model.PermissionListPrivateTeams.Id, model.SystemVerifiedRoleId)
+			th.RemovePermissionFromRole(model.PermissionJoinPrivateTeams.Id, model.SystemVerifiedRoleId)
 			for _, permission := range tc.Permissions {
 				th.AddPermissionToRole(permission, model.SystemUserRoleId)
 			}
@@ -1451,6 +1456,7 @@ func TestGetTeamByNameSanitization(t *testing.T) {
 
 	t.Run("team user without invite permissions", func(t *testing.T) {
 		th.RemovePermissionFromRole(model.PermissionInviteUser.Id, model.TeamUserRoleId)
+		th.RemovePermissionFromRole(model.PermissionInviteUser.Id, model.TeamVerifiedRoleId)
 		th.LinkUserToTeam(th.BasicUser2, team)
 
 		client := th.CreateClient()
@@ -1886,6 +1892,8 @@ func TestGetTeamsForUserSanitization(t *testing.T) {
 		client := th.CreateClient()
 		th.RemovePermissionFromRole(model.PermissionInviteUser.Id, model.TeamUserRoleId)
 		defer th.AddPermissionToRole(model.PermissionInviteUser.Id, model.TeamUserRoleId)
+		th.RemovePermissionFromRole(model.PermissionInviteUser.Id, model.TeamVerifiedRoleId)
+		defer th.AddPermissionToRole(model.PermissionInviteUser.Id, model.TeamVerifiedRoleId)
 
 		th.LoginBasic2WithClient(client)
 
@@ -2209,6 +2217,8 @@ func TestAddTeamMember(t *testing.T) {
 	th.AddPermissionToRole(model.PermissionAddUserToTeam.Id, model.TeamAdminRoleId)
 	th.RemovePermissionFromRole(model.PermissionInviteUser.Id, model.TeamUserRoleId)
 	th.RemovePermissionFromRole(model.PermissionAddUserToTeam.Id, model.TeamUserRoleId)
+	th.RemovePermissionFromRole(model.PermissionInviteUser.Id, model.TeamVerifiedRoleId)
+	th.RemovePermissionFromRole(model.PermissionAddUserToTeam.Id, model.TeamVerifiedRoleId)
 
 	th.LoginBasic()
 
@@ -2436,13 +2446,17 @@ func TestAddTeamMemberMyself(t *testing.T) {
 			th.App.UpdateTeam(team)
 			if tc.PublicPermission {
 				th.AddPermissionToRole(model.PermissionJoinPublicTeams.Id, model.SystemUserRoleId)
+				th.AddPermissionToRole(model.PermissionJoinPublicTeams.Id, model.SystemVerifiedRoleId)
 			} else {
 				th.RemovePermissionFromRole(model.PermissionJoinPublicTeams.Id, model.SystemUserRoleId)
+				th.RemovePermissionFromRole(model.PermissionJoinPublicTeams.Id, model.SystemVerifiedRoleId)
 			}
 			if tc.PrivatePermission {
 				th.AddPermissionToRole(model.PermissionJoinPrivateTeams.Id, model.SystemUserRoleId)
+				th.AddPermissionToRole(model.PermissionJoinPrivateTeams.Id, model.SystemVerifiedRoleId)
 			} else {
 				th.RemovePermissionFromRole(model.PermissionJoinPrivateTeams.Id, model.SystemUserRoleId)
+				th.RemovePermissionFromRole(model.PermissionJoinPrivateTeams.Id, model.SystemVerifiedRoleId)
 			}
 			_, resp, err := client.AddTeamMember(context.Background(), team.Id, th.BasicUser.Id)
 			if tc.ExpectedSuccess {
@@ -2639,6 +2653,7 @@ func TestAddTeamMembers(t *testing.T) {
 
 	// remove invite guests
 	th.RemovePermissionFromRole(model.PermissionInviteGuest.Id, model.TeamUserRoleId)
+	th.RemovePermissionFromRole(model.PermissionInviteGuest.Id, model.TeamVerifiedRoleId)
 	// Regular user can no longer add a guest member to a team they belong to.
 	_, resp, err = client.AddTeamMembers(context.Background(), team.Id, guestList)
 	require.Error(t, err)
@@ -2952,7 +2967,7 @@ func TestUpdateTeamMemberSchemeRoles(t *testing.T) {
 	tm1, _, err := SystemAdminClient.GetTeamMember(context.Background(), th.BasicTeam.Id, th.BasicUser.Id, "")
 	require.NoError(t, err)
 	assert.Equal(t, false, tm1.SchemeGuest)
-	assert.Equal(t, false, tm1.SchemeVerified)
+	assert.Equal(t, true, tm1.SchemeVerified) // this scheme role was not changed.
 	assert.Equal(t, false, tm1.SchemeUser)
 	assert.Equal(t, false, tm1.SchemeAdmin)
 
@@ -2990,6 +3005,7 @@ func TestUpdateTeamMemberSchemeRoles(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, false, tm3.SchemeGuest)
 	assert.Equal(t, false, tm3.SchemeUser)
+	assert.Equal(t, true, tm3.SchemeVerified)
 	assert.Equal(t, true, tm3.SchemeAdmin)
 
 	s4 := &model.SchemeRoles{
@@ -3005,6 +3021,7 @@ func TestUpdateTeamMemberSchemeRoles(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, false, tm4.SchemeGuest)
 	assert.Equal(t, true, tm4.SchemeUser)
+	assert.Equal(t, true, tm4.SchemeVerified)
 	assert.Equal(t, true, tm4.SchemeAdmin)
 
 	s5 := &model.SchemeRoles{

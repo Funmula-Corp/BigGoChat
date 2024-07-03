@@ -265,7 +265,6 @@ func TestDoEmojisPermissionsMigration(t *testing.T) {
 		model.PermissionJoinPublicTeams.Id,
 		model.PermissionCreateDirectChannel.Id,
 		model.PermissionCreateGroupChannel.Id,
-		model.PermissionCreateTeam.Id,
 		model.PermissionCreateEmojis.Id,
 		model.PermissionDeleteEmojis.Id,
 		model.PermissionViewMembers.Id,

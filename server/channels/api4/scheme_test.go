@@ -874,6 +874,11 @@ func TestUpdateTeamSchemeWithTeamMembers(t *testing.T) {
 		teamUserRole, appErr := th.App.GetRoleByName(context.Background(), teamScheme.DefaultTeamUserRole)
 		require.Nil(t, appErr)
 		teamUserRole.Permissions = []string{}
+		teamVerifiedRole, appErr := th.App.GetRoleByName(context.Background(), teamScheme.DefaultTeamVerifiedRole)
+		require.Nil(t, appErr)
+		teamVerifiedRole.Permissions = []string{}
+		_, appErr = th.App.UpdateRole(teamVerifiedRole)
+		require.Nil(t, appErr)
 		_, appErr = th.App.UpdateRole(teamUserRole)
 		require.Nil(t, appErr)
 

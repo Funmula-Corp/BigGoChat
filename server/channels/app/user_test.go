@@ -1013,8 +1013,7 @@ func TestCreateUserWithToken(t *testing.T) {
 
 		members, err := th.App.GetChannelMembersForUser(th.Context, th.BasicTeam.Id, newGuest.Id)
 		require.Nil(t, err)
-		require.Len(t, members, 0)
-		// only channel admin has permission
+		require.Len(t, members, 1)
 	})
 
 	t.Run("create guest having team and system email domain restrictions", func(t *testing.T) {
@@ -1050,8 +1049,7 @@ func TestCreateUserWithToken(t *testing.T) {
 
 		members, err := th.App.GetChannelMembersForUser(th.Context, th.BasicTeam.Id, newGuest.Id)
 		require.Nil(t, err)
-		require.Len(t, members, 0)
-		// only channel admin has permission
+		require.Len(t, members, 1)
 	})
 }
 
@@ -1272,13 +1270,21 @@ func TestGetViewUsersRestrictions(t *testing.T) {
 	t.Run("VIEW_MEMBERS permission granted at team level", func(t *testing.T) {
 		systemUserRole, err := th.App.GetRoleByName(context.Background(), model.SystemUserRoleId)
 		require.Nil(t, err)
+		systemVerifiedRole, err := th.App.GetRoleByName(context.Background(), model.SystemVerifiedRoleId)
+		require.Nil(t, err)
 		teamUserRole, err := th.App.GetRoleByName(context.Background(), model.TeamUserRoleId)
+		require.Nil(t, err)
+		teamVerifiedRole, err := th.App.GetRoleByName(context.Background(), model.TeamVerifiedRoleId)
 		require.Nil(t, err)
 
 		require.Nil(t, removePermission(systemUserRole, model.PermissionViewMembers.Id))
 		defer addPermission(systemUserRole, model.PermissionViewMembers.Id)
+		require.Nil(t, removePermission(systemVerifiedRole, model.PermissionViewMembers.Id))
+		defer addPermission(systemVerifiedRole, model.PermissionViewMembers.Id)
 		require.Nil(t, addPermission(teamUserRole, model.PermissionViewMembers.Id))
 		defer removePermission(teamUserRole, model.PermissionViewMembers.Id)
+		require.Nil(t, addPermission(teamVerifiedRole, model.PermissionViewMembers.Id))
+		defer removePermission(teamVerifiedRole, model.PermissionViewMembers.Id)
 
 		restrictions, err := th.App.GetViewUsersRestrictions(th.Context, user1.Id)
 		require.Nil(t, err)

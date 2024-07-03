@@ -277,9 +277,16 @@ func (a *App) doMigrationKeyBigGoRolesPermissions() (permissionsMap, error) {
 				PermissionDeletePrivateChannel,
 				PermissionCreatePost,
 				PermissionAddReaction,
+				PermissionRemoveReaction,
 				model.PermissionCreatePostEphemeral.Id,
 				model.PermissionUploadFile.Id,
-				// PermissionUseChannelMentions,
+				model.PermissionEditBookmarkPublicChannel.Id,
+				model.PermissionEditBookmarkPrivateChannel.Id,
+				model.PermissionOrderBookmarkPublicChannel.Id,
+				model.PermissionOrderBookmarkPrivateChannel.Id,
+				model.PermissionDeleteBookmarkPublicChannel.Id,
+				model.PermissionDeleteBookmarkPrivateChannel.Id,
+				PermissionUseChannelMentions,
 			},
 		},
 		permissionTransformation{
@@ -300,6 +307,8 @@ func (a *App) doMigrationKeyBigGoRolesPermissions() (permissionsMap, error) {
 				PermissionConvertPublicChannelToPrivate,
 				PermissionManagePublicChannelProperties,
 				PermissionManagePrivateChannelProperties,
+				PermissionDeletePublicChannel,
+				PermissionDeletePrivateChannel,
 			},
 		},
 		permissionTransformation{
@@ -307,7 +316,8 @@ func (a *App) doMigrationKeyBigGoRolesPermissions() (permissionsMap, error) {
 			Remove: []string{
 				model.PermissionCreatePublicChannel.Id,
 				model.PermissionCreatePrivateChannel.Id,
-				model.PermissionPrivatePlaybookCreate.Id},
+				model.PermissionPrivatePlaybookCreate.Id,
+			},
 		},
 		permissionTransformation{
 			On:     permissionAnd(isRole(model.TeamModeratorRoleId)),
