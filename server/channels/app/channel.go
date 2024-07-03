@@ -425,7 +425,17 @@ func (a *App) createDirectChannel(c request.CTX, userID string, otherUserID stri
 }
 
 func (a *App) createDirectChannelWithUser(c request.CTX, user, otherUser *model.User, channelOptions ...model.ChannelOption) (*model.Channel, *model.AppError) {
-	channel, nErr := a.Srv().Store().Channel().CreateDirectChannel(c, user, otherUser, channelOptions...)
+	scheme, err := a.Srv().Store().Scheme().GetByName(model.ChannelAllowUnverifiedSchemeName)
+	if err != nil {
+		return nil, model.NewAppError("createDirectChannelWithUser", "app.channel.create_direct_channel.get_scheme.internal_error", nil, "", http.StatusInternalServerError).Wrap(err)
+	}
+	modifiedChannelOptions := []model.ChannelOption{
+		func (c *model.Channel){ c.SchemeId = model.NewString(scheme.Id)},
+	}
+	for _, f := range(channelOptions) {
+		modifiedChannelOptions = append(modifiedChannelOptions, f)
+	}
+	channel, nErr := a.Srv().Store().Channel().CreateDirectChannel(c, user, otherUser, modifiedChannelOptions...)
 	if nErr != nil {
 		var invErr *store.ErrInvalidInput
 		var cErr *store.ErrConflict

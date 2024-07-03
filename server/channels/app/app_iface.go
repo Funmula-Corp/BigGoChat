@@ -37,6 +37,8 @@ import (
 
 // AppIface is extracted from App struct and contains all it's exported methods. It's provided to allow partial interface passing and app layers creation.
 type AppIface interface {
+	//
+	AddChannelBlockUser(rctx request.CTX, channelId string, blockedId string) (*model.ChannelBlockUser, *model.AppError)
 	// @openTracingParams args
 	ExecuteCommand(c request.CTX, args *model.CommandArgs) (*model.CommandResponse, *model.AppError)
 	// @openTracingParams teamID
@@ -430,7 +432,6 @@ type AppIface interface {
 	AccountMigration() einterfaces.AccountMigrationInterface
 	ActivateMfa(userID, token string) *model.AppError
 	ActiveSearchBackend() string
-	AddChannelBlockUser(rctx request.CTX, channelId string, blockedId string) (*model.ChannelBlockUser, *model.AppError)
 	AddChannelsToRetentionPolicy(policyID string, channelIDs []string) *model.AppError
 	AddConfigListener(listener func(*model.Config, *model.Config)) string
 	AddDirectChannels(c request.CTX, teamID string, user *model.User) *model.AppError
@@ -442,6 +443,7 @@ type AppIface interface {
 	AddSamlPrivateCertificate(fileData *multipart.FileHeader) *model.AppError
 	AddSamlPublicCertificate(fileData *multipart.FileHeader) *model.AppError
 	AddSessionToCache(session *model.Session)
+	AddTeamBlockUser(rctx request.CTX, teamId string, blockedId string) (*model.TeamBlockUser, *model.AppError)
 	AddTeamMember(c request.CTX, teamID, userID string) (*model.TeamMember, *model.AppError)
 	AddTeamMemberByInviteId(c request.CTX, inviteId, userID string) (*model.TeamMember, *model.AppError)
 	AddTeamMemberByToken(c request.CTX, userID, tokenID string) (*model.TeamMember, *model.AppError)
@@ -585,6 +587,7 @@ type AppIface interface {
 	DeleteScheme(schemeId string) (*model.Scheme, *model.AppError)
 	DeleteSharedChannelRemote(id string) (bool, error)
 	DeleteSidebarCategory(c request.CTX, userID, teamID, categoryId string) *model.AppError
+	DeleteTeamBlockUser(rctx request.CTX, teamId string, blockedId string) *model.AppError
 	DeleteToken(token *model.Token) *model.AppError
 	DeleteUserBlockUser(rctx request.CTX, userId string, blockedId string) *model.AppError
 	DisableAutoResponder(rctx request.CTX, userID string, asAdmin bool) *model.AppError
@@ -831,6 +834,7 @@ type AppIface interface {
 	GetStatusFromCache(userID string) *model.Status
 	GetSystemBot(rctx request.CTX) (*model.Bot, *model.AppError)
 	GetTeam(teamID string) (*model.Team, *model.AppError)
+	GetTeamBlockUser(rctx request.CTX, teamId string, blockedId string) (*model.TeamBlockUser, *model.AppError)
 	GetTeamByInviteId(inviteId string) (*model.Team, *model.AppError)
 	GetTeamByName(name string) (*model.Team, *model.AppError)
 	GetTeamIcon(team *model.Team) ([]byte, *model.AppError)
@@ -957,7 +961,9 @@ type AppIface interface {
 	ListExports() ([]string, *model.AppError)
 	ListImports() ([]string, *model.AppError)
 	ListPluginKeys(pluginID string, page, perPage int) ([]string, *model.AppError)
+	ListTeamBlockUsers(rctx request.CTX, teamId string) (*model.TeamBlockUserList, *model.AppError)
 	ListTeamCommands(teamID string) ([]*model.Command, *model.AppError)
+	ListTeamsByBlockedUser(rctx request.CTX, blockedId string) (*model.TeamBlockUserList, *model.AppError)
 	ListUserBlockUsers(rctx request.CTX, userId string) (*model.UserBlockUserList, *model.AppError)
 	ListUsersByBlockedUser(rctx request.CTX, blockedId string) (*model.UserBlockUserList, *model.AppError)
 	Log() *mlog.Logger

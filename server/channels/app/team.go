@@ -648,6 +648,12 @@ func (a *App) AddUserToTeamByToken(c request.CTX, userID string, tokenID string)
 		return nil, nil, model.NewAppError("AddUserToTeamByToken", "app.team.invite_token.group_constrained.error", nil, "", http.StatusForbidden)
 	}
 
+	if blocked, err := a.GetTeamBlockUser(c, team.Id, userID); err != nil {
+		return nil, nil, err
+	}else if blocked != nil {
+		return nil, nil, model.NewAppError("AddUserToTeamByToken", "app.team.invite_token.blocked_user.app_error", nil, "", http.StatusForbidden)
+	}
+
 	userChanResult := <-uchan
 	if userChanResult.NErr != nil {
 		var nfErr *store.ErrNotFound
@@ -731,6 +737,12 @@ func (a *App) AddUserToTeamByInviteId(c request.CTX, inviteId string, userID str
 		}
 	}
 	user := userChanResult.Data
+
+	if blocked, err := a.GetTeamBlockUser(c, team.Id, userID); err != nil {
+		return nil, nil, err
+	}else if blocked != nil {
+		return nil, nil, model.NewAppError("AddUserToTeamByToken", "app.team.invite_id.blocked_user.app_error", nil, "", http.StatusForbidden)
+	}
 
 	teamMember, err := a.JoinUserToTeam(c, team, user, "")
 	if err != nil {

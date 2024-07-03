@@ -85,3 +85,14 @@ SET @preparedStatement = (SELECT IF (
 PREPARE alterIfExists FROM @preparedStatement;
 EXECUTE alterIfExists;
 DEALLOCATE PREPARE alterIfExists;
+
+
+CREATE TABLE IF NOT EXISTS TeamBlockUsers (
+    TeamId varchar(26) NOT NULL,
+    BlockedId varchar(26) NOT NULL,
+    CreateBy varchar(26) NOT NULL,
+    CreateAt bigint(20) DEFAULT 0,
+    PRIMARY KEY (TeamId, BlockedId),
+    KEY idx_userblockusers_user_id (TeamId),
+    KEY idx_userblockusers_blocked_id (BlockedId)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

@@ -54,6 +54,9 @@ type State = {
 type RolesState = {
     system_admin: Role;
     team_admin: Role;
+    team_moderator: Role;
+    team_verified: Role;
+    channel_verified: Role;
     channel_admin: Role;
     playbook_admin: Role;
     playbook_member: Role;
@@ -80,6 +83,9 @@ class PermissionSystemSchemeSettings extends React.PureComponent<Props, State> {
                 all_users: true,
                 system_admin: true,
                 team_admin: true,
+                team_moderator: true,
+                team_verified: true,
+                channel_verified: true,
                 channel_admin: true,
                 playbook_member: true,
                 playbook_admin: true,
@@ -102,6 +108,9 @@ class PermissionSystemSchemeSettings extends React.PureComponent<Props, State> {
             GeneralConstants.SYSTEM_GUEST_ROLE,
             GeneralConstants.TEAM_GUEST_ROLE,
             GeneralConstants.CHANNEL_GUEST_ROLE,
+            GeneralConstants.CHANNEL_VERIFIED_ROLE,
+            GeneralConstants.TEAM_MODERATOR_ROLE,
+            GeneralConstants.TEAM_VERIFIED_ROLE,
         ];
     }
 
@@ -160,6 +169,9 @@ class PermissionSystemSchemeSettings extends React.PureComponent<Props, State> {
             roles: {
                 system_admin: props.roles.system_admin,
                 team_admin: props.roles.team_admin,
+                team_moderator: props.roles.team_moderator,
+                team_verified: props.roles.team_verified,
+                channel_verified: props.roles.channel_verified,
                 channel_admin: props.roles.channel_admin,
                 playbook_admin: props.roles.playbook_admin,
                 playbook_member: props.roles.playbook_member,
@@ -272,7 +284,10 @@ class PermissionSystemSchemeSettings extends React.PureComponent<Props, State> {
 
     handleSubmit = async () => {
         const teamAdminPromise = this.props.actions.editRole(this.state.roles.team_admin);
+        const teamModeratorPromise = this.props.actions.editRole(this.state.roles.team_moderator);
+        const teamVerifiedPromise = this.props.actions.editRole(this.state.roles.team_verified);
         const channelAdminPromise = this.props.actions.editRole(this.state.roles.channel_admin);
+        const channelVerifiedPromise = this.props.actions.editRole(this.state.roles.channel_verified);
         const playbookAdminPromise = this.props.actions.editRole(this.state.roles.playbook_admin);
 
         const derivedRoles = this.restoreExcludedPermissions(this.deriveRolesFromAllUsers(this.state.roles.all_users));
@@ -284,7 +299,10 @@ class PermissionSystemSchemeSettings extends React.PureComponent<Props, State> {
 
         const promises = [
             teamAdminPromise,
+            teamModeratorPromise,
+            teamVerifiedPromise,
             channelAdminPromise,
+            channelVerifiedPromise,
             systemUserPromise,
             teamUserPromise,
             channelUserPromise,
@@ -456,6 +474,23 @@ class PermissionSystemSchemeSettings extends React.PureComponent<Props, State> {
 
                         <AdminPanelTogglable
                             className='permissions-block'
+                            open={this.state.openRoles.channel_verified}
+                            onToggle={() => this.toggleRole('channel_verified')}
+                            title={defineMessage({id: 'admin.permissions.systemScheme.channelVerifiedTitle', defaultMessage: 'Channel Verified User'})}
+                            subtitle={defineMessage({id: 'admin.permissions.systemScheme.channelVerifiedDescription', defaultMessage: 'Permissions granted to channel creators and any users promoted to Channel Verified User.'})}
+                        >
+                            <PermissionsTree
+                                parentRole={this.state.roles.all_users}
+                                role={this.state.roles.channel_verified}
+                                scope={'channel_scope'}
+                                onToggle={this.togglePermission}
+                                selectRow={this.selectRow}
+                                readOnly={this.props.isDisabled}
+                            />
+                        </AdminPanelTogglable>
+
+                        <AdminPanelTogglable
+                            className='permissions-block'
                             open={this.state.openRoles.playbook_admin}
                             onToggle={() => this.toggleRole('playbook_admin')}
                             title={defineMessage({id: 'admin.permissions.systemScheme.playbookAdmin', defaultMessage: 'Playbook Administrator'})}
@@ -486,6 +521,38 @@ class PermissionSystemSchemeSettings extends React.PureComponent<Props, State> {
                                 onToggle={this.togglePermission}
                                 selectRow={this.selectRow}
                                 readOnly={this.props.isDisabled}
+                            />
+                        </AdminPanelTogglable>
+
+                        <AdminPanelTogglable
+                            className='permissions-block'
+                            open={this.state.openRoles.team_moderator}
+                            onToggle={() => this.toggleRole('team_moderator')}
+                            title={defineMessage({id: 'admin.permissions.systemScheme.teamModeratorsTitle', defaultMessage: 'Team Moderators'})}
+                            subtitle={defineMessage({id: 'admin.permissions.systemScheme.teamModeratorsDescription', defaultMessage: 'Permissions granted to team creators and any users promoted to Team Moderator.'})}
+                        >
+                            <PermissionsTree
+                                parentRole={this.state.roles.all_users}
+                                role={this.state.roles.team_moderator}
+                                scope={'team_scope'}
+                                onToggle={this.togglePermission}
+                                selectRow={this.selectRow}
+                            />
+                        </AdminPanelTogglable>
+
+                        <AdminPanelTogglable
+                            className='permissions-block'
+                            open={this.state.openRoles.team_verified}
+                            onToggle={() => this.toggleRole('team_verified')}
+                            title={defineMessage({id: 'admin.permissions.systemScheme.teamVerifiedTitle', defaultMessage: 'Team Verified User'})}
+                            subtitle={defineMessage({id: 'admin.permissions.systemScheme.teamVerifiedDescription', defaultMessage: 'Permissions granted to team creators and any users promoted to Team Verified User.'})}
+                        >
+                            <PermissionsTree
+                                parentRole={this.state.roles.all_users}
+                                role={this.state.roles.team_verified}
+                                scope={'team_scope'}
+                                onToggle={this.togglePermission}
+                                selectRow={this.selectRow}
                             />
                         </AdminPanelTogglable>
 

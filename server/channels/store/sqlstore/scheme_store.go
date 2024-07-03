@@ -635,7 +635,7 @@ func (s *SqlSchemeStore) CloneScheme(old *model.Scheme) (*model.Scheme, error){
 
 func (s *SqlSchemeStore) insertInto(scheme *model.Scheme, transaction *sqlxTxWrapper) (sql.Result, error){
 	return transaction.NamedExec(
-		`INSERT INTO Schemes (Id, Name, DisplayName, Description, Scope, DefaultTeamAdminRole, DefaultTeamModeratorRole, DefaultTeamVerifiedRole, DefaultTeamUserRole, DefaultTeamGuestRole, DefaultChannelAdminRole, DefaultChannelUserRole, DefaultChannelGuestRole, CreateAt, UpdateAt, DeleteAt, DefaultPlaybookAdminRole, DefaultPlaybookMemberRole, DefaultRunAdminRole, DefaultRunMemberRole)
+		`INSERT INTO Schemes (Id, Name, DisplayName, Description, Scope, DefaultTeamAdminRole, DefaultTeamModeratorRole, DefaultTeamVerifiedRole, DefaultTeamUserRole, DefaultTeamGuestRole, DefaultChannelAdminRole, DefaultChannelVerifiedRole, DefaultChannelUserRole, DefaultChannelGuestRole, CreateAt, UpdateAt, DeleteAt, DefaultPlaybookAdminRole, DefaultPlaybookMemberRole, DefaultRunAdminRole, DefaultRunMemberRole)
 		VALUES
-		(:Id, :Name, :DisplayName, :Description, :Scope, :DefaultTeamAdminRole, :DefaultTeamModeratorRole, :DefaultTeamVerifiedRole, :DefaultTeamUserRole, :DefaultTeamGuestRole, :DefaultChannelAdminRole, :DefaultChannelUserRole, :DefaultChannelGuestRole, :CreateAt, :UpdateAt, :DeleteAt, :DefaultPlaybookAdminRole, :DefaultPlaybookMemberRole, :DefaultRunAdminRole, :DefaultRunMemberRole)`, scheme)
+		(:Id, :Name, :DisplayName, :Description, :Scope, :DefaultTeamAdminRole, :DefaultTeamModeratorRole, :DefaultTeamVerifiedRole, :DefaultTeamUserRole, :DefaultTeamGuestRole, :DefaultChannelAdminRole, :DefaultChannelVerifiedRole, :DefaultChannelUserRole, :DefaultChannelGuestRole, :CreateAt, :UpdateAt, :DeleteAt, :DefaultPlaybookAdminRole, :DefaultPlaybookMemberRole, :DefaultRunAdminRole, :DefaultRunMemberRole)`, scheme)
 }

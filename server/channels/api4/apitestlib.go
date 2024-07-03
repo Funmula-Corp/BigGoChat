@@ -422,11 +422,13 @@ func (th *TestHelper) InitLogin() *TestHelper {
 		th.BasicUser = th.CreateUser()
 		th.BasicUser, _ = th.App.GetUser(th.BasicUser.Id)
 		th.App.UpdateUserRoles(th.Context, th.BasicUser.Id, model.SystemUserRoleId+" "+model.SystemVerifiedRoleId, false)
+		th.BasicUser, _ = th.App.GetUser(th.BasicUser.Id)
 		userCache.BasicUser = th.BasicUser.DeepCopy()
 
 		th.BasicUser2 = th.CreateUser()
 		th.BasicUser2, _ = th.App.GetUser(th.BasicUser2.Id)
 		th.App.UpdateUserRoles(th.Context, th.BasicUser2.Id, model.SystemUserRoleId+" "+model.SystemVerifiedRoleId, false)
+		th.BasicUser2, _ = th.App.GetUser(th.BasicUser2.Id)
 		userCache.BasicUser2 = th.BasicUser2.DeepCopy()
 	})
 	// restore cached users
@@ -478,7 +480,7 @@ func (th *TestHelper) InitBasic() *TestHelper {
 	th.App.AddUserToChannel(th.Context, th.BasicUser2, th.BasicPrivateChannel, false)
 	th.App.AddUserToChannel(th.Context, th.BasicUser, th.BasicDeletedChannel, false)
 	th.App.AddUserToChannel(th.Context, th.BasicUser2, th.BasicDeletedChannel, false)
-	th.App.UpdateUserRoles(th.Context, th.BasicUser.Id, model.SystemUserRoleId, false)
+	th.App.UpdateUserRoles(th.Context, th.BasicUser.Id, model.SystemUserRoleId + " " + model.SystemVerifiedRoleId, false)
 	th.Client.DeleteChannel(context.Background(), th.BasicDeletedChannel.Id)
 	th.LoginBasic()
 	th.Group = th.CreateGroup()
@@ -565,6 +567,7 @@ func (th *TestHelper) CreateUser() *model.User {
 }
 
 func (th *TestHelper) CreateTeam() *model.Team {
+	th.App.MarkUserVerified(th.Context, th.BasicUser.Id)
 	return th.CreateTeamWithClient(th.Client)
 }
 
@@ -935,6 +938,33 @@ func (th *TestHelper) LinkUserToTeam(user *model.User, team *model.Team) {
 	}
 }
 
+func (th *TestHelper) UpdateTeamMemberRole(teamID, userID string, p model.SchemeRolesPatch) *model.TeamMember {
+	tm, err := th.App.GetTeamMember(th.Context, teamID, userID)
+	if err != nil {
+		panic(err)
+	}
+	if p.SchemeGuest != nil {
+		tm.SchemeGuest = *p.SchemeGuest
+	}
+	if p.SchemeUser != nil {
+		tm.SchemeUser = *p.SchemeUser
+	}
+	if p.SchemeVerified != nil {
+		tm.SchemeVerified = *p.SchemeVerified
+	}
+	if p.SchemeModerator != nil {
+		tm.SchemeModerator = *p.SchemeModerator
+	}
+	if p.SchemeAdmin != nil {
+		tm.SchemeAdmin = *p.SchemeAdmin
+	}
+	tm, err = th.App.UpdateTeamMemberSchemeRoles(th.Context, teamID, userID, tm.SchemeGuest, tm.SchemeUser, tm.SchemeVerified, tm.SchemeModerator, tm.SchemeAdmin)
+	if err != nil {
+		panic(err)
+	}
+	return tm
+}
+
 func (th *TestHelper) UnlinkUserFromTeam(user *model.User, team *model.Team) {
 	err := th.App.RemoveUserFromTeam(th.Context, team.Id, user.Id, "")
 	if err != nil {
@@ -955,6 +985,30 @@ func (th *TestHelper) RemoveUserFromChannel(user *model.User, channel *model.Cha
 	if err != nil {
 		panic(err)
 	}
+}
+
+func (th *TestHelper) UpdateChannelMemberRole(channelId, userId string, p model.SchemeRolesPatch) *model.ChannelMember {
+	cm, err := th.App.GetChannelMember(th.Context, channelId, userId)
+	if err != nil {
+		panic(err)
+	}
+	if p.SchemeGuest != nil {
+		cm.SchemeGuest = *p.SchemeGuest
+	}
+	if p.SchemeUser != nil {
+		cm.SchemeUser = *p.SchemeUser
+	}
+	if p.SchemeVerified != nil {
+		cm.SchemeVerified = *p.SchemeVerified
+	}
+	if p.SchemeAdmin != nil {
+		cm.SchemeAdmin = *p.SchemeAdmin
+	}
+	cm, err = th.App.UpdateChannelMemberSchemeRoles(th.Context, channelId, userId, cm.SchemeGuest, cm.SchemeUser, cm.SchemeVerified, cm.SchemeAdmin)
+	if err != nil {
+		panic(err)
+	}
+	return cm
 }
 
 func (th *TestHelper) GenerateTestEmail() string {
@@ -1254,10 +1308,14 @@ func (th *TestHelper) SaveDefaultRolePermissions() map[string][]string {
 
 	for _, roleName := range []string{
 		"system_user",
+		"system_verified",
 		"system_admin",
 		"team_user",
+		"team_verified",
+		"team_moderator",
 		"team_admin",
 		"channel_user",
+		"channel_verified",
 		"channel_admin",
 	} {
 		role, err1 := th.App.GetRoleByName(context.Background(), roleName)

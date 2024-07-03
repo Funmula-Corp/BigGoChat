@@ -279,6 +279,27 @@ func (a *App) doMigrationKeyBigGoRolesPermissions() (permissionsMap, error) {
 				PermissionAddReaction,
 				model.PermissionCreatePostEphemeral.Id,
 				model.PermissionUploadFile.Id,
+				// PermissionUseChannelMentions,
+			},
+		},
+		permissionTransformation{
+			On:     permissionAnd(isRole(model.ChannelVerifiedRoleId)),
+			Remove: []string{
+				PermissionManagePublicChannelMembers,
+				PermissionManagePrivateChannelMembers,
+				PermissionManagePublicChannelProperties,
+				PermissionManagePrivateChannelProperties,
+			},
+		},
+		permissionTransformation{
+			On:     permissionAnd(isRole(model.ChannelAdminRoleId)),
+			Remove: []string{model.PermissionConvertPrivateChannelToPublic.Id},
+			Add: []string{
+				PermissionManagePublicChannelMembers,
+				PermissionManagePrivateChannelMembers,
+				PermissionConvertPublicChannelToPrivate,
+				PermissionManagePublicChannelProperties,
+				PermissionManagePrivateChannelProperties,
 			},
 		},
 		permissionTransformation{
@@ -289,17 +310,32 @@ func (a *App) doMigrationKeyBigGoRolesPermissions() (permissionsMap, error) {
 				model.PermissionPrivatePlaybookCreate.Id},
 		},
 		permissionTransformation{
+			On:     permissionAnd(isRole(model.TeamModeratorRoleId)),
+			Add: []string{
+				PermissionManagePublicChannelProperties,
+				PermissionManagePrivateChannelProperties,
+			},
+			Remove: []string{
+				model.PermissionConvertPrivateChannelToPublic.Id,
+			},
+		},
+		permissionTransformation{
+			On:     permissionAnd(isRole(model.TeamAdminRoleId)),
+			Add: []string{
+				PermissionManagePublicChannelProperties,
+				PermissionManagePrivateChannelProperties,
+			},
+			Remove: []string{
+				model.PermissionConvertPrivateChannelToPublic.Id,
+			},
+		},
+		permissionTransformation{
 			On:     permissionAnd(isRole(model.SystemUserRoleId)),
 			Remove: []string{model.PermissionCreateTeam.Id},
 		},
 		permissionTransformation{
-			On:     permissionAnd(isRole(model.TeamAdminRoleId)),
-			Remove: []string{model.PermissionConvertPrivateChannelToPublic.Id},
-		},
-		permissionTransformation{
-			On:     permissionAnd(isRole(model.ChannelAdminRoleId)),
-			Remove: []string{model.PermissionConvertPrivateChannelToPublic.Id},
-			Add: []string{model.PermissionConvertPublicChannelToPrivate.Id},
+			On:     permissionAnd(isRole(model.SystemVerifiedRoleId)),
+			Add: []string{model.PermissionCreateTeam.Id},
 		},
 	}, nil
 }
