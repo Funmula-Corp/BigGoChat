@@ -81,6 +81,7 @@ func ImportLineFromUser(user *model.User, exportedPrefs map[string]*string) *imp
 			Position:           &user.Position,
 			Roles:              &user.Roles,
 			Locale:             &user.Locale,
+			Mobilephone: 		user.Mobilephone,
 			UseMarkdownPreview: exportedPrefs["UseMarkdownPreview"],
 			UseFormatting:      exportedPrefs["UseFormatting"],
 			ShowUnreadSection:  exportedPrefs["ShowUnreadSection"],
@@ -102,14 +103,17 @@ func ImportUserTeamDataFromTeamMember(member *model.TeamMemberForExport) *import
 	if member.SchemeAdmin {
 		rolesList = append(rolesList, model.TeamAdminRoleId)
 	}
+	if member.SchemeModerator {
+		rolesList = append(rolesList, model.TeamModeratorRoleId)
+	}
+	if member.SchemeVerified {
+		rolesList = append(rolesList, model.TeamVerifiedRoleId)
+	}
 	if member.SchemeUser {
 		rolesList = append(rolesList, model.TeamUserRoleId)
 	}
 	if member.SchemeGuest {
 		rolesList = append(rolesList, model.TeamGuestRoleId)
-	}
-	if member.SchemeModerator {
-		rolesList = append(rolesList, model.TeamModeratorRoleId)
 	}
 	roles := strings.Join(rolesList, " ")
 	return &imports.UserTeamImportData{
@@ -122,6 +126,9 @@ func ImportUserChannelDataFromChannelMemberAndPreferences(member *model.ChannelM
 	rolesList := strings.Fields(member.Roles)
 	if member.SchemeAdmin {
 		rolesList = append(rolesList, model.ChannelAdminRoleId)
+	}
+	if member.SchemeVerified {
+		rolesList = append(rolesList, model.ChannelVerifiedRoleId)
 	}
 	if member.SchemeUser {
 		rolesList = append(rolesList, model.ChannelUserRoleId)
@@ -257,6 +264,7 @@ func ImportLineFromScheme(scheme *model.Scheme, rolesMap map[string]*model.Role)
 
 	if scheme.Scope == model.SchemeScopeTeam {
 		data.DefaultTeamAdminRole = ImportRoleDataFromRole(rolesMap[scheme.DefaultTeamAdminRole])
+		data.DefaultTeamModeratorRole = ImportRoleDataFromRole(rolesMap[scheme.DefaultTeamModeratorRole])
 		data.DefaultTeamVerifiedRole = ImportRoleDataFromRole(rolesMap[scheme.DefaultTeamVerifiedRole])
 		data.DefaultTeamUserRole = ImportRoleDataFromRole(rolesMap[scheme.DefaultTeamUserRole])
 		data.DefaultTeamGuestRole = ImportRoleDataFromRole(rolesMap[scheme.DefaultTeamGuestRole])

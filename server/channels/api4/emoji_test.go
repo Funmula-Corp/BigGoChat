@@ -411,11 +411,11 @@ func TestDeleteEmoji(t *testing.T) {
 	newEmoji, _, err = client.CreateEmoji(context.Background(), emoji, utils.CreateTestGif(t, 10, 10), "image.gif")
 	require.NoError(t, err)
 
-	th.RemovePermissionFromRole(model.PermissionDeleteEmojis.Id, model.SystemUserRoleId)
+	th.RemovePermissionFromRole(model.PermissionDeleteEmojis.Id, model.SystemVerifiedRoleId)
 	resp, err = client.DeleteEmoji(context.Background(), newEmoji.Id)
 	require.Error(t, err)
 	CheckForbiddenStatus(t, resp)
-	th.AddPermissionToRole(model.PermissionDeleteEmojis.Id, model.SystemUserRoleId)
+	th.AddPermissionToRole(model.PermissionDeleteEmojis.Id, model.SystemVerifiedRoleId)
 
 	//Try to delete other user's custom emoji without DELETE_EMOJIS permissions
 	emoji = &model.Emoji{
@@ -426,8 +426,8 @@ func TestDeleteEmoji(t *testing.T) {
 	newEmoji, _, err = client.CreateEmoji(context.Background(), emoji, utils.CreateTestGif(t, 10, 10), "image.gif")
 	require.NoError(t, err)
 
-	th.RemovePermissionFromRole(model.PermissionDeleteEmojis.Id, model.SystemUserRoleId)
-	th.AddPermissionToRole(model.PermissionDeleteOthersEmojis.Id, model.SystemUserRoleId)
+	th.RemovePermissionFromRole(model.PermissionDeleteEmojis.Id, model.SystemVerifiedRoleId)
+	th.AddPermissionToRole(model.PermissionDeleteOthersEmojis.Id, model.SystemVerifiedRoleId)
 
 	client.Logout(context.Background())
 	th.LoginBasic2()
@@ -436,8 +436,8 @@ func TestDeleteEmoji(t *testing.T) {
 	require.Error(t, err)
 	CheckForbiddenStatus(t, resp)
 
-	th.RemovePermissionFromRole(model.PermissionDeleteOthersEmojis.Id, model.SystemUserRoleId)
-	th.AddPermissionToRole(model.PermissionDeleteEmojis.Id, model.SystemUserRoleId)
+	th.RemovePermissionFromRole(model.PermissionDeleteOthersEmojis.Id, model.SystemVerifiedRoleId)
+	th.AddPermissionToRole(model.PermissionDeleteEmojis.Id, model.SystemVerifiedRoleId)
 
 	client.Logout(context.Background())
 	th.LoginBasic()
@@ -470,8 +470,8 @@ func TestDeleteEmoji(t *testing.T) {
 	newEmoji, _, err = client.CreateEmoji(context.Background(), emoji, utils.CreateTestGif(t, 10, 10), "image.gif")
 	require.NoError(t, err)
 
-	th.AddPermissionToRole(model.PermissionDeleteEmojis.Id, model.SystemUserRoleId)
-	th.AddPermissionToRole(model.PermissionDeleteOthersEmojis.Id, model.SystemUserRoleId)
+	th.AddPermissionToRole(model.PermissionDeleteEmojis.Id, model.SystemVerifiedRoleId)
+	th.AddPermissionToRole(model.PermissionDeleteOthersEmojis.Id, model.SystemVerifiedRoleId)
 
 	client.Logout(context.Background())
 	th.LoginBasic2()
@@ -486,12 +486,12 @@ func TestDeleteEmoji(t *testing.T) {
 	newEmoji, _, err = client.CreateEmoji(context.Background(), emoji, utils.CreateTestGif(t, 10, 10), "image.gif")
 	require.NoError(t, err)
 
-	th.RemovePermissionFromRole(model.PermissionDeleteEmojis.Id, model.SystemUserRoleId)
-	th.AddPermissionToRole(model.PermissionDeleteEmojis.Id, model.TeamUserRoleId)
+	th.RemovePermissionFromRole(model.PermissionDeleteEmojis.Id, model.SystemVerifiedRoleId)
+	th.AddPermissionToRole(model.PermissionDeleteEmojis.Id, model.TeamVerifiedRoleId)
 	_, err = client.DeleteEmoji(context.Background(), newEmoji.Id)
 	require.NoError(t, err)
-	th.AddPermissionToRole(model.PermissionDeleteEmojis.Id, model.SystemUserRoleId)
-	th.RemovePermissionFromRole(model.PermissionDeleteEmojis.Id, model.TeamUserRoleId)
+	th.AddPermissionToRole(model.PermissionDeleteEmojis.Id, model.SystemVerifiedRoleId)
+	th.RemovePermissionFromRole(model.PermissionDeleteEmojis.Id, model.TeamVerifiedRoleId)
 
 	//Try to delete other user's custom emoji with permissions at team level
 	emoji = &model.Emoji{
@@ -502,11 +502,11 @@ func TestDeleteEmoji(t *testing.T) {
 	newEmoji, _, err = client.CreateEmoji(context.Background(), emoji, utils.CreateTestGif(t, 10, 10), "image.gif")
 	require.NoError(t, err)
 
-	th.RemovePermissionFromRole(model.PermissionDeleteEmojis.Id, model.SystemUserRoleId)
-	th.RemovePermissionFromRole(model.PermissionDeleteOthersEmojis.Id, model.SystemUserRoleId)
+	th.RemovePermissionFromRole(model.PermissionDeleteEmojis.Id, model.SystemVerifiedRoleId)
+	th.RemovePermissionFromRole(model.PermissionDeleteOthersEmojis.Id, model.SystemVerifiedRoleId)
 
-	th.AddPermissionToRole(model.PermissionDeleteEmojis.Id, model.TeamUserRoleId)
-	th.AddPermissionToRole(model.PermissionDeleteOthersEmojis.Id, model.TeamUserRoleId)
+	th.AddPermissionToRole(model.PermissionDeleteEmojis.Id, model.TeamVerifiedRoleId)
+	th.AddPermissionToRole(model.PermissionDeleteOthersEmojis.Id, model.TeamVerifiedRoleId)
 
 	client.Logout(context.Background())
 	th.LoginBasic2()
