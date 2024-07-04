@@ -973,7 +973,7 @@ func TestGetDeletedChannelsForTeam(t *testing.T) {
 
 	th.LoginTeamAdmin()
 
-	channels, _, err := client.GetDeletedChannelsForTeam(context.Background(), team.Id, 0, 100, "")
+	channels, resp, err := client.GetDeletedChannelsForTeam(context.Background(), team.Id, 0, 100, "")
 	require.NoError(t, err)
 	numInitialChannelsForTeam := len(channels)
 
@@ -999,29 +999,20 @@ func TestGetDeletedChannelsForTeam(t *testing.T) {
 	th.LoginBasic()
 
 	privateChannel1 := th.CreatePrivateChannel()
-	client.DeleteChannel(context.Background(), privateChannel1.Id)
-
-	channels, _, err = client.GetDeletedChannelsForTeam(context.Background(), team.Id, 0, 100, "")
+	resp, err = client.DeleteChannel(context.Background(), privateChannel1.Id)
 	require.NoError(t, err)
-	require.Len(t, channels, numInitialChannelsForTeam+3)
+	CheckOKStatus(t, resp)
 
-	// Login as different user and create private channel
-	th.LoginBasic2()
-	privateChannel2 := th.CreatePrivateChannel()
-	client.DeleteChannel(context.Background(), privateChannel2.Id)
+	// only team admin can see deleted channels.
+	_, resp, err = client.GetDeletedChannelsForTeam(context.Background(), team.Id, 0, 100, "")
+	require.Error(t, err)
+	CheckForbiddenStatus(t, resp)
 
-	// Log back in as first user
-	th.LoginBasic()
-
-	channels, _, err = client.GetDeletedChannelsForTeam(context.Background(), team.Id, 0, 100, "")
+	th.LoginTeamAdmin()
+	channels, resp, err = client.GetDeletedChannelsForTeam(context.Background(), team.Id, 0, 100, "")
 	require.NoError(t, err)
+	CheckOKStatus(t, resp)
 	require.Len(t, channels, numInitialChannelsForTeam+3)
-
-	th.TestForSystemAdminAndLocal(t, func(t *testing.T, client *model.Client4) {
-		channels, _, err = client.GetDeletedChannelsForTeam(context.Background(), team.Id, 0, 100, "")
-		require.NoError(t, err)
-		require.Len(t, channels, numInitialChannelsForTeam+2)
-	})
 
 	channels, _, err = client.GetDeletedChannelsForTeam(context.Background(), team.Id, 0, 1, "")
 	require.NoError(t, err)
@@ -1031,9 +1022,27 @@ func TestGetDeletedChannelsForTeam(t *testing.T) {
 	require.NoError(t, err)
 	require.Len(t, channels, 1, "should be one channel per page")
 
+	// Login as different user and create private channel
+	th.LoginBasic2()
+	privateChannel2 := th.CreatePrivateChannel()
+	client.DeleteChannel(context.Background(), privateChannel2.Id)
+
+	// Log back in as first user
+	th.LoginBasic()
+
+	channels, resp, err = client.GetDeletedChannelsForTeam(context.Background(), team.Id, 0, 100, "")
+	require.Error(t, err)
+	CheckForbiddenStatus(t, resp)
+
+	th.TestForSystemAdminAndLocal(t, func(t *testing.T, client *model.Client4) {
+		channels, _, err = client.GetDeletedChannelsForTeam(context.Background(), team.Id, 0, 100, "")
+		require.NoError(t, err)
+		require.Len(t, channels, numInitialChannelsForTeam+2)
+	})
+
 	// test non team member
 	th.SystemAdminClient.RemoveTeamMember(context.Background(), team.Id, th.BasicUser.Id)
-	_, resp, err := client.GetDeletedChannelsForTeam(context.Background(), team.Id, 0, 100, "")
+	_, resp, err = client.GetDeletedChannelsForTeam(context.Background(), team.Id, 0, 100, "")
 	require.Error(t, err)
 	CheckForbiddenStatus(t, resp)
 }
@@ -1638,6 +1647,7 @@ func TestSearchArchivedChannels(t *testing.T) {
 	defer th.TearDown()
 	client := th.Client
 
+	th.LoginTeamAdmin()
 	search := &model.ChannelSearch{Term: th.BasicChannel.Name}
 
 	client.DeleteChannel(context.Background(), th.BasicChannel.Id)
@@ -1693,34 +1703,12 @@ func TestSearchArchivedChannels(t *testing.T) {
 		th.RestoreDefaultRolePermissions(defaultRolePermissions)
 	}()
 
-	// Remove list channels permission from the user
-	th.RemovePermissionFromRole(model.PermissionListTeamChannels.Id, model.TeamUserRoleId)
-
-	t.Run("Search for a BasicDeletedChannel, which the user is a member of", func(t *testing.T) {
-		search.Term = th.BasicDeletedChannel.Name
-		channelList, _, err := client.SearchArchivedChannels(context.Background(), th.BasicTeam.Id, search)
-		require.NoError(t, err)
-
-		channelNames := []string{}
-		for _, c := range channelList {
-			channelNames = append(channelNames, c.Name)
-		}
-		require.Contains(t, channelNames, th.BasicDeletedChannel.Name)
-	})
-
-	t.Run("Remove the user from BasicDeletedChannel and search again, should still return", func(t *testing.T) {
-		th.App.RemoveUserFromChannel(th.Context, th.BasicUser.Id, th.BasicUser.Id, th.BasicDeletedChannel)
-
-		search.Term = th.BasicDeletedChannel.Name
-		channelList, _, err := client.SearchArchivedChannels(context.Background(), th.BasicTeam.Id, search)
-		require.NoError(t, err)
-
-		channelNames := []string{}
-		for _, c := range channelList {
-			channelNames = append(channelNames, c.Name)
-		}
-		require.Contains(t, channelNames, th.BasicDeletedChannel.Name)
-	})
+	// Need PermissionManageTeam to search archived channels
+	th.RemovePermissionFromRole(model.PermissionManageTeam.Id, model.TeamAdminRoleId)
+	search.Term = th.BasicDeletedChannel.Name
+	_, resp, err = client.SearchArchivedChannels(context.Background(), th.BasicTeam.Id, search)
+	require.Error(t, err)
+	CheckForbiddenStatus(t, resp)
 }
 
 func TestSearchAllChannels(t *testing.T) {
@@ -2073,8 +2061,10 @@ func TestDeleteChannel(t *testing.T) {
 		require.NoError(t, err)
 
 		// default channel cannot be deleted.
+		teamAdminClient := th.CreateClient()
+		th.LoginTeamAdminWithClient(teamAdminClient)
 		defaultChannel, _ := th.App.GetChannelByName(th.Context, model.DefaultChannelName, team.Id, false)
-		resp, err = client.DeleteChannel(context.Background(), defaultChannel.Id)
+		resp, err = teamAdminClient.DeleteChannel(context.Background(), defaultChannel.Id)
 		require.Error(t, err)
 		CheckBadRequestStatus(t, resp)
 
