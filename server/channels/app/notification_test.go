@@ -292,7 +292,7 @@ func TestSendNotifications_MentionsFollowers(t *testing.T) {
 	t.Run("should inform each user in a group if they were mentioned by a post", func(t *testing.T) {
 		// Make the sender a channel_admin because that's needed for group mentions
 		originalRoles := member.Roles
-		member.Roles = "channel_user channel_admin"
+		member.Roles = "channel_user channel_verified channel_admin"
 		_, appErr := th.App.UpdateChannelMemberRoles(th.Context, member.ChannelId, member.UserId, member.Roles)
 		require.Nil(t, appErr)
 

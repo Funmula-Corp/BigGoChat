@@ -12,11 +12,11 @@ import (
 	"github.com/stretchr/testify/require"
 	"gopkg.in/yaml.v2"
 
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app/platform"
 	smocks "git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store/storetest/mocks"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/config"
 	fmocks "git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/shared/filestore/mocks"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 )
 
 func TestCreatePluginsFile(t *testing.T) {
@@ -132,9 +132,10 @@ func TestGenerateSupportPacketYaml(t *testing.T) {
 			require.NotNil(t, p)
 		}
 
-		// InitBasic() already creats 5 posts
+		// InitBasic() already creats 7 posts
+		// include two posts for user UserUnverified
 		packet := generateSupportPacket(t)
-		assert.Equal(t, 10, packet.TotalPosts)
+		assert.Equal(t, 12, packet.TotalPosts)
 	})
 
 	t.Run("filestore fails", func(t *testing.T) {

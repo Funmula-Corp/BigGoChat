@@ -967,7 +967,7 @@ func TestCreateUserWithToken(t *testing.T) {
 
 		members, err := th.App.GetChannelMembersForUser(th.Context, th.BasicTeam.Id, newGuest.Id)
 		require.Nil(t, err)
-		require.Len(t, members, 0)
+		require.Len(t, members, 1)
 		// only channel admin has permission
 	})
 
@@ -1301,6 +1301,10 @@ func TestGetViewUsersRestrictions(t *testing.T) {
 		require.Nil(t, err)
 		require.Nil(t, removePermission(systemUserRole, model.PermissionViewMembers.Id))
 		defer addPermission(systemUserRole, model.PermissionViewMembers.Id)
+		systemVerifiedRole, err := th.App.GetRoleByName(context.Background(), model.SystemVerifiedRoleId)
+		require.Nil(t, err)
+		require.Nil(t, removePermission(systemVerifiedRole, model.PermissionViewMembers.Id))
+		defer addPermission(systemVerifiedRole, model.PermissionViewMembers.Id)
 
 		restrictions, err := th.App.GetViewUsersRestrictions(th.Context, user1.Id)
 		require.Nil(t, err)
