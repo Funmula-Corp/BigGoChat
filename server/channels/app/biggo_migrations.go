@@ -280,6 +280,8 @@ func (a *App) doMigrationKeyBigGoRolesPermissions() (permissionsMap, error) {
 				PermissionRemoveReaction,
 				model.PermissionCreatePostEphemeral.Id,
 				model.PermissionUploadFile.Id,
+				PermissionConvertPrivateChannelToPublic,
+				PermissionConvertPublicChannelToPrivate,
 				model.PermissionEditBookmarkPublicChannel.Id,
 				model.PermissionEditBookmarkPrivateChannel.Id,
 				model.PermissionOrderBookmarkPublicChannel.Id,
@@ -292,6 +294,8 @@ func (a *App) doMigrationKeyBigGoRolesPermissions() (permissionsMap, error) {
 		permissionTransformation{
 			On:     permissionAnd(isRole(model.ChannelVerifiedRoleId)),
 			Remove: []string{
+				PermissionConvertPrivateChannelToPublic,
+				PermissionConvertPublicChannelToPrivate,
 				PermissionManagePublicChannelMembers,
 				PermissionManagePrivateChannelMembers,
 				PermissionManagePublicChannelProperties,
@@ -341,7 +345,11 @@ func (a *App) doMigrationKeyBigGoRolesPermissions() (permissionsMap, error) {
 		},
 		permissionTransformation{
 			On:     permissionAnd(isRole(model.SystemUserRoleId)),
-			Remove: []string{model.PermissionCreateTeam.Id},
+			Remove: []string{
+				model.PermissionCreateTeam.Id,
+				PermissionCreateEmojis,
+				PermissionDeleteEmojis,
+			},
 		},
 		permissionTransformation{
 			On:     permissionAnd(isRole(model.SystemVerifiedRoleId)),
