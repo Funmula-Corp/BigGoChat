@@ -300,6 +300,8 @@ func (a *App) doMigrationKeyBigGoRolesPermissions() (permissionsMap, error) {
 				PermissionManagePrivateChannelMembers,
 				PermissionManagePublicChannelProperties,
 				PermissionManagePrivateChannelProperties,
+				PermissionDeletePublicChannel,
+				PermissionDeletePrivateChannel,
 			},
 		},
 		permissionTransformation{
@@ -328,6 +330,8 @@ func (a *App) doMigrationKeyBigGoRolesPermissions() (permissionsMap, error) {
 			Add: []string{
 				PermissionManagePublicChannelProperties,
 				PermissionManagePrivateChannelProperties,
+				PermissionDeletePublicChannel,
+				PermissionDeletePrivateChannel,
 			},
 			Remove: []string{
 				model.PermissionConvertPrivateChannelToPublic.Id,
@@ -338,6 +342,8 @@ func (a *App) doMigrationKeyBigGoRolesPermissions() (permissionsMap, error) {
 			Add: []string{
 				PermissionManagePublicChannelProperties,
 				PermissionManagePrivateChannelProperties,
+				PermissionDeletePublicChannel,
+				PermissionDeletePrivateChannel,
 			},
 			Remove: []string{
 				model.PermissionConvertPrivateChannelToPublic.Id,
