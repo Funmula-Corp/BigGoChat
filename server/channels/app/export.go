@@ -289,6 +289,7 @@ func (a *App) exportSchemes(ctx request.CTX, job *model.Job, writer io.Writer, s
 
 			if scheme.Scope == model.SchemeScopeTeam {
 				schemeRolesMap[scheme.DefaultTeamAdminRole] = true
+				schemeRolesMap[scheme.DefaultTeamModeratorRole] = true
 				schemeRolesMap[scheme.DefaultTeamVerifiedRole] = true
 				schemeRolesMap[scheme.DefaultTeamUserRole] = true
 				schemeRolesMap[scheme.DefaultTeamGuestRole] = true

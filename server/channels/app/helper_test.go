@@ -264,6 +264,7 @@ func (th *TestHelper) InitBasic() *TestHelper {
 		userCache.BasicUser2 = th.BasicUser2.DeepCopy()
 
 		th.BasicUnverified = th.CreateUnverified()
+		th.BasicUnverified, _ = th.App.GetUser(th.BasicUnverified.Id)
 		userCache.BasicUnverified = th.BasicUnverified.DeepCopy()
 	})
 	// restore cached users
