@@ -79,8 +79,9 @@ func TestCreateChannel(t *testing.T) {
 		th.RestoreDefaultRolePermissions(defaultRolePermissions)
 	}()
 
-	th.AddPermissionToRole(model.PermissionCreatePublicChannel.Id, model.TeamUserRoleId)
-	th.AddPermissionToRole(model.PermissionCreatePrivateChannel.Id, model.TeamUserRoleId)
+	// We should already have these permissions
+	th.AddPermissionToRole(model.PermissionCreatePublicChannel.Id, model.TeamVerifiedRoleId)
+	th.AddPermissionToRole(model.PermissionCreatePrivateChannel.Id, model.TeamVerifiedRoleId)
 
 	th.LoginBasic()
 
@@ -2137,8 +2138,8 @@ func TestDeleteChannel2(t *testing.T) {
 		th.RestoreDefaultRolePermissions(defaultRolePermissions)
 	}()
 
-	th.AddPermissionToRole(model.PermissionDeletePublicChannel.Id, model.ChannelUserRoleId)
-	th.AddPermissionToRole(model.PermissionDeletePrivateChannel.Id, model.ChannelUserRoleId)
+	th.AddPermissionToRole(model.PermissionDeletePublicChannel.Id, model.ChannelVerifiedRoleId)
+	th.AddPermissionToRole(model.PermissionDeletePrivateChannel.Id, model.ChannelVerifiedRoleId)
 
 	// channels created by SystemAdmin
 	publicChannel6 := th.CreateChannelWithClient(th.SystemAdminClient, model.ChannelTypeOpen)
@@ -2155,8 +2156,8 @@ func TestDeleteChannel2(t *testing.T) {
 	require.NoError(t, err)
 
 	// Restrict permissions to Channel Admins
-	th.RemovePermissionFromRole(model.PermissionDeletePublicChannel.Id, model.ChannelUserRoleId)
-	th.RemovePermissionFromRole(model.PermissionDeletePrivateChannel.Id, model.ChannelUserRoleId)
+	th.RemovePermissionFromRole(model.PermissionDeletePublicChannel.Id, model.ChannelVerifiedRoleId)
+	th.RemovePermissionFromRole(model.PermissionDeletePrivateChannel.Id, model.ChannelVerifiedRoleId)
 	th.AddPermissionToRole(model.PermissionDeletePublicChannel.Id, model.ChannelAdminRoleId)
 	th.AddPermissionToRole(model.PermissionDeletePrivateChannel.Id, model.ChannelAdminRoleId)
 
@@ -2263,6 +2264,7 @@ func TestUpdateChannelPrivacy(t *testing.T) {
 			{"Updating private channel should fail with forbidden status if not logged in", privateChannel, model.ChannelTypePrivate},
 			{"Updating public channel should fail with forbidden status if not logged in", publicChannel, model.ChannelTypeOpen},
 		}
+		th.LoginBasic2()
 
 		for _, tc := range tt {
 			t.Run(tc.name, func(t *testing.T) {
@@ -2894,8 +2896,8 @@ func TestUpdateChannelRoles(t *testing.T) {
 	defer th.TearDown()
 	client := th.Client
 
-	const ChannelAdmin = "channel_user channel_admin"
-	const ChannelMember = "channel_user"
+	const ChannelAdmin = "channel_user channel_verified channel_admin"
+	const ChannelMember = "channel_user channel_verified"
 
 	// User 1 creates a channel, making them channel admin by default.
 	channel := th.CreatePublicChannel()
@@ -3184,17 +3186,13 @@ func TestAddChannelMember(t *testing.T) {
 	require.NoError(t, err)
 
 	cm, resp, err := client.AddChannelMember(context.Background(), publicChannel.Id, user2.Id)
-	require.Error(t, err)
-	CheckForbiddenStatus(t, resp)
-	require.Nil(t, cm, "should never add channel member")
-	cm = th.AddUserToChannel(user2, publicChannel)
+	require.NoError(t, err)
+	CheckCreatedStatus(t, resp)
 	require.Equal(t, publicChannel.Id, cm.ChannelId, "should have returned exact channel")
 	require.Equal(t, user2.Id, cm.UserId, "should have returned exact user added to public channel")
 
 	cm, _, err = client.AddChannelMember(context.Background(), privateChannel.Id, user2.Id)
-	require.Error(t, err)
-	require.Nil(t, cm, "should never add channel member")
-	cm = th.AddUserToChannel(user2, privateChannel)
+	require.NoError(t, err)
 	require.Equal(t, privateChannel.Id, cm.ChannelId, "should have returned exact channel")
 	require.Equal(t, user2.Id, cm.UserId, "should have returned exact user added to private channel")
 
@@ -3646,8 +3644,7 @@ func TestRemoveChannelMember(t *testing.T) {
 	th.App.AddUserToChannel(th.Context, th.BasicUser2, private, false)
 
 	_, err = client.RemoveUserFromChannel(context.Background(), private.Id, th.BasicUser2.Id)
-	require.Error(t, err)
-	CheckForbiddenStatus(t, resp)
+	require.NoError(t, err)
 
 	th.LoginBasic2()
 	resp, err = client.RemoveUserFromChannel(context.Background(), private.Id, th.BasicUser.Id)

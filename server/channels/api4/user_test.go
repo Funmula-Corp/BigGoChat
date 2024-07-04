@@ -426,7 +426,9 @@ func TestCreateUserWithToken(t *testing.T) {
 	t.Run("Validate inviter user has permissions on channels he is inviting", func(t *testing.T) {
 		user := model.User{Email: th.GenerateTestEmail(), Nickname: "Corey Hulen", Password: "hello1", Username: GenerateTestUsername(), Roles: model.SystemUserRoleId}
 		channelIdWithoutPermissions := th.BasicPrivateChannel2.Id
-		channelIds := th.BasicChannel.Id + " " + channelIdWithoutPermissions
+		tVar := true
+		th.UpdateChannelMemberRole(th.BasicChannel.Id, th.BasicUser.Id, model.SchemeRolesPatch{SchemeAdmin: &tVar,})
+		channelIds := th.BasicChannel.Id + " " + channelIdWithoutPermissions + " " + th.BasicChannel2.Id
 		token := model.NewToken(
 			app.TokenTypeTeamInvitation,
 			model.MapToJSON(map[string]string{"teamId": th.BasicTeam.Id, "email": user.Email, "senderId": th.BasicUser.Id, "channels": channelIds}),
@@ -464,7 +466,9 @@ func TestCreateUserWithToken(t *testing.T) {
 	t.Run("Validate inviterUser permissions on channels he is inviting, when inviting guests", func(t *testing.T) {
 		user := model.User{Email: th.GenerateTestEmail(), Nickname: "Guest User", Password: "hello1", Username: GenerateTestUsername(), Roles: model.SystemUserRoleId}
 		channelIdWithoutPermissions := th.BasicPrivateChannel2.Id
-		channelIds := th.BasicChannel.Id + " " + channelIdWithoutPermissions
+		channelIds := th.BasicChannel.Id + " " + channelIdWithoutPermissions + " " + th.BasicChannel2.Id
+		tVar := true
+		th.UpdateChannelMemberRole(th.BasicChannel.Id, th.BasicUser.Id, model.SchemeRolesPatch{SchemeAdmin: &tVar,})
 		token := model.NewToken(
 			app.TokenTypeTeamInvitation,
 			model.MapToJSON(map[string]string{"guest": "true", "teamId": th.BasicTeam.Id, "email": user.Email, "senderId": th.BasicUser.Id, "channels": channelIds}),
@@ -495,6 +499,7 @@ func TestCreateUserWithToken(t *testing.T) {
 		require.Nil(t, cErr)
 
 		// basicUser has no permissions on BasicPrivateChannel2 so the new invited guest should be able to only access
+		// basicUser has no permissions on BasicChannel2 nether (only admin can invite people to channel)
 		// one channel from the two he was invited (plus the two default channels)
 		require.Len(t, channelList, 3)
 	})

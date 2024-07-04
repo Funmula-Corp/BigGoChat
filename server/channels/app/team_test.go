@@ -18,6 +18,8 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app/email"
 	emailmocks "git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app/email/mocks"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app/teams"
@@ -26,8 +28,6 @@ import (
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store/sqlstore"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store/storetest/mocks"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/testlib"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
 )
 
 func TestCreateTeam(t *testing.T) {
@@ -1127,6 +1127,7 @@ func TestGetTeamMembers(t *testing.T) {
 	var users []model.User
 	users = append(users, *th.BasicUser)
 	users = append(users, *th.BasicUser2)
+	users = append(users, *th.BasicUnverified)
 
 	for i := 0; i < 8; i++ {
 		user := model.User{
