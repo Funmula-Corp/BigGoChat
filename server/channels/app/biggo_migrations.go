@@ -346,6 +346,11 @@ func (a *App) doMigrationKeyBigGoRolesPermissions() (permissionsMap, error) {
 		permissionTransformation{
 			On:     permissionAnd(isRole(model.SystemUserRoleId)),
 			Remove: []string{
+				model.PermissionCreateCustomGroup.Id,
+				model.PermissionDeleteCustomGroup.Id,
+				model.PermissionEditCustomGroup.Id,
+				model.PermissionManageCustomGroupMembers.Id,
+				model.PermissionRestoreCustomGroup.Id,
 				model.PermissionCreateTeam.Id,
 				PermissionCreateEmojis,
 				PermissionDeleteEmojis,
