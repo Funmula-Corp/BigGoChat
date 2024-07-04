@@ -769,7 +769,7 @@ export function handlePostEditEvent(msg) {
 
 async function handlePostDeleteEvent(msg) {
     const post = JSON.parse(msg.data.post);
-    const deleteBy = post.props.deleteBy || "admin";
+    const deleteBy = post.props.deleteBy || msg.data.delete_by || "admin";
 
     if (window.logPostEvents) {
         // eslint-disable-next-line no-console
