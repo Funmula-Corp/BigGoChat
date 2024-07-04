@@ -129,7 +129,7 @@ TEMPLATES_DIR=templates
 
 # Plugins Packages
 PLUGIN_PACKAGES ?= $(PLUGIN_PACKAGES:)
-PLUGIN_PACKAGES += mattermost-plugin-calls-v0.26.2
+PLUGIN_PACKAGES += mattermost-plugin-calls-v0.27.0
 PLUGIN_PACKAGES += mattermost-plugin-github-v2.2.0
 PLUGIN_PACKAGES += mattermost-plugin-gitlab-v1.9.0
 PLUGIN_PACKAGES += mattermost-plugin-jira-v4.1.1
@@ -139,6 +139,7 @@ PLUGIN_PACKAGES += mattermost-plugin-servicenow-v2.3.4
 PLUGIN_PACKAGES += mattermost-plugin-zoom-v1.8.0
 PLUGIN_PACKAGES += mattermost-plugin-ai-v0.6.3
 PLUGIN_PACKAGES += mattermost-plugin-jitsi-v2.0.1
+PLUGIN_PACKAGES += focalboard-v8.0.0
 
 
 ALL_PACKAGES=$(TE_PACKAGES)
