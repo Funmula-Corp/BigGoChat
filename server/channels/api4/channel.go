@@ -1233,6 +1233,10 @@ func searchAllChannels(c *Context, w http.ResponseWriter, r *http.Request) {
 	}
 
 	if !fromSysConsole {
+		if props.Deleted && !c.App.SessionHasPermissionToTeams(c.AppContext, *c.AppContext.Session(), props.TeamIds, model.PermissionManageTeam) {
+			c.SetPermissionError(model.PermissionManageTeam)
+			return
+		}
 		// If the request is not coming from system_console, only show the user level channels
 		// from all teams.
 		channels, err := c.App.AutocompleteChannels(c.AppContext, c.AppContext.Session().UserId, props.Term)
