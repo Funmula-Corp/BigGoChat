@@ -861,11 +861,15 @@ export function removeNonRecentEmptyPostBlocks(blocks: PostOrderBlock[]) {
 }
 
 export function isNotDeleteBySelf(post: Post) {
-    return post.props.deleteBy !== post.user_id;
+    return !!post.props.deleteBy && post.props.deleteBy !== post.user_id;
+}
+
+export function shouldShowPost(post: Post) {
+    return !post.original_id && post.message !== '' && !post.delete_at || post.file_ids?.length;
 }
 
 export function removeDeleteBySelfPostBlockOrder(order: string[], posts: Record<string, Post>) {
-    return order.filter((postId: string) => isNotDeleteBySelf(posts[postId]));
+    return order.filter((postId: string) => shouldShowPost(posts[postId]) || isNotDeleteBySelf(posts[postId]));
 }
 
 export function removeDeleteBySelfPostBlock(block: PostOrderBlock, posts: Record<string, Post>): PostOrderBlock {

@@ -199,7 +199,7 @@ const Signup = ({onCustomizeHeader}: SignupProps) => {
                 id: 'biggo',
                 url,
                 icon: <LoginOpenIDIcon/>,
-                label: formatMessage({id: 'login.biggo', defaultMessage: 'Biggo'}),
+                label: formatMessage({id: 'login.biggo', defaultMessage: 'BigGo'}),
                 onClick: desktopExternalAuth(url),
             });
         }
