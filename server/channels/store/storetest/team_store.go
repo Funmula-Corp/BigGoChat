@@ -76,6 +76,7 @@ func TestTeamStore(t *testing.T, rctx request.CTX, ss store.Store) {
 	t.Run("GroupSyncedTeamCount", func(t *testing.T) { testGroupSyncedTeamCount(t, rctx, ss) })
 	t.Run("GetCommonTeamIDsForMultipleUsers", func(t *testing.T) { testGetCommonTeamIDsForMultipleUsers(t, rctx, ss) })
 	t.Run("TestTeamMembersSchemeVerified", func(t *testing.T) { testTeamMembersSchemeVerified(t, rctx, ss) })
+	t.Run("TestTeamMembersSchemeModerator", func(t *testing.T) { testTeamMembersSchemeModerator(t, rctx, ss) })
 }
 
 func testTeamStoreSave(t *testing.T, rctx request.CTX, ss store.Store) {
@@ -1313,9 +1314,9 @@ func testTeamMembersSchemeVerified(t *testing.T, rctx request.CTX, ss store.Stor
 	ms, err := ss.Team().GetMembers(teamId1, 0, 100, nil)
 	require.NoError(t, err)
 	assert.Len(t, ms, 2)
-	for _, m := range(ms){
+	for _, m := range ms {
 		var cmp *model.TeamMember
-		switch m.UserId{
+		switch m.UserId {
 		case m1.UserId:
 			cmp = m1
 		case m2.UserId:
@@ -1338,6 +1339,50 @@ func testTeamMembersSchemeVerified(t *testing.T, rctx request.CTX, ss store.Stor
 	require.Len(t, ms, 1)
 	require.Equal(t, m1.TeamId, ms[0].TeamId)
 	require.Equal(t, m1.SchemeVerified, ms[0].SchemeVerified)
+	require.Equal(t, m1.SchemeAdmin, ms[0].SchemeAdmin)
+	require.Equal(t, m1.SchemeUser, ms[0].SchemeUser)
+}
+
+func testTeamMembersSchemeModerator(t *testing.T, rctx request.CTX, ss store.Store) {
+	teamId1 := model.NewId()
+	teamId2 := model.NewId()
+
+	m1 := &model.TeamMember{TeamId: teamId1, UserId: model.NewId(), SchemeVerified: true, SchemeModerator: false}
+	m2 := &model.TeamMember{TeamId: teamId1, UserId: model.NewId(), SchemeVerified: true, SchemeModerator: false, SchemeAdmin: true}
+	m3 := &model.TeamMember{TeamId: teamId2, UserId: model.NewId(), SchemeVerified: true, SchemeModerator: true}
+	_, nErr := ss.Team().SaveMultipleMembers([]*model.TeamMember{m1, m2, m3}, -1)
+	require.NoError(t, nErr)
+	ss.Team().ClearCaches()
+	ms, err := ss.Team().GetMembers(teamId1, 0, 100, nil)
+	require.NoError(t, err)
+	assert.Len(t, ms, 2)
+	for _, m := range ms {
+		var cmp *model.TeamMember
+		switch m.UserId {
+		case m1.UserId:
+			cmp = m1
+		case m2.UserId:
+			cmp = m2
+		default:
+			continue
+		}
+		require.Equal(t, cmp.SchemeVerified, m.SchemeVerified)
+		require.Equal(t, cmp.SchemeModerator, m.SchemeModerator)
+		require.Equal(t, cmp.SchemeAdmin, m.SchemeAdmin)
+		require.Equal(t, cmp.SchemeUser, m.SchemeUser)
+	}
+
+	ms, err = ss.Team().GetMembers(teamId2, 0, 100, nil)
+	require.NoError(t, err)
+	require.Len(t, ms, 1)
+	require.Equal(t, m3.UserId, ms[0].UserId)
+
+	ms, err = ss.Team().GetTeamsForUser(rctx, m1.UserId, "", true)
+	require.NoError(t, err)
+	require.Len(t, ms, 1)
+	require.Equal(t, m1.TeamId, ms[0].TeamId)
+	require.Equal(t, m1.SchemeVerified, ms[0].SchemeVerified)
+	require.Equal(t, m1.SchemeModerator, ms[0].SchemeModerator)
 	require.Equal(t, m1.SchemeAdmin, ms[0].SchemeAdmin)
 	require.Equal(t, m1.SchemeUser, ms[0].SchemeUser)
 }
@@ -1474,32 +1519,37 @@ func testTeamSaveMember(t *testing.T, rctx request.CTX, ss store.Store) {
 		require.NoError(t, nErr)
 
 		testCases := []struct {
-			Name                  string
-			SchemeGuest           bool
-			SchemeUser            bool
-			SchemeVerified        bool
-			SchemeAdmin           bool
-			ExplicitRoles         string
-			ExpectedRoles         string
-			ExpectedExplicitRoles string
-			ExpectedSchemeGuest   bool
-			ExpectedSchemeUser    bool
-			ExpectedSchemeVerified bool
-			ExpectedSchemeAdmin   bool
+			Name                    string
+			SchemeGuest             bool
+			SchemeUser              bool
+			SchemeVerified          bool
+			SchemeModerator         bool
+			SchemeAdmin             bool
+			ExplicitRoles           string
+			ExpectedRoles           string
+			ExpectedExplicitRoles   string
+			ExpectedSchemeGuest     bool
+			ExpectedSchemeUser      bool
+			ExpectedSchemeVerified  bool
+			ExpectedSchemeModerator bool
+			ExpectedSchemeAdmin     bool
 		}{
 			{
-				Name:                  "team member schemeverified",
-				ExplicitRoles:         "team_verified",
-				ExpectedRoles:         "team_verified",
-				ExpectedExplicitRoles: "",
-				ExpectedSchemeVerified: true,
+				Name:                    "team member schemeverified schememoderator",
+				ExplicitRoles:           "team_verified team_moderator",
+				ExpectedRoles:           "team_verified team_moderator",
+				ExpectedExplicitRoles:   "",
+				ExpectedSchemeVerified:  true,
+				ExpectedSchemeModerator: true,
 			},
 			{
-				Name:                  "team member schemeverified",
-				SchemeVerified:        true,
-				ExpectedRoles:         "team_verified",
-				ExpectedExplicitRoles: "",
-				ExpectedSchemeVerified: true,
+				Name:                    "team member schemeverified schememoderator",
+				SchemeVerified:          true,
+				SchemeModerator:         true,
+				ExpectedRoles:           "team_verified team_moderator",
+				ExpectedExplicitRoles:   "",
+				ExpectedSchemeVerified:  true,
+				ExpectedSchemeModerator: true,
 			},
 			{
 				Name:               "team user implicit",
@@ -1599,13 +1649,14 @@ func testTeamSaveMember(t *testing.T, rctx request.CTX, ss store.Store) {
 		for _, tc := range testCases {
 			t.Run(tc.Name, func(t *testing.T) {
 				member := &model.TeamMember{
-					TeamId:        team.Id,
-					UserId:        u1.Id,
-					SchemeGuest:   tc.SchemeGuest,
-					SchemeUser:    tc.SchemeUser,
-					SchemeVerified: tc.SchemeVerified,
-					SchemeAdmin:   tc.SchemeAdmin,
-					ExplicitRoles: tc.ExplicitRoles,
+					TeamId:          team.Id,
+					UserId:          u1.Id,
+					SchemeGuest:     tc.SchemeGuest,
+					SchemeUser:      tc.SchemeUser,
+					SchemeVerified:  tc.SchemeVerified,
+					SchemeModerator: tc.SchemeModerator,
+					SchemeAdmin:     tc.SchemeAdmin,
+					ExplicitRoles:   tc.ExplicitRoles,
 				}
 				member, nErr := ss.Team().SaveMember(rctx, member, -1)
 				require.NoError(t, nErr)
@@ -1616,6 +1667,7 @@ func testTeamSaveMember(t *testing.T, rctx request.CTX, ss store.Store) {
 				assert.Equal(t, tc.ExpectedSchemeGuest, member.SchemeGuest)
 				assert.Equal(t, tc.ExpectedSchemeUser, member.SchemeUser)
 				assert.Equal(t, tc.ExpectedSchemeVerified, member.SchemeVerified)
+				assert.Equal(t, tc.ExpectedSchemeModerator, member.SchemeModerator)
 				assert.Equal(t, tc.ExpectedSchemeAdmin, member.SchemeAdmin)
 			})
 		}
@@ -1643,24 +1695,27 @@ func testTeamSaveMember(t *testing.T, rctx request.CTX, ss store.Store) {
 		require.NoError(t, nErr)
 
 		testCases := []struct {
-			Name                  string
-			SchemeGuest           bool
-			SchemeUser            bool
-			SchemeVerified        bool
-			SchemeAdmin           bool
-			ExplicitRoles         string
-			ExpectedRoles         string
-			ExpectedExplicitRoles string
-			ExpectedSchemeGuest   bool
-			ExpectedSchemeUser    bool
-			ExpectedSchemeVerified bool
-			ExpectedSchemeAdmin   bool
+			Name                    string
+			SchemeGuest             bool
+			SchemeUser              bool
+			SchemeVerified          bool
+			SchemeModerator         bool
+			SchemeAdmin             bool
+			ExplicitRoles           string
+			ExpectedRoles           string
+			ExpectedExplicitRoles   string
+			ExpectedSchemeGuest     bool
+			ExpectedSchemeUser      bool
+			ExpectedSchemeVerified  bool
+			ExpectedSchemeModerator bool
+			ExpectedSchemeAdmin     bool
 		}{
 			{
-				Name:               "team verified explicit",
-				ExplicitRoles:      "team_verified",
-				ExpectedRoles:      ts.DefaultTeamVerifiedRole,
-				ExpectedSchemeVerified: true,
+				Name:                    "team verified explicit",
+				ExplicitRoles:           "team_verified team_moderator",
+				ExpectedRoles:           ts.DefaultTeamVerifiedRole + " " + ts.DefaultTeamModeratorRole,
+				ExpectedSchemeVerified:  true,
+				ExpectedSchemeModerator: true,
 			},
 			{
 				Name:               "team user implicit",
@@ -1717,19 +1772,22 @@ func testTeamSaveMember(t *testing.T, rctx request.CTX, ss store.Store) {
 				ExpectedSchemeUser:    true,
 			},
 			{
-				Name:                  "team verified implicit and explicit custom role",
-				SchemeVerified:            true,
-				ExplicitRoles:         "test",
-				ExpectedRoles:         "test " + ts.DefaultTeamVerifiedRole,
-				ExpectedExplicitRoles: "test",
-				ExpectedSchemeVerified:    true,
+				Name:                    "team verified implicit and explicit custom role",
+				SchemeVerified:          true,
+				SchemeModerator:         true,
+				ExplicitRoles:           "test",
+				ExpectedRoles:           "test " + ts.DefaultTeamVerifiedRole + " " + ts.DefaultTeamModeratorRole,
+				ExpectedExplicitRoles:   "test",
+				ExpectedSchemeVerified:  true,
+				ExpectedSchemeModerator: true,
 			},
 			{
-				Name:                  "team verified explicit and explicit custom role",
-				ExplicitRoles:         "team_verified test",
-				ExpectedRoles:         "test " + ts.DefaultTeamVerifiedRole,
-				ExpectedExplicitRoles: "test",
-				ExpectedSchemeVerified:    true,
+				Name:                    "team verified explicit and explicit custom role",
+				ExplicitRoles:           "team_verified team_moderator test",
+				ExpectedRoles:           "test " + ts.DefaultTeamVerifiedRole + " " + ts.DefaultTeamModeratorRole,
+				ExpectedExplicitRoles:   "test",
+				ExpectedSchemeVerified:  true,
+				ExpectedSchemeModerator: true,
 			},
 			{
 				Name:                  "team guest implicit and explicit custom role",
@@ -1747,25 +1805,28 @@ func testTeamSaveMember(t *testing.T, rctx request.CTX, ss store.Store) {
 				ExpectedSchemeGuest:   true,
 			},
 			{
-				Name:                  "team admin implicit and explicit custom role",
-				SchemeUser:            true,
-				SchemeVerified:        true,
-				SchemeAdmin:           true,
-				ExplicitRoles:         "test",
-				ExpectedRoles:         "test " + ts.DefaultTeamUserRole + " " + ts.DefaultTeamVerifiedRole + " " + ts.DefaultTeamAdminRole,
-				ExpectedExplicitRoles: "test",
-				ExpectedSchemeUser:    true,
-				ExpectedSchemeVerified:   true,
-				ExpectedSchemeAdmin:   true,
+				Name:                    "team admin implicit and explicit custom role",
+				SchemeUser:              true,
+				SchemeVerified:          true,
+				SchemeModerator:         true,
+				SchemeAdmin:             true,
+				ExplicitRoles:           "test",
+				ExpectedRoles:           "test " + ts.DefaultTeamUserRole + " " + ts.DefaultTeamVerifiedRole + " " + ts.DefaultTeamModeratorRole + " " + ts.DefaultTeamAdminRole,
+				ExpectedExplicitRoles:   "test",
+				ExpectedSchemeUser:      true,
+				ExpectedSchemeVerified:  true,
+				ExpectedSchemeModerator: true,
+				ExpectedSchemeAdmin:     true,
 			},
 			{
-				Name:                  "team admin explicit and explicit custom role",
-				ExplicitRoles:         "team_user team_admin team_verified test",
-				ExpectedRoles:         "test " + ts.DefaultTeamUserRole + " " + ts.DefaultTeamVerifiedRole + " " + ts.DefaultTeamAdminRole,
-				ExpectedExplicitRoles: "test",
-				ExpectedSchemeUser:    true,
-				ExpectedSchemeVerified:   true,
-				ExpectedSchemeAdmin:   true,
+				Name:                    "team admin explicit and explicit custom role",
+				ExplicitRoles:           "team_user team_admin team_verified team_moderator test",
+				ExpectedRoles:           "test " + ts.DefaultTeamUserRole + " " + ts.DefaultTeamVerifiedRole + " " + ts.DefaultTeamModeratorRole + " " + ts.DefaultTeamAdminRole,
+				ExpectedExplicitRoles:   "test",
+				ExpectedSchemeUser:      true,
+				ExpectedSchemeVerified:  true,
+				ExpectedSchemeModerator: true,
+				ExpectedSchemeAdmin:     true,
 			},
 			{
 				Name:                  "team member with only explicit custom roles",
@@ -1778,13 +1839,14 @@ func testTeamSaveMember(t *testing.T, rctx request.CTX, ss store.Store) {
 		for _, tc := range testCases {
 			t.Run(tc.Name, func(t *testing.T) {
 				member := &model.TeamMember{
-					TeamId:        team.Id,
-					UserId:        u1.Id,
-					SchemeGuest:   tc.SchemeGuest,
-					SchemeUser:    tc.SchemeUser,
-					SchemeVerified:   tc.SchemeVerified,
-					SchemeAdmin:   tc.SchemeAdmin,
-					ExplicitRoles: tc.ExplicitRoles,
+					TeamId:          team.Id,
+					UserId:          u1.Id,
+					SchemeGuest:     tc.SchemeGuest,
+					SchemeUser:      tc.SchemeUser,
+					SchemeVerified:  tc.SchemeVerified,
+					SchemeModerator: tc.SchemeModerator,
+					SchemeAdmin:     tc.SchemeAdmin,
+					ExplicitRoles:   tc.ExplicitRoles,
 				}
 				member, nErr := ss.Team().SaveMember(rctx, member, -1)
 				require.NoError(t, nErr)
@@ -1875,30 +1937,35 @@ func testTeamSaveMultipleMembers(t *testing.T, rctx request.CTX, ss store.Store)
 		require.NoError(t, nErr)
 
 		testCases := []struct {
-			Name                  string
-			SchemeGuest           bool
-			SchemeUser            bool
-			SchemeVerified        bool
-			SchemeAdmin           bool
-			ExplicitRoles         string
-			ExpectedRoles         string
-			ExpectedExplicitRoles string
-			ExpectedSchemeGuest   bool
-			ExpectedSchemeUser    bool
-			ExpectedSchemeVerified bool
-			ExpectedSchemeAdmin   bool
+			Name                    string
+			SchemeGuest             bool
+			SchemeUser              bool
+			SchemeVerified          bool
+			SchemeModerator         bool
+			SchemeAdmin             bool
+			ExplicitRoles           string
+			ExpectedRoles           string
+			ExpectedExplicitRoles   string
+			ExpectedSchemeGuest     bool
+			ExpectedSchemeUser      bool
+			ExpectedSchemeVerified  bool
+			ExpectedSchemeModerator bool
+			ExpectedSchemeAdmin     bool
 		}{
 			{
-				Name:               "team verified implicit",
-				SchemeVerified:         true,
-				ExpectedRoles:      "team_verified",
-				ExpectedSchemeVerified: true,
+				Name:                    "team verified implicit",
+				SchemeVerified:          true,
+				SchemeModerator:         true,
+				ExpectedRoles:           "team_verified team_moderator",
+				ExpectedSchemeVerified:  true,
+				ExpectedSchemeModerator: true,
 			},
 			{
-				Name:               "team verified explicit",
-				ExplicitRoles:      "team_verified",
-				ExpectedRoles:      "team_verified",
-				ExpectedSchemeVerified: true,
+				Name:                    "team verified explicit",
+				ExplicitRoles:           "team_verified team_moderator",
+				ExpectedRoles:           "team_verified team_moderator",
+				ExpectedSchemeVerified:  true,
+				ExpectedSchemeModerator: true,
 			},
 			{
 				Name:               "team user implicit",
@@ -1925,19 +1992,22 @@ func testTeamSaveMultipleMembers(t *testing.T, rctx request.CTX, ss store.Store)
 				ExpectedSchemeGuest: true,
 			},
 			{
-				Name:                "team admin implicit",
+				Name:                    "team admin implicit",
 				SchemeVerified:          true,
-				SchemeAdmin:         true,
-				ExpectedRoles:       "team_verified team_admin",
+				SchemeModerator:         true,
+				SchemeAdmin:             true,
+				ExpectedRoles:           "team_verified team_moderator team_admin",
 				ExpectedSchemeVerified:  true,
-				ExpectedSchemeAdmin: true,
+				ExpectedSchemeModerator: true,
+				ExpectedSchemeAdmin:     true,
 			},
 			{
-				Name:                "team admin explicit",
-				ExplicitRoles:       "team_verified team_admin",
-				ExpectedRoles:       "team_verified team_admin",
+				Name:                    "team admin explicit",
+				ExplicitRoles:           "team_verified team_moderator team_admin",
+				ExpectedRoles:           "team_verified team_moderator team_admin",
 				ExpectedSchemeVerified:  true,
-				ExpectedSchemeAdmin: true,
+				ExpectedSchemeModerator: true,
+				ExpectedSchemeAdmin:     true,
 			},
 			{
 				Name:                "team admin implicit",
@@ -1985,25 +2055,28 @@ func testTeamSaveMultipleMembers(t *testing.T, rctx request.CTX, ss store.Store)
 				ExpectedSchemeGuest:   true,
 			},
 			{
-				Name:                  "team admin implicit and explicit custom role",
-				SchemeUser:            true,
-				SchemeVerified:        true,
-				SchemeAdmin:           true,
-				ExplicitRoles:         "test",
-				ExpectedRoles:         "test team_user team_verified team_admin",
-				ExpectedExplicitRoles: "test",
-				ExpectedSchemeUser:    true,
-				ExpectedSchemeVerified:   true,
-				ExpectedSchemeAdmin:   true,
+				Name:                    "team admin implicit and explicit custom role",
+				SchemeUser:              true,
+				SchemeVerified:          true,
+				SchemeModerator:         true,
+				SchemeAdmin:             true,
+				ExplicitRoles:           "test",
+				ExpectedRoles:           "test team_user team_verified team_moderator team_admin",
+				ExpectedExplicitRoles:   "test",
+				ExpectedSchemeUser:      true,
+				ExpectedSchemeVerified:  true,
+				ExpectedSchemeModerator: true,
+				ExpectedSchemeAdmin:     true,
 			},
 			{
-				Name:                  "team admin explicit and explicit custom role",
-				ExplicitRoles:         "team_user team_verified team_admin test",
-				ExpectedRoles:         "test team_user team_verified team_admin",
-				ExpectedExplicitRoles: "test",
-				ExpectedSchemeUser:    true,
-				ExpectedSchemeVerified:   true,
-				ExpectedSchemeAdmin:   true,
+				Name:                    "team admin explicit and explicit custom role",
+				ExplicitRoles:           "team_user team_verified team_moderator team_admin test",
+				ExpectedRoles:           "test team_user team_verified team_moderator team_admin",
+				ExpectedExplicitRoles:   "test",
+				ExpectedSchemeUser:      true,
+				ExpectedSchemeVerified:  true,
+				ExpectedSchemeModerator: true,
+				ExpectedSchemeAdmin:     true,
 			},
 			{
 				Name:                  "team member with only explicit custom roles",
@@ -2016,22 +2089,24 @@ func testTeamSaveMultipleMembers(t *testing.T, rctx request.CTX, ss store.Store)
 		for _, tc := range testCases {
 			t.Run(tc.Name, func(t *testing.T) {
 				member := &model.TeamMember{
-					TeamId:        team.Id,
-					UserId:        u1.Id,
-					SchemeGuest:   tc.SchemeGuest,
-					SchemeUser:    tc.SchemeUser,
-					SchemeVerified:   tc.SchemeVerified,
-					SchemeAdmin:   tc.SchemeAdmin,
-					ExplicitRoles: tc.ExplicitRoles,
+					TeamId:          team.Id,
+					UserId:          u1.Id,
+					SchemeGuest:     tc.SchemeGuest,
+					SchemeUser:      tc.SchemeUser,
+					SchemeVerified:  tc.SchemeVerified,
+					SchemeModerator: tc.SchemeModerator,
+					SchemeAdmin:     tc.SchemeAdmin,
+					ExplicitRoles:   tc.ExplicitRoles,
 				}
 				otherMember := &model.TeamMember{
-					TeamId:        team.Id,
-					UserId:        u2.Id,
-					SchemeGuest:   tc.SchemeGuest,
-					SchemeUser:    tc.SchemeUser,
-					SchemeVerified:   tc.SchemeVerified,
-					SchemeAdmin:   tc.SchemeAdmin,
-					ExplicitRoles: tc.ExplicitRoles,
+					TeamId:          team.Id,
+					UserId:          u2.Id,
+					SchemeGuest:     tc.SchemeGuest,
+					SchemeUser:      tc.SchemeUser,
+					SchemeVerified:  tc.SchemeVerified,
+					SchemeModerator: tc.SchemeModerator,
+					SchemeAdmin:     tc.SchemeAdmin,
+					ExplicitRoles:   tc.ExplicitRoles,
 				}
 				var members []*model.TeamMember
 				members, nErr := ss.Team().SaveMultipleMembers([]*model.TeamMember{member, otherMember}, -1)
@@ -2046,6 +2121,7 @@ func testTeamSaveMultipleMembers(t *testing.T, rctx request.CTX, ss store.Store)
 				assert.Equal(t, tc.ExpectedSchemeGuest, member.SchemeGuest)
 				assert.Equal(t, tc.ExpectedSchemeUser, member.SchemeUser)
 				assert.Equal(t, tc.ExpectedSchemeVerified, member.SchemeVerified)
+				assert.Equal(t, tc.ExpectedSchemeModerator, member.SchemeModerator)
 				assert.Equal(t, tc.ExpectedSchemeAdmin, member.SchemeAdmin)
 			})
 		}
@@ -2073,30 +2149,35 @@ func testTeamSaveMultipleMembers(t *testing.T, rctx request.CTX, ss store.Store)
 		require.NoError(t, nErr)
 
 		testCases := []struct {
-			Name                  string
-			SchemeGuest           bool
-			SchemeUser            bool
-			SchemeVerified        bool
-			SchemeAdmin           bool
-			ExplicitRoles         string
-			ExpectedRoles         string
-			ExpectedExplicitRoles string
-			ExpectedSchemeGuest   bool
-			ExpectedSchemeUser    bool
-			ExpectedSchemeVerified   bool
-			ExpectedSchemeAdmin   bool
+			Name                    string
+			SchemeGuest             bool
+			SchemeUser              bool
+			SchemeVerified          bool
+			SchemeModerator         bool
+			SchemeAdmin             bool
+			ExplicitRoles           string
+			ExpectedRoles           string
+			ExpectedExplicitRoles   string
+			ExpectedSchemeGuest     bool
+			ExpectedSchemeUser      bool
+			ExpectedSchemeVerified  bool
+			ExpectedSchemeModerator bool
+			ExpectedSchemeAdmin     bool
 		}{
 			{
-				Name:               "team verified implicit",
-				SchemeVerified:         true,
-				ExpectedRoles:      ts.DefaultTeamVerifiedRole,
-				ExpectedSchemeVerified: true,
+				Name:                    "team verified implicit",
+				SchemeVerified:          true,
+				SchemeModerator:         true,
+				ExpectedRoles:           ts.DefaultTeamVerifiedRole + " " + ts.DefaultTeamModeratorRole,
+				ExpectedSchemeVerified:  true,
+				ExpectedSchemeModerator: true,
 			},
 			{
-				Name:               "team verified explicit",
-				ExplicitRoles:      "team_verified",
-				ExpectedRoles:      ts.DefaultTeamVerifiedRole,
-				ExpectedSchemeVerified: true,
+				Name:                    "team verified explicit",
+				ExplicitRoles:           "team_verified team_moderator",
+				ExpectedRoles:           ts.DefaultTeamVerifiedRole + " " + ts.DefaultTeamModeratorRole,
+				ExpectedSchemeVerified:  true,
+				ExpectedSchemeModerator: true,
 			},
 			{
 				Name:               "team user implicit",
@@ -2168,25 +2249,28 @@ func testTeamSaveMultipleMembers(t *testing.T, rctx request.CTX, ss store.Store)
 				ExpectedSchemeGuest:   true,
 			},
 			{
-				Name:                  "team admin implicit and explicit custom role",
-				SchemeUser:            true,
-				SchemeVerified:           true,
-				SchemeAdmin:           true,
-				ExplicitRoles:         "test",
-				ExpectedRoles:         "test " + ts.DefaultTeamUserRole + " " + ts.DefaultTeamVerifiedRole + " " + ts.DefaultTeamAdminRole,
-				ExpectedExplicitRoles: "test",
-				ExpectedSchemeUser:    true,
-				ExpectedSchemeVerified:   true,
-				ExpectedSchemeAdmin:   true,
+				Name:                    "team admin implicit and explicit custom role",
+				SchemeUser:              true,
+				SchemeVerified:          true,
+				SchemeModerator:         true,
+				SchemeAdmin:             true,
+				ExplicitRoles:           "test",
+				ExpectedRoles:           "test " + ts.DefaultTeamUserRole + " " + ts.DefaultTeamVerifiedRole + " " + ts.DefaultTeamModeratorRole + " " + ts.DefaultTeamAdminRole,
+				ExpectedExplicitRoles:   "test",
+				ExpectedSchemeUser:      true,
+				ExpectedSchemeVerified:  true,
+				ExpectedSchemeModerator: true,
+				ExpectedSchemeAdmin:     true,
 			},
 			{
-				Name:                  "team admin explicit and explicit custom role",
-				ExplicitRoles:         "team_user team_verified team_admin test",
-				ExpectedRoles:         "test " + ts.DefaultTeamUserRole + " " + ts.DefaultTeamVerifiedRole + " " + ts.DefaultTeamAdminRole,
-				ExpectedExplicitRoles: "test",
-				ExpectedSchemeUser:    true,
-				ExpectedSchemeVerified:   true,
-				ExpectedSchemeAdmin:   true,
+				Name:                    "team admin explicit and explicit custom role",
+				ExplicitRoles:           "team_user team_verified team_moderator team_admin test",
+				ExpectedRoles:           "test " + ts.DefaultTeamUserRole + " " + ts.DefaultTeamVerifiedRole + " " + ts.DefaultTeamModeratorRole + " " + ts.DefaultTeamAdminRole,
+				ExpectedExplicitRoles:   "test",
+				ExpectedSchemeUser:      true,
+				ExpectedSchemeVerified:  true,
+				ExpectedSchemeModerator: true,
+				ExpectedSchemeAdmin:     true,
 			},
 			{
 				Name:                  "team member with only explicit custom roles",
@@ -2199,22 +2283,24 @@ func testTeamSaveMultipleMembers(t *testing.T, rctx request.CTX, ss store.Store)
 		for _, tc := range testCases {
 			t.Run(tc.Name, func(t *testing.T) {
 				member := &model.TeamMember{
-					TeamId:        team.Id,
-					UserId:        u1.Id,
-					SchemeGuest:   tc.SchemeGuest,
-					SchemeUser:    tc.SchemeUser,
-					SchemeVerified:   tc.SchemeVerified,
-					SchemeAdmin:   tc.SchemeAdmin,
-					ExplicitRoles: tc.ExplicitRoles,
+					TeamId:          team.Id,
+					UserId:          u1.Id,
+					SchemeGuest:     tc.SchemeGuest,
+					SchemeUser:      tc.SchemeUser,
+					SchemeVerified:  tc.SchemeVerified,
+					SchemeModerator: tc.SchemeModerator,
+					SchemeAdmin:     tc.SchemeAdmin,
+					ExplicitRoles:   tc.ExplicitRoles,
 				}
 				otherMember := &model.TeamMember{
-					TeamId:        team.Id,
-					UserId:        u2.Id,
-					SchemeGuest:   tc.SchemeGuest,
-					SchemeUser:    tc.SchemeUser,
-					SchemeVerified:   tc.SchemeVerified,
-					SchemeAdmin:   tc.SchemeAdmin,
-					ExplicitRoles: tc.ExplicitRoles,
+					TeamId:          team.Id,
+					UserId:          u2.Id,
+					SchemeGuest:     tc.SchemeGuest,
+					SchemeUser:      tc.SchemeUser,
+					SchemeVerified:  tc.SchemeVerified,
+					SchemeModerator: tc.SchemeModerator,
+					SchemeAdmin:     tc.SchemeAdmin,
+					ExplicitRoles:   tc.ExplicitRoles,
 				}
 				members, nErr := ss.Team().SaveMultipleMembers([]*model.TeamMember{member, otherMember}, -1)
 				require.NoError(t, nErr)
@@ -2228,6 +2314,7 @@ func testTeamSaveMultipleMembers(t *testing.T, rctx request.CTX, ss store.Store)
 				assert.Equal(t, tc.ExpectedSchemeGuest, member.SchemeGuest)
 				assert.Equal(t, tc.ExpectedSchemeUser, member.SchemeUser)
 				assert.Equal(t, tc.ExpectedSchemeVerified, member.SchemeVerified)
+				assert.Equal(t, tc.ExpectedSchemeModerator, member.SchemeModerator)
 				assert.Equal(t, tc.ExpectedSchemeAdmin, member.SchemeAdmin)
 			})
 		}
@@ -2263,30 +2350,35 @@ func testTeamUpdateMember(t *testing.T, rctx request.CTX, ss store.Store) {
 		require.NoError(t, nErr)
 
 		testCases := []struct {
-			Name                  string
-			SchemeGuest           bool
-			SchemeUser            bool
-			SchemeVerified        bool
-			SchemeAdmin           bool
-			ExplicitRoles         string
-			ExpectedRoles         string
-			ExpectedExplicitRoles string
-			ExpectedSchemeGuest   bool
-			ExpectedSchemeUser    bool
-			ExpectedSchemeVerified   bool
-			ExpectedSchemeAdmin   bool
+			Name                    string
+			SchemeGuest             bool
+			SchemeUser              bool
+			SchemeVerified          bool
+			SchemeModerator         bool
+			SchemeAdmin             bool
+			ExplicitRoles           string
+			ExpectedRoles           string
+			ExpectedExplicitRoles   string
+			ExpectedSchemeGuest     bool
+			ExpectedSchemeUser      bool
+			ExpectedSchemeVerified  bool
+			ExpectedSchemeModerator bool
+			ExpectedSchemeAdmin     bool
 		}{
 			{
-				Name:               "team verified implicit",
-				SchemeVerified:         true,
-				ExpectedRoles:      "team_verified",
-				ExpectedSchemeVerified: true,
+				Name:                    "team verified implicit",
+				SchemeVerified:          true,
+				SchemeModerator:         true,
+				ExpectedRoles:           "team_verified team_moderator",
+				ExpectedSchemeVerified:  true,
+				ExpectedSchemeModerator: true,
 			},
 			{
-				Name:               "team verified explicit",
-				ExplicitRoles:      "team_verified",
-				ExpectedRoles:      "team_verified",
-				ExpectedSchemeVerified: true,
+				Name:                    "team verified explicit",
+				ExplicitRoles:           "team_verified team_moderator",
+				ExpectedRoles:           "team_verified team_moderator",
+				ExpectedSchemeVerified:  true,
+				ExpectedSchemeModerator: true,
 			},
 			{
 				Name:               "team user implicit",
@@ -2328,19 +2420,22 @@ func testTeamUpdateMember(t *testing.T, rctx request.CTX, ss store.Store) {
 				ExpectedSchemeAdmin: true,
 			},
 			{
-				Name:                  "team verified implicit and explicit custom role",
-				SchemeVerified:            true,
-				ExplicitRoles:         "test",
-				ExpectedRoles:         "test team_verified",
-				ExpectedExplicitRoles: "test",
-				ExpectedSchemeVerified:    true,
+				Name:                    "team verified implicit and explicit custom role",
+				SchemeVerified:          true,
+				SchemeModerator:         true,
+				ExplicitRoles:           "test",
+				ExpectedRoles:           "test team_verified team_moderator",
+				ExpectedExplicitRoles:   "test",
+				ExpectedSchemeVerified:  true,
+				ExpectedSchemeModerator: true,
 			},
 			{
-				Name:                  "team verified explicit and explicit custom role",
-				ExplicitRoles:         "team_verified test",
-				ExpectedRoles:         "test team_verified",
-				ExpectedExplicitRoles: "test",
-				ExpectedSchemeVerified:    true,
+				Name:                    "team verified explicit and explicit custom role",
+				ExplicitRoles:           "team_verified team_moderator test",
+				ExpectedRoles:           "test team_verified team_moderator",
+				ExpectedExplicitRoles:   "test",
+				ExpectedSchemeVerified:  true,
+				ExpectedSchemeModerator: true,
 			},
 			{
 				Name:                  "team user implicit and explicit custom role",
@@ -2373,25 +2468,28 @@ func testTeamUpdateMember(t *testing.T, rctx request.CTX, ss store.Store) {
 				ExpectedSchemeGuest:   true,
 			},
 			{
-				Name:                  "team admin implicit and explicit custom role",
-				SchemeUser:            true,
-				SchemeVerified:        true,
-				SchemeAdmin:           true,
-				ExplicitRoles:         "test",
-				ExpectedRoles:         "test team_user team_verified team_admin",
-				ExpectedExplicitRoles: "test",
-				ExpectedSchemeUser:    true,
-				ExpectedSchemeVerified:    true,
-				ExpectedSchemeAdmin:   true,
+				Name:                    "team admin implicit and explicit custom role",
+				SchemeUser:              true,
+				SchemeVerified:          true,
+				SchemeModerator:         true,
+				SchemeAdmin:             true,
+				ExplicitRoles:           "test",
+				ExpectedRoles:           "test team_user team_verified team_moderator team_admin",
+				ExpectedExplicitRoles:   "test",
+				ExpectedSchemeUser:      true,
+				ExpectedSchemeVerified:  true,
+				ExpectedSchemeModerator: true,
+				ExpectedSchemeAdmin:     true,
 			},
 			{
-				Name:                  "team admin explicit and explicit custom role",
-				ExplicitRoles:         "team_user team_verified team_admin test",
-				ExpectedRoles:         "test team_user team_verified team_admin",
-				ExpectedExplicitRoles: "test",
-				ExpectedSchemeUser:    true,
-				ExpectedSchemeVerified:    true,
-				ExpectedSchemeAdmin:   true,
+				Name:                    "team admin explicit and explicit custom role",
+				ExplicitRoles:           "team_user team_verified team_moderator team_admin test",
+				ExpectedRoles:           "test team_user team_verified team_moderator team_admin",
+				ExpectedExplicitRoles:   "test",
+				ExpectedSchemeUser:      true,
+				ExpectedSchemeVerified:  true,
+				ExpectedSchemeModerator: true,
+				ExpectedSchemeAdmin:     true,
 			},
 			{
 				Name:                  "team member with only explicit custom roles",
@@ -2406,6 +2504,7 @@ func testTeamUpdateMember(t *testing.T, rctx request.CTX, ss store.Store) {
 				member.SchemeGuest = tc.SchemeGuest
 				member.SchemeUser = tc.SchemeUser
 				member.SchemeVerified = tc.SchemeVerified
+				member.SchemeModerator = tc.SchemeModerator
 				member.SchemeAdmin = tc.SchemeAdmin
 				member.ExplicitRoles = tc.ExplicitRoles
 
@@ -2417,6 +2516,7 @@ func testTeamUpdateMember(t *testing.T, rctx request.CTX, ss store.Store) {
 				assert.Equal(t, tc.ExpectedSchemeGuest, member.SchemeGuest)
 				assert.Equal(t, tc.ExpectedSchemeUser, member.SchemeUser)
 				assert.Equal(t, tc.ExpectedSchemeVerified, member.SchemeVerified)
+				assert.Equal(t, tc.ExpectedSchemeModerator, member.SchemeModerator)
 				assert.Equal(t, tc.ExpectedSchemeAdmin, member.SchemeAdmin)
 			})
 		}
@@ -2448,30 +2548,35 @@ func testTeamUpdateMember(t *testing.T, rctx request.CTX, ss store.Store) {
 		require.NoError(t, nErr)
 
 		testCases := []struct {
-			Name                  string
-			SchemeGuest           bool
-			SchemeUser            bool
-			SchemeVerified           bool
-			SchemeAdmin           bool
-			ExplicitRoles         string
-			ExpectedRoles         string
-			ExpectedExplicitRoles string
-			ExpectedSchemeGuest   bool
-			ExpectedSchemeUser    bool
-			ExpectedSchemeVerified   bool
-			ExpectedSchemeAdmin   bool
+			Name                    string
+			SchemeGuest             bool
+			SchemeUser              bool
+			SchemeVerified          bool
+			SchemeModerator         bool
+			SchemeAdmin             bool
+			ExplicitRoles           string
+			ExpectedRoles           string
+			ExpectedExplicitRoles   string
+			ExpectedSchemeGuest     bool
+			ExpectedSchemeUser      bool
+			ExpectedSchemeVerified  bool
+			ExpectedSchemeModerator bool
+			ExpectedSchemeAdmin     bool
 		}{
 			{
-				Name:               "team verified implicit",
-				SchemeVerified:         true,
-				ExpectedRoles:      ts.DefaultTeamVerifiedRole,
-				ExpectedSchemeVerified: true,
+				Name:                    "team verified implicit",
+				SchemeVerified:          true,
+				SchemeModerator:         true,
+				ExpectedRoles:           ts.DefaultTeamVerifiedRole + " " + ts.DefaultTeamModeratorRole,
+				ExpectedSchemeVerified:  true,
+				ExpectedSchemeModerator: true,
 			},
 			{
-				Name:               "team verified explicit",
-				ExplicitRoles:      "team_verified",
-				ExpectedRoles:      ts.DefaultTeamVerifiedRole,
-				ExpectedSchemeVerified: true,
+				Name:                    "team verified explicit",
+				ExplicitRoles:           "team_verified team_moderator",
+				ExpectedRoles:           ts.DefaultTeamVerifiedRole + " " + ts.DefaultTeamModeratorRole,
+				ExpectedSchemeVerified:  true,
+				ExpectedSchemeModerator: true,
 			},
 			{
 				Name:               "team user implicit",
@@ -2513,19 +2618,22 @@ func testTeamUpdateMember(t *testing.T, rctx request.CTX, ss store.Store) {
 				ExpectedSchemeAdmin: true,
 			},
 			{
-				Name:                  "team verified implicit and explicit custom role",
-				SchemeVerified:            true,
-				ExplicitRoles:         "test",
-				ExpectedRoles:         "test " + ts.DefaultTeamVerifiedRole,
-				ExpectedExplicitRoles: "test",
-				ExpectedSchemeVerified:    true,
+				Name:                    "team verified implicit and explicit custom role",
+				SchemeVerified:          true,
+				SchemeModerator:         true,
+				ExplicitRoles:           "test",
+				ExpectedRoles:           "test " + ts.DefaultTeamVerifiedRole + " " + ts.DefaultTeamModeratorRole,
+				ExpectedExplicitRoles:   "test",
+				ExpectedSchemeVerified:  true,
+				ExpectedSchemeModerator: true,
 			},
 			{
-				Name:                  "team verified explicit and explicit custom role",
-				ExplicitRoles:         "team_verified test",
-				ExpectedRoles:         "test " + ts.DefaultTeamVerifiedRole,
-				ExpectedExplicitRoles: "test",
-				ExpectedSchemeVerified:    true,
+				Name:                    "team verified explicit and explicit custom role",
+				ExplicitRoles:           "team_verified team_moderator test",
+				ExpectedRoles:           "test " + ts.DefaultTeamVerifiedRole + " " + ts.DefaultTeamModeratorRole,
+				ExpectedExplicitRoles:   "test",
+				ExpectedSchemeVerified:  true,
+				ExpectedSchemeModerator: true,
 			},
 			{
 				Name:                  "team user implicit and explicit custom role",
@@ -2558,25 +2666,28 @@ func testTeamUpdateMember(t *testing.T, rctx request.CTX, ss store.Store) {
 				ExpectedSchemeGuest:   true,
 			},
 			{
-				Name:                  "team admin implicit and explicit custom role",
-				SchemeUser:            true,
-				SchemeVerified:        true,
-				SchemeAdmin:           true,
-				ExplicitRoles:         "test",
-				ExpectedRoles:         "test " + ts.DefaultTeamUserRole + " " + ts.DefaultTeamVerifiedRole + " " + ts.DefaultTeamAdminRole,
-				ExpectedExplicitRoles: "test",
-				ExpectedSchemeUser:    true,
-				ExpectedSchemeVerified:    true,
-				ExpectedSchemeAdmin:   true,
+				Name:                    "team admin implicit and explicit custom role",
+				SchemeUser:              true,
+				SchemeVerified:          true,
+				SchemeModerator:         true,
+				SchemeAdmin:             true,
+				ExplicitRoles:           "test",
+				ExpectedRoles:           "test " + ts.DefaultTeamUserRole + " " + ts.DefaultTeamVerifiedRole + " " + ts.DefaultTeamModeratorRole + " " + ts.DefaultTeamAdminRole,
+				ExpectedExplicitRoles:   "test",
+				ExpectedSchemeUser:      true,
+				ExpectedSchemeVerified:  true,
+				ExpectedSchemeModerator: true,
+				ExpectedSchemeAdmin:     true,
 			},
 			{
-				Name:                  "team admin explicit and explicit custom role",
-				ExplicitRoles:         "team_user team_verified team_admin test",
-				ExpectedRoles:         "test " + ts.DefaultTeamUserRole + " " + ts.DefaultTeamVerifiedRole + " " + ts.DefaultTeamAdminRole,
-				ExpectedExplicitRoles: "test",
-				ExpectedSchemeUser:    true,
-				ExpectedSchemeVerified:    true,
-				ExpectedSchemeAdmin:   true,
+				Name:                    "team admin explicit and explicit custom role",
+				ExplicitRoles:           "team_user team_verified team_moderator team_admin test",
+				ExpectedRoles:           "test " + ts.DefaultTeamUserRole + " " + ts.DefaultTeamVerifiedRole + " " + ts.DefaultTeamModeratorRole + " " + ts.DefaultTeamAdminRole,
+				ExpectedExplicitRoles:   "test",
+				ExpectedSchemeUser:      true,
+				ExpectedSchemeVerified:  true,
+				ExpectedSchemeModerator: true,
+				ExpectedSchemeAdmin:     true,
 			},
 			{
 				Name:                  "team member with only explicit custom roles",
@@ -2591,6 +2702,7 @@ func testTeamUpdateMember(t *testing.T, rctx request.CTX, ss store.Store) {
 				member.SchemeGuest = tc.SchemeGuest
 				member.SchemeUser = tc.SchemeUser
 				member.SchemeVerified = tc.SchemeVerified
+				member.SchemeModerator = tc.SchemeModerator
 				member.SchemeAdmin = tc.SchemeAdmin
 				member.ExplicitRoles = tc.ExplicitRoles
 
@@ -2602,6 +2714,7 @@ func testTeamUpdateMember(t *testing.T, rctx request.CTX, ss store.Store) {
 				assert.Equal(t, tc.ExpectedSchemeGuest, member.SchemeGuest)
 				assert.Equal(t, tc.ExpectedSchemeUser, member.SchemeUser)
 				assert.Equal(t, tc.ExpectedSchemeVerified, member.SchemeVerified)
+				assert.Equal(t, tc.ExpectedSchemeModerator, member.SchemeModerator)
 				assert.Equal(t, tc.ExpectedSchemeAdmin, member.SchemeAdmin)
 			})
 		}
@@ -2645,30 +2758,35 @@ func testTeamUpdateMultipleMembers(t *testing.T, rctx request.CTX, ss store.Stor
 		otherMember = members[1]
 
 		testCases := []struct {
-			Name                  string
-			SchemeGuest           bool
-			SchemeUser            bool
-			SchemeVerified            bool
-			SchemeAdmin           bool
-			ExplicitRoles         string
-			ExpectedRoles         string
-			ExpectedExplicitRoles string
-			ExpectedSchemeGuest   bool
-			ExpectedSchemeUser    bool
-			ExpectedSchemeVerified    bool
-			ExpectedSchemeAdmin   bool
+			Name                    string
+			SchemeGuest             bool
+			SchemeUser              bool
+			SchemeVerified          bool
+			SchemeModerator         bool
+			SchemeAdmin             bool
+			ExplicitRoles           string
+			ExpectedRoles           string
+			ExpectedExplicitRoles   string
+			ExpectedSchemeGuest     bool
+			ExpectedSchemeUser      bool
+			ExpectedSchemeVerified  bool
+			ExpectedSchemeModerator bool
+			ExpectedSchemeAdmin     bool
 		}{
 			{
-				Name:               "team verified implicit",
-				SchemeVerified:         true,
-				ExpectedRoles:      "team_verified",
-				ExpectedSchemeVerified: true,
+				Name:                    "team verified implicit",
+				SchemeVerified:          true,
+				SchemeModerator:         true,
+				ExpectedRoles:           "team_verified team_moderator",
+				ExpectedSchemeVerified:  true,
+				ExpectedSchemeModerator: true,
 			},
 			{
-				Name:               "team verified explicit",
-				ExplicitRoles:      "team_verified",
-				ExpectedRoles:      "team_verified",
-				ExpectedSchemeVerified: true,
+				Name:                    "team verified explicit",
+				ExplicitRoles:           "team_verified team_moderator",
+				ExpectedRoles:           "team_verified team_moderator",
+				ExpectedSchemeVerified:  true,
+				ExpectedSchemeModerator: true,
 			},
 			{
 				Name:               "team user implicit",
@@ -2695,37 +2813,43 @@ func testTeamUpdateMultipleMembers(t *testing.T, rctx request.CTX, ss store.Stor
 				ExpectedSchemeGuest: true,
 			},
 			{
-				Name:                "team admin implicit",
-				SchemeUser:          true,
-				SchemeVerified:      true,
-				SchemeAdmin:         true,
-				ExpectedRoles:       "team_user team_verified team_admin",
-				ExpectedSchemeUser:  true,
+				Name:                    "team admin implicit",
+				SchemeUser:              true,
+				SchemeVerified:          true,
+				SchemeModerator:         true,
+				SchemeAdmin:             true,
+				ExpectedRoles:           "team_user team_verified team_moderator team_admin",
+				ExpectedSchemeUser:      true,
 				ExpectedSchemeVerified:  true,
-				ExpectedSchemeAdmin: true,
+				ExpectedSchemeModerator: true,
+				ExpectedSchemeAdmin:     true,
 			},
 			{
-				Name:                "team admin explicit",
-				ExplicitRoles:       "team_user team_verified team_admin",
-				ExpectedRoles:       "team_user team_verified team_admin",
-				ExpectedSchemeUser:  true,
+				Name:                    "team admin explicit",
+				ExplicitRoles:           "team_user team_verified team_moderator team_admin",
+				ExpectedRoles:           "team_user team_verified team_moderator team_admin",
+				ExpectedSchemeUser:      true,
 				ExpectedSchemeVerified:  true,
-				ExpectedSchemeAdmin: true,
+				ExpectedSchemeModerator: true,
+				ExpectedSchemeAdmin:     true,
 			},
 			{
-				Name:                  "team verified implicit and explicit custom role",
-				SchemeVerified:            true,
-				ExplicitRoles:         "test",
-				ExpectedRoles:         "test team_verified",
-				ExpectedExplicitRoles: "test",
-				ExpectedSchemeVerified:    true,
+				Name:                    "team verified implicit and explicit custom role",
+				SchemeVerified:          true,
+				SchemeModerator:         true,
+				ExplicitRoles:           "test",
+				ExpectedRoles:           "test team_verified team_moderator",
+				ExpectedExplicitRoles:   "test",
+				ExpectedSchemeVerified:  true,
+				ExpectedSchemeModerator: true,
 			},
 			{
-				Name:                  "team verified explicit and explicit custom role",
-				ExplicitRoles:         "team_verified test",
-				ExpectedRoles:         "test team_verified",
-				ExpectedExplicitRoles: "test",
-				ExpectedSchemeVerified:    true,
+				Name:                    "team verified explicit and explicit custom role",
+				ExplicitRoles:           "team_verified team_moderator test",
+				ExpectedRoles:           "test team_verified team_moderator",
+				ExpectedExplicitRoles:   "test",
+				ExpectedSchemeVerified:  true,
+				ExpectedSchemeModerator: true,
 			},
 			{
 				Name:                  "team user implicit and explicit custom role",
@@ -2758,25 +2882,28 @@ func testTeamUpdateMultipleMembers(t *testing.T, rctx request.CTX, ss store.Stor
 				ExpectedSchemeGuest:   true,
 			},
 			{
-				Name:                  "team admin implicit and explicit custom role",
-				SchemeUser:            true,
-				SchemeVerified:            true,
-				SchemeAdmin:           true,
-				ExplicitRoles:         "test",
-				ExpectedRoles:         "test team_user team_verified team_admin",
-				ExpectedExplicitRoles: "test",
-				ExpectedSchemeUser:    true,
-				ExpectedSchemeVerified:    true,
-				ExpectedSchemeAdmin:   true,
+				Name:                    "team admin implicit and explicit custom role",
+				SchemeUser:              true,
+				SchemeVerified:          true,
+				SchemeModerator:         true,
+				SchemeAdmin:             true,
+				ExplicitRoles:           "test",
+				ExpectedRoles:           "test team_user team_verified team_moderator team_admin",
+				ExpectedExplicitRoles:   "test",
+				ExpectedSchemeUser:      true,
+				ExpectedSchemeVerified:  true,
+				ExpectedSchemeModerator: true,
+				ExpectedSchemeAdmin:     true,
 			},
 			{
-				Name:                  "team admin explicit and explicit custom role",
-				ExplicitRoles:         "team_user team_verified team_admin test",
-				ExpectedRoles:         "test team_user team_verified team_admin",
-				ExpectedExplicitRoles: "test",
-				ExpectedSchemeUser:    true,
-				ExpectedSchemeVerified:    true,
-				ExpectedSchemeAdmin:   true,
+				Name:                    "team admin explicit and explicit custom role",
+				ExplicitRoles:           "team_user team_verified team_moderator team_admin test",
+				ExpectedRoles:           "test team_user team_verified team_moderator team_admin",
+				ExpectedExplicitRoles:   "test",
+				ExpectedSchemeUser:      true,
+				ExpectedSchemeVerified:  true,
+				ExpectedSchemeModerator: true,
+				ExpectedSchemeAdmin:     true,
 			},
 			{
 				Name:                  "team member with only explicit custom roles",
@@ -2791,6 +2918,7 @@ func testTeamUpdateMultipleMembers(t *testing.T, rctx request.CTX, ss store.Stor
 				member.SchemeGuest = tc.SchemeGuest
 				member.SchemeUser = tc.SchemeUser
 				member.SchemeVerified = tc.SchemeVerified
+				member.SchemeModerator = tc.SchemeModerator
 				member.SchemeAdmin = tc.SchemeAdmin
 				member.ExplicitRoles = tc.ExplicitRoles
 
@@ -2805,6 +2933,7 @@ func testTeamUpdateMultipleMembers(t *testing.T, rctx request.CTX, ss store.Stor
 				assert.Equal(t, tc.ExpectedSchemeGuest, member.SchemeGuest)
 				assert.Equal(t, tc.ExpectedSchemeUser, member.SchemeUser)
 				assert.Equal(t, tc.ExpectedSchemeVerified, member.SchemeVerified)
+				assert.Equal(t, tc.ExpectedSchemeModerator, member.SchemeModerator)
 				assert.Equal(t, tc.ExpectedSchemeAdmin, member.SchemeAdmin)
 			})
 		}
@@ -2840,30 +2969,35 @@ func testTeamUpdateMultipleMembers(t *testing.T, rctx request.CTX, ss store.Stor
 		otherMember = members[1]
 
 		testCases := []struct {
-			Name                  string
-			SchemeGuest           bool
-			SchemeUser            bool
-			SchemeVerified        bool
-			SchemeAdmin           bool
-			ExplicitRoles         string
-			ExpectedRoles         string
-			ExpectedExplicitRoles string
-			ExpectedSchemeGuest   bool
-			ExpectedSchemeUser    bool
-			ExpectedSchemeVerified    bool
-			ExpectedSchemeAdmin   bool
+			Name                    string
+			SchemeGuest             bool
+			SchemeUser              bool
+			SchemeVerified          bool
+			SchemeModerator         bool
+			SchemeAdmin             bool
+			ExplicitRoles           string
+			ExpectedRoles           string
+			ExpectedExplicitRoles   string
+			ExpectedSchemeGuest     bool
+			ExpectedSchemeUser      bool
+			ExpectedSchemeVerified  bool
+			ExpectedSchemeModerator bool
+			ExpectedSchemeAdmin     bool
 		}{
 			{
-				Name:               "team verified implicit",
-				SchemeVerified:         true,
-				ExpectedRoles:      ts.DefaultTeamVerifiedRole,
-				ExpectedSchemeVerified: true,
+				Name:                    "team verified implicit",
+				SchemeVerified:          true,
+				SchemeModerator:         true,
+				ExpectedRoles:           ts.DefaultTeamVerifiedRole + " " + ts.DefaultTeamModeratorRole,
+				ExpectedSchemeVerified:  true,
+				ExpectedSchemeModerator: true,
 			},
 			{
-				Name:               "team verified explicit",
-				ExplicitRoles:      "team_verified",
-				ExpectedRoles:      ts.DefaultTeamVerifiedRole,
-				ExpectedSchemeVerified: true,
+				Name:                    "team verified explicit",
+				ExplicitRoles:           "team_verified team_moderator",
+				ExpectedRoles:           ts.DefaultTeamVerifiedRole + " " + ts.DefaultTeamModeratorRole,
+				ExpectedSchemeVerified:  true,
+				ExpectedSchemeModerator: true,
 			},
 			{
 				Name:               "team user implicit",
@@ -2890,37 +3024,43 @@ func testTeamUpdateMultipleMembers(t *testing.T, rctx request.CTX, ss store.Stor
 				ExpectedSchemeGuest: true,
 			},
 			{
-				Name:                "team admin implicit",
-				SchemeUser:          true,
+				Name:                    "team admin implicit",
+				SchemeUser:              true,
 				SchemeVerified:          true,
-				SchemeAdmin:         true,
-				ExpectedRoles:       ts.DefaultTeamUserRole + " " + ts.DefaultTeamVerifiedRole + " " + ts.DefaultTeamAdminRole,
-				ExpectedSchemeUser:  true,
+				SchemeModerator:         true,
+				SchemeAdmin:             true,
+				ExpectedRoles:           ts.DefaultTeamUserRole + " " + ts.DefaultTeamVerifiedRole + " " + ts.DefaultTeamModeratorRole + " " + ts.DefaultTeamAdminRole,
+				ExpectedSchemeUser:      true,
 				ExpectedSchemeVerified:  true,
-				ExpectedSchemeAdmin: true,
+				ExpectedSchemeModerator: true,
+				ExpectedSchemeAdmin:     true,
 			},
 			{
-				Name:                "team admin explicit",
-				ExplicitRoles:       "team_user team_verified team_admin",
-				ExpectedRoles:       ts.DefaultTeamUserRole + " " + ts.DefaultTeamVerifiedRole + " " + ts.DefaultTeamAdminRole,
-				ExpectedSchemeUser:  true,
+				Name:                    "team admin explicit",
+				ExplicitRoles:           "team_user team_verified team_moderator team_admin",
+				ExpectedRoles:           ts.DefaultTeamUserRole + " " + ts.DefaultTeamVerifiedRole + " " + ts.DefaultTeamModeratorRole + " " + ts.DefaultTeamAdminRole,
+				ExpectedSchemeUser:      true,
 				ExpectedSchemeVerified:  true,
-				ExpectedSchemeAdmin: true,
+				ExpectedSchemeModerator: true,
+				ExpectedSchemeAdmin:     true,
 			},
 			{
-				Name:                  "team verified implicit and explicit custom role",
-				SchemeVerified:            true,
-				ExplicitRoles:         "test",
-				ExpectedRoles:         "test " + ts.DefaultTeamVerifiedRole,
-				ExpectedExplicitRoles: "test",
-				ExpectedSchemeVerified:    true,
+				Name:                    "team verified implicit and explicit custom role",
+				SchemeVerified:          true,
+				SchemeModerator:         true,
+				ExplicitRoles:           "test",
+				ExpectedRoles:           "test " + ts.DefaultTeamVerifiedRole + " " + ts.DefaultTeamModeratorRole,
+				ExpectedExplicitRoles:   "test",
+				ExpectedSchemeVerified:  true,
+				ExpectedSchemeModerator: true,
 			},
 			{
-				Name:                  "team verified explicit and explicit custom role",
-				ExplicitRoles:         "team_verified test",
-				ExpectedRoles:         "test " + ts.DefaultTeamVerifiedRole,
-				ExpectedExplicitRoles: "test",
-				ExpectedSchemeVerified:    true,
+				Name:                    "team verified explicit and explicit custom role",
+				ExplicitRoles:           "team_verified team_moderator test",
+				ExpectedRoles:           "test " + ts.DefaultTeamVerifiedRole + " " + ts.DefaultTeamModeratorRole,
+				ExpectedExplicitRoles:   "test",
+				ExpectedSchemeVerified:  true,
+				ExpectedSchemeModerator: true,
 			},
 			{
 				Name:                  "team user implicit and explicit custom role",
@@ -2953,25 +3093,28 @@ func testTeamUpdateMultipleMembers(t *testing.T, rctx request.CTX, ss store.Stor
 				ExpectedSchemeGuest:   true,
 			},
 			{
-				Name:                  "team admin implicit and explicit custom role",
-				SchemeUser:            true,
-				SchemeVerified:            true,
-				SchemeAdmin:           true,
-				ExplicitRoles:         "test",
-				ExpectedRoles:         "test " + ts.DefaultTeamUserRole + " " + ts.DefaultTeamVerifiedRole + " " + ts.DefaultTeamAdminRole,
-				ExpectedExplicitRoles: "test",
-				ExpectedSchemeUser:    true,
-				ExpectedSchemeVerified:    true,
-				ExpectedSchemeAdmin:   true,
+				Name:                    "team admin implicit and explicit custom role",
+				SchemeUser:              true,
+				SchemeVerified:          true,
+				SchemeModerator:         true,
+				SchemeAdmin:             true,
+				ExplicitRoles:           "test",
+				ExpectedRoles:           "test " + ts.DefaultTeamUserRole + " " + ts.DefaultTeamVerifiedRole + " " + ts.DefaultTeamModeratorRole + " " + ts.DefaultTeamAdminRole,
+				ExpectedExplicitRoles:   "test",
+				ExpectedSchemeUser:      true,
+				ExpectedSchemeVerified:  true,
+				ExpectedSchemeModerator: true,
+				ExpectedSchemeAdmin:     true,
 			},
 			{
-				Name:                  "team admin explicit and explicit custom role",
-				ExplicitRoles:         "team_user team_verified team_admin test",
-				ExpectedRoles:         "test " + ts.DefaultTeamUserRole + " " + ts.DefaultTeamVerifiedRole + " " + ts.DefaultTeamAdminRole,
-				ExpectedExplicitRoles: "test",
-				ExpectedSchemeUser:    true,
-				ExpectedSchemeVerified:    true,
-				ExpectedSchemeAdmin:   true,
+				Name:                    "team admin explicit and explicit custom role",
+				ExplicitRoles:           "team_user team_verified team_moderator team_admin test",
+				ExpectedRoles:           "test " + ts.DefaultTeamUserRole + " " + ts.DefaultTeamVerifiedRole + " " + ts.DefaultTeamModeratorRole + " " + ts.DefaultTeamAdminRole,
+				ExpectedExplicitRoles:   "test",
+				ExpectedSchemeUser:      true,
+				ExpectedSchemeVerified:  true,
+				ExpectedSchemeModerator: true,
+				ExpectedSchemeAdmin:     true,
 			},
 			{
 				Name:                  "team member with only explicit custom roles",
@@ -2986,6 +3129,7 @@ func testTeamUpdateMultipleMembers(t *testing.T, rctx request.CTX, ss store.Stor
 				member.SchemeGuest = tc.SchemeGuest
 				member.SchemeUser = tc.SchemeUser
 				member.SchemeVerified = tc.SchemeVerified
+				member.SchemeModerator = tc.SchemeModerator
 				member.SchemeAdmin = tc.SchemeAdmin
 				member.ExplicitRoles = tc.ExplicitRoles
 
@@ -2999,6 +3143,7 @@ func testTeamUpdateMultipleMembers(t *testing.T, rctx request.CTX, ss store.Stor
 				assert.Equal(t, tc.ExpectedSchemeGuest, member.SchemeGuest)
 				assert.Equal(t, tc.ExpectedSchemeUser, member.SchemeUser)
 				assert.Equal(t, tc.ExpectedSchemeVerified, member.SchemeVerified)
+				assert.Equal(t, tc.ExpectedSchemeModerator, member.SchemeModerator)
 				assert.Equal(t, tc.ExpectedSchemeAdmin, member.SchemeAdmin)
 			})
 		}

@@ -194,6 +194,118 @@ func TestCreateTeam(t *testing.T) {
 	})
 }
 
+func TestModeratorRole(t *testing.T) {
+	th := Setup(t).InitBasic()
+	defer th.TearDown()
+	th.LoginSystemAdmin()
+
+	// define variables for reuse
+	var (
+		ctx    context.Context = context.Background()
+		err    error
+		member *model.TeamMember
+		res    *model.Response
+		team1  *model.Team
+		team2  *model.Team
+		user1  *model.User = th.CreateUser()
+	)
+
+	// this requires custom license
+	/*/
+	scheme := &model.Scheme{
+		Id:                         GenerateTestID(),
+		Name:                       "DemoScheme",
+		DisplayName:                "Name",
+		DefaultTeamAdminRole:       "team_admin",
+		DefaultTeamModeratorRole:   "team_moderator",
+		DefaultTeamUserRole:        "team_member",
+		DefaultTeamVerifiedRole:    "team_verified",
+		DefaultChannelAdminRole:    "channel_admin",
+		DefaultChannelUserRole:     "chanel_member",
+		DefaultChannelVerifiedRole: "channel_verified",
+		DefaultTeamGuestRole:       "team_guest",
+		DefaultChannelGuestRole:    "channel_guest",
+		DefaultPlaybookAdminRole:   "",
+		DefaultPlaybookMemberRole:  "",
+		DefaultRunAdminRole:        "",
+		DefaultRunMemberRole:       "",
+	}
+	scheme, res, err = th.Client.CreateScheme(ctx, scheme)
+	require.NoError(t, err)
+	CheckOKStatus(t, res)
+	assert.NotNil(t, scheme)
+	//*/
+
+	// create a new team via tha API
+	team1, res, err = th.Client.CreateTeam(ctx, &model.Team{
+		DisplayName:     "Name",
+		Name:            GenerateTestTeamName(),
+		Email:           th.GenerateTestEmail(),
+		Type:            model.TeamOpen,
+		AllowOpenInvite: false,
+		//SchemeId:        model.NewString(scheme.Id),
+	})
+	require.NoError(t, err)
+	CheckCreatedStatus(t, res)
+	assert.NotNil(t, team1)
+
+	// add the generated user as member of the team
+	member, res, err = th.Client.AddTeamMember(ctx, team1.Id, user1.Id)
+	require.NoError(t, err)
+	CheckCreatedStatus(t, res)
+	assert.NotNil(t, member)
+
+	// login user via API
+	_, res, err = th.Client.LoginById(ctx, user1.Id, user1.Password)
+	require.NoError(t, err)
+	CheckOKStatus(t, res)
+
+	// verify that the user is member of the team
+	team2, res, err = th.Client.GetTeam(ctx, team1.Id, "")
+	require.NoError(t, err)
+	CheckOKStatus(t, res)
+	assert.Equal(t, team1.Id, team2.Id)
+
+	var (
+		channel1 *model.Channel = &model.Channel{
+			TeamId:      team2.Id,
+			DisplayName: "Test API Team-Moderator",
+			Name:        GenerateTestChannelName(),
+			Type:        model.ChannelTypeOpen,
+		}
+		channel2 *model.Channel
+	)
+
+	// update user's team permissions to set verified user to true
+	//assert.NotNil(t, th.UpdateTeamMemberRole(team1.Id, user1.Id, model.SchemeRolesPatch{
+	//	SchemeVerified: model.NewBool(true),
+	//}))
+
+	// attempt to create a new channel as team member (expected to fail)
+	channel2, res, err = th.Client.CreateChannel(ctx, channel1)
+	require.Error(t, err)
+	CheckForbiddenStatus(t, res)
+	assert.Nil(t, channel2)
+
+	// update user's team permissions to grant moderator role and set verified user to true
+	assert.NotNil(t, th.UpdateTeamMemberRole(team1.Id, user1.Id, model.SchemeRolesPatch{
+		SchemeModerator: model.NewBool(true),
+		SchemeVerified:  model.NewBool(true),
+	}))
+
+	// attempt to create a new channel as team moderator (expected to succeed)
+	channel2, res, err = th.Client.CreateChannel(ctx, channel1)
+	require.NoError(t, err)
+	CheckCreatedStatus(t, res)
+	assert.NotNil(t, channel2)
+
+	// cannot use assert.EqualValues since the Channel1.Id is not set before creating it
+	assert.Equal(t, channel1.TeamId, channel2.TeamId)
+	assert.Equal(t, channel1.DisplayName, channel2.DisplayName)
+	assert.Equal(t, channel1.Name, channel2.Name)
+	assert.Equal(t, channel1.Type, channel2.Type)
+}
+
 func TestCreateTeamSanitization(t *testing.T) {
 	th := Setup(t)
 	defer th.TearDown()
@@ -2956,10 +3068,10 @@ func TestUpdateTeamMemberSchemeRoles(t *testing.T) {
 	th.LoginBasic()
 
 	s1 := &model.SchemeRoles{
-		SchemeAdmin: false,
-		SchemeVerified:  false,
-		SchemeUser:  false,
-		SchemeGuest: false,
+		SchemeAdmin:    false,
+		SchemeVerified: false,
+		SchemeUser:     false,
+		SchemeGuest:    false,
 	}
 	_, err := SystemAdminClient.UpdateTeamMemberSchemeRoles(context.Background(), th.BasicTeam.Id, th.BasicUser.Id, s1)
 	require.NoError(t, err)
@@ -2972,10 +3084,10 @@ func TestUpdateTeamMemberSchemeRoles(t *testing.T) {
 	assert.Equal(t, false, tm1.SchemeAdmin)
 
 	s2 := &model.SchemeRoles{
-		SchemeAdmin: false,
-		SchemeVerified:  true,
-		SchemeUser:  true,
-		SchemeGuest: false,
+		SchemeAdmin:    false,
+		SchemeVerified: true,
+		SchemeUser:     true,
+		SchemeGuest:    false,
 	}
 	_, err = SystemAdminClient.UpdateTeamMemberSchemeRoles(context.Background(), th.BasicTeam.Id, th.BasicUser.Id, s2)
 	require.NoError(t, err)
@@ -2993,10 +3105,10 @@ func TestUpdateTeamMemberSchemeRoles(t *testing.T) {
 	CheckBadRequestStatus(t, resp)
 
 	s3 := &model.SchemeRoles{
-		SchemeAdmin: true,
+		SchemeAdmin:    true,
 		SchemeVerified: true,
-		SchemeUser:  false,
-		SchemeGuest: false,
+		SchemeUser:     false,
+		SchemeGuest:    false,
 	}
 	_, err = SystemAdminClient.UpdateTeamMemberSchemeRoles(context.Background(), th.BasicTeam.Id, th.BasicUser.Id, s3)
 	require.NoError(t, err)
@@ -3009,10 +3121,10 @@ func TestUpdateTeamMemberSchemeRoles(t *testing.T) {
 	assert.Equal(t, true, tm3.SchemeAdmin)
 
 	s4 := &model.SchemeRoles{
-		SchemeAdmin: true,
+		SchemeAdmin:    true,
 		SchemeVerified: true,
-		SchemeUser:  true,
-		SchemeGuest: false,
+		SchemeUser:     true,
+		SchemeGuest:    false,
 	}
 	_, err = SystemAdminClient.UpdateTeamMemberSchemeRoles(context.Background(), th.BasicTeam.Id, th.BasicUser.Id, s4)
 	require.NoError(t, err)
@@ -3025,10 +3137,10 @@ func TestUpdateTeamMemberSchemeRoles(t *testing.T) {
 	assert.Equal(t, true, tm4.SchemeAdmin)
 
 	s5 := &model.SchemeRoles{
-		SchemeAdmin: false,
+		SchemeAdmin:    false,
 		SchemeVerified: true,
-		SchemeUser:  false,
-		SchemeGuest: true,
+		SchemeUser:     false,
+		SchemeGuest:    true,
 	}
 
 	// cannot set user to guest for a single team
@@ -3037,10 +3149,10 @@ func TestUpdateTeamMemberSchemeRoles(t *testing.T) {
 	CheckBadRequestStatus(t, resp)
 
 	s6 := &model.SchemeRoles{
-		SchemeAdmin: false,
+		SchemeAdmin:    false,
 		SchemeVerified: true,
-		SchemeUser:  true,
-		SchemeGuest: true,
+		SchemeUser:     true,
+		SchemeGuest:    true,
 	}
 	resp, err = SystemAdminClient.UpdateTeamMemberSchemeRoles(context.Background(), th.BasicTeam.Id, th.BasicUser.Id, s6)
 	require.Error(t, err)
