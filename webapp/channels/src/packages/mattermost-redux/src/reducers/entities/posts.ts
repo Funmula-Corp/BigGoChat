@@ -865,7 +865,7 @@ export function isNotDeleteBySelf(post: Post) {
 }
 
 export function shouldShowPost(post: Post) {
-    return !post.original_id && post.message !== '' && !post.delete_at;
+    return !post.original_id && post.message !== '' && !post.delete_at || post.file_ids?.length;
 }
 
 export function removeDeleteBySelfPostBlockOrder(order: string[], posts: Record<string, Post>) {
