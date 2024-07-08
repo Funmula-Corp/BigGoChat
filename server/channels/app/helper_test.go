@@ -319,7 +319,7 @@ func (th *TestHelper) CreateUser() *model.User {
 }
 
 func (th *TestHelper) CreateGuest() *model.User {
-	return th.CreateUserOrGuest(true, true)
+	return th.CreateUserOrGuest(true, false)
 }
 
 func (th *TestHelper) CreateUnverified() *model.User {

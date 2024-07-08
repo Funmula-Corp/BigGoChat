@@ -1222,7 +1222,8 @@ func TestGetViewUsersRestrictions(t *testing.T) {
 	th.LinkUserToTeam(user1, team1)
 	th.LinkUserToTeam(user1, team2)
 
-	th.App.UpdateTeamMemberRoles(th.Context, team1.Id, user1.Id, "team_user team_admin")
+	_, err := th.App.UpdateTeamMemberRoles(th.Context, team1.Id, user1.Id, "team_user team_verified team_admin")
+	require.Nil(t, err)
 
 	team1channel1 := th.CreateChannel(th.Context, team1)
 	team1channel2 := th.CreateChannel(th.Context, team1)
@@ -1318,11 +1319,15 @@ func TestGetViewUsersRestrictions(t *testing.T) {
 	t.Run("VIEW_MEMBERS permission for some teams but not for others", func(t *testing.T) {
 		systemUserRole, err := th.App.GetRoleByName(context.Background(), model.SystemUserRoleId)
 		require.Nil(t, err)
+		systemVerifiedRole, err := th.App.GetRoleByName(context.Background(), model.SystemVerifiedRoleId)
+		require.Nil(t, err)
 		teamAdminRole, err := th.App.GetRoleByName(context.Background(), model.TeamAdminRoleId)
 		require.Nil(t, err)
 
 		require.Nil(t, removePermission(systemUserRole, model.PermissionViewMembers.Id))
 		defer addPermission(systemUserRole, model.PermissionViewMembers.Id)
+		require.Nil(t, removePermission(systemVerifiedRole, model.PermissionViewMembers.Id))
+		defer addPermission(systemVerifiedRole, model.PermissionViewMembers.Id)
 		require.Nil(t, addPermission(teamAdminRole, model.PermissionViewMembers.Id))
 		defer removePermission(teamAdminRole, model.PermissionViewMembers.Id)
 

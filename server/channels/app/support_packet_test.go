@@ -104,11 +104,11 @@ func TestGenerateSupportPacketYaml(t *testing.T) {
 		assert.Equal(t, false, packet.LicenseIsTrial)
 
 		/* Server stats */
-		assert.Equal(t, 3, packet.ActiveUsers) // from InitBasic()
+		assert.Equal(t, 4, packet.ActiveUsers) // from InitBasic()
 		assert.Equal(t, 0, packet.DailyActiveUsers)
 		assert.Equal(t, 0, packet.MonthlyActiveUsers)
 		assert.Equal(t, 0, packet.InactiveUserCount)
-		assert.Equal(t, 5, packet.TotalPosts)    // from InitBasic()
+		assert.Equal(t, 7, packet.TotalPosts)    // from InitBasic()
 		assert.Equal(t, 3, packet.TotalChannels) // from InitBasic()
 		assert.Equal(t, 1, packet.TotalTeams)    // from InitBasic()
 
