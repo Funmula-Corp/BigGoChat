@@ -98,6 +98,36 @@ func (_m *BlocklistStore) GetChannelBlockUser(channelId string, userId string) (
 	return r0, r1
 }
 
+// GetChannelBlockUserByEmail provides a mock function with given fields: channelId, email
+func (_m *BlocklistStore) GetChannelBlockUserByEmail(channelId string, email string) (*model.ChannelBlockUser, error) {
+	ret := _m.Called(channelId, email)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetChannelBlockUserByEmail")
+	}
+
+	var r0 *model.ChannelBlockUser
+	var r1 error
+	if rf, ok := ret.Get(0).(func(string, string) (*model.ChannelBlockUser, error)); ok {
+		return rf(channelId, email)
+	}
+	if rf, ok := ret.Get(0).(func(string, string) *model.ChannelBlockUser); ok {
+		r0 = rf(channelId, email)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.ChannelBlockUser)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(string, string) error); ok {
+		r1 = rf(channelId, email)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // GetTeamBlockUser provides a mock function with given fields: channelId, userId
 func (_m *BlocklistStore) GetTeamBlockUser(channelId string, userId string) (*model.TeamBlockUser, error) {
 	ret := _m.Called(channelId, userId)
@@ -121,6 +151,36 @@ func (_m *BlocklistStore) GetTeamBlockUser(channelId string, userId string) (*mo
 
 	if rf, ok := ret.Get(1).(func(string, string) error); ok {
 		r1 = rf(channelId, userId)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GetTeamBlockUserByEmail provides a mock function with given fields: teamId, email
+func (_m *BlocklistStore) GetTeamBlockUserByEmail(teamId string, email string) (*model.TeamBlockUser, error) {
+	ret := _m.Called(teamId, email)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetTeamBlockUserByEmail")
+	}
+
+	var r0 *model.TeamBlockUser
+	var r1 error
+	if rf, ok := ret.Get(0).(func(string, string) (*model.TeamBlockUser, error)); ok {
+		return rf(teamId, email)
+	}
+	if rf, ok := ret.Get(0).(func(string, string) *model.TeamBlockUser); ok {
+		r0 = rf(teamId, email)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.TeamBlockUser)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(string, string) error); ok {
+		r1 = rf(teamId, email)
 	} else {
 		r1 = ret.Error(1)
 	}

@@ -593,6 +593,22 @@ func (s *TimerLayerBlocklistStore) GetChannelBlockUser(channelId string, userId 
 	return result, err
 }
 
+func (s *TimerLayerBlocklistStore) GetChannelBlockUserByEmail(channelId string, email string) (*model.ChannelBlockUser, error) {
+	start := time.Now()
+
+	result, err := s.BlocklistStore.GetChannelBlockUserByEmail(channelId, email)
+
+	elapsed := float64(time.Since(start)) / float64(time.Second)
+	if s.Root.Metrics != nil {
+		success := "false"
+		if err == nil {
+			success = "true"
+		}
+		s.Root.Metrics.ObserveStoreMethodDuration("BlocklistStore.GetChannelBlockUserByEmail", success, elapsed)
+	}
+	return result, err
+}
+
 func (s *TimerLayerBlocklistStore) GetTeamBlockUser(channelId string, userId string) (*model.TeamBlockUser, error) {
 	start := time.Now()
 
@@ -605,6 +621,22 @@ func (s *TimerLayerBlocklistStore) GetTeamBlockUser(channelId string, userId str
 			success = "true"
 		}
 		s.Root.Metrics.ObserveStoreMethodDuration("BlocklistStore.GetTeamBlockUser", success, elapsed)
+	}
+	return result, err
+}
+
+func (s *TimerLayerBlocklistStore) GetTeamBlockUserByEmail(teamId string, email string) (*model.TeamBlockUser, error) {
+	start := time.Now()
+
+	result, err := s.BlocklistStore.GetTeamBlockUserByEmail(teamId, email)
+
+	elapsed := float64(time.Since(start)) / float64(time.Second)
+	if s.Root.Metrics != nil {
+		success := "false"
+		if err == nil {
+			success = "true"
+		}
+		s.Root.Metrics.ObserveStoreMethodDuration("BlocklistStore.GetTeamBlockUserByEmail", success, elapsed)
 	}
 	return result, err
 }

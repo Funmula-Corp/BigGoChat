@@ -97,6 +97,36 @@ func (s *SqlBlocklistStore) GetTeamBlockUser(teamId string, blockedId string) (*
 	return &teamBlockUser, nil
 }
 
+func (s *SqlBlocklistStore) GetTeamBlockUserByEmail(teamId string, email string) (*model.TeamBlockUser, error) {
+	query := s.getQueryBuilder().
+		Select("TeamBlockUsers.TeamId", "TeamBlockUsers.BlockedId", "TeamBlockUsers.CreateBy", "TeamBlockUsers.CreateAt").
+		From("TeamBlockUsers").
+		InnerJoin("Users ON TeamBlockUsers.BlockedId = Users.Id").
+		Where(
+		sq.And{
+			sq.Eq{"TeamBlockUsers.TeamId": teamId},
+			sq.Eq{"Users.Email": email},
+		},
+	)
+
+	queryString, args, err := query.ToSql()
+	if err != nil {
+		return nil, errors.Wrap(err, "get_team_block_user_tosql")
+	}
+
+	teamBlockUser := model.TeamBlockUser{}
+	err = s.GetReplicaX().Get(&teamBlockUser, queryString, args...)
+
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		} else {
+			return nil, errors.Wrapf(err, "failed to get teams blocklist with id %v", teamId)
+		}
+	}
+	return &teamBlockUser, nil
+}
+
 func (s *SqlBlocklistStore) ListTeamBlockUsers(teamId string) (*model.TeamBlockUserList, error) {
 	query := s.getQueryBuilder().
 		Select(teamBlockUserSliceColumns()...).
@@ -210,6 +240,36 @@ func (s *SqlBlocklistStore) GetChannelBlockUser(channelId string, blockedId stri
 			return nil, nil
 		} else {
 			return nil, errors.Wrapf(err, "failed to get channels blocklist with id %v", channelId)
+		}
+	}
+	return &channelBlockUser, nil
+}
+
+func (s *SqlBlocklistStore) GetChannelBlockUserByEmail(channelId string, email string) (*model.ChannelBlockUser, error) {
+	query := s.getQueryBuilder().
+		Select("ChannelBlockUsers.ChannelId", "ChannelBlockUsers.BlockedId", "ChannelBlockUsers.CreateBy", "ChannelBlockUsers.CreateAt").
+		From("ChannelBlockUsers").
+		InnerJoin("Users ON ChannelBlockUsers.BlockedId = Users.Id").
+		Where(
+		sq.And{
+			sq.Eq{"ChannelBlockUsers.ChannelId": channelId},
+			sq.Eq{"Users.Email": email},
+		},
+	)
+
+	queryString, args, err := query.ToSql()
+	if err != nil {
+		return nil, errors.Wrap(err, "get_channel_block_user_tosql")
+	}
+
+	channelBlockUser := model.ChannelBlockUser{}
+	err = s.GetReplicaX().Get(&channelBlockUser, queryString, args...)
+
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		} else {
+			return nil, errors.Wrapf(err, "failed to get channels blocklist with id %v %s", channelId, queryString)
 		}
 	}
 	return &channelBlockUser, nil

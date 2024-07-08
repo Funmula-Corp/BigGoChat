@@ -1,8 +1,12 @@
 package app
 
 import (
+	"errors"
+	"net/http"
+
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
 )
 
 func (a *App) AddTeamBlockUser(rctx request.CTX, teamId string, blockedId string) (*model.TeamBlockUser, *model.AppError) {
@@ -11,6 +15,17 @@ func (a *App) AddTeamBlockUser(rctx request.CTX, teamId string, blockedId string
 		TeamId: teamId,
 		BlockedId: blockedId,
 		CreateBy:  userId,
+	}
+	if userId == blockedId {
+		return nil, model.NewAppError("AddTeamBlockUser", "app.team.add_blocklist.add_self.app_err", nil, "", http.StatusBadRequest)
+	}
+	if tm, err := a.GetTeamMember(rctx, teamId, blockedId); err != nil{
+		var nfErr *store.ErrNotFound
+		if !errors.As(err, &nfErr) {
+			return nil, err
+		}
+	}else if tm.SchemeAdmin || tm.SchemeModerator {
+		return nil, model.NewAppError("AddTeamBlockUser", "app.team.add_blocklist.team_moderator.app_err", nil, "", http.StatusBadRequest)
 	}
 	if err := a.RemoveUserFromTeam(rctx, teamId, blockedId, userId); err != nil {
 		// block a user who is not a team member.
@@ -66,6 +81,17 @@ func (a *App) AddChannelBlockUser(rctx request.CTX, channelId string, blockedId 
 		BlockedId: blockedId,
 		CreateBy:  userId,
 	}
+	if userId == blockedId {
+		return nil, model.NewAppError("AddChannelBlockUser", "app.channel.add_blocklist.add_self.app_err", nil, "", http.StatusBadRequest)
+	}
+	if cm, err := a.GetChannelMember(rctx, channelId, blockedId); err != nil {
+		var nfErr *store.ErrNotFound
+		if !errors.As(err, &nfErr) {
+			return nil, err
+		}
+	} else if cm.SchemeAdmin {
+		return nil, model.NewAppError("AddChanelBlockUser", "app.channel.add_blocklist.channel_admin.app_err", nil, "", http.StatusBadRequest)
+	}
 	if saved, err := a.Srv().Store().Blocklist().SaveChannelBlockUser(&newCBU); err != nil {
 		return nil, model.NewAppError("AddChannelBlockUser", "app.channel.add_blocklist.add.app_error", nil, "", 500).Wrap(err)
 	} else {
@@ -110,6 +136,9 @@ func (a *App) AddUserBlockUser(rctx request.CTX, userId string, blockedId string
 	newUBU := model.UserBlockUser{
 		UserId:    userId,
 		BlockedId: blockedId,
+	}
+	if userId == blockedId {
+		return nil, model.NewAppError("AddUserBlockUser", "app.user.add_blocklist.add_self.app_err", nil, "", http.StatusBadRequest)
 	}
 	if saved, err := a.Srv().Store().Blocklist().SaveUserBlockUser(&newUBU); err != nil {
 		return nil, model.NewAppError("AddUserBlockUser", "app.user.add_blocklist.save.app_error", nil, "", 500).Wrap(err)

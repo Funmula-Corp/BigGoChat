@@ -145,9 +145,9 @@ func TestChannelBlockUser(t *testing.T) {
 	defer th.TearDown()
 	client := th.Client
 	resp, err := th.SystemAdminClient.UpdateChannelMemberSchemeRoles(context.Background(), th.BasicChannel.Id, th.BasicUser.Id, &model.SchemeRoles{
-		SchemeAdmin: true,
+		SchemeAdmin:    true,
 		SchemeVerified: true,
-		SchemeUser: true,
+		SchemeUser:     true,
 	})
 	require.NoError(t, err)
 	CheckOKStatus(t, resp)
@@ -211,9 +211,9 @@ func TestChannelBlockUserPost(t *testing.T) {
 		panic(lErr)
 	}
 	resp, err := th.SystemAdminClient.UpdateChannelMemberSchemeRoles(context.Background(), th.BasicChannel.Id, th.BasicUser.Id, &model.SchemeRoles{
-		SchemeAdmin: true,
+		SchemeAdmin:    true,
 		SchemeVerified: true,
-		SchemeUser: true,
+		SchemeUser:     true,
 	})
 	require.NoError(t, err)
 	CheckOKStatus(t, resp)
@@ -329,6 +329,35 @@ func TestTeamBlockUserAddRemove(t *testing.T) {
 	_, resp8, err8 := otherClient.ListUserBlockUsers(context.Background(), th.BasicTeam.Id)
 	require.Error(t, err8)
 	CheckForbiddenStatus(t, resp8)
+
+	// Cannot block other team admin/team moderator
+	teamAdmin := th.CreateUser()
+	teamModerator := th.CreateUser()
+	schemeRoleAdmin := model.SchemeRoles{
+		SchemeAdmin:     true,
+		SchemeUser:      true,
+		SchemeGuest:     false,
+		SchemeVerified:  true,
+		SchemeModerator: true,
+	}
+	th.LinkUserToTeam(teamAdmin, th.BasicTeam)
+	th.LinkUserToTeam(teamModerator, th.BasicTeam)
+	resp, err := th.SystemAdminClient.UpdateTeamMemberSchemeRoles(context.Background(), th.BasicTeam.Id, teamModerator.Id, &schemeRole)
+	require.NoError(t, err)
+	CheckOKStatus(t, resp)
+	resp, err = th.SystemAdminClient.UpdateTeamMemberSchemeRoles(context.Background(), th.BasicTeam.Id, teamAdmin.Id, &schemeRoleAdmin)
+	require.NoError(t, err)
+	CheckOKStatus(t, resp)
+	_, resp, err = client.AddTeamBlockUser(context.Background(), th.BasicTeam.Id, teamAdmin.Id)
+	require.Error(t, err)
+	CheckBadRequestStatus(t, resp)
+	_, resp, err = client.AddTeamBlockUser(context.Background(), th.BasicTeam.Id, teamModerator.Id)
+	require.Error(t, err)
+	CheckBadRequestStatus(t, resp)
+	//cannot block self
+	_, resp, err = client.AddTeamBlockUser(context.Background(), th.BasicTeam.Id, th.BasicUser.Id)
+	require.Error(t, err)
+	CheckBadRequestStatus(t, resp)
 }
 
 // put the user into team block list also remove he/she from team.

@@ -648,11 +648,53 @@ func (s *RetryLayerBlocklistStore) GetChannelBlockUser(channelId string, userId 
 
 }
 
+func (s *RetryLayerBlocklistStore) GetChannelBlockUserByEmail(channelId string, email string) (*model.ChannelBlockUser, error) {
+
+	tries := 0
+	for {
+		result, err := s.BlocklistStore.GetChannelBlockUserByEmail(channelId, email)
+		if err == nil {
+			return result, nil
+		}
+		if !isRepeatableError(err) {
+			return result, err
+		}
+		tries++
+		if tries >= 3 {
+			err = errors.Wrap(err, "giving up after 3 consecutive repeatable transaction failures")
+			return result, err
+		}
+		timepkg.Sleep(100 * timepkg.Millisecond)
+	}
+
+}
+
 func (s *RetryLayerBlocklistStore) GetTeamBlockUser(channelId string, userId string) (*model.TeamBlockUser, error) {
 
 	tries := 0
 	for {
 		result, err := s.BlocklistStore.GetTeamBlockUser(channelId, userId)
+		if err == nil {
+			return result, nil
+		}
+		if !isRepeatableError(err) {
+			return result, err
+		}
+		tries++
+		if tries >= 3 {
+			err = errors.Wrap(err, "giving up after 3 consecutive repeatable transaction failures")
+			return result, err
+		}
+		timepkg.Sleep(100 * timepkg.Millisecond)
+	}
+
+}
+
+func (s *RetryLayerBlocklistStore) GetTeamBlockUserByEmail(teamId string, email string) (*model.TeamBlockUser, error) {
+
+	tries := 0
+	for {
+		result, err := s.BlocklistStore.GetTeamBlockUserByEmail(teamId, email)
 		if err == nil {
 			return result, nil
 		}

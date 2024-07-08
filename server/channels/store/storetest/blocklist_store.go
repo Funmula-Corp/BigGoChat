@@ -18,6 +18,8 @@ func TestBlocklistStore(t *testing.T, rctx request.CTX, ss store.Store) {
 	t.Run("ListTeamBlockUser", func(t *testing.T) { testListTeamBlockUser(t, rctx, ss) })
 	t.Run("ListChannelBlockUser", func(t *testing.T) { testListChannelBlockUser(t, rctx, ss) })
 	t.Run("ListUserBlockUser", func(t *testing.T) { testListUserBlockUser(t, rctx, ss) })
+	t.Run("GetTeamBlockUserByEmail", func(t *testing.T) { testGetTeamBlockUserByEmail(t, rctx, ss) })
+	t.Run("GetChannelBlockUserByEmail", func(t *testing.T) { testGetChannelBlockUserByEmail(t, rctx, ss) })
 }
 
 func testSaveTeamBlockUser(t *testing.T, _ request.CTX, ss store.Store) {
@@ -325,4 +327,35 @@ func testListUserBlockUser(t *testing.T, _ request.CTX, ss store.Store) {
 	retCBUL, err = ss.Blocklist().ListUserBlockUsersByBlockedUser(user4)
 	require.NoError(t, err)
 	assert.Len(t, *retCBUL, 0)
+}
+
+func testGetTeamBlockUserByEmail(t *testing.T, ctx request.CTX, ss store.Store) {
+	user := &model.User{
+		Email: MakeEmail(),
+	}
+	user, err := ss.User().Save(ctx, user)
+	require.NoError(t, err)
+	team1 := model.NewId()
+	createAt := model.GetMillis()
+	_, err = ss.Blocklist().SaveTeamBlockUser( &model.TeamBlockUser{TeamId: team1, BlockedId: user.Id, CreateBy: model.NewId(), CreateAt: createAt})
+	require.NoError(t, err)
+
+	tbu, err := ss.Blocklist().GetTeamBlockUserByEmail(team1, user.Email)
+	require.NoError(t, err)
+	require.Equal(t, user.Id, tbu.BlockedId)
+}
+
+func testGetChannelBlockUserByEmail(t *testing.T, ctx request.CTX, ss store.Store) {
+	user := &model.User{
+		Email: MakeEmail(),
+	}
+	user, err := ss.User().Save(ctx, user)
+	require.NoError(t, err)
+	channelId := model.NewId()
+	createAt := model.GetMillis()
+	_, err = ss.Blocklist().SaveChannelBlockUser( &model.ChannelBlockUser{ChannelId: channelId, BlockedId: user.Id, CreateBy: model.NewId(), CreateAt: createAt})
+
+	cbu, err := ss.Blocklist().GetChannelBlockUserByEmail(channelId, user.Email)
+	require.NoError(t, err)
+	require.Equal(t, user.Id, cbu.BlockedId)
 }

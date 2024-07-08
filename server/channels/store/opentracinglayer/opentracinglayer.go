@@ -607,6 +607,24 @@ func (s *OpenTracingLayerBlocklistStore) GetChannelBlockUser(channelId string, u
 	return result, err
 }
 
+func (s *OpenTracingLayerBlocklistStore) GetChannelBlockUserByEmail(channelId string, email string) (*model.ChannelBlockUser, error) {
+	origCtx := s.Root.Store.Context()
+	span, newCtx := tracing.StartSpanWithParentByContext(s.Root.Store.Context(), "BlocklistStore.GetChannelBlockUserByEmail")
+	s.Root.Store.SetContext(newCtx)
+	defer func() {
+		s.Root.Store.SetContext(origCtx)
+	}()
+
+	defer span.Finish()
+	result, err := s.BlocklistStore.GetChannelBlockUserByEmail(channelId, email)
+	if err != nil {
+		span.LogFields(spanlog.Error(err))
+		ext.Error.Set(span, true)
+	}
+
+	return result, err
+}
+
 func (s *OpenTracingLayerBlocklistStore) GetTeamBlockUser(channelId string, userId string) (*model.TeamBlockUser, error) {
 	origCtx := s.Root.Store.Context()
 	span, newCtx := tracing.StartSpanWithParentByContext(s.Root.Store.Context(), "BlocklistStore.GetTeamBlockUser")
@@ -617,6 +635,24 @@ func (s *OpenTracingLayerBlocklistStore) GetTeamBlockUser(channelId string, user
 
 	defer span.Finish()
 	result, err := s.BlocklistStore.GetTeamBlockUser(channelId, userId)
+	if err != nil {
+		span.LogFields(spanlog.Error(err))
+		ext.Error.Set(span, true)
+	}
+
+	return result, err
+}
+
+func (s *OpenTracingLayerBlocklistStore) GetTeamBlockUserByEmail(teamId string, email string) (*model.TeamBlockUser, error) {
+	origCtx := s.Root.Store.Context()
+	span, newCtx := tracing.StartSpanWithParentByContext(s.Root.Store.Context(), "BlocklistStore.GetTeamBlockUserByEmail")
+	s.Root.Store.SetContext(newCtx)
+	defer func() {
+		s.Root.Store.SetContext(origCtx)
+	}()
+
+	defer span.Finish()
+	result, err := s.BlocklistStore.GetTeamBlockUserByEmail(teamId, email)
 	if err != nil {
 		span.LogFields(spanlog.Error(err))
 		ext.Error.Set(span, true)
