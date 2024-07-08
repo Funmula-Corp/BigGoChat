@@ -1347,13 +1347,13 @@ func TestPromoteGuestToUser(t *testing.T) {
 	defer th.TearDown()
 
 	t.Run("Must fail with regular user", func(t *testing.T) {
-		require.Equal(t, "system_user", th.BasicUser.Roles)
+		require.Equal(t, "system_user system_verified", th.BasicUser.Roles)
 		err := th.App.PromoteGuestToUser(th.Context, th.BasicUser, th.BasicUser.Id)
 		require.Nil(t, err)
 
 		user, err := th.App.GetUser(th.BasicUser.Id)
 		assert.Nil(t, err)
-		assert.Equal(t, "system_user", user.Roles)
+		assert.Equal(t, "system_user system_verified", user.Roles)
 	})
 
 	t.Run("Must work with guest user without teams or channels", func(t *testing.T) {
@@ -1484,7 +1484,7 @@ func TestDemoteUserToGuest(t *testing.T) {
 
 	t.Run("Must invalidate channel stats cache when demoting a user", func(t *testing.T) {
 		user := th.CreateUser()
-		require.Equal(t, "system_user", user.Roles)
+		require.Equal(t, "system_user system_verified", user.Roles)
 		th.LinkUserToTeam(user, th.BasicTeam)
 		teamMember, err := th.App.GetTeamMember(th.Context, th.BasicTeam.Id, user.Id)
 		require.Nil(t, err)
@@ -1521,7 +1521,7 @@ func TestDemoteUserToGuest(t *testing.T) {
 
 	t.Run("Must work with user without teams or channels", func(t *testing.T) {
 		user := th.CreateUser()
-		require.Equal(t, "system_user", user.Roles)
+		require.Equal(t, "system_user system_verified", user.Roles)
 
 		err := th.App.DemoteUserToGuest(th.Context, user)
 		require.Nil(t, err)
@@ -1532,7 +1532,7 @@ func TestDemoteUserToGuest(t *testing.T) {
 
 	t.Run("Must work with user with teams but no channels", func(t *testing.T) {
 		user := th.CreateUser()
-		require.Equal(t, "system_user", user.Roles)
+		require.Equal(t, "system_user system_verified", user.Roles)
 		th.LinkUserToTeam(user, th.BasicTeam)
 		teamMember, err := th.App.GetTeamMember(th.Context, th.BasicTeam.Id, user.Id)
 		require.Nil(t, err)
@@ -1552,7 +1552,7 @@ func TestDemoteUserToGuest(t *testing.T) {
 
 	t.Run("Must work with user with teams and channels", func(t *testing.T) {
 		user := th.CreateUser()
-		require.Equal(t, "system_user", user.Roles)
+		require.Equal(t, "system_user system_verified", user.Roles)
 		th.LinkUserToTeam(user, th.BasicTeam)
 		teamMember, err := th.App.GetTeamMember(th.Context, th.BasicTeam.Id, user.Id)
 		require.Nil(t, err)
@@ -1580,7 +1580,7 @@ func TestDemoteUserToGuest(t *testing.T) {
 
 	t.Run("Must respect the current channels not removing defaults", func(t *testing.T) {
 		user := th.CreateUser()
-		require.Equal(t, "system_user", user.Roles)
+		require.Equal(t, "system_user system_verified", user.Roles)
 		th.LinkUserToTeam(user, th.BasicTeam)
 		teamMember, err := th.App.GetTeamMember(th.Context, th.BasicTeam.Id, user.Id)
 		require.Nil(t, err)
@@ -1616,12 +1616,12 @@ func TestDemoteUserToGuest(t *testing.T) {
 
 	t.Run("Must be removed as team and channel admin", func(t *testing.T) {
 		user := th.CreateUser()
-		require.Equal(t, "system_user", user.Roles)
+		require.Equal(t, "system_user system_verified", user.Roles)
 
 		team := th.CreateTeam()
 
 		th.LinkUserToTeam(user, team)
-		th.App.UpdateTeamMemberRoles(th.Context, team.Id, user.Id, "team_user team_admin")
+		th.App.UpdateTeamMemberRoles(th.Context, team.Id, user.Id, "team_user team_verified team_admin")
 
 		teamMember, err := th.App.GetTeamMember(th.Context, team.Id, user.Id)
 		require.Nil(t, err)
@@ -1693,7 +1693,7 @@ func TestUpdateUserRolesWithUser(t *testing.T) {
 
 	// Create normal user.
 	user := th.CreateUser()
-	assert.Equal(t, user.Roles, model.SystemUserRoleId)
+	assert.Equal(t, user.Roles, model.SystemUserRoleId+" "+model.SystemVerifiedRoleId)
 
 	// Upgrade to sysadmin.
 	user, err := th.App.UpdateUserRolesWithUser(th.Context, user, model.SystemUserRoleId+" "+model.SystemAdminRoleId, false)
