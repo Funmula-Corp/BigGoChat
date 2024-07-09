@@ -8,9 +8,9 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
 )
 
 func createAudit(ss store.Store, userId, sessionId string) *model.Audit {
@@ -229,6 +229,23 @@ func createDefaultRoles(ss store.Store) {
 	})
 
 	ss.Role().Save(&model.Role{
+		Name:        model.TeamModeratorRoleId,
+		DisplayName: model.TeamModeratorRoleId,
+		Permissions: []string{
+			model.PermissionDeleteOthersPosts.Id,
+		},
+	})
+
+	ss.Role().Save(&model.Role{
+		Name:        model.TeamVerifiedRoleId,
+		DisplayName: model.TeamVerifiedRoleId,
+		Permissions: []string{
+			model.PermissionViewTeam.Id,
+			model.PermissionAddUserToTeam.Id,
+		},
+	})
+
+	ss.Role().Save(&model.Role{
 		Name:        model.TeamUserRoleId,
 		DisplayName: model.TeamUserRoleId,
 		Permissions: []string{
@@ -251,6 +268,16 @@ func createDefaultRoles(ss store.Store) {
 		Permissions: []string{
 			model.PermissionManagePublicChannelMembers.Id,
 			model.PermissionManagePrivateChannelMembers.Id,
+		},
+	})
+
+	ss.Role().Save(&model.Role{
+		Name:        model.ChannelVerifiedRoleId,
+		DisplayName: model.ChannelVerifiedRoleId,
+		Permissions: []string{
+			model.PermissionReadChannel.Id,
+			model.PermissionReadChannelContent.Id,
+			model.PermissionCreatePost.Id,
 		},
 	})
 
@@ -714,6 +741,7 @@ func TestCheckSchemesChannelsIntegrity(t *testing.T) {
 		t.Run("should generate a report with one record", func(t *testing.T) {
 			createDefaultRoles(ss)
 			scheme := createScheme(ss)
+			require.NotNil(t, scheme)
 			schemeId := scheme.Id
 			channel := createChannelWithSchemeId(rctx, ss, &schemeId)
 			dbmap.Exec(`DELETE FROM Schemes WHERE Id=?`, scheme.Id)
@@ -745,6 +773,7 @@ func TestCheckSchemesTeamsIntegrity(t *testing.T) {
 		t.Run("should generate a report with one record", func(t *testing.T) {
 			createDefaultRoles(ss)
 			scheme := createScheme(ss)
+			require.NotNil(t, scheme)
 			schemeId := scheme.Id
 			team := createTeamWithSchemeId(ss, &schemeId)
 			dbmap.Exec(`DELETE FROM Schemes WHERE Id=?`, scheme.Id)

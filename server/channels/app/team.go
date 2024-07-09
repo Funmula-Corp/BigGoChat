@@ -17,17 +17,17 @@ import (
 	"sort"
 	"strings"
 
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/i18n"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app/email"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app/imaging"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app/teams"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app/users"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store/sqlstore"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/i18n"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
 )
 
 func (a *App) AdjustTeamsFromProductLimits(teamLimits *model.TeamsLimits) *model.AppError {
@@ -373,21 +373,21 @@ func (a *App) sendTeamEvent(team *model.Team, event model.WebsocketEventType) *m
 	return nil
 }
 
-func (a *App) GetSchemeRolesForTeam(teamID string) (string, string, string, *model.AppError) {
+func (a *App) GetSchemeRolesForTeam(teamID string) (string, string, string, string, string, *model.AppError) {
 	team, err := a.GetTeam(teamID)
 	if err != nil {
-		return "", "", "", err
+		return "", "", "", "", "", err
 	}
 
 	if team.SchemeId != nil && *team.SchemeId != "" {
 		scheme, err := a.GetScheme(*team.SchemeId)
 		if err != nil {
-			return "", "", "", err
+			return "", "", "", "", "", err
 		}
-		return scheme.DefaultTeamGuestRole, scheme.DefaultTeamUserRole, scheme.DefaultTeamAdminRole, nil
+		return scheme.DefaultTeamGuestRole, scheme.DefaultTeamUserRole, scheme.DefaultTeamVerifiedRole, scheme.DefaultTeamModeratorRole, scheme.DefaultTeamAdminRole, nil
 	}
 
-	return model.TeamGuestRoleId, model.TeamUserRoleId, model.TeamAdminRoleId, nil
+	return model.TeamGuestRoleId, model.TeamUserRoleId, model.TeamVerifiedRoleId, model.TeamModeratorRoleId, model.TeamAdminRoleId, nil
 }
 
 func (a *App) UpdateTeamMemberRoles(c request.CTX, teamID string, userID string, newRoles string) (*model.TeamMember, *model.AppError) {
@@ -406,16 +406,19 @@ func (a *App) UpdateTeamMemberRoles(c request.CTX, teamID string, userID string,
 		return nil, model.NewAppError("UpdateTeamMemberRoles", "api.team.update_member_roles.not_a_member", nil, "userId="+userID+" teamId="+teamID, http.StatusBadRequest)
 	}
 
-	schemeGuestRole, schemeUserRole, schemeAdminRole, err := a.GetSchemeRolesForTeam(teamID)
+	schemeGuestRole, schemeUserRole, schemeVerifiedRole, schemeModeratorRole, schemeAdminRole, err := a.GetSchemeRolesForTeam(teamID)
 	if err != nil {
 		return nil, err
 	}
 
 	prevSchemeGuestValue := member.SchemeGuest
+	prevSchemeVerifiedValue := member.SchemeVerified
 
 	var newExplicitRoles []string
 	member.SchemeGuest = false
 	member.SchemeUser = false
+	member.SchemeVerified = false
+	member.SchemeModerator = false
 	member.SchemeAdmin = false
 
 	for _, roleName := range strings.Fields(newRoles) {
@@ -433,6 +436,10 @@ func (a *App) UpdateTeamMemberRoles(c request.CTX, teamID string, userID string,
 			switch roleName {
 			case schemeAdminRole:
 				member.SchemeAdmin = true
+			case schemeModeratorRole:
+				member.SchemeModerator = true
+			case schemeVerifiedRole:
+				member.SchemeVerified = true
 			case schemeUserRole:
 				member.SchemeUser = true
 			case schemeGuestRole:
@@ -450,6 +457,10 @@ func (a *App) UpdateTeamMemberRoles(c request.CTX, teamID string, userID string,
 
 	if prevSchemeGuestValue != member.SchemeGuest {
 		return nil, model.NewAppError("UpdateTeamMemberRoles", "api.channel.update_team_member_roles.changing_guest_role.app_error", nil, "", http.StatusBadRequest)
+	}
+
+	if prevSchemeVerifiedValue != member.SchemeVerified {
+		return nil, model.NewAppError("UpdateTeamMemberRoles", "api.channel.update_team_member_roles.changing_verified_role.app_error", nil, "", http.StatusBadRequest)
 	}
 
 	member.ExplicitRoles = strings.Join(newExplicitRoles, " ")
@@ -474,7 +485,7 @@ func (a *App) UpdateTeamMemberRoles(c request.CTX, teamID string, userID string,
 	return member, nil
 }
 
-func (a *App) UpdateTeamMemberSchemeRoles(c request.CTX, teamID string, userID string, isSchemeGuest bool, isSchemeUser bool, isSchemeAdmin bool) (*model.TeamMember, *model.AppError) {
+func (a *App) UpdateTeamMemberSchemeRoles(c request.CTX, teamID string, userID string, isSchemeGuest bool, isSchemeUser bool, isSchemeVerified bool, isSchemeModerator bool, isSchemeAdmin bool) (*model.TeamMember, *model.AppError) {
 	member, err := a.GetTeamMember(c, teamID, userID)
 	if err != nil {
 		return nil, err
@@ -489,6 +500,8 @@ func (a *App) UpdateTeamMemberSchemeRoles(c request.CTX, teamID string, userID s
 	}
 
 	member.SchemeAdmin = isSchemeAdmin
+	member.SchemeModerator = isSchemeModerator
+	member.SchemeVerified = isSchemeVerified
 	member.SchemeUser = isSchemeUser
 	member.SchemeGuest = isSchemeGuest
 
@@ -640,6 +653,12 @@ func (a *App) AddUserToTeamByToken(c request.CTX, userID string, tokenID string)
 		return nil, nil, model.NewAppError("AddUserToTeamByToken", "app.team.invite_token.group_constrained.error", nil, "", http.StatusForbidden)
 	}
 
+	if blocked, err := a.GetTeamBlockUser(c, team.Id, userID); err != nil {
+		return nil, nil, err
+	}else if blocked != nil {
+		return nil, nil, model.NewAppError("AddUserToTeamByToken", "app.team.invite_token.blocked_user.app_error", nil, "", http.StatusForbidden)
+	}
+
 	userChanResult := <-uchan
 	if userChanResult.NErr != nil {
 		var nfErr *store.ErrNotFound
@@ -723,6 +742,12 @@ func (a *App) AddUserToTeamByInviteId(c request.CTX, inviteId string, userID str
 		}
 	}
 	user := userChanResult.Data
+
+	if blocked, err := a.GetTeamBlockUser(c, team.Id, userID); err != nil {
+		return nil, nil, err
+	}else if blocked != nil {
+		return nil, nil, model.NewAppError("AddUserToTeamByToken", "app.team.invite_id.blocked_user.app_error", nil, "", http.StatusForbidden)
+	}
 
 	teamMember, err := a.JoinUserToTeam(c, team, user, "")
 	if err != nil {

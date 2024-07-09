@@ -14,6 +14,36 @@ type SchemeStore struct {
 	mock.Mock
 }
 
+// CloneScheme provides a mock function with given fields: scheme
+func (_m *SchemeStore) CloneScheme(scheme *model.Scheme) (*model.Scheme, error) {
+	ret := _m.Called(scheme)
+
+	if len(ret) == 0 {
+		panic("no return value specified for CloneScheme")
+	}
+
+	var r0 *model.Scheme
+	var r1 error
+	if rf, ok := ret.Get(0).(func(*model.Scheme) (*model.Scheme, error)); ok {
+		return rf(scheme)
+	}
+	if rf, ok := ret.Get(0).(func(*model.Scheme) *model.Scheme); ok {
+		r0 = rf(scheme)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.Scheme)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(*model.Scheme) error); ok {
+		r1 = rf(scheme)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // CountByScope provides a mock function with given fields: scope
 func (_m *SchemeStore) CountByScope(scope string) (int64, error) {
 	ret := _m.Called(scope)
@@ -70,12 +100,12 @@ func (_m *SchemeStore) CountWithoutPermission(scope string, permissionID string,
 	return r0, r1
 }
 
-// CreateScheme provides a mock function with given fields: scheme
-func (_m *SchemeStore) CreateScheme(scheme *model.Scheme) (*model.Scheme, error) {
+// CreateBuiltInScheme provides a mock function with given fields: scheme
+func (_m *SchemeStore) CreateBuiltInScheme(scheme *model.Scheme) (*model.Scheme, error) {
 	ret := _m.Called(scheme)
 
 	if len(ret) == 0 {
-		panic("no return value specified for CreateScheme")
+		panic("no return value specified for CreateBuiltInScheme")
 	}
 
 	var r0 *model.Scheme

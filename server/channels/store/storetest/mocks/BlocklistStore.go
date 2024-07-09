@@ -32,17 +32,35 @@ func (_m *BlocklistStore) DeleteChannelBlockUser(channelId string, userId string
 	return r0
 }
 
-// DeleteUserBlockUser provides a mock function with given fields: userId, blockedId
-func (_m *BlocklistStore) DeleteUserBlockUser(userId string, blockedId string) error {
-	ret := _m.Called(userId, blockedId)
+// DeleteTeamBlockUser provides a mock function with given fields: channelId, userId
+func (_m *BlocklistStore) DeleteTeamBlockUser(channelId string, userId string) error {
+	ret := _m.Called(channelId, userId)
+
+	if len(ret) == 0 {
+		panic("no return value specified for DeleteTeamBlockUser")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(string, string) error); ok {
+		r0 = rf(channelId, userId)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// DeleteUserBlockUser provides a mock function with given fields: userId, blockedId, userIsVerified, blockedIsVerified
+func (_m *BlocklistStore) DeleteUserBlockUser(userId string, blockedId string, userIsVerified bool, blockedIsVerified bool) error {
+	ret := _m.Called(userId, blockedId, userIsVerified, blockedIsVerified)
 
 	if len(ret) == 0 {
 		panic("no return value specified for DeleteUserBlockUser")
 	}
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(string, string) error); ok {
-		r0 = rf(userId, blockedId)
+	if rf, ok := ret.Get(0).(func(string, string, bool, bool) error); ok {
+		r0 = rf(userId, blockedId, userIsVerified, blockedIsVerified)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -73,6 +91,96 @@ func (_m *BlocklistStore) GetChannelBlockUser(channelId string, userId string) (
 
 	if rf, ok := ret.Get(1).(func(string, string) error); ok {
 		r1 = rf(channelId, userId)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GetChannelBlockUserByEmail provides a mock function with given fields: channelId, email
+func (_m *BlocklistStore) GetChannelBlockUserByEmail(channelId string, email string) (*model.ChannelBlockUser, error) {
+	ret := _m.Called(channelId, email)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetChannelBlockUserByEmail")
+	}
+
+	var r0 *model.ChannelBlockUser
+	var r1 error
+	if rf, ok := ret.Get(0).(func(string, string) (*model.ChannelBlockUser, error)); ok {
+		return rf(channelId, email)
+	}
+	if rf, ok := ret.Get(0).(func(string, string) *model.ChannelBlockUser); ok {
+		r0 = rf(channelId, email)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.ChannelBlockUser)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(string, string) error); ok {
+		r1 = rf(channelId, email)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GetTeamBlockUser provides a mock function with given fields: channelId, userId
+func (_m *BlocklistStore) GetTeamBlockUser(channelId string, userId string) (*model.TeamBlockUser, error) {
+	ret := _m.Called(channelId, userId)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetTeamBlockUser")
+	}
+
+	var r0 *model.TeamBlockUser
+	var r1 error
+	if rf, ok := ret.Get(0).(func(string, string) (*model.TeamBlockUser, error)); ok {
+		return rf(channelId, userId)
+	}
+	if rf, ok := ret.Get(0).(func(string, string) *model.TeamBlockUser); ok {
+		r0 = rf(channelId, userId)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.TeamBlockUser)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(string, string) error); ok {
+		r1 = rf(channelId, userId)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GetTeamBlockUserByEmail provides a mock function with given fields: teamId, email
+func (_m *BlocklistStore) GetTeamBlockUserByEmail(teamId string, email string) (*model.TeamBlockUser, error) {
+	ret := _m.Called(teamId, email)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetTeamBlockUserByEmail")
+	}
+
+	var r0 *model.TeamBlockUser
+	var r1 error
+	if rf, ok := ret.Get(0).(func(string, string) (*model.TeamBlockUser, error)); ok {
+		return rf(teamId, email)
+	}
+	if rf, ok := ret.Get(0).(func(string, string) *model.TeamBlockUser); ok {
+		r0 = rf(teamId, email)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.TeamBlockUser)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(string, string) error); ok {
+		r1 = rf(teamId, email)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -170,6 +278,66 @@ func (_m *BlocklistStore) ListChannelBlockUsersByBlockedUser(blockedId string) (
 	return r0, r1
 }
 
+// ListTeamBlockUsers provides a mock function with given fields: channelId
+func (_m *BlocklistStore) ListTeamBlockUsers(channelId string) (*model.TeamBlockUserList, error) {
+	ret := _m.Called(channelId)
+
+	if len(ret) == 0 {
+		panic("no return value specified for ListTeamBlockUsers")
+	}
+
+	var r0 *model.TeamBlockUserList
+	var r1 error
+	if rf, ok := ret.Get(0).(func(string) (*model.TeamBlockUserList, error)); ok {
+		return rf(channelId)
+	}
+	if rf, ok := ret.Get(0).(func(string) *model.TeamBlockUserList); ok {
+		r0 = rf(channelId)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.TeamBlockUserList)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(string) error); ok {
+		r1 = rf(channelId)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ListTeamBlockUsersByBlockedUser provides a mock function with given fields: blockedId
+func (_m *BlocklistStore) ListTeamBlockUsersByBlockedUser(blockedId string) (*model.TeamBlockUserList, error) {
+	ret := _m.Called(blockedId)
+
+	if len(ret) == 0 {
+		panic("no return value specified for ListTeamBlockUsersByBlockedUser")
+	}
+
+	var r0 *model.TeamBlockUserList
+	var r1 error
+	if rf, ok := ret.Get(0).(func(string) (*model.TeamBlockUserList, error)); ok {
+		return rf(blockedId)
+	}
+	if rf, ok := ret.Get(0).(func(string) *model.TeamBlockUserList); ok {
+		r0 = rf(blockedId)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.TeamBlockUserList)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(string) error); ok {
+		r1 = rf(blockedId)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // ListUserBlockUsers provides a mock function with given fields: userId
 func (_m *BlocklistStore) ListUserBlockUsers(userId string) (*model.UserBlockUserList, error) {
 	ret := _m.Called(userId)
@@ -252,6 +420,36 @@ func (_m *BlocklistStore) SaveChannelBlockUser(blockUser *model.ChannelBlockUser
 	}
 
 	if rf, ok := ret.Get(1).(func(*model.ChannelBlockUser) error); ok {
+		r1 = rf(blockUser)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// SaveTeamBlockUser provides a mock function with given fields: blockUser
+func (_m *BlocklistStore) SaveTeamBlockUser(blockUser *model.TeamBlockUser) (*model.TeamBlockUser, error) {
+	ret := _m.Called(blockUser)
+
+	if len(ret) == 0 {
+		panic("no return value specified for SaveTeamBlockUser")
+	}
+
+	var r0 *model.TeamBlockUser
+	var r1 error
+	if rf, ok := ret.Get(0).(func(*model.TeamBlockUser) (*model.TeamBlockUser, error)); ok {
+		return rf(blockUser)
+	}
+	if rf, ok := ret.Get(0).(func(*model.TeamBlockUser) *model.TeamBlockUser); ok {
+		r0 = rf(blockUser)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.TeamBlockUser)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(*model.TeamBlockUser) error); ok {
 		r1 = rf(blockUser)
 	} else {
 		r1 = ret.Error(1)

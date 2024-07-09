@@ -483,6 +483,7 @@ type UserStore interface {
 	RefreshPostStatsForUsers() error
 	GetUserReport(filter *model.UserReportOptions) ([]*model.UserReportQuery, error)
 	GetUserCountForReport(filter *model.UserReportOptions) (int64, error)
+	UpdateMemberVerifiedStatus(rctx request.CTX, user *model.User) (error)
 }
 
 type BotStore interface {
@@ -829,7 +830,8 @@ type SchemeStore interface {
 	CountWithoutPermission(scope, permissionID string, roleScope model.RoleScope, roleType model.RoleType) (int64, error)
 
 	// create scheme with customized id
-	CreateScheme(scheme *model.Scheme) (*model.Scheme, error)
+	CreateBuiltInScheme(scheme *model.Scheme) (*model.Scheme, error)
+	CloneScheme(scheme *model.Scheme) (*model.Scheme, error)
 }
 
 type TermsOfServiceStore interface {
@@ -1047,14 +1049,21 @@ type ChannelBookmarkStore interface {
 
 type BlocklistStore interface {
 	GetChannelBlockUser(channelId string, userId string) (*model.ChannelBlockUser, error)
+	GetChannelBlockUserByEmail(channelId string, email string) (*model.ChannelBlockUser, error)
 	ListChannelBlockUsers(channelId string) (*model.ChannelBlockUserList, error)
 	ListChannelBlockUsersByBlockedUser(blockedId string) (*model.ChannelBlockUserList, error)
 	DeleteChannelBlockUser(channelId string, userId string) error
 	SaveChannelBlockUser(blockUser *model.ChannelBlockUser) (*model.ChannelBlockUser, error)
+	GetTeamBlockUser(channelId string, userId string) (*model.TeamBlockUser, error)
+	GetTeamBlockUserByEmail(teamId string, email string) (*model.TeamBlockUser, error)
+	ListTeamBlockUsers(channelId string) (*model.TeamBlockUserList, error)
+	ListTeamBlockUsersByBlockedUser(blockedId string) (*model.TeamBlockUserList, error)
+	DeleteTeamBlockUser(channelId string, userId string) error
+	SaveTeamBlockUser(blockUser *model.TeamBlockUser) (*model.TeamBlockUser, error)
 	GetUserBlockUser(userId string, blockedId string) (*model.UserBlockUser, error)
 	ListUserBlockUsers(userId string) (*model.UserBlockUserList, error)
 	ListUserBlockUsersByBlockedUser(blockedId string) (*model.UserBlockUserList, error)
-	DeleteUserBlockUser(userId string, blockedId string) error
+	DeleteUserBlockUser(userId, blockedId string, userIsVerified, blockedIsVerified bool) error
 	SaveUserBlockUser(userBlockUser *model.UserBlockUser) (*model.UserBlockUser, error)
 }
 

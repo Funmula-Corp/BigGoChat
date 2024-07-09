@@ -22,13 +22,13 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin/plugintest/mock"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store/storetest/mocks"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/utils"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/utils/testutils"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin/plugintest/mock"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
 )
 
 func TestCreatePost(t *testing.T) {
@@ -123,6 +123,7 @@ func TestCreatePost(t *testing.T) {
 
 		defer th.RestoreDefaultRolePermissions(th.SaveDefaultRolePermissions())
 
+		th.RemovePermissionFromRole(model.PermissionUseChannelMentions.Id, model.ChannelVerifiedRoleId)
 		th.RemovePermissionFromRole(model.PermissionUseChannelMentions.Id, model.ChannelUserRoleId)
 
 		post.RootId = rpost.Id
@@ -3196,6 +3197,8 @@ func TestSearchPostsFromUser(t *testing.T) {
 	th.LinkUserToTeam(user, th.BasicTeam)
 	th.App.AddUserToChannel(th.Context, user, th.BasicChannel, false)
 	th.App.AddUserToChannel(th.Context, user, th.BasicChannel2, false)
+	appErr := th.App.MarkUserVerified(th.Context, user.Id)
+	require.Nil(t, appErr)
 
 	message := "sgtitlereview with space"
 	_ = th.CreateMessagePost(message)

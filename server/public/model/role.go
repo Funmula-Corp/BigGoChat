@@ -29,6 +29,7 @@ func init() {
 	BuiltInSchemeManagedRoleIDs = append([]string{
 		SystemGuestRoleId,
 		SystemUserRoleId,
+		SystemVerifiedRoleId,
 		SystemAdminRoleId,
 		SystemPostAllRoleId,
 		SystemPostAllPublicRoleId,
@@ -36,12 +37,15 @@ func init() {
 
 		TeamGuestRoleId,
 		TeamUserRoleId,
+		TeamVerifiedRoleId,
+		TeamModeratorRoleId,
 		TeamAdminRoleId,
 		TeamPostAllRoleId,
 		TeamPostAllPublicRoleId,
 
 		ChannelGuestRoleId,
 		ChannelUserRoleId,
+		ChannelVerifiedRoleId,
 		ChannelAdminRoleId,
 
 		CustomGroupUserRoleId,
@@ -374,17 +378,21 @@ const (
 	SystemReadOnlyAdminRoleId    = "system_read_only_admin"
 	SystemManagerRoleId          = "system_manager"
 	SystemCustomGroupAdminRoleId = "system_custom_group_admin"
-	SystemVerifiedId             = "system_verified"
+	SystemVerifiedRoleId         = "system_verified"
 
 	TeamGuestRoleId         = "team_guest"
 	TeamUserRoleId          = "team_user"
 	TeamAdminRoleId         = "team_admin"
+	TeamVerifiedRoleId      = "team_verified"
+	TeamModeratorRoleId     = "team_moderator"
 	TeamPostAllRoleId       = "team_post_all"
 	TeamPostAllPublicRoleId = "team_post_all_public"
 
-	ChannelGuestRoleId = "channel_guest"
-	ChannelUserRoleId  = "channel_user"
-	ChannelAdminRoleId = "channel_admin"
+	ChannelGuestRoleId    = "channel_guest"
+	ChannelUserRoleId     = "channel_user"
+	ChannelAdminRoleId    = "channel_admin"
+	ChannelVerifiedRoleId = "channel_verified"
+	ChannelReadOnlyRoleId = "channel_readonly"
 
 	CustomGroupUserRoleId = "custom_group_user"
 

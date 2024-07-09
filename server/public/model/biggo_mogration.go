@@ -2,5 +2,8 @@ package model
 
 const (
 	CustomChannelReadOnlyRoleCreationMigrationKey = "CustomChannelReadOnlyRoleCreationMigrationComplete"
-	CustomSystemVerifiedRoleCreationMigrationKey = "CustomSystemVerifiedRoleCreationMigrationComplete"
+	CustomSystemVerifiedRoleCreationMigrationKey  = "CustomSystemVerifiedRoleCreationMigrationComplete"
+
+	MigrationKeyBigGoRolesPermissions = "MigrationKeyBigGoRolesPermissions"
+	MigrationBigGoSchemeRolesCreation = "MigrationBigGoSchemeRolesCreation"
 )

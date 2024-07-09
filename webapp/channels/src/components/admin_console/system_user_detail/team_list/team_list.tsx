@@ -54,7 +54,7 @@ type Props = {
         getTeamsData: (userId: string) => Promise<ActionResult<Team[]>>;
         getTeamMembersForUser: (userId: string) => Promise<ActionResult<TeamMembership[]>>;
         removeUserFromTeam: (teamId: string, userId: string) => Promise<ActionResult>;
-        updateTeamMemberSchemeRoles: (teamId: string, userId: string, isSchemeUser: boolean, isSchemeAdmin: boolean) => Promise<ActionResult>;
+        updateTeamMemberSchemeRoles: (teamId: string, userId: string, isSchemeUser: boolean, isSchemeAdmin: boolean, isSchemeModerator: boolean) => Promise<ActionResult>;
     };
     userDetailCallback: (teamsId: TeamMembership[]) => void;
     refreshTeams: boolean;
@@ -125,7 +125,16 @@ export default class TeamList extends React.PureComponent<Props, State> {
     };
 
     private doMakeUserTeamAdmin = async (teamId: string) => {
-        const {error} = await this.props.actions.updateTeamMemberSchemeRoles(teamId, this.props.userId, true, true);
+        const {error} = await this.props.actions.updateTeamMemberSchemeRoles(teamId, this.props.userId, true, true, false);
+        if (error) {
+            this.setState({serverError: error.message});
+        } else {
+            this.getTeamsAndMemberships();
+        }
+    };
+
+    private doMakeUserTeamModerator = async (teamId: string) => {
+        const {error} = await this.props.actions.updateTeamMemberSchemeRoles(teamId, this.props.userId, true, false, true);
         if (error) {
             this.setState({serverError: error.message});
         } else {
@@ -134,7 +143,7 @@ export default class TeamList extends React.PureComponent<Props, State> {
     };
 
     private doMakeUserTeamMember = async (teamId: string) => {
-        const {error} = await this.props.actions.updateTeamMemberSchemeRoles(teamId, this.props.userId, true, false);
+        const {error} = await this.props.actions.updateTeamMemberSchemeRoles(teamId, this.props.userId, true, false, false);
         if (error) {
             this.setState({serverError: error.message});
         } else {
@@ -149,6 +158,7 @@ export default class TeamList extends React.PureComponent<Props, State> {
                 team={item}
                 doRemoveUserFromTeam={this.doRemoveUserFromTeam}
                 doMakeUserTeamAdmin={this.doMakeUserTeamAdmin}
+                doMakeUserTeamModerator={this.doMakeUserTeamModerator}
                 doMakeUserTeamMember={this.doMakeUserTeamMember}
                 readOnly={this.props.readOnly}
             />

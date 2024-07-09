@@ -833,7 +833,7 @@ func (u *User) IsGuest() bool {
 }
 
 func (u *User) IsVerified() bool {
-	return IsInRole(u.Roles, SystemVerifiedId)
+	return IsInRole(u.Roles, SystemVerifiedRoleId)
 }
 
 func (u *User) IsSystemAdmin() bool {
@@ -858,6 +858,18 @@ func IsInRole(userRoles string, inRole string) bool {
 	}
 
 	return false
+}
+
+func (u *User) AddRole(role string) bool {
+	if !IsValidRoleName(role) {
+		return false
+	}
+	if IsInRole(u.Roles, role) {
+		return false
+	}else{
+		u.Roles += " " + role
+		return true
+	}
 }
 
 func (u *User) IsSSOUser() bool {

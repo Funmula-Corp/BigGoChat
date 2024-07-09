@@ -55,6 +55,7 @@ func TestRemoveProviderDoCommand(t *testing.T) {
 		ChannelId: publicChannel.Id,
 		UserId:    th.BasicUser.Id,
 	}
+	th.App.UpdateChannelMemberSchemeRoles(th.Context, publicChannel.Id, th.BasicUser.Id, false, true, true, true)
 
 	actual = rp.DoCommand(th.App, th.Context, args, targetUser.Username).Text
 	assert.Equal(t, "", actual)
@@ -71,6 +72,7 @@ func TestRemoveProviderDoCommand(t *testing.T) {
 
 	// Try a private channel *with* permission.
 	th.App.AddUserToChannel(th.Context, th.BasicUser, privateChannel, false)
+	th.App.UpdateChannelMemberSchemeRoles(th.Context, privateChannel.Id, th.BasicUser.Id, false, true, true, true)
 	args = &model.CommandArgs{
 		T:         func(s string, args ...any) string { return s },
 		ChannelId: privateChannel.Id,

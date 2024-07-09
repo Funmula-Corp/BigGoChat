@@ -5,6 +5,7 @@ package slashcommands
 
 import (
 	"bytes"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -30,7 +31,7 @@ func TestShareProviderDoCommand(t *testing.T) {
 		th := setupForSharedChannels(t).initBasic()
 		defer th.tearDown()
 
-		th.addPermissionToRole(model.PermissionManageSharedChannels.Id, th.BasicUser.Roles)
+		th.addPermissionToRole(model.PermissionManageSharedChannels.Id, strings.Fields(th.BasicUser.Roles)[0])
 
 		mockSyncService := app.NewMockSharedChannelService(th.Server.GetSharedChannelSyncService())
 		th.Server.SetSharedChannelSyncService(mockSyncService)
@@ -63,7 +64,7 @@ func TestShareProviderDoCommand(t *testing.T) {
 		th := setupForSharedChannels(t).initBasic()
 		defer th.tearDown()
 
-		th.addPermissionToRole(model.PermissionManageSharedChannels.Id, th.BasicUser.Roles)
+		th.addPermissionToRole(model.PermissionManageSharedChannels.Id, strings.Fields(th.BasicUser.Roles)[0])
 
 		mockSyncService := app.NewMockSharedChannelService(th.Server.GetSharedChannelSyncService())
 		th.Server.SetSharedChannelSyncService(mockSyncService)
@@ -95,7 +96,7 @@ func TestShareProviderDoCommand(t *testing.T) {
 		th := setupForSharedChannels(t).initBasic()
 		defer th.tearDown()
 
-		th.addPermissionToRole(model.PermissionManageSharedChannels.Id, th.BasicUser.Roles)
+		th.addPermissionToRole(model.PermissionManageSharedChannels.Id, strings.Fields(th.BasicUser.Roles)[0])
 
 		mockSyncService := app.NewMockSharedChannelService(th.Server.GetSharedChannelSyncService())
 		th.Server.SetSharedChannelSyncService(mockSyncService)

@@ -1996,6 +1996,24 @@ func (_m *UserStore) UpdateLastPictureUpdate(userID string) error {
 	return r0
 }
 
+// UpdateMemberVerifiedStatus provides a mock function with given fields: rctx, user
+func (_m *UserStore) UpdateMemberVerifiedStatus(rctx request.CTX, user *model.User) error {
+	ret := _m.Called(rctx, user)
+
+	if len(ret) == 0 {
+		panic("no return value specified for UpdateMemberVerifiedStatus")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(request.CTX, *model.User) error); ok {
+		r0 = rf(rctx, user)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // UpdateMfaActive provides a mock function with given fields: userID, active
 func (_m *UserStore) UpdateMfaActive(userID string, active bool) error {
 	ret := _m.Called(userID, active)

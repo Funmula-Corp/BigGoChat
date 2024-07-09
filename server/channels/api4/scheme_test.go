@@ -41,9 +41,12 @@ func TestCreateScheme(t *testing.T) {
 	assert.Zero(t, s1.DeleteAt)
 	assert.Equal(t, s1.Scope, scheme1.Scope)
 	assert.NotZero(t, len(s1.DefaultTeamAdminRole))
+	assert.NotZero(t, len(s1.DefaultTeamModeratorRole))
+	assert.NotZero(t, len(s1.DefaultTeamVerifiedRole))
 	assert.NotZero(t, len(s1.DefaultTeamUserRole))
 	assert.NotZero(t, len(s1.DefaultTeamGuestRole))
 	assert.NotZero(t, len(s1.DefaultChannelAdminRole))
+	assert.NotZero(t, len(s1.DefaultChannelVerifiedRole))
 	assert.NotZero(t, len(s1.DefaultChannelUserRole))
 	assert.NotZero(t, len(s1.DefaultChannelGuestRole))
 
@@ -83,9 +86,12 @@ func TestCreateScheme(t *testing.T) {
 	assert.Zero(t, s2.DeleteAt)
 	assert.Equal(t, s2.Scope, scheme2.Scope)
 	assert.Zero(t, len(s2.DefaultTeamAdminRole))
+	assert.Zero(t, len(s2.DefaultTeamModeratorRole))
+	assert.Zero(t, len(s2.DefaultTeamVerifiedRole))
 	assert.Zero(t, len(s2.DefaultTeamUserRole))
 	assert.Zero(t, len(s2.DefaultTeamGuestRole))
 	assert.NotZero(t, len(s2.DefaultChannelAdminRole))
+	assert.NotZero(t, len(s2.DefaultChannelVerifiedRole))
 	assert.NotZero(t, len(s2.DefaultChannelUserRole))
 	assert.NotZero(t, len(s2.DefaultChannelGuestRole))
 
@@ -217,9 +223,12 @@ func TestGetScheme(t *testing.T) {
 	assert.Zero(t, s1.DeleteAt)
 	assert.Equal(t, s1.Scope, scheme1.Scope)
 	assert.NotZero(t, len(s1.DefaultTeamAdminRole))
+	assert.NotZero(t, len(s1.DefaultTeamModeratorRole))
+	assert.NotZero(t, len(s1.DefaultTeamVerifiedRole))
 	assert.NotZero(t, len(s1.DefaultTeamUserRole))
 	assert.NotZero(t, len(s1.DefaultTeamGuestRole))
 	assert.NotZero(t, len(s1.DefaultChannelAdminRole))
+	assert.NotZero(t, len(s1.DefaultChannelVerifiedRole))
 	assert.NotZero(t, len(s1.DefaultChannelUserRole))
 	assert.NotZero(t, len(s1.DefaultChannelGuestRole))
 
@@ -532,9 +541,12 @@ func TestPatchScheme(t *testing.T) {
 	assert.Zero(t, s1.DeleteAt)
 	assert.Equal(t, s1.Scope, scheme1.Scope)
 	assert.NotZero(t, len(s1.DefaultTeamAdminRole))
+	assert.NotZero(t, len(s1.DefaultTeamModeratorRole))
+	assert.NotZero(t, len(s1.DefaultTeamVerifiedRole))
 	assert.NotZero(t, len(s1.DefaultTeamUserRole))
 	assert.NotZero(t, len(s1.DefaultTeamGuestRole))
 	assert.NotZero(t, len(s1.DefaultChannelAdminRole))
+	assert.NotZero(t, len(s1.DefaultChannelVerifiedRole))
 	assert.NotZero(t, len(s1.DefaultChannelUserRole))
 	assert.NotZero(t, len(s1.DefaultChannelGuestRole))
 
@@ -862,6 +874,11 @@ func TestUpdateTeamSchemeWithTeamMembers(t *testing.T) {
 		teamUserRole, appErr := th.App.GetRoleByName(context.Background(), teamScheme.DefaultTeamUserRole)
 		require.Nil(t, appErr)
 		teamUserRole.Permissions = []string{}
+		teamVerifiedRole, appErr := th.App.GetRoleByName(context.Background(), teamScheme.DefaultTeamVerifiedRole)
+		require.Nil(t, appErr)
+		teamVerifiedRole.Permissions = []string{}
+		_, appErr = th.App.UpdateRole(teamVerifiedRole)
+		require.Nil(t, appErr)
 		_, appErr = th.App.UpdateRole(teamUserRole)
 		require.Nil(t, appErr)
 

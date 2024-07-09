@@ -24,7 +24,7 @@ func (s *SqlRoleStore) CreateRole(role *model.Role) (_ *model.Role, err error) {
 	return createdRole, nil
 }
 
-func (s *SqlSchemeStore) CreateScheme(scheme *model.Scheme) (_ *model.Scheme, err error) {
+func (s *SqlSchemeStore) CreateBuiltInScheme(scheme *model.Scheme) (_ *model.Scheme, err error) {
 	transaction, terr := s.GetMasterX().Beginx()
 	if terr != nil {
 		return nil, errors.Wrap(terr, "begin_transaction")
@@ -46,6 +46,9 @@ func (s *SqlSchemeStore) createSchemeWithoutCreateRoles(scheme *model.Scheme, tr
 	schemeRoleNames := []string{}
 	if scheme.DefaultTeamAdminRole != "" {
 		schemeRoleNames = append(schemeRoleNames, scheme.DefaultTeamAdminRole)
+	}
+	if scheme.DefaultTeamModeratorRole != "" {
+		schemeRoleNames = append(schemeRoleNames, scheme.DefaultTeamModeratorRole)
 	}
 	if scheme.DefaultTeamUserRole != "" {
 		schemeRoleNames = append(schemeRoleNames, scheme.DefaultTeamUserRole)
@@ -105,10 +108,8 @@ func (s *SqlSchemeStore) createSchemeWithoutCreateRoles(scheme *model.Scheme, tr
 		return nil, store.NewErrInvalidInput("Scheme", "<any>", fmt.Sprintf("%v", scheme))
 	}
 
-	if _, err := transaction.NamedExec(`INSERT INTO Schemes
-	(Id, Name, DisplayName, Description, Scope, DefaultTeamAdminRole, DefaultTeamUserRole, DefaultTeamGuestRole, DefaultChannelAdminRole, DefaultChannelUserRole, DefaultChannelGuestRole, CreateAt, UpdateAt, DeleteAt, DefaultPlaybookAdminRole, DefaultPlaybookMemberRole, DefaultRunAdminRole, DefaultRunMemberRole)
-		VALUES
-		(:Id, :Name, :DisplayName, :Description, :Scope, :DefaultTeamAdminRole, :DefaultTeamUserRole, :DefaultTeamGuestRole, :DefaultChannelAdminRole, :DefaultChannelUserRole, :DefaultChannelGuestRole, :CreateAt, :UpdateAt, :DeleteAt, :DefaultPlaybookAdminRole, :DefaultPlaybookMemberRole, :DefaultRunAdminRole, :DefaultRunMemberRole)`, scheme); err != nil {
+	_, err = s.insertInto(scheme, transaction)
+	if err != nil{
 		return nil, errors.Wrap(err, "failed to save Scheme")
 	}
 

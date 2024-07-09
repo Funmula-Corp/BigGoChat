@@ -14,8 +14,8 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store/storetest/mocks"
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store/storetest/mocks"
 )
 
 /* TODO: Temporarily comment out until MM-11108
@@ -258,16 +258,10 @@ func TestDoEmojisPermissionsMigration(t *testing.T) {
 	role3, err3 := th.App.GetRoleByName(context.Background(), model.SystemUserRoleId)
 	assert.Nil(t, err3)
 	expected3 := []string{
-		model.PermissionCreateCustomGroup.Id,
-		model.PermissionEditCustomGroup.Id,
-		model.PermissionDeleteCustomGroup.Id,
-		model.PermissionManageCustomGroupMembers.Id,
-		model.PermissionRestoreCustomGroup.Id,
 		model.PermissionListPublicTeams.Id,
 		model.PermissionJoinPublicTeams.Id,
 		model.PermissionCreateDirectChannel.Id,
 		model.PermissionCreateGroupChannel.Id,
-		model.PermissionCreateTeam.Id,
 		model.PermissionCreateEmojis.Id,
 		model.PermissionDeleteEmojis.Id,
 		model.PermissionViewMembers.Id,

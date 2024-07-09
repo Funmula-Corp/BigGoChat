@@ -16,6 +16,9 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin/plugintest/mock"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app/platform"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store/storetest"
@@ -24,9 +27,6 @@ import (
 	eMocks "git.biggo.com/Funmula/mattermost-funmula/server/v8/einterfaces/mocks"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/services/imageproxy"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/services/searchengine/mocks"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin/plugintest/mock"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
 )
 
 func TestCreatePostDeduplicate(t *testing.T) {
@@ -889,7 +889,7 @@ func TestCreatePost(t *testing.T) {
 		})
 
 		t.Run("Sets prop when post has mentions and user does not have USE_CHANNEL_MENTIONS", func(t *testing.T) {
-			th.RemovePermissionFromRole(model.PermissionUseChannelMentions.Id, model.ChannelUserRoleId)
+			th.RemovePermissionFromRole(model.PermissionUseChannelMentions.Id, model.ChannelVerifiedRoleId)
 			th.RemovePermissionFromRole(model.PermissionUseChannelMentions.Id, model.ChannelAdminRoleId)
 
 			postWithNoMention := &model.Post{
@@ -910,7 +910,7 @@ func TestCreatePost(t *testing.T) {
 			require.Nil(t, err)
 			assert.Equal(t, rpost.GetProp(model.PostPropsMentionHighlightDisabled), true)
 
-			th.AddPermissionToRole(model.PermissionUseChannelMentions.Id, model.ChannelUserRoleId)
+			th.AddPermissionToRole(model.PermissionUseChannelMentions.Id, model.ChannelVerifiedRoleId)
 			th.AddPermissionToRole(model.PermissionUseChannelMentions.Id, model.ChannelAdminRoleId)
 		})
 	})
@@ -1169,7 +1169,7 @@ func TestPatchPost(t *testing.T) {
 		})
 
 		t.Run("Sets prop when user does not have USE_CHANNEL_MENTIONS", func(t *testing.T) {
-			th.RemovePermissionFromRole(model.PermissionUseChannelMentions.Id, model.ChannelUserRoleId)
+			th.RemovePermissionFromRole(model.PermissionUseChannelMentions.Id, model.ChannelVerifiedRoleId)
 			th.RemovePermissionFromRole(model.PermissionUseChannelMentions.Id, model.ChannelAdminRoleId)
 
 			patchWithNoMention := &model.PostPatch{Message: model.NewString("This patch still does not have a mention")}
@@ -1183,7 +1183,7 @@ func TestPatchPost(t *testing.T) {
 			require.Nil(t, err)
 			assert.Equal(t, rpost.GetProp(model.PostPropsMentionHighlightDisabled), true)
 
-			th.AddPermissionToRole(model.PermissionUseChannelMentions.Id, model.ChannelUserRoleId)
+			th.AddPermissionToRole(model.PermissionUseChannelMentions.Id, model.ChannelVerifiedRoleId)
 			th.AddPermissionToRole(model.PermissionUseChannelMentions.Id, model.ChannelAdminRoleId)
 		})
 	})

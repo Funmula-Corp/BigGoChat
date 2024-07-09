@@ -585,11 +585,32 @@ func (s *RetryLayerBlocklistStore) DeleteChannelBlockUser(channelId string, user
 
 }
 
-func (s *RetryLayerBlocklistStore) DeleteUserBlockUser(userId string, blockedId string) error {
+func (s *RetryLayerBlocklistStore) DeleteTeamBlockUser(channelId string, userId string) error {
 
 	tries := 0
 	for {
-		err := s.BlocklistStore.DeleteUserBlockUser(userId, blockedId)
+		err := s.BlocklistStore.DeleteTeamBlockUser(channelId, userId)
+		if err == nil {
+			return nil
+		}
+		if !isRepeatableError(err) {
+			return err
+		}
+		tries++
+		if tries >= 3 {
+			err = errors.Wrap(err, "giving up after 3 consecutive repeatable transaction failures")
+			return err
+		}
+		timepkg.Sleep(100 * timepkg.Millisecond)
+	}
+
+}
+
+func (s *RetryLayerBlocklistStore) DeleteUserBlockUser(userId string, blockedId string, userIsVerified bool, blockedIsVerified bool) error {
+
+	tries := 0
+	for {
+		err := s.BlocklistStore.DeleteUserBlockUser(userId, blockedId, userIsVerified, blockedIsVerified)
 		if err == nil {
 			return nil
 		}
@@ -611,6 +632,69 @@ func (s *RetryLayerBlocklistStore) GetChannelBlockUser(channelId string, userId 
 	tries := 0
 	for {
 		result, err := s.BlocklistStore.GetChannelBlockUser(channelId, userId)
+		if err == nil {
+			return result, nil
+		}
+		if !isRepeatableError(err) {
+			return result, err
+		}
+		tries++
+		if tries >= 3 {
+			err = errors.Wrap(err, "giving up after 3 consecutive repeatable transaction failures")
+			return result, err
+		}
+		timepkg.Sleep(100 * timepkg.Millisecond)
+	}
+
+}
+
+func (s *RetryLayerBlocklistStore) GetChannelBlockUserByEmail(channelId string, email string) (*model.ChannelBlockUser, error) {
+
+	tries := 0
+	for {
+		result, err := s.BlocklistStore.GetChannelBlockUserByEmail(channelId, email)
+		if err == nil {
+			return result, nil
+		}
+		if !isRepeatableError(err) {
+			return result, err
+		}
+		tries++
+		if tries >= 3 {
+			err = errors.Wrap(err, "giving up after 3 consecutive repeatable transaction failures")
+			return result, err
+		}
+		timepkg.Sleep(100 * timepkg.Millisecond)
+	}
+
+}
+
+func (s *RetryLayerBlocklistStore) GetTeamBlockUser(channelId string, userId string) (*model.TeamBlockUser, error) {
+
+	tries := 0
+	for {
+		result, err := s.BlocklistStore.GetTeamBlockUser(channelId, userId)
+		if err == nil {
+			return result, nil
+		}
+		if !isRepeatableError(err) {
+			return result, err
+		}
+		tries++
+		if tries >= 3 {
+			err = errors.Wrap(err, "giving up after 3 consecutive repeatable transaction failures")
+			return result, err
+		}
+		timepkg.Sleep(100 * timepkg.Millisecond)
+	}
+
+}
+
+func (s *RetryLayerBlocklistStore) GetTeamBlockUserByEmail(teamId string, email string) (*model.TeamBlockUser, error) {
+
+	tries := 0
+	for {
+		result, err := s.BlocklistStore.GetTeamBlockUserByEmail(teamId, email)
 		if err == nil {
 			return result, nil
 		}
@@ -690,6 +774,48 @@ func (s *RetryLayerBlocklistStore) ListChannelBlockUsersByBlockedUser(blockedId 
 
 }
 
+func (s *RetryLayerBlocklistStore) ListTeamBlockUsers(channelId string) (*model.TeamBlockUserList, error) {
+
+	tries := 0
+	for {
+		result, err := s.BlocklistStore.ListTeamBlockUsers(channelId)
+		if err == nil {
+			return result, nil
+		}
+		if !isRepeatableError(err) {
+			return result, err
+		}
+		tries++
+		if tries >= 3 {
+			err = errors.Wrap(err, "giving up after 3 consecutive repeatable transaction failures")
+			return result, err
+		}
+		timepkg.Sleep(100 * timepkg.Millisecond)
+	}
+
+}
+
+func (s *RetryLayerBlocklistStore) ListTeamBlockUsersByBlockedUser(blockedId string) (*model.TeamBlockUserList, error) {
+
+	tries := 0
+	for {
+		result, err := s.BlocklistStore.ListTeamBlockUsersByBlockedUser(blockedId)
+		if err == nil {
+			return result, nil
+		}
+		if !isRepeatableError(err) {
+			return result, err
+		}
+		tries++
+		if tries >= 3 {
+			err = errors.Wrap(err, "giving up after 3 consecutive repeatable transaction failures")
+			return result, err
+		}
+		timepkg.Sleep(100 * timepkg.Millisecond)
+	}
+
+}
+
 func (s *RetryLayerBlocklistStore) ListUserBlockUsers(userId string) (*model.UserBlockUserList, error) {
 
 	tries := 0
@@ -737,6 +863,27 @@ func (s *RetryLayerBlocklistStore) SaveChannelBlockUser(blockUser *model.Channel
 	tries := 0
 	for {
 		result, err := s.BlocklistStore.SaveChannelBlockUser(blockUser)
+		if err == nil {
+			return result, nil
+		}
+		if !isRepeatableError(err) {
+			return result, err
+		}
+		tries++
+		if tries >= 3 {
+			err = errors.Wrap(err, "giving up after 3 consecutive repeatable transaction failures")
+			return result, err
+		}
+		timepkg.Sleep(100 * timepkg.Millisecond)
+	}
+
+}
+
+func (s *RetryLayerBlocklistStore) SaveTeamBlockUser(blockUser *model.TeamBlockUser) (*model.TeamBlockUser, error) {
+
+	tries := 0
+	for {
+		result, err := s.BlocklistStore.SaveTeamBlockUser(blockUser)
 		if err == nil {
 			return result, nil
 		}
@@ -9885,6 +10032,27 @@ func (s *RetryLayerRoleStore) Save(role *model.Role) (*model.Role, error) {
 
 }
 
+func (s *RetryLayerSchemeStore) CloneScheme(scheme *model.Scheme) (*model.Scheme, error) {
+
+	tries := 0
+	for {
+		result, err := s.SchemeStore.CloneScheme(scheme)
+		if err == nil {
+			return result, nil
+		}
+		if !isRepeatableError(err) {
+			return result, err
+		}
+		tries++
+		if tries >= 3 {
+			err = errors.Wrap(err, "giving up after 3 consecutive repeatable transaction failures")
+			return result, err
+		}
+		timepkg.Sleep(100 * timepkg.Millisecond)
+	}
+
+}
+
 func (s *RetryLayerSchemeStore) CountByScope(scope string) (int64, error) {
 
 	tries := 0
@@ -9927,11 +10095,11 @@ func (s *RetryLayerSchemeStore) CountWithoutPermission(scope string, permissionI
 
 }
 
-func (s *RetryLayerSchemeStore) CreateScheme(scheme *model.Scheme) (*model.Scheme, error) {
+func (s *RetryLayerSchemeStore) CreateBuiltInScheme(scheme *model.Scheme) (*model.Scheme, error) {
 
 	tries := 0
 	for {
-		result, err := s.SchemeStore.CreateScheme(scheme)
+		result, err := s.SchemeStore.CreateBuiltInScheme(scheme)
 		if err == nil {
 			return result, nil
 		}
@@ -14549,6 +14717,27 @@ func (s *RetryLayerUserStore) UpdateLastPictureUpdate(userID string) error {
 	tries := 0
 	for {
 		err := s.UserStore.UpdateLastPictureUpdate(userID)
+		if err == nil {
+			return nil
+		}
+		if !isRepeatableError(err) {
+			return err
+		}
+		tries++
+		if tries >= 3 {
+			err = errors.Wrap(err, "giving up after 3 consecutive repeatable transaction failures")
+			return err
+		}
+		timepkg.Sleep(100 * timepkg.Millisecond)
+	}
+
+}
+
+func (s *RetryLayerUserStore) UpdateMemberVerifiedStatus(rctx request.CTX, user *model.User) error {
+
+	tries := 0
+	for {
+		err := s.UserStore.UpdateMemberVerifiedStatus(rctx, user)
 		if err == nil {
 			return nil
 		}

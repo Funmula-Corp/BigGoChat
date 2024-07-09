@@ -13,12 +13,12 @@ import (
 	"testing"
 	"time"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/config"
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/config"
 )
 
 type TestHelper struct {
@@ -180,7 +180,7 @@ func (th *TestHelper) initBasic() *TestHelper {
 	// create users once and cache them because password hashing is slow
 	initBasicOnce.Do(func() {
 		th.SystemAdminUser = th.createUser()
-		th.App.UpdateUserRoles(th.Context, th.SystemAdminUser.Id, model.SystemUserRoleId+" "+model.SystemAdminRoleId, false)
+		th.App.UpdateUserRoles(th.Context, th.SystemAdminUser.Id, model.SystemUserRoleId+" "+model.SystemVerifiedRoleId+" "+model.SystemAdminRoleId, false)
 		th.SystemAdminUser, _ = th.App.GetUser(th.SystemAdminUser.Id)
 		userCache.SystemAdminUser = th.SystemAdminUser.DeepCopy()
 
@@ -205,6 +205,9 @@ func (th *TestHelper) initBasic() *TestHelper {
 	th.linkUserToTeam(th.BasicUser2, th.BasicTeam)
 	th.BasicChannel = th.CreateChannel(th.BasicTeam)
 	th.BasicPost = th.createPost(th.BasicChannel)
+	// if _, err := th.App.UpdateChannelMemberSchemeRoles(th.Context, th.BasicChannel.Id, th.BasicUser.Id, false, true, true, true); err != nil {
+	// 	panic(err)
+	// }
 	return th
 }
 
@@ -226,14 +229,18 @@ func (th *TestHelper) createTeam() *model.Team {
 }
 
 func (th *TestHelper) createUser() *model.User {
-	return th.createUserOrGuest(false)
+	return th.createUserOrGuest(false, true)
 }
+
+// func (th *TestHelper) createUnverified() *model.User {
+// 	return th.createUserOrGuest(false, false)
+// }
 
 func (th *TestHelper) createGuest() *model.User {
-	return th.createUserOrGuest(true)
+	return th.createUserOrGuest(true, false)
 }
 
-func (th *TestHelper) createUserOrGuest(guest bool) *model.User {
+func (th *TestHelper) createUserOrGuest(guest, verified bool) *model.User {
 	id := model.NewId()
 
 	user := &model.User{
@@ -251,6 +258,12 @@ func (th *TestHelper) createUserOrGuest(guest bool) *model.User {
 		}
 	} else {
 		if user, err = th.App.CreateUser(th.Context, user); err != nil {
+			panic(err)
+		}
+	}
+	if verified {
+		user.Roles += " " + model.SystemVerifiedRoleId
+		if user, err = th.App.UpdateUserRoles(th.Context, user.Id, user.Roles, false); err != nil {
 			panic(err)
 		}
 	}

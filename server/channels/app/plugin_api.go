@@ -429,6 +429,10 @@ func (api *PluginAPI) GetLDAPUserAttributes(userID string, attributes []string) 
 	return map[string]string{}, nil
 }
 
+func (api *PluginAPI) MarkUserVerified (userID string) *model.AppError {
+	return api.app.MarkUserVerified(api.ctx, userID)
+}
+
 func (api *PluginAPI) CreateChannel(channel *model.Channel) (*model.Channel, *model.AppError) {
 	return api.app.CreateChannel(api.ctx, channel, false)
 }
