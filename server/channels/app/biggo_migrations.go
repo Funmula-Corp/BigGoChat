@@ -367,7 +367,7 @@ func (a *App) doMigrationKeyBigGoRolesPermissions() (permissionsMap, error) {
 			Add: []string{model.PermissionCreateTeam.Id},
 		},
 		permissionTransformation{
-			On: 	permissionAnd(permissionExists(model.PermissionEditOthersPosts.Id)),
+			On: 	permissionAnd(permissionExists(model.PermissionEditOthersPosts.Id), isNotRole(model.SystemAdminRoleId)),
 			Remove: []string {
 				model.PermissionEditOthersPosts.Id,
 			},
