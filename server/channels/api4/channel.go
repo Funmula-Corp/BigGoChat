@@ -1191,10 +1191,11 @@ func searchArchivedChannelsForTeam(c *Context, w http.ResponseWriter, r *http.Re
 
 	var channels model.ChannelList
 	var appErr *model.AppError
-	if c.App.SessionHasPermissionToTeam(*c.AppContext.Session(), c.Params.TeamId, model.PermissionManageTeam) {
-		c.SetPermissionError(model.PermissionManageTeam)
-		return
-	} else if c.App.SessionHasPermissionToTeam(*c.AppContext.Session(), c.Params.TeamId, model.PermissionListTeamChannels) {
+	if c.App.SessionHasPermissionToTeam(*c.AppContext.Session(), c.Params.TeamId, model.PermissionListTeamChannels) {
+		if !c.App.SessionHasPermissionToTeam(*c.AppContext.Session(), c.Params.TeamId, model.PermissionManageTeam) {
+			c.SetPermissionError(model.PermissionManageTeam)
+			return
+		}
 		channels, appErr = c.App.SearchArchivedChannels(c.AppContext, c.Params.TeamId, props.Term, c.AppContext.Session().UserId)
 	} else {
 		// If the user is not a team member, return a 404
