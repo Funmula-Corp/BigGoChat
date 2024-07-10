@@ -315,6 +315,7 @@ func (a *App) doMigrationKeyBigGoRolesPermissions() (permissionsMap, error) {
 				PermissionManagePrivateChannelProperties,
 				PermissionDeletePublicChannel,
 				PermissionDeletePrivateChannel,
+				model.PermissionDeleteOthersPosts.Id,
 			},
 		},
 		permissionTransformation{
