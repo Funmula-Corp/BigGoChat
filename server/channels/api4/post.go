@@ -609,7 +609,14 @@ func deletePost(c *Context, w http.ResponseWriter, _ *http.Request) {
 			return
 		}
 	} else {
-		if !c.App.SessionHasPermissionToChannel(c.AppContext, *c.AppContext.Session(), post.ChannelId, model.PermissionDeleteOthersPosts) {
+		channel, err := c.App.GetChannel(c.AppContext, post.ChannelId)
+		if err != nil {
+			c.Err = err
+			return
+		}
+
+		if !c.App.SessionHasPermissionToChannel(c.AppContext, *c.AppContext.Session(), post.ChannelId, model.PermissionDeleteOthersPosts) ||
+			channel.Type == model.ChannelTypeDirect || channel.Type == model.ChannelTypeGroup {
 			c.SetPermissionError(model.PermissionDeleteOthersPosts)
 			return
 		}
