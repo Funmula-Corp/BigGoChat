@@ -3225,34 +3225,51 @@ func TestAddChannelMember(t *testing.T) {
 	otherUser := th.CreateUser()
 	otherChannel := th.CreatePublicChannel()
 	client.Logout(context.Background())
-	client.Login(context.Background(), user2.Id, user2.Password)
+	_, resp, err = client.Login(context.Background(), user2.Username, user2.Password)
+	require.NoError(t, err)
+	CheckOKStatus(t, resp)
+
+	// test as user2.
+	// only channel admins, team admins and system admins can add channel members.
+	cm, resp, err = client.GetChannelMember(context.Background(), publicChannel.Id, user2.Id, "")
+	require.NoError(t, err)
+	CheckOKStatus(t, resp)
+	require.False(t, cm.SchemeAdmin)
+	cm, resp, err = client.GetChannelMember(context.Background(), privateChannel.Id, user2.Id, "")
+	require.NoError(t, err)
+	CheckOKStatus(t, resp)
+	require.False(t, cm.SchemeAdmin)
 
 	_, resp, err = client.AddChannelMember(context.Background(), publicChannel.Id, otherUser.Id)
 	require.Error(t, err)
-	CheckUnauthorizedStatus(t, resp)
+	CheckForbiddenStatus(t, resp)
 
 	_, resp, err = client.AddChannelMember(context.Background(), privateChannel.Id, otherUser.Id)
 	require.Error(t, err)
-	CheckUnauthorizedStatus(t, resp)
+	CheckForbiddenStatus(t, resp)
 
 	_, resp, err = client.AddChannelMember(context.Background(), otherChannel.Id, otherUser.Id)
 	require.Error(t, err)
-	CheckUnauthorizedStatus(t, resp)
+	CheckForbiddenStatus(t, resp)
 
 	client.Logout(context.Background())
-	client.Login(context.Background(), user.Id, user.Password)
+	_, resp, err = client.Login(context.Background(), user.Username, user.Password)
+	require.NoError(t, err)
+	CheckOKStatus(t, resp)
 
 	// should fail adding user who is not a member of the team
 	_, resp, err = client.AddChannelMember(context.Background(), otherChannel.Id, otherUser.Id)
 	require.Error(t, err)
-	CheckUnauthorizedStatus(t, resp)
+	CheckNotFoundStatus(t, resp)
 
-	client.DeleteChannel(context.Background(), otherChannel.Id)
+	resp, err = client.DeleteChannel(context.Background(), otherChannel.Id)
+	require.NoError(t, err)
+	CheckOKStatus(t, resp)
 
 	// should fail adding user to a deleted channel
 	_, resp, err = client.AddChannelMember(context.Background(), otherChannel.Id, user2.Id)
 	require.Error(t, err)
-	CheckUnauthorizedStatus(t, resp)
+	CheckBadRequestStatus(t, resp)
 
 	client.Logout(context.Background())
 	_, resp, err = client.AddChannelMember(context.Background(), publicChannel.Id, user2.Id)
