@@ -2799,6 +2799,23 @@ func TestDeletePost(t *testing.T) {
 
 	_, err = th.SystemAdminClient.DeletePost(context.Background(), post.Id)
 	require.NoError(t, err)
+
+	client.Logout(context.Background())
+	th.LoginBasic2()
+	post2 := th.CreatePost()
+	
+	client.Logout(context.Background())
+	th.LoginBasic()
+
+	resp, err = client.DeletePost(context.Background(), post2.Id)
+	require.Error(t, err)
+	CheckForbiddenStatus(t, resp)
+
+	th.MakeUserChannelAdmin(th.BasicUser, th.BasicChannel)
+	th.App.Srv().InvalidateAllCaches()
+
+	_, err = client.DeletePost(context.Background(), post2.Id)
+	require.NoError(t, err)
 }
 
 func TestDeletePostEvent(t *testing.T) {
@@ -4368,4 +4385,38 @@ func TestUnacknowledgePost(t *testing.T) {
 	resp, err = client.UnacknowledgePost(context.Background(), post.Id, th.BasicUser.Id)
 	require.Error(t, err)
 	CheckUnauthorizedStatus(t, resp)
+}
+
+func TestDirectChannelDeletePost(t *testing.T) {
+	th := Setup(t).InitBasic()
+	defer th.TearDown()
+	client := th.Client
+	
+	channel, _, err := client.CreateDirectChannel(context.Background(), th.BasicUser.Id, th.BasicUser2.Id)
+	require.NoError(t, err)
+
+	post := &model.Post{
+		ChannelId: channel.Id,
+		Message:   "should not delete this message",
+		UserId:    th.BasicUser.Id,
+	}
+
+	rpost, _, err := client.CreatePost(context.Background(), post)
+	require.NoError(t, err)
+
+	client.Logout(context.Background())
+	th.LoginBasic2()
+
+	// user
+	resp, err := client.DeletePost(context.Background(), rpost.Id)
+	require.Error(t, err)
+	CheckForbiddenStatus(t, resp)
+
+	_, appErr := th.App.UpdateUserRoles(th.Context, th.BasicUser2.Id, model.SystemAdminRoleId, false)
+	require.Nil(t, appErr)
+
+	// system_admin 
+	resp, err = client.DeletePost(context.Background(), rpost.Id)
+	require.Error(t, err)
+	CheckForbiddenStatus(t, resp)
 }
