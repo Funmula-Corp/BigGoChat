@@ -7721,7 +7721,7 @@
   },
   {
     "id": "api.templates.email_footer_v2",
-    "translation": "© 2020 Mattermost, Inc. 855 El Camino Real, 13A-168, Palo Alto, CA, 94301"
+    "translation": "© 2024 BigGo"
   },
   {
     "id": "api.post.search_files.invalid_body.app_error",
