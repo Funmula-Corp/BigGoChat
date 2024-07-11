@@ -57,6 +57,11 @@ const FilePreviewModalMainActions: React.FC<Props> = (props: Props) => {
         copyToClipboard(selectedFilePublicLink ?? '');
         setPublicLinkCopied(true);
     };
+    const openPublicLink = () => {
+        if (selectedFilePublicLink) {
+            globalThis.window.open(selectedFilePublicLink, '_blank')
+        }
+    };
 
     const closeMessage = intl.formatMessage({
         id: 'full_screen_modal.close',
@@ -118,6 +123,27 @@ const FilePreviewModalMainActions: React.FC<Props> = (props: Props) => {
             </a>
         </OverlayTrigger>
     );
+    // TODO i18n
+    const publicLinkPage = (
+        <OverlayTrigger
+            delayShow={Constants.OVERLAY_TIME_DELAY}
+            key='link'
+            placement={tooltipPlacement}
+            overlay={
+                <Tooltip id='link-variant-icon-tooltip'>
+                    另開新頁
+                </Tooltip>
+            }
+        >
+            <a
+                href='#'
+                className='file-preview-modal-main-actions__action-item'
+                onClick={openPublicLink}
+            >
+                <i className='icon icon-magnify-plus'/>
+            </a>
+        </OverlayTrigger>
+    );
 
     const downloadMessage = intl.formatMessage({
         id: 'view_image_popover.download',
@@ -161,6 +187,7 @@ const FilePreviewModalMainActions: React.FC<Props> = (props: Props) => {
     return (
         <div className='file-preview-modal-main-actions__actions'>
             {!props.showOnlyClose && props.canCopyContent && copy}
+            {!props.showOnlyClose && props.enablePublicLink && props.showPublicLink && !!selectedFilePublicLink && publicLinkPage}
             {!props.showOnlyClose && props.enablePublicLink && props.showPublicLink && publicLink}
             {!props.showOnlyClose && props.canDownloadFiles && download}
             {props.showClose && closeButton}
