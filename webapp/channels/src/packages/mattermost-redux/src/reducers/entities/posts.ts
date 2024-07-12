@@ -864,12 +864,18 @@ export function isNotDeleteBySelf(post: Post) {
     return !!post.props.deleteBy && post.props.deleteBy !== post.user_id;
 }
 
-export function shouldShowPost(post: Post) {
-    return !post.original_id && post.message !== '' && !post.delete_at || post.file_ids?.length;
+export function shouldShowPost(post: Post): boolean {
+    return !post.original_id && post.message !== '' && !post.delete_at || !!post.file_ids?.length;
+}
+
+export function doPostFilter() {
+    return (post: Post) =>
+        post.props.deleteBy ? isNotDeleteBySelf(post) : shouldShowPost(post);
 }
 
 export function removeDeleteBySelfPostBlockOrder(order: string[], posts: Record<string, Post>) {
-    return order.filter((postId: string) => shouldShowPost(posts[postId]) || isNotDeleteBySelf(posts[postId]));
+    const filter = doPostFilter()
+    return order.filter((postId: string) => filter(posts[postId]));
 }
 
 export function removeDeleteBySelfPostBlock(block: PostOrderBlock, posts: Record<string, Post>): PostOrderBlock {
@@ -1015,7 +1021,7 @@ export function postsInThread(state: RelationOneToMany<Post, Post> = {}, action:
     case PostTypes.RECEIVED_POSTS_BEFORE:
     case PostTypes.RECEIVED_POSTS_IN_CHANNEL:
     case PostTypes.RECEIVED_POSTS_SINCE: {
-        const newPosts: Post[] = (Object.values(action.data.posts) as Post[]).filter(isNotDeleteBySelf);
+        const newPosts: Post[] = (Object.values(action.data.posts) as Post[]).filter(doPostFilter);
 
         if (newPosts.length === 0) {
             // Nothing to add
@@ -1052,7 +1058,7 @@ export function postsInThread(state: RelationOneToMany<Post, Post> = {}, action:
     }
 
     case PostTypes.RECEIVED_POSTS_IN_THREAD: {
-        const newPosts: Post[] = Object.values(action.data.posts);
+        const newPosts: Post[] = (Object.values(action.data.posts) as Post[]).filter(doPostFilter);
 
         if (newPosts.length === 0) {
             // Nothing to add
@@ -1229,7 +1235,7 @@ export function reactions(state: RelationOneToOne<Post, Record<string, Reaction>
         const posts: Post[] = Object.values(action.data.posts);
 
         return posts
-            .filter(isNotDeleteBySelf)
+            .filter(doPostFilter)
             .reduce(storeReactionsForPost, state);
     }
 
