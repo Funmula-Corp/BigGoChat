@@ -185,6 +185,9 @@ export function filterProfilesStartingWithTerm(users: UserProfile[], term: strin
     if (trimmedTerm.startsWith('@')) {
         trimmedTerm = trimmedTerm.substr(1);
     }
+    if (trimmedTerm.startsWith('+')) {
+        trimmedTerm = trimmedTerm.substr(1);
+    }
 
     return users.filter((user: UserProfile) => {
         if (!user) {
@@ -200,6 +203,9 @@ export function filterProfilesMatchingWithTerm(users: UserProfile[], term: strin
     const lowercasedTerm = term.toLowerCase();
     let trimmedTerm = lowercasedTerm;
     if (trimmedTerm.startsWith('@')) {
+        trimmedTerm = trimmedTerm.substr(1);
+    }
+    if (trimmedTerm.startsWith('+')) {
         trimmedTerm = trimmedTerm.substr(1);
     }
 
