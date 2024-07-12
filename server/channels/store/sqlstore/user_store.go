@@ -1628,7 +1628,6 @@ func generateSearchQuery(query sq.SelectBuilder, terms []string, fields []string
 				// would introduce a SQL injection vulnerability
 				// (order of operation is from the inside outwards)
 				termArgs = append(termArgs, strings.TrimLeft(strings.TrimLeft(term, "+"), "@"))
-				mlog.Warn("DEBUG-SQL", mlog.Any("1", searchFields), mlog.Any("2", termArgs))
 			} else {
 				if isPostgreSQL {
 					searchFields = append(searchFields, fmt.Sprintf("lower(%s) LIKE lower(?) escape '*' ", field))
