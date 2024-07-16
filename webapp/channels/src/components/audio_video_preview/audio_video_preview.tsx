@@ -91,6 +91,13 @@ export default class AudioVideoPreview extends React.PureComponent<Props, State>
             height = Constants.MOBILE_VIDEO_HEIGHT;
         }
 
+        const style = {
+            width: '100%',
+            maxWidth: `${width}px`,
+            height: 'auto',
+            maxHeight: `${height}px`,
+        }
+
         // add a key to the video to prevent React from using an old video source while a new one is loading
         return (
             <video
@@ -100,6 +107,7 @@ export default class AudioVideoPreview extends React.PureComponent<Props, State>
                 controls={true}
                 width={width}
                 height={height}
+                style={style}
             >
                 <source
                     ref={this.sourceRef}
