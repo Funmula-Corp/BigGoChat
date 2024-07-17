@@ -3242,7 +3242,7 @@ func TestAddChannelMember(t *testing.T) {
 
 	_, resp, err = client.AddChannelMember(context.Background(), publicChannel.Id, otherUser.Id)
 	require.Error(t, err)
-	CheckForbiddenStatus(t, resp)
+	CheckNotFoundStatus(t, resp)
 
 	_, resp, err = client.AddChannelMember(context.Background(), privateChannel.Id, otherUser.Id)
 	require.Error(t, err)
@@ -3294,7 +3294,7 @@ func TestAddChannelMember(t *testing.T) {
 		th.RestoreDefaultRolePermissions(defaultRolePermissions)
 	}()
 
-	th.AddPermissionToRole(model.PermissionManagePrivateChannelMembers.Id, model.ChannelUserRoleId)
+	th.AddPermissionToRole(model.PermissionAddPrivateChannelMembers.Id, model.ChannelUserRoleId)
 
 	// Check that a regular channel user can add other users.
 	client.Login(context.Background(), user2.Username, user2.Password)
@@ -3309,8 +3309,8 @@ func TestAddChannelMember(t *testing.T) {
 	client.Logout(context.Background())
 
 	// Restrict the permission for adding users to Channel Admins
-	th.AddPermissionToRole(model.PermissionManagePrivateChannelMembers.Id, model.ChannelAdminRoleId)
-	th.RemovePermissionFromRole(model.PermissionManagePrivateChannelMembers.Id, model.ChannelUserRoleId)
+	th.AddPermissionToRole(model.PermissionAddPrivateChannelMembers.Id, model.ChannelAdminRoleId)
+	th.RemovePermissionFromRole(model.PermissionAddPrivateChannelMembers.Id, model.ChannelUserRoleId)
 
 	client.Login(context.Background(), user2.Username, user2.Password)
 	privateChannel = th.CreatePrivateChannel()

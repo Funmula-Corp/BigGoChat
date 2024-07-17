@@ -627,6 +627,10 @@ func (r *Role) GetChannelModeratedPermissions(channelType ChannelType) map[strin
 					//
 					// Only AddBookmark is checked even if the permission includes four (add, delete, edit and
 					// order) as all of them are enabled or disabled in together
+				} else if moderated == PermissionAddPublicChannelMembers.Id || moderated == PermissionAddPrivateChannelMembers.Id {
+					canAddPublic := channelType == ChannelTypeOpen && moderated == PermissionAddPublicChannelMembers.Id
+					canAddPrivate := channelType == ChannelTypePrivate && moderated == PermissionAddPrivateChannelMembers.Id
+					moderatedPermissions[moderatedPermissionValue] = canAddPublic || canAddPrivate
 				} else if isModeratedBookmarkPermission(moderated) {
 					canManagePublic := channelType == ChannelTypeOpen && moderated == PermissionAddBookmarkPublicChannel.Id
 					canManagePrivate := channelType == ChannelTypePrivate && moderated == PermissionAddBookmarkPrivateChannel.Id

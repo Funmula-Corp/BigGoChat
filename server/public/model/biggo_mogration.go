@@ -6,4 +6,5 @@ const (
 
 	MigrationKeyBigGoRolesPermissions = "MigrationKeyBigGoRolesPermissions"
 	MigrationBigGoSchemeRolesCreation = "MigrationBigGoSchemeRolesCreation"
+	MigrationKeyAddChannelMembersPermission = "MigrationKeyAddChannelMembersPermission"
 )

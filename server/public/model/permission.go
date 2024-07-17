@@ -34,7 +34,9 @@ var PermissionManageOthersSlashCommands *Permission
 var PermissionCreatePublicChannel *Permission
 var PermissionCreatePrivateChannel *Permission
 var PermissionManagePublicChannelMembers *Permission
+var PermissionAddPublicChannelMembers *Permission
 var PermissionManagePrivateChannelMembers *Permission
+var PermissionAddPrivateChannelMembers *Permission
 var PermissionConvertPublicChannelToPrivate *Permission
 var PermissionConvertPrivateChannelToPublic *Permission
 var PermissionAssignSystemAdminRole *Permission
@@ -448,10 +450,22 @@ func initializePermissions() {
 		"authentication.permissions.manage_public_channel_members.description",
 		PermissionScopeChannel,
 	}
+	PermissionAddPublicChannelMembers = &Permission{
+		"add_public_channel_members",
+		"authentication.permissions.add_public_channel_members.name",
+		"authentication.permissions.add_public_channel_members.description",
+		PermissionScopeChannel,
+	}
 	PermissionManagePrivateChannelMembers = &Permission{
 		"manage_private_channel_members",
 		"authentication.permissions.manage_private_channel_members.name",
 		"authentication.permissions.manage_private_channel_members.description",
+		PermissionScopeChannel,
+	}
+	PermissionAddPrivateChannelMembers = &Permission{
+		"add_private_channel_members",
+		"authentication.permissions.add_private_channel_members.name",
+		"authentication.permissions.add_private_channel_members.description",
 		PermissionScopeChannel,
 	}
 	PermissionConvertPublicChannelToPrivate = &Permission{
@@ -2420,7 +2434,9 @@ func initializePermissions() {
 	ChannelScopedPermissions := []*Permission{
 		PermissionUseSlashCommands,
 		PermissionManagePublicChannelMembers,
+		PermissionAddPublicChannelMembers,
 		PermissionManagePrivateChannelMembers,
+		PermissionAddPrivateChannelMembers,
 		PermissionManageChannelRoles,
 		PermissionManagePublicChannelProperties,
 		PermissionManagePrivateChannelProperties,
@@ -2523,6 +2539,7 @@ func initializePermissions() {
 		"manage_members",
 		PermissionUseChannelMentions.Id,
 		"manage_bookmarks",
+		"add_members",
 	}
 
 	ChannelModeratedPermissionsMap = map[string]string{
@@ -2532,6 +2549,8 @@ func initializePermissions() {
 		PermissionManagePublicChannelMembers.Id:  ChannelModeratedPermissions[2],
 		PermissionManagePrivateChannelMembers.Id: ChannelModeratedPermissions[2],
 		PermissionUseChannelMentions.Id:          ChannelModeratedPermissions[3],
+		PermissionAddPublicChannelMembers.Id: 	  ChannelModeratedPermissions[5],
+		PermissionAddPrivateChannelMembers.Id: 	  ChannelModeratedPermissions[5],
 	}
 
 	ModeratedBookmarkPermissions = []*Permission{

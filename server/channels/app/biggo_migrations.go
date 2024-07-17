@@ -376,6 +376,30 @@ func (a *App) doMigrationKeyBigGoRolesPermissions() (permissionsMap, error) {
 	}, nil
 }
 
+func (a *App) doMigrationKeyAddChannelMembersPermission() (permissionsMap, error) {
+	return permissionsMap{
+		permissionTransformation{
+			On: permissionOr(
+				isRole(model.ChannelUserRoleId),
+				isRole(model.ChannelAdminRoleId),
+				permissionExists(model.PermissionManagePublicChannelMembers.Id),
+			),
+			Add: []string {
+				model.PermissionAddPublicChannelMembers.Id,
+			},
+		},
+		permissionTransformation{
+			On: permissionOr(
+				isRole(model.ChannelAdminRoleId),
+				permissionExists(model.PermissionManagePrivateChannelMembers.Id),
+			),
+			Add: []string {
+				model.PermissionAddPrivateChannelMembers.Id,
+			},
+		},
+	}, nil
+}
+
 func (s *Server) doBiggoPermissionMigration() error {
 	a := New(ServerConnector(s.Channels()))
 	PermissionsMigrations := []struct {
@@ -383,6 +407,7 @@ func (s *Server) doBiggoPermissionMigration() error {
 		Migration func() (permissionsMap, error)
 	}{
 		{Key: model.MigrationKeyBigGoRolesPermissions, Migration: a.doMigrationKeyBigGoRolesPermissions},
+		{Key: model.MigrationKeyAddChannelMembersPermission, Migration: a.doMigrationKeyAddChannelMembersPermission},
 	}
 
 	roles, err := s.Store().Role().GetAll()
