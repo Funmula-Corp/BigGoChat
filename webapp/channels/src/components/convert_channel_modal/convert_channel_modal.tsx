@@ -114,8 +114,19 @@ export default class ConvertChannelModal extends React.PureComponent<Props, Stat
                             />
                         </div>
                     </p>
+                    {/* todo i18n */}
+                    <p style={{ marginTop: '25px' }}>
+                        <div className='Input_wrapper'>
+                            <input
+                                className='Input form-control medium new-channel-modal-name-input channel-name-input-field'
+                                placeholder='輸入頻道名稱'
+                                onChange={this.onUpdateConfirmName}
+                                autoFocus
+                            />
+                        </div>
+                    </p>
                     <p style={{ fontSize: '12px', color: 'rgba(63, 67 89, 0.75)' }}>
-                        Please enter this channel's name to confirm the change
+                        請輸入此頻道名稱已確認變更
                     </p>
                 </Modal.Body>
                 <Modal.Footer>
