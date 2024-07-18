@@ -29,14 +29,22 @@ type Props = {
 
 type State = {
     show: boolean;
+    confirmDisplayName: string;
 }
 
 export default class ConvertChannelModal extends React.PureComponent<Props, State> {
     constructor(props: Props) {
         super(props);
 
-        this.state = {show: true};
+        this.state = {
+            show: true,
+            confirmDisplayName: '',
+        };
     }
+
+    canConvert = () => {
+        return this.state.confirmDisplayName == this.props.channelDisplayName;
+    };
 
     handleConvert = () => {
         const {actions, channelId} = this.props;
@@ -47,6 +55,12 @@ export default class ConvertChannelModal extends React.PureComponent<Props, Stat
         actions.updateChannelPrivacy(channelId, General.PRIVATE_CHANNEL);
         trackEvent('actions', 'convert_to_private_channel', {channel_id: channelId});
         this.onHide();
+    };
+
+    onUpdateConfirmName = (event: any) => {
+        this.setState({
+            confirmDisplayName: event.target.value,
+        })
     };
 
     onHide = () => {
@@ -98,14 +112,19 @@ export default class ConvertChannelModal extends React.PureComponent<Props, Stat
                             defaultMessage='The change is permanent and cannot be undone.'
                         />
                     </p>
-                    <p>
-                        <FormattedMarkdownMessage
-                            id='convert_channel.question3'
-                            defaultMessage='Are you sure you want to convert **{display_name}** to a private channel?'
-                            values={{
-                                display_name: channelDisplayName,
-                            }}
-                        />
+                    {/* todo i18n */}
+                    <p style={{ marginTop: '25px' }}>
+                        <div className='Input_wrapper'>
+                            <input
+                                className='Input form-control medium new-channel-modal-name-input channel-name-input-field'
+                                placeholder='輸入頻道名稱'
+                                onChange={this.onUpdateConfirmName}
+                                autoFocus
+                            />
+                        </div>
+                    </p>
+                    <p style={{ fontSize: '12px', color: 'rgba(63, 67 89, 0.75)' }}>
+                        請輸入此頻道名稱已確認變更
                     </p>
                 </Modal.Body>
                 <Modal.Footer>
@@ -125,6 +144,7 @@ export default class ConvertChannelModal extends React.PureComponent<Props, Stat
                         data-dismiss='modal'
                         onClick={this.handleConvert}
                         autoFocus={true}
+                        disabled={!this.canConvert()}
                         data-testid='convertChannelConfirm'
                     >
                         <FormattedMessage
