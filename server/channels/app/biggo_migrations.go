@@ -11,7 +11,7 @@ const (
 	ChannelReadOnlyRoleId = "biggoryyyyyyyyyyyyyyyyyyyb"
 	ChannelReadOnlyRoleName = model.ChannelReadOnlyRoleId
 
-	ChannelReadOnlySchemeId = "biggosyyyyyyyyyyyyyyyyyyyd"
+	ChannelReadOnlySchemeId = model.ChannelReadOnlySchemeId
 )
 
 func (s *Server) doChannelReadOnlyRoleCreationMigration() {

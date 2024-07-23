@@ -65,9 +65,10 @@ type ChannelMember struct {
 	LastUpdateAt       int64     `json:"last_update_at"`
 	SchemeGuest        bool      `json:"scheme_guest"`
 	SchemeUser         bool      `json:"scheme_user"`
-	SchemeVerified     bool     `json:"scheme_verified"`
+	SchemeVerified     bool      `json:"scheme_verified"`
 	SchemeAdmin        bool      `json:"scheme_admin"`
 	ExplicitRoles      string    `json:"explicit_roles"`
+	ExcludePermissions string    `json:"exclude_permissions"`
 }
 
 func (o *ChannelMember) Auditable() map[string]interface{} {
@@ -87,6 +88,7 @@ func (o *ChannelMember) Auditable() map[string]interface{} {
 		"scheme_user":          o.SchemeUser,
 		"scheme_admin":         o.SchemeAdmin,
 		"explicit_roles":       o.ExplicitRoles,
+		"exclude_permissions":  o.ExcludePermissions,
 	}
 }
 
@@ -185,6 +187,10 @@ func (o *ChannelMember) PreUpdate() {
 
 func (o *ChannelMember) GetRoles() []string {
 	return strings.Fields(o.Roles)
+}
+
+func (o *ChannelMember) GetExcludePermissions() []string {
+	return strings.Fields(o.ExcludePermissions)
 }
 
 func (o *ChannelMember) SetChannelMuted(muted bool) {

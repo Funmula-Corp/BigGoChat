@@ -45,6 +45,7 @@ type channelMember struct {
 	SchemeVerified     sql.NullBool
 	MentionCountRoot   int64
 	MsgCountRoot       int64
+	ExcludePermissions string
 }
 
 func NewMapFromChannelMemberModel(cm *model.ChannelMember) map[string]any {
@@ -64,6 +65,7 @@ func NewMapFromChannelMemberModel(cm *model.ChannelMember) map[string]any {
 		"SchemeUser":         sql.NullBool{Valid: true, Bool: cm.SchemeUser},
 		"SchemeVerified":        sql.NullBool{Valid: true, Bool: cm.SchemeVerified},
 		"SchemeAdmin":        sql.NullBool{Valid: true, Bool: cm.SchemeAdmin},
+		"ExcludePermissions": cm.ExcludePermissions,
 	}
 }
 
@@ -91,6 +93,7 @@ type channelMemberWithSchemeRoles struct {
 	ChannelSchemeDefaultVerifiedRole  sql.NullString
 	ChannelSchemeDefaultAdminRole sql.NullString
 	MsgCountRoot                  int64
+	ExcludePermissions            string
 }
 
 type channelMemberWithTeamWithSchemeRoles struct {
@@ -282,6 +285,7 @@ func (db channelMemberWithSchemeRoles) ToModel() *model.ChannelMember {
 		SchemeVerified:     rolesResult.schemeVerified,
 		SchemeGuest:        rolesResult.schemeGuest,
 		ExplicitRoles:      strings.Join(rolesResult.explicitRoles, " "),
+		ExcludePermissions: db.ExcludePermissions,
 	}
 }
 
@@ -358,6 +362,7 @@ func (db channelMemberWithTeamWithSchemeRoles) ToModel() *model.ChannelMemberWit
 			SchemeVerified:     rolesResult.schemeVerified,
 			SchemeGuest:        rolesResult.schemeGuest,
 			ExplicitRoles:      strings.Join(rolesResult.explicitRoles, " "),
+			ExcludePermissions: db.ExcludePermissions,
 		},
 		TeamName:        db.TeamName,
 		TeamDisplayName: db.TeamDisplayName,
@@ -400,6 +405,7 @@ type allChannelMember struct {
 	ChannelSchemeDefaultUserRole  sql.NullString
 	ChannelSchemeDefaultVerifiedRole  sql.NullString
 	ChannelSchemeDefaultAdminRole sql.NullString
+	ExcludePermissions            sql.NullString
 }
 
 type allChannelMembers []allChannelMember
@@ -2212,7 +2218,8 @@ func (s SqlChannelStore) GetAllChannelMembersForUser(userId string, allowFromCac
 				ChannelScheme.DefaultChannelGuestRole ChannelSchemeDefaultGuestRole,
 				ChannelScheme.DefaultChannelUserRole ChannelSchemeDefaultUserRole,
 				ChannelScheme.DefaultChannelVerifiedRole ChannelSchemeDefaultVerifiedRole,
-				ChannelScheme.DefaultChannelAdminRole ChannelSchemeDefaultAdminRole
+				ChannelScheme.DefaultChannelAdminRole ChannelSchemeDefaultAdminRole,
+				ChannelMembers.excludepermissions
 		`).
 		From("ChannelMembers").
 		Join("Channels ON ChannelMembers.ChannelId = Channels.Id").
@@ -2242,6 +2249,7 @@ func (s SqlChannelStore) GetAllChannelMembersForUser(userId string, allowFromCac
 			&cm.SchemeAdmin, &cm.TeamSchemeDefaultGuestRole, &cm.TeamSchemeDefaultUserRole, &cm.TeamSchemeDefaultVerifiedRole,
 			&cm.TeamSchemeDefaultAdminRole, &cm.ChannelSchemeDefaultGuestRole,
 			&cm.ChannelSchemeDefaultUserRole, &cm.ChannelSchemeDefaultVerifiedRole, &cm.ChannelSchemeDefaultAdminRole,
+			&cm.ExcludePermissions,
 		)
 		if err != nil {
 			return nil, errors.Wrap(err, "unable to scan columns")
