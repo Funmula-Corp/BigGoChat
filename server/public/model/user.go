@@ -215,6 +215,7 @@ type UserForIndexing struct {
 	DeleteAt    int64    `json:"delete_at"`
 	TeamsIds    []string `json:"team_id"`
 	ChannelsIds []string `json:"channel_id"`
+	Mobilephone string  `json:"mobilephone"`
 }
 
 //msgp:ignore ViewUsersRestrictions
