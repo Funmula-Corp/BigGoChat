@@ -131,7 +131,7 @@ const FilePreviewModalMainActions: React.FC<Props> = (props: Props) => {
             placement={tooltipPlacement}
             overlay={
                 <Tooltip id='link-variant-icon-tooltip'>
-                    另開新頁
+                    Open image in new tab
                 </Tooltip>
             }
         >

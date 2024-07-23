@@ -107,6 +107,10 @@ export function canDeletePost(state: GlobalState, post: Post, channel?: Channel)
     if (isPostOwner(state, post)) {
         return haveIChannelPermission(state, channel && channel.team_id, post.channel_id, Permissions.DELETE_POST);
     }
+
+    if (channel && channel.type === 'D') {
+        return false;
+    }
     return haveIChannelPermission(state, channel && channel.team_id, post.channel_id, Permissions.DELETE_OTHERS_POSTS);
 }
 

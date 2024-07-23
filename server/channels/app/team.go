@@ -655,7 +655,7 @@ func (a *App) AddUserToTeamByToken(c request.CTX, userID string, tokenID string)
 
 	if blocked, err := a.GetTeamBlockUser(c, team.Id, userID); err != nil {
 		return nil, nil, err
-	}else if blocked != nil {
+	} else if blocked != nil {
 		return nil, nil, model.NewAppError("AddUserToTeamByToken", "app.team.invite_token.blocked_user.app_error", nil, "", http.StatusForbidden)
 	}
 
@@ -745,7 +745,7 @@ func (a *App) AddUserToTeamByInviteId(c request.CTX, inviteId string, userID str
 
 	if blocked, err := a.GetTeamBlockUser(c, team.Id, userID); err != nil {
 		return nil, nil, err
-	}else if blocked != nil {
+	} else if blocked != nil {
 		return nil, nil, model.NewAppError("AddUserToTeamByToken", "app.team.invite_id.blocked_user.app_error", nil, "", http.StatusForbidden)
 	}
 
@@ -904,6 +904,15 @@ func (a *App) GetAllTeams() ([]*model.Team, *model.AppError) {
 	teams, err := a.Srv().Store().Team().GetAll()
 	if err != nil {
 		return nil, model.NewAppError("GetAllTeams", "app.team.get_all.app_error", nil, "", http.StatusInternalServerError).Wrap(err)
+	}
+
+	return teams, nil
+}
+
+func (a *App) GetAllTeamsByEmail(email string) ([]*model.Team, *model.AppError) {
+	teams, err := a.Srv().Store().Team().GetAllTeamsByEmail(email)
+	if err != nil {
+		return nil, model.NewAppError("GetAllTeamsByEmail", "app.team.get_all_by_email.app_error", nil, "", http.StatusInternalServerError).Wrap(err)
 	}
 
 	return teams, nil

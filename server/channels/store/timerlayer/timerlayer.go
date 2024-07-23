@@ -9106,6 +9106,22 @@ func (s *TimerLayerTeamStore) GetAll() ([]*model.Team, error) {
 	return result, err
 }
 
+func (s *TimerLayerTeamStore) GetAllTeamsByEmail(email string) ([]*model.Team, error) {
+	start := time.Now()
+
+	result, err := s.TeamStore.GetAllTeamsByEmail(email)
+
+	elapsed := float64(time.Since(start)) / float64(time.Second)
+	if s.Root.Metrics != nil {
+		success := "false"
+		if err == nil {
+			success = "true"
+		}
+		s.Root.Metrics.ObserveStoreMethodDuration("TeamStore.GetAllTeamsByEmail", success, elapsed)
+	}
+	return result, err
+}
+
 func (s *TimerLayerTeamStore) GetAllForExportAfter(limit int, afterID string) ([]*model.TeamForExport, error) {
 	start := time.Now()
 
