@@ -7,9 +7,9 @@ import (
 	"context"
 	"strings"
 
-	"github.com/mattermost/mattermost/server/v8/cmd/mmctl/client"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/cmd/mmctl/client"
 
-	"github.com/mattermost/mattermost/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 )
 
 // getCommandFromCommandArg retrieves a Command by command id or team:trigger.

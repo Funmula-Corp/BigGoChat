@@ -10,9 +10,9 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/mattermost/mattermost/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 
-	"github.com/mattermost/mattermost/server/v8/cmd/mmctl/printer"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/cmd/mmctl/printer"
 
 	"github.com/hashicorp/go-multierror"
 	"github.com/spf13/cobra"
@@ -464,5 +464,52 @@ Permissions   edit_brand
 		s.Require().Equal(expectedError, err)
 		s.Require().Len(printer.GetLines(), 0)
 		s.Require().Len(printer.GetErrorLines(), 0)
+	})
+}
+
+func (s *MmctlUnitTestSuite) TestShowRolesCmd() {
+	s.Run("Show all roles", func() {
+		printer.Clean()
+		printer.SetFormat(printer.FormatPlain)
+		defer printer.SetFormat(printer.FormatJSON)
+		printer.Clean()
+		printer.SetFormat(printer.FormatPlain)
+		defer printer.SetFormat(printer.FormatJSON)
+
+		mockRole := []*model.Role{{
+			Id:          "example-mock-id",
+			Name:        "example-role-name",
+			Permissions: []string{"create_team"},
+		}, {
+			Id:          "system_xx-id",
+			Name:        "system_xx",
+			BuiltIn: true,
+			SchemeManaged: true,
+			Permissions: []string{"create_team"},
+		}}
+
+		s.client.
+			EXPECT().
+			GetAllRoles(context.TODO()).
+			Return(mockRole, &model.Response{}, nil).
+			Times(1)
+
+		err := showRolesCmdF(s.client, &cobra.Command{}, []string{})
+		s.Require().Nil(err)
+		lines := printer.GetLines()
+		s.Equal("Scope,Permission,system_xx,example-role-name", lines[0])
+		s.Equal("SchemeManaged,,true,false", lines[1])
+		s.Equal("BuiltIn,,true,false", lines[2])
+		s.True(strings.HasPrefix(fmt.Sprintf("%s", lines[3]), "system_scope,"))
+		matched := false
+		for _, line := range lines {
+			b := fmt.Sprintf("%s", line)
+			fmt.Printf("b||%s||b\n", b)
+			if b == "system_scope,create_team,1,1" {
+				matched = true
+			}
+		}
+		s.True(matched)
+
 	})
 }

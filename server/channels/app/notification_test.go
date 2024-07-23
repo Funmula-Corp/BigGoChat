@@ -16,11 +16,11 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/mattermost/mattermost/server/public/model"
-	"github.com/mattermost/mattermost/server/public/shared/i18n"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/i18n"
 
-	"github.com/mattermost/mattermost/server/v8/channels/app/platform"
-	"github.com/mattermost/mattermost/server/v8/channels/store"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app/platform"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
 )
 
 func getLicWithSkuShortName(skuShortName string) *model.License {
@@ -292,7 +292,7 @@ func TestSendNotifications_MentionsFollowers(t *testing.T) {
 	t.Run("should inform each user in a group if they were mentioned by a post", func(t *testing.T) {
 		// Make the sender a channel_admin because that's needed for group mentions
 		originalRoles := member.Roles
-		member.Roles = "channel_user channel_admin"
+		member.Roles = "channel_user channel_verified channel_admin"
 		_, appErr := th.App.UpdateChannelMemberRoles(th.Context, member.ChannelId, member.UserId, member.Roles)
 		require.Nil(t, appErr)
 
@@ -1519,8 +1519,10 @@ func TestAllowChannelMentions(t *testing.T) {
 
 	t.Run("should return false for a post where the post user does not have USE_CHANNEL_MENTIONS permission", func(t *testing.T) {
 		defer th.AddPermissionToRole(model.PermissionUseChannelMentions.Id, model.ChannelUserRoleId)
+		defer th.AddPermissionToRole(model.PermissionUseChannelMentions.Id, model.ChannelVerifiedRoleId)
 		defer th.AddPermissionToRole(model.PermissionUseChannelMentions.Id, model.ChannelAdminRoleId)
 		th.RemovePermissionFromRole(model.PermissionUseChannelMentions.Id, model.ChannelUserRoleId)
+		th.RemovePermissionFromRole(model.PermissionUseChannelMentions.Id, model.ChannelVerifiedRoleId)
 		th.RemovePermissionFromRole(model.PermissionUseChannelMentions.Id, model.ChannelAdminRoleId)
 		allowChannelMentions := th.App.allowChannelMentions(th.Context, post, 5)
 		assert.False(t, allowChannelMentions)

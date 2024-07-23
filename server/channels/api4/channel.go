@@ -9,11 +9,11 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/mattermost/mattermost/server/public/model"
-	"github.com/mattermost/mattermost/server/public/shared/i18n"
-	"github.com/mattermost/mattermost/server/public/shared/mlog"
-	"github.com/mattermost/mattermost/server/v8/channels/app"
-	"github.com/mattermost/mattermost/server/v8/channels/audit"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/i18n"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/audit"
 )
 
 func (api *API) InitChannel() {
@@ -875,7 +875,12 @@ func getDeletedChannelsForTeam(c *Context, w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	channels, err := c.App.GetDeletedChannels(c.AppContext, c.Params.TeamId, c.Params.Page*c.Params.PerPage, c.Params.PerPage, c.AppContext.Session().UserId)
+	if !c.App.SessionHasPermissionToTeam(*c.AppContext.Session(), c.Params.TeamId, model.PermissionManageTeam) {
+		c.SetPermissionError(model.PermissionManageTeam)
+		return
+	}
+
+	channels, err := c.App.GetDeletedChannels(c.AppContext, c.Params.TeamId, c.Params.Page*c.Params.PerPage, c.Params.PerPage, "")
 	if err != nil {
 		c.Err = err
 		return
@@ -898,7 +903,7 @@ func getPrivateChannelsForTeam(c *Context, w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	if !c.App.SessionHasPermissionTo(*c.AppContext.Session(), model.PermissionManageSystem) {
+	if !c.App.SessionHasPermissionToTeam(*c.AppContext.Session(), c.Params.TeamId, model.PermissionManageTeam) {
 		c.SetPermissionError(model.PermissionManageSystem)
 		return
 	}
@@ -1188,6 +1193,10 @@ func searchArchivedChannelsForTeam(c *Context, w http.ResponseWriter, r *http.Re
 	var channels model.ChannelList
 	var appErr *model.AppError
 	if c.App.SessionHasPermissionToTeam(*c.AppContext.Session(), c.Params.TeamId, model.PermissionListTeamChannels) {
+		if !c.App.SessionHasPermissionToTeam(*c.AppContext.Session(), c.Params.TeamId, model.PermissionManageTeam) {
+			c.SetPermissionError(model.PermissionManageTeam)
+			return
+		}
 		channels, appErr = c.App.SearchArchivedChannels(c.AppContext, c.Params.TeamId, props.Term, c.AppContext.Session().UserId)
 	} else {
 		// If the user is not a team member, return a 404
@@ -1229,6 +1238,10 @@ func searchAllChannels(c *Context, w http.ResponseWriter, r *http.Request) {
 	}
 
 	if !fromSysConsole {
+		if props.IncludeDeleted && !c.App.SessionHasPermissionToTeams(c.AppContext, *c.AppContext.Session(), props.TeamIds, model.PermissionManageTeam) {
+			c.SetPermissionError(model.PermissionManageTeam)
+			return
+		}
 		// If the request is not coming from system_console, only show the user level channels
 		// from all teams.
 		channels, err := c.App.AutocompleteChannels(c.AppContext, c.AppContext.Session().UserId, props.Term)
@@ -1644,6 +1657,22 @@ func updateChannelMemberRoles(c *Context, w http.ResponseWriter, r *http.Request
 		return
 	}
 
+	if user, err := c.App.GetUser(c.Params.UserId); err != nil {
+		c.Err = err
+		return
+	} else if user.IsVerified() {
+		hasVerified := false
+		for _, role := range(strings.Fields(newRoles)){
+			if role == model.ChannelVerifiedRoleId {
+				hasVerified = true
+				break
+			}
+		}
+		if !hasVerified {
+			newRoles += " " + model.ChannelVerifiedRoleId
+		}
+	}
+
 	if _, err := c.App.UpdateChannelMemberRoles(c.AppContext, c.Params.ChannelId, c.Params.UserId, newRoles); err != nil {
 		c.Err = err
 		return
@@ -1676,7 +1705,14 @@ func updateChannelMemberSchemeRoles(c *Context, w http.ResponseWriter, r *http.R
 		return
 	}
 
-	if _, err := c.App.UpdateChannelMemberSchemeRoles(c.AppContext, c.Params.ChannelId, c.Params.UserId, schemeRoles.SchemeGuest, schemeRoles.SchemeUser, schemeRoles.SchemeAdmin); err != nil {
+	if user, err := c.App.GetUser(c.Params.UserId); err != nil {
+		c.Err = err
+		return
+	} else {
+		schemeRoles.SchemeVerified = user.IsVerified()
+	}
+
+	if _, err := c.App.UpdateChannelMemberSchemeRoles(c.AppContext, c.Params.ChannelId, c.Params.UserId, schemeRoles.SchemeGuest, schemeRoles.SchemeUser, schemeRoles.SchemeVerified, schemeRoles.SchemeAdmin); err != nil {
 		c.Err = err
 		return
 	}
@@ -1765,6 +1801,11 @@ func addChannelMember(c *Context, w http.ResponseWriter, r *http.Request) {
 	channel, err := c.App.GetChannel(c.AppContext, member.ChannelId)
 	if err != nil {
 		c.Err = err
+		return
+	}
+
+	if channel.DeleteAt > 0 {
+		c.Err = model.NewAppError("addUserToChannel", "api.channel.add_user.to.channel.failed.deleted.app_error", nil, "", http.StatusBadRequest)
 		return
 	}
 
@@ -1929,7 +1970,7 @@ func updateChannelScheme(c *Context, w http.ResponseWriter, r *http.Request) {
 	defer c.LogAuditRec(auditRec)
 
 	var p model.SchemeIDPatch
-	if jsonErr := json.NewDecoder(r.Body).Decode(&p); jsonErr != nil || p.SchemeID == nil || !model.IsValidId(*p.SchemeID) {
+	if jsonErr := json.NewDecoder(r.Body).Decode(&p); jsonErr != nil || p.SchemeID == nil || (*p.SchemeID != "" && !model.IsValidId(*p.SchemeID)) {
 		c.SetInvalidParamWithErr("scheme_id", jsonErr)
 		return
 	}
@@ -1937,36 +1978,55 @@ func updateChannelScheme(c *Context, w http.ResponseWriter, r *http.Request) {
 
 	audit.AddEventParameter(auditRec, "scheme_id", *schemeID)
 
-	if c.App.Channels().License() == nil {
-		c.Err = model.NewAppError("Api4.UpdateChannelScheme", "api.channel.update_channel_scheme.license.error", nil, "", http.StatusForbidden)
-		return
-	}
-
-	if !c.App.SessionHasPermissionTo(*c.AppContext.Session(), model.PermissionManageSystem) {
-		c.SetPermissionError(model.PermissionManageSystem)
-		return
-	}
-
-	scheme, err := c.App.GetScheme(*schemeID)
-	if err != nil {
-		c.Err = err
-		return
-	}
-
-	if scheme.Scope != model.SchemeScopeChannel {
-		c.Err = model.NewAppError("Api4.UpdateChannelScheme", "api.channel.update_channel_scheme.scheme_scope.error", nil, "", http.StatusBadRequest)
-		return
-	}
-
 	channel, err := c.App.GetChannel(c.AppContext, c.Params.ChannelId)
 	if err != nil {
 		c.Err = err
 		return
 	}
+	var scheme *model.Scheme
+
+	if *schemeID != ""  {
+		scheme, err = c.App.GetScheme(*schemeID)
+		if err != nil {
+			c.Err = err
+			return
+		}
+		if scheme.Scope != model.SchemeScopeChannel {
+			c.Err = model.NewAppError("Api4.UpdateChannelScheme", "api.channel.update_channel_scheme.scheme_scope.error", nil, "", http.StatusBadRequest)
+			return
+		}
+	}
+
+	session := c.AppContext.Session()
+	if !c.App.SessionHasPermissionTo(*session, model.PermissionManageSystem) {
+		if !c.App.SessionHasPermissionToChannel(c.AppContext, *session, channel.Id, model.PermissionManageChannelRoles) {
+			c.SetPermissionError(model.PermissionManageChannelRoles)
+			return
+		}
+		if scheme != nil && !scheme.IsBuiltIn() {
+			c.Err = model.NewAppError("Api4.UpdateChannelScheme", "api.channel.update_channel_scheme.builtin_scheme.error", nil, "", http.StatusBadRequest)
+			return
+		}
+		if channel.SchemeId != nil && len(*channel.SchemeId) > 0 {
+			oScheme, err := c.App.GetScheme(*channel.SchemeId)
+			if err != nil {
+				c.Err = err
+				return
+			}
+			if !oScheme.IsBuiltIn() {
+				c.Err = model.NewAppError("Api4.UpdateChannelScheme", "api.channel.update_channel_scheme.builtin_scheme.error", nil, "", http.StatusBadRequest)
+				return
+			}
+		}
+	}
 
 	auditRec.AddEventPriorState(channel)
 
-	channel.SchemeId = &scheme.Id
+	if scheme != nil {
+		channel.SchemeId = &scheme.Id
+	}else{
+		channel.SchemeId = model.NewString("")
+	}
 
 	updatedChannel, err := c.App.UpdateChannelScheme(c.AppContext, channel)
 	if err != nil {

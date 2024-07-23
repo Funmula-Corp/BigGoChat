@@ -11,7 +11,7 @@ import (
 	"net/http"
 	timePkg "time"
 
-	"github.com/mattermost/mattermost/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 )
 
 type apiTimerLayer struct {
@@ -1370,4 +1370,17 @@ func (api *apiTimerLayer) UpdateUserRoles(userID, newRoles string) (*model.User,
 	_returnsA, _returnsB := api.apiImpl.UpdateUserRoles(userID, newRoles)
 	api.recordTime(startTime, "UpdateUserRoles", _returnsB == nil)
 	return _returnsA, _returnsB
+}
+
+func (api *apiTimerLayer) BDPublishWebSocketEvent(event model.WebsocketEventType, teamId string, channelId string, userId string, omitUsers map[string]bool, omitConnectionId string, data map[string]any) {
+	startTime := timePkg.Now()
+	api.apiImpl.BDPublishWebSocketEvent(event, teamId, channelId, userId, omitUsers, omitConnectionId, data)
+	api.recordTime(startTime, "BDPublishWebSocketEvent", true)
+}
+
+func (api *apiTimerLayer) MarkUserVerified(userId string) *model.AppError {
+	startTime := timePkg.Now()
+	_returnsA := api.apiImpl.MarkUserVerified(userId)
+	api.recordTime(startTime, "MarkUserVerified", _returnsA == nil)
+	return _returnsA
 }

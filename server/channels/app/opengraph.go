@@ -12,7 +12,7 @@ import (
 	"github.com/dyatlov/go-opengraph/opengraph"
 	"golang.org/x/net/html/charset"
 
-	"github.com/mattermost/mattermost/server/public/shared/mlog"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
 )
 
 const (

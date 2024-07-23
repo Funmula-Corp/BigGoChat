@@ -10,13 +10,13 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/mattermost/mattermost/server/public/model"
-	"github.com/mattermost/mattermost/server/public/shared/mlog"
-	"github.com/mattermost/mattermost/server/public/shared/request"
-	"github.com/mattermost/mattermost/server/v8/channels/app/platform"
-	"github.com/mattermost/mattermost/server/v8/channels/app/users"
-	"github.com/mattermost/mattermost/server/v8/channels/audit"
-	"github.com/mattermost/mattermost/server/v8/channels/store"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app/platform"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app/users"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/audit"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
 )
 
 // maxSessionsLimit prevents a potential DOS caused by creating an unbounded number of sessions; MM-55320

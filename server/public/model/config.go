@@ -21,8 +21,8 @@ import (
 
 	"github.com/mattermost/ldap"
 
-	"github.com/mattermost/mattermost/server/public/shared/mlog"
-	"github.com/mattermost/mattermost/server/public/utils"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/utils"
 )
 
 const (
@@ -48,6 +48,7 @@ const (
 
 	ServiceGitlab    = "gitlab"
 	ServiceGoogle    = "google"
+	ServiceBiggo     = "biggo"
 	ServiceOffice365 = "office365"
 	ServiceOpenid    = "openid"
 
@@ -244,6 +245,11 @@ const (
 	GoogleSettingsDefaultAuthEndpoint    = "https://accounts.google.com/o/oauth2/v2/auth"
 	GoogleSettingsDefaultTokenEndpoint   = "https://www.googleapis.com/oauth2/v4/token"
 	GoogleSettingsDefaultUserAPIEndpoint = "https://people.googleapis.com/v1/people/me?personFields=names,emailAddresses,nicknames,metadata"
+
+	BiggoSettingsDefaultScope           = "profile email"
+	BiggoSettingsDefaultAuthEndpoint    = "http://kyle.account.biggo.com/"
+	BiggoSettingsDefaultTokenEndpoint   = "https://api-auth.dev.cloud.biggo.com/auth/v1/token"
+	BiggoSettingsDefaultUserAPIEndpoint = "http://api-auth.dev.cloud.biggo.com/auth/v1/token/user_info"
 
 	Office365SettingsDefaultScope           = "User.Read"
 	Office365SettingsDefaultAuthEndpoint    = "https://login.microsoftonline.com/common/oauth2/v2.0/authorize"
@@ -1353,7 +1359,7 @@ func (s *LogSettings) SetDefaults() {
 	}
 
 	if s.EnableDiagnostics == nil {
-		s.EnableDiagnostics = NewBool(true)
+		s.EnableDiagnostics = NewBool(false)
 	}
 
 	if s.VerboseDiagnostics == nil {
@@ -1995,8 +2001,11 @@ func (s *RateLimitSettings) SetDefaults() {
 }
 
 type PrivacySettings struct {
-	ShowEmailAddress *bool `access:"site_users_and_teams"`
-	ShowFullName     *bool `access:"site_users_and_teams"`
+	ShowEmailAddress                *bool `access:"site_users_and_teams"`
+	ShowFullName                    *bool `access:"site_users_and_teams"`
+	ShowMobilephone                 *bool `access:"site_users_and_teams"`
+	AllowAnonymousEmailSearch       *bool `access:"site_users_and_teams"`
+	AllowAnonymousMobilephoneSearch *bool `access:"site_users_and_teams"`
 }
 
 func (s *PrivacySettings) setDefaults() {
@@ -2006,6 +2015,18 @@ func (s *PrivacySettings) setDefaults() {
 
 	if s.ShowFullName == nil {
 		s.ShowFullName = NewBool(true)
+	}
+
+	if s.ShowMobilephone == nil {
+		s.ShowMobilephone = NewBool(true)
+	}
+
+	if s.AllowAnonymousEmailSearch == nil {
+		s.AllowAnonymousEmailSearch = NewBool(false)
+	}
+
+	if s.AllowAnonymousMobilephoneSearch == nil {
+		s.AllowAnonymousMobilephoneSearch = NewBool(false)
 	}
 }
 
@@ -3482,6 +3503,7 @@ type Config struct {
 	ThemeSettings             ThemeSettings
 	GitLabSettings            SSOSettings
 	GoogleSettings            SSOSettings
+	BiggoSettings             SSOSettings
 	Office365Settings         Office365Settings
 	OpenIdSettings            SSOSettings
 	LdapSettings              LdapSettings
@@ -3546,6 +3568,8 @@ func (o *Config) GetSSOService(service string) *SSOSettings {
 		return &o.GitLabSettings
 	case ServiceGoogle:
 		return &o.GoogleSettings
+	case ServiceBiggo:
+		return &o.BiggoSettings
 	case ServiceOffice365:
 		return o.Office365Settings.SSOSettings()
 	case ServiceOpenid:
@@ -3588,6 +3612,7 @@ func (o *Config) SetDefaults() {
 	o.Office365Settings.setDefaults()
 	o.GitLabSettings.setDefaults("", "", "", "", "")
 	o.GoogleSettings.setDefaults(GoogleSettingsDefaultScope, GoogleSettingsDefaultAuthEndpoint, GoogleSettingsDefaultTokenEndpoint, GoogleSettingsDefaultUserAPIEndpoint, "")
+	o.BiggoSettings.setDefaults(BiggoSettingsDefaultScope, BiggoSettingsDefaultAuthEndpoint, BiggoSettingsDefaultTokenEndpoint, BiggoSettingsDefaultUserAPIEndpoint, "")
 	o.OpenIdSettings.setDefaults(OpenidSettingsDefaultScope, "", "", "", "#145DBF")
 	o.ServiceSettings.SetDefaults(isUpdate)
 	o.PasswordSettings.SetDefaults()
@@ -4318,6 +4343,7 @@ func (o *Config) GetSanitizeOptions() map[string]bool {
 	options := map[string]bool{}
 	options["fullname"] = *o.PrivacySettings.ShowFullName
 	options["email"] = *o.PrivacySettings.ShowEmailAddress
+	options["mobilephone"] = *o.PrivacySettings.ShowMobilephone
 
 	return options
 }
@@ -4345,6 +4371,10 @@ func (o *Config) Sanitize() {
 
 	if o.GoogleSettings.Secret != nil && *o.GoogleSettings.Secret != "" {
 		*o.GoogleSettings.Secret = FakeSetting
+	}
+
+	if o.BiggoSettings.Secret != nil && *o.BiggoSettings.Secret != "" {
+		*o.BiggoSettings.Secret = FakeSetting
 	}
 
 	if o.Office365Settings.Secret != nil && *o.Office365Settings.Secret != "" {

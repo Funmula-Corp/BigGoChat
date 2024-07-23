@@ -16,9 +16,9 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/mattermost/mattermost/server/public/model"
-	"github.com/mattermost/mattermost/server/public/plugin/plugintest/mock"
-	"github.com/mattermost/mattermost/server/v8/channels/store/storetest/mocks"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin/plugintest/mock"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store/storetest/mocks"
 )
 
 func TestCheckIfRolesGrantPermission(t *testing.T) {
@@ -136,7 +136,7 @@ func TestSessionHasPermissionToChannel(t *testing.T) {
 		UserId: th.BasicUser.Id,
 	}
 
-	t.Run("basic user can access basic channel", func(t *testing.T) {
+	t.Run("basic verified user can access basic channel", func(t *testing.T) {
 		assert.True(t, th.App.SessionHasPermissionToChannel(th.Context, session, th.BasicChannel.Id, model.PermissionAddReaction))
 	})
 

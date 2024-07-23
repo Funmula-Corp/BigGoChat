@@ -18,16 +18,16 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 
-	"github.com/mattermost/mattermost/server/public/model"
-	"github.com/mattermost/mattermost/server/public/shared/request"
-	"github.com/mattermost/mattermost/server/v8/channels/app/email"
-	emailmocks "github.com/mattermost/mattermost/server/v8/channels/app/email/mocks"
-	"github.com/mattermost/mattermost/server/v8/channels/app/teams"
-	"github.com/mattermost/mattermost/server/v8/channels/app/users"
-	"github.com/mattermost/mattermost/server/v8/channels/store"
-	"github.com/mattermost/mattermost/server/v8/channels/store/sqlstore"
-	"github.com/mattermost/mattermost/server/v8/channels/store/storetest/mocks"
-	"github.com/mattermost/mattermost/server/v8/channels/testlib"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app/email"
+	emailmocks "git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app/email/mocks"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app/teams"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app/users"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store/sqlstore"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store/storetest/mocks"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/testlib"
 )
 
 func TestCreateTeam(t *testing.T) {
@@ -1127,6 +1127,7 @@ func TestGetTeamMembers(t *testing.T) {
 	var users []model.User
 	users = append(users, *th.BasicUser)
 	users = append(users, *th.BasicUser2)
+	users = append(users, *th.BasicUnverified)
 
 	for i := 0; i < 8; i++ {
 		user := model.User{

@@ -8,7 +8,7 @@ import (
 	"io"
 	"strings"
 
-	"github.com/mattermost/mattermost/server/public/utils"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/utils"
 )
 
 const (

@@ -1,0 +1,94 @@
+syntax = "proto3";
+option go_package = "./gossip";
+package gossip;
+
+message Void {
+}
+
+service Cluster {
+  rpc GetMyClusterInfo (Void) returns (ClusterInfoReply) {}
+  rpc GetClusterStats (Void) returns (ClusterStatsReply) {}
+  rpc SendClusterMessageToNode (ClusterMessage) returns (Void) {}
+  rpc GetLogs (LogRequest) returns (LogReply) {}
+  rpc QueryLogs (LogRequest) returns (QueryLogReply) {}
+  rpc GetPluginStatuses (Void) returns (PluginStatusReply) {}
+  rpc ConfigChanged (ConfigUpdateRequest) returns (Void) {}
+  rpc WebConnCountForUser (WebsocketCountForUserRequest) returns (WebsocketCountForUserReply) {}
+}
+
+message ClusterInfoReply {
+  string Id = 1;
+  string Version = 2;
+  string SchemaVersion = 3;
+  string ConfigHash = 4;
+  string IPAddress = 5;
+  string Hostname = 6;
+}
+
+message ClusterStatsReply {
+  string Id = 1;
+  int32 TotalWebsocketConnections = 2;
+  int32 TotalReadDbConnections = 3;
+  int32 TotalMasterDbConnections = 4;
+}
+
+message ClusterMessage {
+  string Event = 1;
+  string SendType = 2;
+  bool WaitForAllToSend = 3;
+  bytes Data = 4;
+  map<string, string> Props = 5;
+}
+
+message PluginStatus {
+  string PluginId = 1;
+  string ClusterId = 2;
+  string PluginPath = 3;
+  int32 State = 4;
+  string Error = 5;
+  string Name = 6;
+  string Description = 7;
+  string Version = 8;
+}
+
+message PluginStatusReply {
+  repeated PluginStatus Statuses = 1;
+}
+
+message LogFilter {
+	repeated string ServerNames = 1;
+	repeated string LogLevels = 2;
+	string DateFrom = 3;
+	string DateTo = 4;
+}
+
+message LogRequest {
+  int32 Page = 1;
+  int32 PerPage = 2;
+  LogFilter Filter = 3;
+}
+
+message LogReply {
+  repeated string Entries = 1;
+}
+
+message QueryLogReply {
+  map<string, StringList> Entries = 1;
+}
+
+message StringList {
+  repeated string values = 1;
+}
+
+message ConfigUpdateRequest {
+  bytes OldConfigBuffer = 1;
+  bytes NewConfigBuffer = 2;
+}
+
+message WebsocketCountForUserRequest {
+  string UserId = 1;
+}
+
+message WebsocketCountForUserReply {
+  int32 Count = 1;
+}

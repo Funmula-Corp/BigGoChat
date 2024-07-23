@@ -12,7 +12,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/mattermost/mattermost/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 )
 
 func TestLRU(t *testing.T) {
@@ -204,6 +204,20 @@ func TestLRUMarshalUnMarshal(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, post.Clone(), p.Clone())
 
+	teamMember := &model.TeamMember{
+		TeamId:         "ty7ia14yuty5bmpt8wmz6da1fw",
+		UserId:         "rpgh1q5ra38y9xjn9z8fjctezr",
+		Roles:          "role",
+		DeleteAt:       1,
+		SchemeGuest:    true,
+		SchemeUser:     true,
+		SchemeVerified: true,
+		SchemeAdmin:    true,
+		ExplicitRoles:  "",
+		CreateAt:       1,
+	}
+	teamMembers := []*model.TeamMember{teamMember}
+
 	session := &model.Session{
 		Id:             "ty7ia14yuty5bmpt8wmz6da1fw",
 		Token:          "79c3iq6nzpycmkkawudanqhg5c",
@@ -222,6 +236,7 @@ func TestLRUMarshalUnMarshal(t *testing.T) {
 			"os":       "",
 			"platform": "Windows",
 		},
+		TeamMembers: teamMembers,
 	}
 
 	err = l.Set("session", session)

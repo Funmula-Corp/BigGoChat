@@ -14,7 +14,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/mattermost/mattermost/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 )
 
 const CustomDefaultsEnvVar = "MM_CUSTOM_DEFAULTS_PATH"

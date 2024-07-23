@@ -13,11 +13,11 @@ import (
 	"sync"
 	"time"
 
-	"github.com/mattermost/mattermost/server/public/model"
-	"github.com/mattermost/mattermost/server/public/plugin"
-	"github.com/mattermost/mattermost/server/public/shared/mlog"
-	"github.com/mattermost/mattermost/server/public/shared/request"
-	"github.com/mattermost/mattermost/server/v8/channels/store"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
 )
 
 const minFirstPartSize = 5 * 1024 * 1024 // 5MB

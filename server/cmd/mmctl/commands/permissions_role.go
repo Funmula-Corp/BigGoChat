@@ -10,10 +10,10 @@ import (
 	"strings"
 	"text/tabwriter"
 
-	"github.com/mattermost/mattermost/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 
-	"github.com/mattermost/mattermost/server/v8/cmd/mmctl/client"
-	"github.com/mattermost/mattermost/server/v8/cmd/mmctl/printer"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/cmd/mmctl/client"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/cmd/mmctl/printer"
 
 	"github.com/hashicorp/go-multierror"
 	"github.com/spf13/cobra"
@@ -146,6 +146,48 @@ func prettyRole(role *model.Role) string {
 	return b.String()
 }
 
+type rolesSort []*model.Role
+
+func (rl rolesSort)Len() int {
+	return len(rl)
+}
+
+func (rl rolesSort)Swap(i, j int) {
+	rl[i], rl[j] = rl[j], rl[i]
+}
+
+func (rl rolesSort) Less(i, j int) bool {
+	scoreMap := map[string]int {
+		"system": 0,
+		"team": 1,
+		"channel": 2,
+	}
+	getScore := func (name string) int {
+		toks := strings.SplitN(name, "_", 2)
+		if len(toks) == 1 {
+			return 9999
+		}
+		score, ok := scoreMap[toks[0]]
+		if ok {
+			return score
+		}else{
+			return 9998
+		}
+	}
+	si := getScore(rl[i].Name)
+	sj := getScore(rl[j].Name)
+	if si != sj {
+		return si < sj
+	}
+	if rl[i].BuiltIn != rl[j].BuiltIn{
+		return rl[i].BuiltIn
+	}
+	if rl[i].SchemeManaged != rl[j].SchemeManaged {
+		return rl[i].SchemeManaged
+	}
+	return rl[i].Name < rl[j].Name
+}
+
 func showRoleCmdF(c client.Client, cmd *cobra.Command, args []string) error {
 	role, _, err := c.GetRoleByName(context.TODO(), args[0])
 	if err != nil {
@@ -154,6 +196,49 @@ func showRoleCmdF(c client.Client, cmd *cobra.Command, args []string) error {
 
 	printer.PrintT(prettyRole(role), nil)
 
+	return nil
+}
+
+func showRolesCmdF(c client.Client, cmd *cobra.Command, args []string) error {
+	roles, _, err := c.GetAllRoles(context.TODO())
+	if err != nil {
+		return err
+	}
+	sort.Sort(rolesSort(roles))
+	rolePermMap := make(map[string](map[string]bool), len(roles))
+
+	line := "Scope,Permission"
+	for _, role := range roles {
+		line += fmt.Sprintf(",%s", role.Name)
+		permSet := make(map[string]bool, len(role.Permissions))
+		for _, perm := range role.Permissions {
+			permSet[perm] = true
+		}
+		rolePermMap[role.Name] = permSet
+	}
+	printer.Print(line)
+	line = "SchemeManaged,"
+	for _, role := range roles {
+		line += fmt.Sprintf(",%v", role.SchemeManaged)
+	}
+	printer.Print(line)
+	line = "BuiltIn,"
+	for _, role := range roles {
+		line += fmt.Sprintf(",%v", role.BuiltIn)
+	}
+	printer.Print(line)
+	for _, permission := range model.AllPermissions {
+		line := fmt.Sprintf("%s,%s", permission.Scope, permission.Id)
+		for _, role := range roles {
+			permSet := rolePermMap[role.Name]
+			if e := permSet[permission.Id]; e {
+				line += ",1"
+			} else {
+				line += ",0"
+			}
+		}
+		printer.Print(line)
+	}
 	return nil
 }
 

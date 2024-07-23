@@ -10,11 +10,11 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/mattermost/mattermost/server/public/model"
-	"github.com/mattermost/mattermost/server/public/shared/i18n"
-	"github.com/mattermost/mattermost/server/public/shared/request"
-	"github.com/mattermost/mattermost/server/v8/platform/services/cache"
-	"github.com/mattermost/mattermost/server/v8/platform/shared/mail"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/i18n"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/services/cache"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/shared/mail"
 )
 
 var latestVersionCache = cache.NewLRU(cache.LRUOptions{
@@ -82,7 +82,7 @@ func (s *Server) QueryLogs(c request.CTX, page, perPage int, logFilter *model.Lo
 	}
 
 	if s.platform.Cluster() != nil && *s.Config().ClusterSettings.Enable {
-		clusterLogs, err := s.platform.Cluster().QueryLogs(page, perPage)
+		clusterLogs, err := s.platform.Cluster().QueryLogs(page, perPage, logFilter)
 		if err != nil {
 			return nil, err
 		}

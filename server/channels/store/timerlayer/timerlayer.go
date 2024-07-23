@@ -10,16 +10,17 @@ import (
 	"context"
 	"time"
 
-	"github.com/mattermost/mattermost/server/public/model"
-	"github.com/mattermost/mattermost/server/public/shared/request"
-	"github.com/mattermost/mattermost/server/v8/channels/store"
-	"github.com/mattermost/mattermost/server/v8/einterfaces"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/einterfaces"
 )
 
 type TimerLayer struct {
 	store.Store
 	Metrics                         einterfaces.MetricsInterface
 	AuditStore                      store.AuditStore
+	BlocklistStore                  store.BlocklistStore
 	BotStore                        store.BotStore
 	ChannelStore                    store.ChannelStore
 	ChannelBookmarkStore            store.ChannelBookmarkStore
@@ -68,6 +69,10 @@ type TimerLayer struct {
 
 func (s *TimerLayer) Audit() store.AuditStore {
 	return s.AuditStore
+}
+
+func (s *TimerLayer) Blocklist() store.BlocklistStore {
+	return s.BlocklistStore
 }
 
 func (s *TimerLayer) Bot() store.BotStore {
@@ -248,6 +253,11 @@ func (s *TimerLayer) Webhook() store.WebhookStore {
 
 type TimerLayerAuditStore struct {
 	store.AuditStore
+	Root *TimerLayer
+}
+
+type TimerLayerBlocklistStore struct {
+	store.BlocklistStore
 	Root *TimerLayer
 }
 
@@ -517,6 +527,278 @@ func (s *TimerLayerAuditStore) Save(audit *model.Audit) error {
 		s.Root.Metrics.ObserveStoreMethodDuration("AuditStore.Save", success, elapsed)
 	}
 	return err
+}
+
+func (s *TimerLayerBlocklistStore) DeleteChannelBlockUser(channelId string, userId string) error {
+	start := time.Now()
+
+	err := s.BlocklistStore.DeleteChannelBlockUser(channelId, userId)
+
+	elapsed := float64(time.Since(start)) / float64(time.Second)
+	if s.Root.Metrics != nil {
+		success := "false"
+		if err == nil {
+			success = "true"
+		}
+		s.Root.Metrics.ObserveStoreMethodDuration("BlocklistStore.DeleteChannelBlockUser", success, elapsed)
+	}
+	return err
+}
+
+func (s *TimerLayerBlocklistStore) DeleteTeamBlockUser(channelId string, userId string) error {
+	start := time.Now()
+
+	err := s.BlocklistStore.DeleteTeamBlockUser(channelId, userId)
+
+	elapsed := float64(time.Since(start)) / float64(time.Second)
+	if s.Root.Metrics != nil {
+		success := "false"
+		if err == nil {
+			success = "true"
+		}
+		s.Root.Metrics.ObserveStoreMethodDuration("BlocklistStore.DeleteTeamBlockUser", success, elapsed)
+	}
+	return err
+}
+
+func (s *TimerLayerBlocklistStore) DeleteUserBlockUser(userId string, blockedId string, userIsVerified bool, blockedIsVerified bool) error {
+	start := time.Now()
+
+	err := s.BlocklistStore.DeleteUserBlockUser(userId, blockedId, userIsVerified, blockedIsVerified)
+
+	elapsed := float64(time.Since(start)) / float64(time.Second)
+	if s.Root.Metrics != nil {
+		success := "false"
+		if err == nil {
+			success = "true"
+		}
+		s.Root.Metrics.ObserveStoreMethodDuration("BlocklistStore.DeleteUserBlockUser", success, elapsed)
+	}
+	return err
+}
+
+func (s *TimerLayerBlocklistStore) GetChannelBlockUser(channelId string, userId string) (*model.ChannelBlockUser, error) {
+	start := time.Now()
+
+	result, err := s.BlocklistStore.GetChannelBlockUser(channelId, userId)
+
+	elapsed := float64(time.Since(start)) / float64(time.Second)
+	if s.Root.Metrics != nil {
+		success := "false"
+		if err == nil {
+			success = "true"
+		}
+		s.Root.Metrics.ObserveStoreMethodDuration("BlocklistStore.GetChannelBlockUser", success, elapsed)
+	}
+	return result, err
+}
+
+func (s *TimerLayerBlocklistStore) GetChannelBlockUserByEmail(channelId string, email string) (*model.ChannelBlockUser, error) {
+	start := time.Now()
+
+	result, err := s.BlocklistStore.GetChannelBlockUserByEmail(channelId, email)
+
+	elapsed := float64(time.Since(start)) / float64(time.Second)
+	if s.Root.Metrics != nil {
+		success := "false"
+		if err == nil {
+			success = "true"
+		}
+		s.Root.Metrics.ObserveStoreMethodDuration("BlocklistStore.GetChannelBlockUserByEmail", success, elapsed)
+	}
+	return result, err
+}
+
+func (s *TimerLayerBlocklistStore) GetTeamBlockUser(channelId string, userId string) (*model.TeamBlockUser, error) {
+	start := time.Now()
+
+	result, err := s.BlocklistStore.GetTeamBlockUser(channelId, userId)
+
+	elapsed := float64(time.Since(start)) / float64(time.Second)
+	if s.Root.Metrics != nil {
+		success := "false"
+		if err == nil {
+			success = "true"
+		}
+		s.Root.Metrics.ObserveStoreMethodDuration("BlocklistStore.GetTeamBlockUser", success, elapsed)
+	}
+	return result, err
+}
+
+func (s *TimerLayerBlocklistStore) GetTeamBlockUserByEmail(teamId string, email string) (*model.TeamBlockUser, error) {
+	start := time.Now()
+
+	result, err := s.BlocklistStore.GetTeamBlockUserByEmail(teamId, email)
+
+	elapsed := float64(time.Since(start)) / float64(time.Second)
+	if s.Root.Metrics != nil {
+		success := "false"
+		if err == nil {
+			success = "true"
+		}
+		s.Root.Metrics.ObserveStoreMethodDuration("BlocklistStore.GetTeamBlockUserByEmail", success, elapsed)
+	}
+	return result, err
+}
+
+func (s *TimerLayerBlocklistStore) GetUserBlockUser(userId string, blockedId string) (*model.UserBlockUser, error) {
+	start := time.Now()
+
+	result, err := s.BlocklistStore.GetUserBlockUser(userId, blockedId)
+
+	elapsed := float64(time.Since(start)) / float64(time.Second)
+	if s.Root.Metrics != nil {
+		success := "false"
+		if err == nil {
+			success = "true"
+		}
+		s.Root.Metrics.ObserveStoreMethodDuration("BlocklistStore.GetUserBlockUser", success, elapsed)
+	}
+	return result, err
+}
+
+func (s *TimerLayerBlocklistStore) ListChannelBlockUsers(channelId string) (*model.ChannelBlockUserList, error) {
+	start := time.Now()
+
+	result, err := s.BlocklistStore.ListChannelBlockUsers(channelId)
+
+	elapsed := float64(time.Since(start)) / float64(time.Second)
+	if s.Root.Metrics != nil {
+		success := "false"
+		if err == nil {
+			success = "true"
+		}
+		s.Root.Metrics.ObserveStoreMethodDuration("BlocklistStore.ListChannelBlockUsers", success, elapsed)
+	}
+	return result, err
+}
+
+func (s *TimerLayerBlocklistStore) ListChannelBlockUsersByBlockedUser(blockedId string) (*model.ChannelBlockUserList, error) {
+	start := time.Now()
+
+	result, err := s.BlocklistStore.ListChannelBlockUsersByBlockedUser(blockedId)
+
+	elapsed := float64(time.Since(start)) / float64(time.Second)
+	if s.Root.Metrics != nil {
+		success := "false"
+		if err == nil {
+			success = "true"
+		}
+		s.Root.Metrics.ObserveStoreMethodDuration("BlocklistStore.ListChannelBlockUsersByBlockedUser", success, elapsed)
+	}
+	return result, err
+}
+
+func (s *TimerLayerBlocklistStore) ListTeamBlockUsers(channelId string) (*model.TeamBlockUserList, error) {
+	start := time.Now()
+
+	result, err := s.BlocklistStore.ListTeamBlockUsers(channelId)
+
+	elapsed := float64(time.Since(start)) / float64(time.Second)
+	if s.Root.Metrics != nil {
+		success := "false"
+		if err == nil {
+			success = "true"
+		}
+		s.Root.Metrics.ObserveStoreMethodDuration("BlocklistStore.ListTeamBlockUsers", success, elapsed)
+	}
+	return result, err
+}
+
+func (s *TimerLayerBlocklistStore) ListTeamBlockUsersByBlockedUser(blockedId string) (*model.TeamBlockUserList, error) {
+	start := time.Now()
+
+	result, err := s.BlocklistStore.ListTeamBlockUsersByBlockedUser(blockedId)
+
+	elapsed := float64(time.Since(start)) / float64(time.Second)
+	if s.Root.Metrics != nil {
+		success := "false"
+		if err == nil {
+			success = "true"
+		}
+		s.Root.Metrics.ObserveStoreMethodDuration("BlocklistStore.ListTeamBlockUsersByBlockedUser", success, elapsed)
+	}
+	return result, err
+}
+
+func (s *TimerLayerBlocklistStore) ListUserBlockUsers(userId string) (*model.UserBlockUserList, error) {
+	start := time.Now()
+
+	result, err := s.BlocklistStore.ListUserBlockUsers(userId)
+
+	elapsed := float64(time.Since(start)) / float64(time.Second)
+	if s.Root.Metrics != nil {
+		success := "false"
+		if err == nil {
+			success = "true"
+		}
+		s.Root.Metrics.ObserveStoreMethodDuration("BlocklistStore.ListUserBlockUsers", success, elapsed)
+	}
+	return result, err
+}
+
+func (s *TimerLayerBlocklistStore) ListUserBlockUsersByBlockedUser(blockedId string) (*model.UserBlockUserList, error) {
+	start := time.Now()
+
+	result, err := s.BlocklistStore.ListUserBlockUsersByBlockedUser(blockedId)
+
+	elapsed := float64(time.Since(start)) / float64(time.Second)
+	if s.Root.Metrics != nil {
+		success := "false"
+		if err == nil {
+			success = "true"
+		}
+		s.Root.Metrics.ObserveStoreMethodDuration("BlocklistStore.ListUserBlockUsersByBlockedUser", success, elapsed)
+	}
+	return result, err
+}
+
+func (s *TimerLayerBlocklistStore) SaveChannelBlockUser(blockUser *model.ChannelBlockUser) (*model.ChannelBlockUser, error) {
+	start := time.Now()
+
+	result, err := s.BlocklistStore.SaveChannelBlockUser(blockUser)
+
+	elapsed := float64(time.Since(start)) / float64(time.Second)
+	if s.Root.Metrics != nil {
+		success := "false"
+		if err == nil {
+			success = "true"
+		}
+		s.Root.Metrics.ObserveStoreMethodDuration("BlocklistStore.SaveChannelBlockUser", success, elapsed)
+	}
+	return result, err
+}
+
+func (s *TimerLayerBlocklistStore) SaveTeamBlockUser(blockUser *model.TeamBlockUser) (*model.TeamBlockUser, error) {
+	start := time.Now()
+
+	result, err := s.BlocklistStore.SaveTeamBlockUser(blockUser)
+
+	elapsed := float64(time.Since(start)) / float64(time.Second)
+	if s.Root.Metrics != nil {
+		success := "false"
+		if err == nil {
+			success = "true"
+		}
+		s.Root.Metrics.ObserveStoreMethodDuration("BlocklistStore.SaveTeamBlockUser", success, elapsed)
+	}
+	return result, err
+}
+
+func (s *TimerLayerBlocklistStore) SaveUserBlockUser(userBlockUser *model.UserBlockUser) (*model.UserBlockUser, error) {
+	start := time.Now()
+
+	result, err := s.BlocklistStore.SaveUserBlockUser(userBlockUser)
+
+	elapsed := float64(time.Since(start)) / float64(time.Second)
+	if s.Root.Metrics != nil {
+		success := "false"
+		if err == nil {
+			success = "true"
+		}
+		s.Root.Metrics.ObserveStoreMethodDuration("BlocklistStore.SaveUserBlockUser", success, elapsed)
+	}
+	return result, err
 }
 
 func (s *TimerLayerBotStore) Get(userID string, includeDeleted bool) (*model.Bot, error) {
@@ -7513,6 +7795,22 @@ func (s *TimerLayerRoleStore) ChannelRolesUnderTeamRole(roleName string) ([]*mod
 	return result, err
 }
 
+func (s *TimerLayerRoleStore) CreateRole(role *model.Role) (*model.Role, error) {
+	start := time.Now()
+
+	result, err := s.RoleStore.CreateRole(role)
+
+	elapsed := float64(time.Since(start)) / float64(time.Second)
+	if s.Root.Metrics != nil {
+		success := "false"
+		if err == nil {
+			success = "true"
+		}
+		s.Root.Metrics.ObserveStoreMethodDuration("RoleStore.CreateRole", success, elapsed)
+	}
+	return result, err
+}
+
 func (s *TimerLayerRoleStore) Delete(roleID string) (*model.Role, error) {
 	start := time.Now()
 
@@ -7625,6 +7923,22 @@ func (s *TimerLayerRoleStore) Save(role *model.Role) (*model.Role, error) {
 	return result, err
 }
 
+func (s *TimerLayerSchemeStore) CloneScheme(scheme *model.Scheme) (*model.Scheme, error) {
+	start := time.Now()
+
+	result, err := s.SchemeStore.CloneScheme(scheme)
+
+	elapsed := float64(time.Since(start)) / float64(time.Second)
+	if s.Root.Metrics != nil {
+		success := "false"
+		if err == nil {
+			success = "true"
+		}
+		s.Root.Metrics.ObserveStoreMethodDuration("SchemeStore.CloneScheme", success, elapsed)
+	}
+	return result, err
+}
+
 func (s *TimerLayerSchemeStore) CountByScope(scope string) (int64, error) {
 	start := time.Now()
 
@@ -7653,6 +7967,22 @@ func (s *TimerLayerSchemeStore) CountWithoutPermission(scope string, permissionI
 			success = "true"
 		}
 		s.Root.Metrics.ObserveStoreMethodDuration("SchemeStore.CountWithoutPermission", success, elapsed)
+	}
+	return result, err
+}
+
+func (s *TimerLayerSchemeStore) CreateBuiltInScheme(scheme *model.Scheme) (*model.Scheme, error) {
+	start := time.Now()
+
+	result, err := s.SchemeStore.CreateBuiltInScheme(scheme)
+
+	elapsed := float64(time.Since(start)) / float64(time.Second)
+	if s.Root.Metrics != nil {
+		success := "false"
+		if err == nil {
+			success = "true"
+		}
+		s.Root.Metrics.ObserveStoreMethodDuration("SchemeStore.CreateBuiltInScheme", success, elapsed)
 	}
 	return result, err
 }
@@ -11282,6 +11612,22 @@ func (s *TimerLayerUserStore) UpdateLastPictureUpdate(userID string) error {
 	return err
 }
 
+func (s *TimerLayerUserStore) UpdateMemberVerifiedStatus(rctx request.CTX, user *model.User) error {
+	start := time.Now()
+
+	err := s.UserStore.UpdateMemberVerifiedStatus(rctx, user)
+
+	elapsed := float64(time.Since(start)) / float64(time.Second)
+	if s.Root.Metrics != nil {
+		success := "false"
+		if err == nil {
+			success = "true"
+		}
+		s.Root.Metrics.ObserveStoreMethodDuration("UserStore.UpdateMemberVerifiedStatus", success, elapsed)
+	}
+	return err
+}
+
 func (s *TimerLayerUserStore) UpdateMfaActive(userID string, active bool) error {
 	start := time.Now()
 
@@ -12059,6 +12405,7 @@ func New(childStore store.Store, metrics einterfaces.MetricsInterface) *TimerLay
 	}
 
 	newStore.AuditStore = &TimerLayerAuditStore{AuditStore: childStore.Audit(), Root: &newStore}
+	newStore.BlocklistStore = &TimerLayerBlocklistStore{BlocklistStore: childStore.Blocklist(), Root: &newStore}
 	newStore.BotStore = &TimerLayerBotStore{BotStore: childStore.Bot(), Root: &newStore}
 	newStore.ChannelStore = &TimerLayerChannelStore{ChannelStore: childStore.Channel(), Root: &newStore}
 	newStore.ChannelBookmarkStore = &TimerLayerChannelBookmarkStore{ChannelBookmarkStore: childStore.ChannelBookmark(), Root: &newStore}

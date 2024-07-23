@@ -7,10 +7,10 @@ import (
 	"context"
 	"errors"
 
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 	gomock "github.com/golang/mock/gomock"
-	"github.com/mattermost/mattermost/server/public/model"
 
-	"github.com/mattermost/mattermost/server/v8/cmd/mmctl/printer"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/cmd/mmctl/printer"
 
 	"github.com/spf13/cobra"
 )

@@ -68,7 +68,6 @@ func TestRolePatchFromChannelModerationsPatch(t *testing.T) {
 		PermissionRemoveReaction.Id,
 		PermissionCreatePost.Id,
 		PermissionUseChannelMentions.Id,
-		PermissionManagePublicChannelMembers.Id,
 		PermissionUploadFile.Id,
 		PermissionGetPublicLink.Id,
 	}
@@ -77,7 +76,6 @@ func TestRolePatchFromChannelModerationsPatch(t *testing.T) {
 		PermissionAddReaction.Id,
 		PermissionRemoveReaction.Id,
 		PermissionCreatePost.Id,
-		PermissionManagePublicChannelMembers.Id,
 		PermissionUseChannelMentions.Id,
 	}
 

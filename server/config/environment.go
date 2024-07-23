@@ -10,7 +10,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/mattermost/mattermost/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 )
 
 func GetEnvironment() map[string]string {

@@ -4504,6 +4504,9 @@ const AdminDefinition: AdminDefinitionType = {
                         if (config.GoogleSettings?.Enable) {
                             newState.oauthType = Constants.GOOGLE_SERVICE;
                         }
+                        if (config.BiggoSettings?.Enable) {
+                            newState.oauthType = Constants.BIGGO_SERVICE;
+                        }
 
                         newState['GitLabSettings.Url'] = config.GitLabSettings?.UserAPIEndpoint?.replace('/api/v4/user', '');
 
@@ -4515,11 +4518,13 @@ const AdminDefinition: AdminDefinitionType = {
                         newConfig.Office365Settings = config.Office365Settings || {};
                         newConfig.GoogleSettings = config.GoogleSettings || {};
                         newConfig.OpenIdSettings = config.OpenIdSettings || {};
+                        newConfig.BiggoSettings = config.BiggoSettings || {};
 
                         newConfig.GitLabSettings.Enable = false;
                         newConfig.Office365Settings.Enable = false;
                         newConfig.GoogleSettings.Enable = false;
                         newConfig.OpenIdSettings.Enable = false;
+                        newConfig.BiggoSettings.Enable = false;
                         newConfig.GitLabSettings.UserAPIEndpoint = config.GitLabSettings.Url.replace(/\/$/, '') + '/api/v4/user';
 
                         if (config.oauthType === Constants.GITLAB_SERVICE) {
@@ -4530,6 +4535,9 @@ const AdminDefinition: AdminDefinitionType = {
                         }
                         if (config.oauthType === Constants.GOOGLE_SERVICE) {
                             newConfig.GoogleSettings.Enable = true;
+                        }
+                        if (config.oauthType === Constants.BIGGO_SERVICE) {
+                            newConfig.BiggoSettings.Enable = true;
                         }
                         delete newConfig.oauthType;
                         return newConfig;
@@ -4599,6 +4607,16 @@ const AdminDefinition: AdminDefinitionType = {
                                     },
                                 },
                                 {
+                                    value: Constants.BIGGO_SERVICE,
+                                    display_name: defineMessage({id: 'admin.oauth.biggo', defaultMessage: 'BigGo'}),
+                                    //help_text: defineMessage({id: 'admin.biggo.EnableMarkdownDesc', defaultMessage: ''}),
+                                    //help_text_values: {
+                                    //    loginUrlChunk: (chunk: string) => `<${chunk}>/login/biggo/complete`,
+                                    //    signupUrlChunk: (chunk: string) => `<${chunk}>/signup/biggo/complete`,
+                                    //},
+                                    //help_text_markdown: true,
+                                },
+                                {
                                     value: Constants.OFFICE365_SERVICE,
                                     display_name: defineMessage({id: 'admin.oauth.office365', defaultMessage: 'Office 365'}),
                                     isHidden: it.all(it.not(it.licensedForFeature('Office365OAuth')), it.not(it.cloudLicensed)),
@@ -4634,6 +4652,34 @@ const AdminDefinition: AdminDefinitionType = {
                                 },
                             ],
                             isDisabled: it.not(it.userHasWritePermissionOnResource(RESOURCE_KEYS.AUTHENTICATION.OPENID)),
+                        },
+                        {
+                            type: 'text',
+                            key: 'BiggoSettings.Id',
+                            label: defineMessage({id: 'admin.biggo.clientIdTitle', defaultMessage: 'Application ID:'}),
+                            placeholder: defineMessage({id: 'admin.biggo.clientIdExample', defaultMessage: 'E.g.: "biggo"'}),
+                            isHidden: it.not(it.stateEquals('oauthType', 'biggo')),
+                        },
+                        {
+                            type: 'text',
+                            key: 'BiggoSettings.UserAPIEndpoint',
+                            label: defineMessage({id: 'admin.biggo.userTitle', defaultMessage: 'User API Endpoint:'}),
+                            isDisabled: false,
+                            isHidden: it.not(it.stateEquals('oauthType', 'biggo')),
+                        },
+                        {
+                            type: 'text',
+                            key: 'BiggoSettings.AuthEndpoint',
+                            label: defineMessage({id: 'admin.biggo.authTitle', defaultMessage: 'Auth Endpoint:'}),
+                            isDisabled: false,
+                            isHidden: it.not(it.stateEquals('oauthType', 'biggo')),
+                        },
+                        {
+                            type: 'text',
+                            key: 'BiggoSettings.TokenEndpoint',
+                            label: defineMessage({id: 'admin.biggo.tokenTitle', defaultMessage: 'Token Endpoint:'}),
+                            isDisabled: false,
+                            isHidden: it.not(it.stateEquals('oauthType', 'biggo')),
                         },
                         {
                             type: 'text',
@@ -4831,6 +4877,9 @@ const AdminDefinition: AdminDefinitionType = {
                         if (config.OpenIdSettings?.Enable) {
                             newState.openidType = Constants.OPENID_SERVICE;
                         }
+                        if (config.BiggoSettings?.Enable) {
+                            newState.openidType = Constants.BIGGO_SERVICE;
+                        }
                         if (config.GitLabSettings?.UserAPIEndpoint) {
                             newState['GitLabSettings.Url'] = config.GitLabSettings.UserAPIEndpoint.replace('/api/v4/user', '');
                         } else if (config.GitLabSettings?.DiscoveryEndpoint) {
@@ -4844,11 +4893,13 @@ const AdminDefinition: AdminDefinitionType = {
                         newConfig.Office365Settings = config.Office365Settings || {};
                         newConfig.GoogleSettings = config.GoogleSettings || {};
                         newConfig.GitLabSettings = config.GitLabSettings || {};
+                        newConfig.BiggoSettings = config.BiggoSettings || {};
                         newConfig.OpenIdSettings = config.OpenIdSettings || {};
 
                         newConfig.Office365Settings.Enable = false;
                         newConfig.GoogleSettings.Enable = false;
                         newConfig.GitLabSettings.Enable = false;
+                        newConfig.BiggoSettings.Enable = false;
                         newConfig.OpenIdSettings.Enable = false;
 
                         let configSetting = '';
@@ -4860,6 +4911,8 @@ const AdminDefinition: AdminDefinitionType = {
                             configSetting = 'GitLabSettings';
                         } else if (config.openidType === Constants.OPENID_SERVICE) {
                             configSetting = 'OpenIdSettings';
+                        }else if (config.openidType === Constants.BIGGO_SERVICE) {
+                            configSetting = 'BiggoSettings';
                         }
 
                         if (configSetting !== '') {
@@ -4902,6 +4955,16 @@ const AdminDefinition: AdminDefinitionType = {
                                         signupUrlChunk: (chunk: string) => `<${chunk}>/signup/gitlab/complete`,
                                     },
                                     help_text_markdown: false,
+                                },
+                                {
+                                    value: Constants.BIGGO_SERVICE,
+                                    display_name: defineMessage({id: 'admin.openid.biggo', defaultMessage: 'BigGo'}),
+                                    //help_text: defineMessage({id: 'admin.biggo.EnableMarkdownDesc', defaultMessage: ''}),
+                                    //help_text_values: {
+                                    //    loginUrlChunk: (chunk: string) => `<${chunk}>/login/biggo/complete`,
+                                    //    signupUrlChunk: (chunk: string) => `<${chunk}>/signup/biggo/complete`,
+                                    //},
+                                    //help_text_markdown: false,
                                 },
                                 {
                                     value: Constants.GOOGLE_SERVICE,

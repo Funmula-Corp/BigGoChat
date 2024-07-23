@@ -4,7 +4,7 @@
 package app
 
 import (
-	"github.com/mattermost/mattermost/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 )
 
 func (a *App) NotifySelfHostedSignupProgress(progress string, userId string) {

@@ -8,7 +8,7 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/mattermost/mattermost/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 )
 
 type Client interface {
@@ -52,6 +52,7 @@ type Client interface {
 	UploadLicenseFile(ctx context.Context, data []byte) (*model.Response, error)
 	RemoveLicenseFile(ctx context.Context) (*model.Response, error)
 	GetLogs(ctx context.Context, page, perPage int) ([]string, *model.Response, error)
+	GetAllRoles(ctx context.Context) ([]*model.Role, *model.Response, error)
 	GetRoleByName(ctx context.Context, name string) (*model.Role, *model.Response, error)
 	PatchRole(ctx context.Context, roleID string, patch *model.RolePatch) (*model.Role, *model.Response, error)
 	UploadPlugin(ctx context.Context, file io.Reader) (*model.Manifest, *model.Response, error)

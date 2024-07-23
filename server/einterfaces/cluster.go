@@ -4,7 +4,7 @@
 package einterfaces
 
 import (
-	"github.com/mattermost/mattermost/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 )
 
 type ClusterMessageHandler func(msg *model.ClusterMessage)
@@ -26,7 +26,7 @@ type ClusterInterface interface {
 	NotifyMsg(buf []byte)
 	GetClusterStats() ([]*model.ClusterStats, *model.AppError)
 	GetLogs(page, perPage int) ([]string, *model.AppError)
-	QueryLogs(page, perPage int) (map[string][]string, *model.AppError)
+	QueryLogs(page, perPage int, logFilter *model.LogFilter) (map[string][]string, *model.AppError)
 	GetPluginStatuses() (model.PluginStatuses, *model.AppError)
 	ConfigChanged(previousConfig *model.Config, newConfig *model.Config, sendToOtherServer bool) *model.AppError
 	// WebConnCountForUser returns the number of active webconn connections

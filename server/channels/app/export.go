@@ -19,12 +19,12 @@ import (
 
 	"github.com/pkg/errors"
 
-	"github.com/mattermost/mattermost/server/public/model"
-	"github.com/mattermost/mattermost/server/public/shared/mlog"
-	"github.com/mattermost/mattermost/server/public/shared/request"
-	"github.com/mattermost/mattermost/server/v8/channels/app/imports"
-	"github.com/mattermost/mattermost/server/v8/channels/store"
-	"github.com/mattermost/mattermost/server/v8/platform/shared/filestore"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app/imports"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/shared/filestore"
 )
 
 // We use this map to identify the exportable preferences.
@@ -289,6 +289,8 @@ func (a *App) exportSchemes(ctx request.CTX, job *model.Job, writer io.Writer, s
 
 			if scheme.Scope == model.SchemeScopeTeam {
 				schemeRolesMap[scheme.DefaultTeamAdminRole] = true
+				schemeRolesMap[scheme.DefaultTeamModeratorRole] = true
+				schemeRolesMap[scheme.DefaultTeamVerifiedRole] = true
 				schemeRolesMap[scheme.DefaultTeamUserRole] = true
 				schemeRolesMap[scheme.DefaultTeamGuestRole] = true
 
@@ -303,6 +305,7 @@ func (a *App) exportSchemes(ctx request.CTX, job *model.Job, writer io.Writer, s
 
 			if scheme.Scope == model.SchemeScopeTeam || scheme.Scope == model.SchemeScopeChannel {
 				schemeRolesMap[scheme.DefaultChannelAdminRole] = true
+				schemeRolesMap[scheme.DefaultChannelVerifiedRole] = true
 				schemeRolesMap[scheme.DefaultChannelUserRole] = true
 				schemeRolesMap[scheme.DefaultChannelGuestRole] = true
 			}

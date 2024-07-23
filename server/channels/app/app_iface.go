@@ -18,25 +18,27 @@ import (
 	"reflect"
 	"time"
 
-	"github.com/mattermost/mattermost/server/public/model"
-	"github.com/mattermost/mattermost/server/public/plugin"
-	"github.com/mattermost/mattermost/server/public/shared/i18n"
-	"github.com/mattermost/mattermost/server/public/shared/mlog"
-	"github.com/mattermost/mattermost/server/public/shared/request"
-	"github.com/mattermost/mattermost/server/public/shared/timezones"
-	"github.com/mattermost/mattermost/server/v8/channels/app/platform"
-	"github.com/mattermost/mattermost/server/v8/channels/audit"
-	"github.com/mattermost/mattermost/server/v8/channels/store"
-	"github.com/mattermost/mattermost/server/v8/einterfaces"
-	"github.com/mattermost/mattermost/server/v8/platform/services/httpservice"
-	"github.com/mattermost/mattermost/server/v8/platform/services/imageproxy"
-	"github.com/mattermost/mattermost/server/v8/platform/services/remotecluster"
-	"github.com/mattermost/mattermost/server/v8/platform/services/searchengine"
-	"github.com/mattermost/mattermost/server/v8/platform/shared/filestore"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/i18n"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/timezones"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app/platform"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/audit"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/einterfaces"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/services/httpservice"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/services/imageproxy"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/services/remotecluster"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/services/searchengine"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/shared/filestore"
 )
 
 // AppIface is extracted from App struct and contains all it's exported methods. It's provided to allow partial interface passing and app layers creation.
 type AppIface interface {
+	//
+	AddChannelBlockUser(rctx request.CTX, channelId string, blockedId string) (*model.ChannelBlockUser, *model.AppError)
 	// @openTracingParams args
 	ExecuteCommand(c request.CTX, args *model.CommandArgs) (*model.CommandResponse, *model.AppError)
 	// @openTracingParams teamID
@@ -230,7 +232,7 @@ type AppIface interface {
 	// GetSanitizedConfig gets the configuration for a system admin without any secrets.
 	GetSanitizedConfig() *model.Config
 	// GetSchemeRolesForChannel Checks if a channel or its team has an override scheme for channel roles and returns the scheme roles or default channel roles.
-	GetSchemeRolesForChannel(c request.CTX, channelID string) (guestRoleName string, userRoleName string, adminRoleName string, err *model.AppError)
+	GetSchemeRolesForChannel(c request.CTX, channelID string) (guestRoleName string, userRoleName string, verifiedRoleName string, adminRoleName string, err *model.AppError)
 	// GetSessionLengthInMillis returns the session length, in milliseconds,
 	// based on the type of session (Mobile, SSO, Web/LDAP).
 	GetSessionLengthInMillis(session *model.Session) int64
@@ -241,7 +243,7 @@ type AppIface interface {
 	// GetTeamGroupUsers returns the users who are associated to the team via GroupTeams and GroupMembers.
 	GetTeamGroupUsers(teamID string) ([]*model.User, *model.AppError)
 	// GetTeamSchemeChannelRoles Checks if a team has an override scheme and returns the scheme channel role names or default channel role names.
-	GetTeamSchemeChannelRoles(c request.CTX, teamID string) (guestRoleName string, userRoleName string, adminRoleName string, err *model.AppError)
+	GetTeamSchemeChannelRoles(c request.CTX, teamID string) (guestRoleName string, userRoleName string, verifiedRoleName string, adminRoleName string, err *model.AppError)
 	// GetTotalUsersStats is used for the DM list total
 	GetTotalUsersStats(viewRestrictions *model.ViewUsersRestrictions) (*model.UsersStats, *model.AppError)
 	// GetUserStatusesByIds used by apiV4
@@ -441,11 +443,13 @@ type AppIface interface {
 	AddSamlPrivateCertificate(fileData *multipart.FileHeader) *model.AppError
 	AddSamlPublicCertificate(fileData *multipart.FileHeader) *model.AppError
 	AddSessionToCache(session *model.Session)
+	AddTeamBlockUser(rctx request.CTX, teamId string, blockedId string) (*model.TeamBlockUser, *model.AppError)
 	AddTeamMember(c request.CTX, teamID, userID string) (*model.TeamMember, *model.AppError)
 	AddTeamMemberByInviteId(c request.CTX, inviteId, userID string) (*model.TeamMember, *model.AppError)
 	AddTeamMemberByToken(c request.CTX, userID, tokenID string) (*model.TeamMember, *model.AppError)
 	AddTeamMembers(c request.CTX, teamID string, userIDs []string, userRequestorId string, graceful bool) ([]*model.TeamMemberWithError, *model.AppError)
 	AddTeamsToRetentionPolicy(policyID string, teamIDs []string) *model.AppError
+	AddUserBlockUser(rctx request.CTX, userId string, blockedId string) (*model.UserBlockUser, *model.AppError)
 	AddUserToTeam(c request.CTX, teamID string, userID string, userRequestorId string) (*model.Team, *model.TeamMember, *model.AppError)
 	AddUserToTeamByInviteId(c request.CTX, inviteId string, userID string) (*model.Team, *model.TeamMember, *model.AppError)
 	AddUserToTeamByTeamId(c request.CTX, teamID string, user *model.User) *model.AppError
@@ -560,6 +564,7 @@ type AppIface interface {
 	DeleteAllKeysForPlugin(pluginID string) *model.AppError
 	DeleteBrandImage(rctx request.CTX) *model.AppError
 	DeleteChannel(c request.CTX, channel *model.Channel, userID string) *model.AppError
+	DeleteChannelBlockUser(rctx request.CTX, channelId string, blockedId string) *model.AppError
 	DeleteChannelBookmark(bookmarkId, connectionId string) (*model.ChannelBookmarkWithFileInfo, *model.AppError)
 	DeleteCommand(commandID string) *model.AppError
 	DeleteDraft(rctx request.CTX, draft *model.Draft, connectionID string) *model.AppError
@@ -582,7 +587,9 @@ type AppIface interface {
 	DeleteScheme(schemeId string) (*model.Scheme, *model.AppError)
 	DeleteSharedChannelRemote(id string) (bool, error)
 	DeleteSidebarCategory(c request.CTX, userID, teamID, categoryId string) *model.AppError
+	DeleteTeamBlockUser(rctx request.CTX, teamId string, blockedId string) *model.AppError
 	DeleteToken(token *model.Token) *model.AppError
+	DeleteUserBlockUser(rctx request.CTX, userId string, blockedId string) *model.AppError
 	DisableAutoResponder(rctx request.CTX, userID string, asAdmin bool) *model.AppError
 	DisableUserAccessToken(c request.CTX, token *model.UserAccessToken) *model.AppError
 	DoAppMigrations()
@@ -642,6 +649,7 @@ type AppIface interface {
 	GetBrandImage(rctx request.CTX) ([]byte, *model.AppError)
 	GetBulkReactionsForPosts(postIDs []string) (map[string][]*model.Reaction, *model.AppError)
 	GetChannel(c request.CTX, channelID string) (*model.Channel, *model.AppError)
+	GetChannelBlockUser(rctx request.CTX, channelId string, blockedId string) (*model.ChannelBlockUser, *model.AppError)
 	GetChannelBookmarks(channelId string, since int64) ([]*model.ChannelBookmarkWithFileInfo, *model.AppError)
 	GetChannelByName(c request.CTX, channelName, teamID string, includeDeleted bool) (*model.Channel, *model.AppError)
 	GetChannelByNameForTeamName(c request.CTX, channelName, teamName string, includeDeleted bool) (*model.Channel, *model.AppError)
@@ -769,7 +777,7 @@ type AppIface interface {
 	GetPostsAroundPost(before bool, options model.GetPostsOptions) (*model.PostList, *model.AppError)
 	GetPostsBeforePost(options model.GetPostsOptions) (*model.PostList, *model.AppError)
 	GetPostsEtag(channelID string, collapsedThreads bool) string
-	GetPostsForChannelAroundLastUnread(c request.CTX, channelID, userID string, limitBefore, limitAfter int, skipFetchThreads bool, collapsedThreads, collapsedThreadsExtended bool) (*model.PostList, *model.AppError)
+	GetPostsForChannelAroundLastUnread(c request.CTX, channelID, userID string, limitBefore, limitAfter int, skipFetchThreads bool, collapsedThreads, collapsedThreadsExtended bool, includeDeleted bool) (*model.PostList, *model.AppError)
 	GetPostsPage(options model.GetPostsOptions) (*model.PostList, *model.AppError)
 	GetPostsSince(options model.GetPostsSinceOptions) (*model.PostList, *model.AppError)
 	GetPreferenceByCategoryAndNameForUser(c request.CTX, userID string, category string, preferenceName string) (*model.Preference, *model.AppError)
@@ -802,7 +810,7 @@ type AppIface interface {
 	GetSanitizeOptions(asAdmin bool) map[string]bool
 	GetScheme(id string) (*model.Scheme, *model.AppError)
 	GetSchemeByName(name string) (*model.Scheme, *model.AppError)
-	GetSchemeRolesForTeam(teamID string) (string, string, string, *model.AppError)
+	GetSchemeRolesForTeam(teamID string) (string, string, string, string, string, *model.AppError)
 	GetSchemes(scope string, offset int, limit int) ([]*model.Scheme, *model.AppError)
 	GetSchemesPage(scope string, page int, perPage int) ([]*model.Scheme, *model.AppError)
 	GetServerLimits() (*model.ServerLimits, *model.AppError)
@@ -826,6 +834,7 @@ type AppIface interface {
 	GetStatusFromCache(userID string) *model.Status
 	GetSystemBot(rctx request.CTX) (*model.Bot, *model.AppError)
 	GetTeam(teamID string) (*model.Team, *model.AppError)
+	GetTeamBlockUser(rctx request.CTX, teamId string, blockedId string) (*model.TeamBlockUser, *model.AppError)
 	GetTeamByInviteId(inviteId string) (*model.Team, *model.AppError)
 	GetTeamByName(name string) (*model.Team, *model.AppError)
 	GetTeamIcon(team *model.Team) ([]byte, *model.AppError)
@@ -857,6 +866,7 @@ type AppIface interface {
 	GetUserAccessToken(tokenID string, sanitize bool) (*model.UserAccessToken, *model.AppError)
 	GetUserAccessTokens(page, perPage int) ([]*model.UserAccessToken, *model.AppError)
 	GetUserAccessTokensForUser(userID string, page, perPage int) ([]*model.UserAccessToken, *model.AppError)
+	GetUserBlockUser(rctx request.CTX, userId string, blockedId string) (*model.UserBlockUser, *model.AppError)
 	GetUserByAuth(authData *string, authService string) (*model.User, *model.AppError)
 	GetUserByEmail(email string) (*model.User, *model.AppError)
 	GetUserByRemoteID(remoteID string) (*model.User, *model.AppError)
@@ -943,16 +953,23 @@ type AppIface interface {
 	License() *model.License
 	LimitedClientConfig() map[string]string
 	ListAllCommands(teamID string, T i18n.TranslateFunc) ([]*model.Command, *model.AppError)
+	ListChannelBlockUsers(rctx request.CTX, channelId string) (*model.ChannelBlockUserList, *model.AppError)
+	ListChannelsByBlockedUser(rctx request.CTX, blockedId string) (*model.ChannelBlockUserList, *model.AppError)
 	ListDirectory(path string) ([]string, *model.AppError)
 	ListDirectoryRecursively(path string) ([]string, *model.AppError)
 	ListExportDirectory(path string) ([]string, *model.AppError)
 	ListExports() ([]string, *model.AppError)
 	ListImports() ([]string, *model.AppError)
 	ListPluginKeys(pluginID string, page, perPage int) ([]string, *model.AppError)
+	ListTeamBlockUsers(rctx request.CTX, teamId string) (*model.TeamBlockUserList, *model.AppError)
 	ListTeamCommands(teamID string) ([]*model.Command, *model.AppError)
+	ListTeamsByBlockedUser(rctx request.CTX, blockedId string) (*model.TeamBlockUserList, *model.AppError)
+	ListUserBlockUsers(rctx request.CTX, userId string) (*model.UserBlockUserList, *model.AppError)
+	ListUsersByBlockedUser(rctx request.CTX, blockedId string) (*model.UserBlockUserList, *model.AppError)
 	Log() *mlog.Logger
 	LoginByOAuth(c request.CTX, service string, userData io.Reader, teamID string, tokenUser *model.User) (*model.User, *model.AppError)
 	MarkChannelsAsViewed(c request.CTX, channelIDs []string, userID string, currentSessionId string, collapsedThreadsSupported, isCRTEnabled bool) (map[string]int64, *model.AppError)
+	MarkUserVerified(c request.CTX, id string) *model.AppError
 	MaxPostSize() int
 	MessageExport() einterfaces.MessageExportInterface
 	Metrics() einterfaces.MetricsInterface
@@ -1161,7 +1178,7 @@ type AppIface interface {
 	UpdateChannelBookmarkSortOrder(bookmarkId, channelId string, newIndex int64, connectionId string) ([]*model.ChannelBookmarkWithFileInfo, *model.AppError)
 	UpdateChannelMemberNotifyProps(c request.CTX, data map[string]string, channelID string, userID string) (*model.ChannelMember, *model.AppError)
 	UpdateChannelMemberRoles(c request.CTX, channelID string, userID string, newRoles string) (*model.ChannelMember, *model.AppError)
-	UpdateChannelMemberSchemeRoles(c request.CTX, channelID string, userID string, isSchemeGuest bool, isSchemeUser bool, isSchemeAdmin bool) (*model.ChannelMember, *model.AppError)
+	UpdateChannelMemberSchemeRoles(c request.CTX, channelID string, userID string, isSchemeGuest bool, isSchemeUser bool, isSchemeVerified bool, isSchemeAdmin bool) (*model.ChannelMember, *model.AppError)
 	UpdateChannelPrivacy(c request.CTX, oldChannel *model.Channel, user *model.User) (*model.Channel, *model.AppError)
 	UpdateCommand(oldCmd, updatedCmd *model.Command) (*model.Command, *model.AppError)
 	UpdateConfig(f func(*model.Config))
@@ -1194,7 +1211,7 @@ type AppIface interface {
 	UpdateSidebarCategoryOrder(c request.CTX, userID, teamID string, categoryOrder []string) *model.AppError
 	UpdateTeam(team *model.Team) (*model.Team, *model.AppError)
 	UpdateTeamMemberRoles(c request.CTX, teamID string, userID string, newRoles string) (*model.TeamMember, *model.AppError)
-	UpdateTeamMemberSchemeRoles(c request.CTX, teamID string, userID string, isSchemeGuest bool, isSchemeUser bool, isSchemeAdmin bool) (*model.TeamMember, *model.AppError)
+	UpdateTeamMemberSchemeRoles(c request.CTX, teamID string, userID string, isSchemeGuest bool, isSchemeUser bool, isSchemeVerified bool, isSchemeModerator bool, isSchemeAdmin bool) (*model.TeamMember, *model.AppError)
 	UpdateTeamPrivacy(teamID string, teamType string, allowOpenInvite bool) *model.AppError
 	UpdateTeamScheme(team *model.Team) (*model.Team, *model.AppError)
 	UpdateThreadFollowForUser(userID, teamID, threadID string, state bool) *model.AppError

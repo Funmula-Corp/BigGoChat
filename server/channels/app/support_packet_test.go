@@ -12,11 +12,11 @@ import (
 	"github.com/stretchr/testify/require"
 	"gopkg.in/yaml.v2"
 
-	"github.com/mattermost/mattermost/server/public/model"
-	"github.com/mattermost/mattermost/server/v8/channels/app/platform"
-	smocks "github.com/mattermost/mattermost/server/v8/channels/store/storetest/mocks"
-	"github.com/mattermost/mattermost/server/v8/config"
-	fmocks "github.com/mattermost/mattermost/server/v8/platform/shared/filestore/mocks"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app/platform"
+	smocks "git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store/storetest/mocks"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/config"
+	fmocks "git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/shared/filestore/mocks"
 )
 
 func TestCreatePluginsFile(t *testing.T) {
@@ -104,11 +104,11 @@ func TestGenerateSupportPacketYaml(t *testing.T) {
 		assert.Equal(t, false, packet.LicenseIsTrial)
 
 		/* Server stats */
-		assert.Equal(t, 3, packet.ActiveUsers) // from InitBasic()
+		assert.Equal(t, 4, packet.ActiveUsers) // from InitBasic()
 		assert.Equal(t, 0, packet.DailyActiveUsers)
 		assert.Equal(t, 0, packet.MonthlyActiveUsers)
 		assert.Equal(t, 0, packet.InactiveUserCount)
-		assert.Equal(t, 5, packet.TotalPosts)    // from InitBasic()
+		assert.Equal(t, 7, packet.TotalPosts)    // from InitBasic()
 		assert.Equal(t, 3, packet.TotalChannels) // from InitBasic()
 		assert.Equal(t, 1, packet.TotalTeams)    // from InitBasic()
 
@@ -132,9 +132,10 @@ func TestGenerateSupportPacketYaml(t *testing.T) {
 			require.NotNil(t, p)
 		}
 
-		// InitBasic() already creats 5 posts
+		// InitBasic() already creats 7 posts
+		// include two posts for user UserUnverified
 		packet := generateSupportPacket(t)
-		assert.Equal(t, 10, packet.TotalPosts)
+		assert.Equal(t, 12, packet.TotalPosts)
 	})
 
 	t.Run("filestore fails", func(t *testing.T) {

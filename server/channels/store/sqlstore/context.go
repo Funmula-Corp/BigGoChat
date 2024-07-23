@@ -6,7 +6,7 @@ package sqlstore
 import (
 	"context"
 
-	"github.com/mattermost/mattermost/server/public/shared/request"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
 )
 
 // storeContextKey is the base type for all context keys for the store.

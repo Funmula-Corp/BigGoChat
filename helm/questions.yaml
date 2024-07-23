@@ -1,0 +1,103 @@
+questions:
+# deployment
+  - description: "Credentials to be used to pull docker images from the harbor repository."
+    group: Deployment
+    label: Pull Secret
+    type: enum
+    variable: deployment.pullsecret
+    options:
+      - "docker.dev.cloud.biggo.com"
+      - "docker.cloud.biggo.com"
+      - "docker.biggo.dev"
+
+  - default: 1
+    description: "Set the amount of replications."
+    group: Deployment
+    label: "Replicas"
+    type: int
+    variable: deployment.replicas
+
+# ingress
+  - description: ""
+    group: Ingress
+    label: "Enable Ingress"
+    type: boolean
+    variable: ingress.enabled
+    show_subquestion_if: true
+    subquestions:
+
+    - description: "HTTP Hostname"
+      group: Ingress
+      label: "Hostname"
+      type: string
+      variable: ingress.hostname
+
+    - description: "SSL Certificate Issuer (ClusterIssuer)"
+      group: Ingress
+      label: "Issuer"
+      type: string
+      variable: ingress.issuer
+
+# service
+  - description: "RTC Nodeport"
+    group: Service
+    label: "Nodeport"
+    type: int
+    variable: service.nodeport
+
+  - description: "RTC Pod Index Selector (Numeric Value MUST be wrapped in '')"
+    group: Service
+    label: "PodIndex"
+    type: string
+    variable: service.podindex
+
+# postgres
+  - description: "Postgres Database Name"
+    group: Postgres
+    label: "Database"
+    type: string
+    variable: postgres.database
+
+  - description: "Postgres Username."
+    group: Postgres
+    label: "Username"
+    type: string
+    variable: postgres.username
+
+  - description: "Postgres Password."
+    group: Postgres
+    label: "Password"
+    type: string
+    variable: postgres.password
+
+  - description: "Postgres Host Address."
+    group: Postgres
+    label: "Host"
+    type: string
+    variable: postgres.host
+
+  - description: "Postgres Port."
+    group: Postgres
+    label: "Port"
+    type: int
+    variable: postgres.port
+
+# minio
+  - description: "Minio Access Key"
+    group: Minio
+    label: "AccessKey"
+    type: string
+    variable: minio.accesskey
+
+  - description: "Minio Secret Key."
+    group: Minio
+    label: "SecretKey"
+    type: string
+    variable: minio.secretkey
+
+# mattermost
+  - description: "Mattermost Cluster Name"
+    group: Mattermost
+    label: "ClusterName"
+    type: string
+    variable: mattermost.clustername

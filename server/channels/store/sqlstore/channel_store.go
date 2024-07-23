@@ -15,10 +15,10 @@ import (
 	sq "github.com/mattermost/squirrel"
 	"github.com/pkg/errors"
 
-	"github.com/mattermost/mattermost/server/public/model"
-	"github.com/mattermost/mattermost/server/public/shared/request"
-	"github.com/mattermost/mattermost/server/v8/channels/store"
-	"github.com/mattermost/mattermost/server/v8/einterfaces"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/einterfaces"
 )
 
 type SqlChannelStore struct {
@@ -42,6 +42,7 @@ type channelMember struct {
 	SchemeUser         sql.NullBool
 	SchemeAdmin        sql.NullBool
 	SchemeGuest        sql.NullBool
+	SchemeVerified     sql.NullBool
 	MentionCountRoot   int64
 	MsgCountRoot       int64
 }
@@ -61,6 +62,7 @@ func NewMapFromChannelMemberModel(cm *model.ChannelMember) map[string]any {
 		"LastUpdateAt":       cm.LastUpdateAt,
 		"SchemeGuest":        sql.NullBool{Valid: true, Bool: cm.SchemeGuest},
 		"SchemeUser":         sql.NullBool{Valid: true, Bool: cm.SchemeUser},
+		"SchemeVerified":        sql.NullBool{Valid: true, Bool: cm.SchemeVerified},
 		"SchemeAdmin":        sql.NullBool{Valid: true, Bool: cm.SchemeAdmin},
 	}
 }
@@ -78,12 +80,15 @@ type channelMemberWithSchemeRoles struct {
 	LastUpdateAt                  int64
 	SchemeGuest                   sql.NullBool
 	SchemeUser                    sql.NullBool
+	SchemeVerified                sql.NullBool
 	SchemeAdmin                   sql.NullBool
 	TeamSchemeDefaultGuestRole    sql.NullString
 	TeamSchemeDefaultUserRole     sql.NullString
+	TeamSchemeDefaultVerifiedRole sql.NullString
 	TeamSchemeDefaultAdminRole    sql.NullString
 	ChannelSchemeDefaultGuestRole sql.NullString
 	ChannelSchemeDefaultUserRole  sql.NullString
+	ChannelSchemeDefaultVerifiedRole  sql.NullString
 	ChannelSchemeDefaultAdminRole sql.NullString
 	MsgCountRoot                  int64
 }
@@ -98,7 +103,7 @@ type channelMemberWithTeamWithSchemeRoles struct {
 type channelMemberWithTeamWithSchemeRolesList []channelMemberWithTeamWithSchemeRoles
 
 func channelMemberSliceColumns() []string {
-	return []string{"ChannelId", "UserId", "Roles", "LastViewedAt", "MsgCount", "MsgCountRoot", "MentionCount", "MentionCountRoot", "UrgentMentionCount", "NotifyProps", "LastUpdateAt", "SchemeUser", "SchemeAdmin", "SchemeGuest"}
+	return []string{"ChannelId", "UserId", "Roles", "LastViewedAt", "MsgCount", "MsgCountRoot", "MentionCount", "MentionCountRoot", "UrgentMentionCount", "NotifyProps", "LastUpdateAt", "SchemeUser", "SchemeAdmin", "SchemeVerified", "SchemeGuest"}
 }
 
 func channelMemberToSlice(member *model.ChannelMember) []any {
@@ -116,19 +121,21 @@ func channelMemberToSlice(member *model.ChannelMember) []any {
 	resultSlice = append(resultSlice, member.LastUpdateAt)
 	resultSlice = append(resultSlice, member.SchemeUser)
 	resultSlice = append(resultSlice, member.SchemeAdmin)
+	resultSlice = append(resultSlice, member.SchemeVerified)
 	resultSlice = append(resultSlice, member.SchemeGuest)
 	return resultSlice
 }
 
 type channelMemberWithSchemeRolesList []channelMemberWithSchemeRoles
 
-func getChannelRoles(schemeGuest, schemeUser, schemeAdmin bool, defaultTeamGuestRole, defaultTeamUserRole, defaultTeamAdminRole, defaultChannelGuestRole, defaultChannelUserRole, defaultChannelAdminRole string,
+func getChannelRoles(schemeGuest, schemeUser, schemeVerified, schemeAdmin bool, defaultTeamGuestRole, defaultTeamUserRole, defaultTeamVerifiedRole, defaultTeamAdminRole, defaultChannelGuestRole, defaultChannelUserRole, defaultChannelVerifiedRole, defaultChannelAdminRole string,
 	roles []string) rolesInfo {
 	result := rolesInfo{
 		roles:         []string{},
 		explicitRoles: []string{},
 		schemeGuest:   schemeGuest,
 		schemeUser:    schemeUser,
+		schemeVerified: schemeVerified,
 		schemeAdmin:   schemeAdmin,
 	}
 
@@ -140,6 +147,8 @@ func getChannelRoles(schemeGuest, schemeUser, schemeAdmin bool, defaultTeamGuest
 			result.schemeGuest = true
 		case model.ChannelUserRoleId:
 			result.schemeUser = true
+		case model.ChannelVerifiedRoleId:
+			result.schemeVerified = true
 		case model.ChannelAdminRoleId:
 			result.schemeAdmin = true
 		default:
@@ -167,6 +176,15 @@ func getChannelRoles(schemeGuest, schemeUser, schemeAdmin bool, defaultTeamGuest
 			schemeImpliedRoles = append(schemeImpliedRoles, defaultTeamUserRole)
 		} else {
 			schemeImpliedRoles = append(schemeImpliedRoles, model.ChannelUserRoleId)
+		}
+	}
+	if result.schemeVerified {
+		if defaultChannelVerifiedRole != "" {
+			schemeImpliedRoles = append(schemeImpliedRoles, defaultChannelVerifiedRole)
+		} else if defaultTeamVerifiedRole != "" {
+			schemeImpliedRoles = append(schemeImpliedRoles, defaultTeamVerifiedRole)
+		} else {
+			schemeImpliedRoles = append(schemeImpliedRoles, model.ChannelVerifiedRoleId)
 		}
 	}
 	if result.schemeAdmin {
@@ -198,6 +216,7 @@ func (db channelMemberWithSchemeRoles) ToModel() *model.ChannelMember {
 	// and exclude them from ExplicitRoles field.
 	schemeGuest := db.SchemeGuest.Valid && db.SchemeGuest.Bool
 	schemeUser := db.SchemeUser.Valid && db.SchemeUser.Bool
+	schemeVerified := db.SchemeVerified.Valid && db.SchemeVerified.Bool
 	schemeAdmin := db.SchemeAdmin.Valid && db.SchemeAdmin.Bool
 
 	defaultTeamGuestRole := ""
@@ -208,6 +227,11 @@ func (db channelMemberWithSchemeRoles) ToModel() *model.ChannelMember {
 	defaultTeamUserRole := ""
 	if db.TeamSchemeDefaultUserRole.Valid {
 		defaultTeamUserRole = db.TeamSchemeDefaultUserRole.String
+	}
+
+	defaultTeamVerifiedRole := ""
+	if db.TeamSchemeDefaultVerifiedRole.Valid {
+		defaultTeamVerifiedRole = db.TeamSchemeDefaultVerifiedRole.String
 	}
 
 	defaultTeamAdminRole := ""
@@ -225,15 +249,20 @@ func (db channelMemberWithSchemeRoles) ToModel() *model.ChannelMember {
 		defaultChannelUserRole = db.ChannelSchemeDefaultUserRole.String
 	}
 
+	defaultChannelVerifiedRole := ""
+	if db.ChannelSchemeDefaultVerifiedRole.Valid {
+		defaultChannelVerifiedRole = db.ChannelSchemeDefaultVerifiedRole.String
+	}
+
 	defaultChannelAdminRole := ""
 	if db.ChannelSchemeDefaultAdminRole.Valid {
 		defaultChannelAdminRole = db.ChannelSchemeDefaultAdminRole.String
 	}
 
 	rolesResult := getChannelRoles(
-		schemeGuest, schemeUser, schemeAdmin,
-		defaultTeamGuestRole, defaultTeamUserRole, defaultTeamAdminRole,
-		defaultChannelGuestRole, defaultChannelUserRole, defaultChannelAdminRole,
+		schemeGuest, schemeUser, schemeVerified, schemeAdmin,
+		defaultTeamGuestRole, defaultTeamUserRole, defaultTeamVerifiedRole, defaultTeamAdminRole,
+		defaultChannelGuestRole, defaultChannelUserRole, defaultChannelVerifiedRole, defaultChannelAdminRole,
 		strings.Fields(db.Roles),
 	)
 	return &model.ChannelMember{
@@ -250,6 +279,7 @@ func (db channelMemberWithSchemeRoles) ToModel() *model.ChannelMember {
 		LastUpdateAt:       db.LastUpdateAt,
 		SchemeAdmin:        rolesResult.schemeAdmin,
 		SchemeUser:         rolesResult.schemeUser,
+		SchemeVerified:     rolesResult.schemeVerified,
 		SchemeGuest:        rolesResult.schemeGuest,
 		ExplicitRoles:      strings.Join(rolesResult.explicitRoles, " "),
 	}
@@ -261,6 +291,7 @@ func (db channelMemberWithTeamWithSchemeRoles) ToModel() *model.ChannelMemberWit
 	// and exclude them from ExplicitRoles field.
 	schemeGuest := db.SchemeGuest.Valid && db.SchemeGuest.Bool
 	schemeUser := db.SchemeUser.Valid && db.SchemeUser.Bool
+	schemeVerified := db.SchemeVerified.Valid && db.SchemeVerified.Bool
 	schemeAdmin := db.SchemeAdmin.Valid && db.SchemeAdmin.Bool
 
 	defaultTeamGuestRole := ""
@@ -271,6 +302,11 @@ func (db channelMemberWithTeamWithSchemeRoles) ToModel() *model.ChannelMemberWit
 	defaultTeamUserRole := ""
 	if db.TeamSchemeDefaultUserRole.Valid {
 		defaultTeamUserRole = db.TeamSchemeDefaultUserRole.String
+	}
+
+	defaultTeamVerifiedRole := ""
+	if db.TeamSchemeDefaultVerifiedRole.Valid {
+		defaultTeamVerifiedRole = db.TeamSchemeDefaultVerifiedRole.String
 	}
 
 	defaultTeamAdminRole := ""
@@ -288,15 +324,20 @@ func (db channelMemberWithTeamWithSchemeRoles) ToModel() *model.ChannelMemberWit
 		defaultChannelUserRole = db.ChannelSchemeDefaultUserRole.String
 	}
 
+	defaultChannelVerifiedRole := ""
+	if db.ChannelSchemeDefaultVerifiedRole.Valid {
+		defaultChannelVerifiedRole = db.ChannelSchemeDefaultVerifiedRole.String
+	}
+
 	defaultChannelAdminRole := ""
 	if db.ChannelSchemeDefaultAdminRole.Valid {
 		defaultChannelAdminRole = db.ChannelSchemeDefaultAdminRole.String
 	}
 
 	rolesResult := getChannelRoles(
-		schemeGuest, schemeUser, schemeAdmin,
-		defaultTeamGuestRole, defaultTeamUserRole, defaultTeamAdminRole,
-		defaultChannelGuestRole, defaultChannelUserRole, defaultChannelAdminRole,
+		schemeGuest, schemeUser, schemeVerified, schemeAdmin,
+		defaultTeamGuestRole, defaultTeamUserRole, defaultTeamVerifiedRole, defaultTeamAdminRole,
+		defaultChannelGuestRole, defaultChannelUserRole, defaultChannelVerifiedRole, defaultChannelAdminRole,
 		strings.Fields(db.Roles),
 	)
 	return &model.ChannelMemberWithTeamData{
@@ -314,6 +355,7 @@ func (db channelMemberWithTeamWithSchemeRoles) ToModel() *model.ChannelMemberWit
 			LastUpdateAt:       db.LastUpdateAt,
 			SchemeAdmin:        rolesResult.schemeAdmin,
 			SchemeUser:         rolesResult.schemeUser,
+			SchemeVerified:     rolesResult.schemeVerified,
 			SchemeGuest:        rolesResult.schemeGuest,
 			ExplicitRoles:      strings.Join(rolesResult.explicitRoles, " "),
 		},
@@ -348,12 +390,15 @@ type allChannelMember struct {
 	Roles                         string
 	SchemeGuest                   sql.NullBool
 	SchemeUser                    sql.NullBool
+	SchemeVerified                    sql.NullBool
 	SchemeAdmin                   sql.NullBool
 	TeamSchemeDefaultGuestRole    sql.NullString
 	TeamSchemeDefaultUserRole     sql.NullString
+	TeamSchemeDefaultVerifiedRole     sql.NullString
 	TeamSchemeDefaultAdminRole    sql.NullString
 	ChannelSchemeDefaultGuestRole sql.NullString
 	ChannelSchemeDefaultUserRole  sql.NullString
+	ChannelSchemeDefaultVerifiedRole  sql.NullString
 	ChannelSchemeDefaultAdminRole sql.NullString
 }
 
@@ -381,6 +426,15 @@ func (db allChannelMember) Process() (string, string) {
 			schemeImpliedRoles = append(schemeImpliedRoles, db.TeamSchemeDefaultUserRole.String)
 		} else {
 			schemeImpliedRoles = append(schemeImpliedRoles, model.ChannelUserRoleId)
+		}
+	}
+	if db.SchemeVerified.Valid && db.SchemeVerified.Bool {
+		if db.ChannelSchemeDefaultVerifiedRole.Valid && db.ChannelSchemeDefaultVerifiedRole.String != "" {
+			schemeImpliedRoles = append(schemeImpliedRoles, db.ChannelSchemeDefaultVerifiedRole.String)
+		} else if db.TeamSchemeDefaultVerifiedRole.Valid && db.TeamSchemeDefaultVerifiedRole.String != "" {
+			schemeImpliedRoles = append(schemeImpliedRoles, db.TeamSchemeDefaultVerifiedRole.String)
+		} else {
+			schemeImpliedRoles = append(schemeImpliedRoles, model.ChannelVerifiedRoleId)
 		}
 	}
 	if db.SchemeAdmin.Valid && db.SchemeAdmin.Bool {
@@ -462,13 +516,16 @@ func (s *SqlChannelStore) initializeQueries() {
 			"ChannelMembers.NotifyProps",
 			"ChannelMembers.LastUpdateAt",
 			"ChannelMembers.SchemeUser",
+			"ChannelMembers.SchemeVerified",
 			"ChannelMembers.SchemeAdmin",
 			"ChannelMembers.SchemeGuest",
 			"TeamScheme.DefaultChannelGuestRole TeamSchemeDefaultGuestRole",
 			"TeamScheme.DefaultChannelUserRole TeamSchemeDefaultUserRole",
+			"TeamScheme.DefaultChannelVerifiedRole TeamSchemeDefaultVerifiedRole",
 			"TeamScheme.DefaultChannelAdminRole TeamSchemeDefaultAdminRole",
 			"ChannelScheme.DefaultChannelGuestRole ChannelSchemeDefaultGuestRole",
 			"ChannelScheme.DefaultChannelUserRole ChannelSchemeDefaultUserRole",
+			"ChannelScheme.DefaultChannelVerifiedRole ChannelSchemeDefaultVerifiedRole",
 			"ChannelScheme.DefaultChannelAdminRole ChannelSchemeDefaultAdminRole",
 		).
 		From("ChannelMembers").
@@ -601,12 +658,14 @@ func (s SqlChannelStore) CreateDirectChannel(rctx request.CTX, user *model.User,
 		NotifyProps: model.GetDefaultChannelNotifyProps(),
 		SchemeGuest: user.IsGuest(),
 		SchemeUser:  !user.IsGuest(),
+		SchemeVerified: user.IsVerified(),
 	}
 	cm2 := &model.ChannelMember{
 		UserId:      otherUser.Id,
 		NotifyProps: model.GetDefaultChannelNotifyProps(),
 		SchemeGuest: otherUser.IsGuest(),
 		SchemeUser:  !otherUser.IsGuest(),
+		SchemeVerified: otherUser.IsVerified(),
 	}
 
 	return s.SaveDirectChannel(rctx, channel, cm1, cm2)
@@ -1460,6 +1519,7 @@ func (s SqlChannelStore) GetDeletedByName(teamId string, name string) (*model.Ch
 
 func (s SqlChannelStore) GetDeleted(teamId string, offset int, limit int, userId string) (model.ChannelList, error) {
 	channels := model.ChannelList{}
+	getAll := false
 
 	query := `
 		SELECT * FROM Channels
@@ -1471,11 +1531,15 @@ func (s SqlChannelStore) GetDeleted(teamId string, offset int, limit int, userId
 			WHERE (TeamId = ? OR TeamId = '')
 			AND DeleteAt != 0
 			AND Type = ?
-			AND Id IN (SELECT ChannelId FROM ChannelMembers WHERE UserId = ?)
+			AND (Id IN (SELECT ChannelId FROM ChannelMembers WHERE UserId = ?) OR ?)
 		ORDER BY DisplayName LIMIT ? OFFSET ?
 	`
 
-	if err := s.GetReplicaX().Select(&channels, query, teamId, model.ChannelTypePrivate, teamId, model.ChannelTypePrivate, userId, limit, offset); err != nil {
+	if userId == "" {
+		getAll = true
+	}
+
+	if err := s.GetReplicaX().Select(&channels, query, teamId, model.ChannelTypePrivate, teamId, model.ChannelTypePrivate, userId, getAll, limit, offset); err != nil {
 		if err == sql.ErrNoRows {
 			return nil, store.NewErrNotFound("Channel", fmt.Sprintf("TeamId=%s,UserId=%s", teamId, userId))
 		}
@@ -1569,6 +1633,7 @@ func (s SqlChannelStore) saveMultipleMembers(members []*model.ChannelMember) ([]
 		Id    string
 		Guest sql.NullString
 		User  sql.NullString
+		Verified  sql.NullString
 		Admin sql.NullString
 	}{}
 
@@ -1577,6 +1642,7 @@ func (s SqlChannelStore) saveMultipleMembers(members []*model.ChannelMember) ([]
 			"Channels.Id as Id",
 			"ChannelScheme.DefaultChannelGuestRole as Guest",
 			"ChannelScheme.DefaultChannelUserRole as User",
+			"ChannelScheme.DefaultChannelVerifiedRole as Verified",
 			"ChannelScheme.DefaultChannelAdminRole as Admin",
 		).
 		From("Channels").
@@ -1592,6 +1658,7 @@ func (s SqlChannelStore) saveMultipleMembers(members []*model.ChannelMember) ([]
 		Id    string
 		Guest sql.NullString
 		User  sql.NullString
+		Verified  sql.NullString
 		Admin sql.NullString
 	}{}
 	err = s.GetMasterX().Select(&defaultChannelsRoles, channelRolesSql, channelRolesArgs...)
@@ -1607,6 +1674,7 @@ func (s SqlChannelStore) saveMultipleMembers(members []*model.ChannelMember) ([]
 		Id    string
 		Guest sql.NullString
 		User  sql.NullString
+		Verified  sql.NullString
 		Admin sql.NullString
 	}{}
 
@@ -1615,6 +1683,7 @@ func (s SqlChannelStore) saveMultipleMembers(members []*model.ChannelMember) ([]
 			"Channels.Id as Id",
 			"TeamScheme.DefaultChannelGuestRole as Guest",
 			"TeamScheme.DefaultChannelUserRole as User",
+			"TeamScheme.DefaultChannelVerifiedRole as Verified",
 			"TeamScheme.DefaultChannelAdminRole as Admin",
 		).
 		From("Channels").
@@ -1631,6 +1700,7 @@ func (s SqlChannelStore) saveMultipleMembers(members []*model.ChannelMember) ([]
 		Id    string
 		Guest sql.NullString
 		User  sql.NullString
+		Verified  sql.NullString
 		Admin sql.NullString
 	}{}
 	err = s.GetMasterX().Select(&defaultTeamsRoles, teamRolesSql, teamRolesArgs...)
@@ -1663,14 +1733,16 @@ func (s SqlChannelStore) saveMultipleMembers(members []*model.ChannelMember) ([]
 	for _, member := range members {
 		defaultTeamGuestRole := defaultTeamRolesByChannel[member.ChannelId].Guest.String
 		defaultTeamUserRole := defaultTeamRolesByChannel[member.ChannelId].User.String
+		defaultTeamVerifiedRole := defaultTeamRolesByChannel[member.ChannelId].Verified.String
 		defaultTeamAdminRole := defaultTeamRolesByChannel[member.ChannelId].Admin.String
 		defaultChannelGuestRole := defaultChannelRolesByChannel[member.ChannelId].Guest.String
 		defaultChannelUserRole := defaultChannelRolesByChannel[member.ChannelId].User.String
+		defaultChannelVerifiedRole := defaultChannelRolesByChannel[member.ChannelId].Verified.String
 		defaultChannelAdminRole := defaultChannelRolesByChannel[member.ChannelId].Admin.String
 		rolesResult := getChannelRoles(
-			member.SchemeGuest, member.SchemeUser, member.SchemeAdmin,
-			defaultTeamGuestRole, defaultTeamUserRole, defaultTeamAdminRole,
-			defaultChannelGuestRole, defaultChannelUserRole, defaultChannelAdminRole,
+			member.SchemeGuest, member.SchemeUser, member.SchemeVerified, member.SchemeAdmin,
+			defaultTeamGuestRole, defaultTeamUserRole, defaultTeamVerifiedRole, defaultTeamAdminRole,
+			defaultChannelGuestRole, defaultChannelUserRole, defaultChannelVerifiedRole, defaultChannelAdminRole,
 			strings.Fields(member.ExplicitRoles),
 		)
 		newMember := *member
@@ -2091,13 +2163,16 @@ func (s SqlChannelStore) GetMemberForPost(postId string, userId string, includeA
 			ChannelMembers.NotifyProps,
 			ChannelMembers.LastUpdateAt,
 			ChannelMembers.SchemeUser,
+			ChannelMembers.SchemeVerified,
 			ChannelMembers.SchemeAdmin,
 			ChannelMembers.SchemeGuest,
 			TeamScheme.DefaultChannelGuestRole TeamSchemeDefaultGuestRole,
 			TeamScheme.DefaultChannelUserRole TeamSchemeDefaultUserRole,
+			TeamScheme.DefaultChannelVerifiedRole TeamSchemeDefaultVerifiedRole,
 			TeamScheme.DefaultChannelAdminRole TeamSchemeDefaultAdminRole,
 			ChannelScheme.DefaultChannelGuestRole ChannelSchemeDefaultGuestRole,
 			ChannelScheme.DefaultChannelUserRole ChannelSchemeDefaultUserRole,
+			ChannelScheme.DefaultChannelVerifiedRole ChannelSchemeDefaultVerifiedRole,
 			ChannelScheme.DefaultChannelAdminRole ChannelSchemeDefaultAdminRole
 		FROM
 			ChannelMembers
@@ -2129,12 +2204,14 @@ func (s SqlChannelStore) GetAllChannelMembersForUser(userId string, allowFromCac
 	query := s.getQueryBuilder().
 		Select(`
 				ChannelMembers.ChannelId, ChannelMembers.Roles, ChannelMembers.SchemeGuest,
-				ChannelMembers.SchemeUser, ChannelMembers.SchemeAdmin,
+				ChannelMembers.SchemeUser, ChannelMembers.SchemeVerified, ChannelMembers.SchemeAdmin,
 				TeamScheme.DefaultChannelGuestRole TeamSchemeDefaultGuestRole,
 				TeamScheme.DefaultChannelUserRole TeamSchemeDefaultUserRole,
+				TeamScheme.DefaultChannelVerifiedRole TeamSchemeDefaultVerifiedRole,
 				TeamScheme.DefaultChannelAdminRole TeamSchemeDefaultAdminRole,
 				ChannelScheme.DefaultChannelGuestRole ChannelSchemeDefaultGuestRole,
 				ChannelScheme.DefaultChannelUserRole ChannelSchemeDefaultUserRole,
+				ChannelScheme.DefaultChannelVerifiedRole ChannelSchemeDefaultVerifiedRole,
 				ChannelScheme.DefaultChannelAdminRole ChannelSchemeDefaultAdminRole
 		`).
 		From("ChannelMembers").
@@ -2161,10 +2238,10 @@ func (s SqlChannelStore) GetAllChannelMembersForUser(userId string, allowFromCac
 	for rows.Next() {
 		var cm allChannelMember
 		err = rows.Scan(
-			&cm.ChannelId, &cm.Roles, &cm.SchemeGuest, &cm.SchemeUser,
-			&cm.SchemeAdmin, &cm.TeamSchemeDefaultGuestRole, &cm.TeamSchemeDefaultUserRole,
+			&cm.ChannelId, &cm.Roles, &cm.SchemeGuest, &cm.SchemeUser, &cm.SchemeVerified,
+			&cm.SchemeAdmin, &cm.TeamSchemeDefaultGuestRole, &cm.TeamSchemeDefaultUserRole, &cm.TeamSchemeDefaultVerifiedRole,
 			&cm.TeamSchemeDefaultAdminRole, &cm.ChannelSchemeDefaultGuestRole,
-			&cm.ChannelSchemeDefaultUserRole, &cm.ChannelSchemeDefaultAdminRole,
+			&cm.ChannelSchemeDefaultUserRole, &cm.ChannelSchemeDefaultVerifiedRole, &cm.ChannelSchemeDefaultAdminRole,
 		)
 		if err != nil {
 			return nil, errors.Wrap(err, "unable to scan columns")
@@ -3920,6 +3997,7 @@ func (s SqlChannelStore) ClearAllCustomRoleAssignments() (err error) {
 				NotifyProps,
 				LastUpdateAt,
 				SchemeUser,
+				SchemeVerified,
 				SchemeAdmin,
 				SchemeGuest
 			FROM
@@ -4014,6 +4092,7 @@ func (s SqlChannelStore) GetChannelMembersForExport(userId string, teamId string
 		ChannelMembers.NotifyProps,
 		ChannelMembers.LastUpdateAt,
 		ChannelMembers.SchemeUser,
+		ChannelMembers.SchemeVerified,
 		ChannelMembers.SchemeAdmin,
 		(ChannelMembers.SchemeGuest IS NOT NULL AND ChannelMembers.SchemeGuest) as SchemeGuest,
 		Channels.Name as ChannelName
@@ -4067,7 +4146,7 @@ func (s SqlChannelStore) GetAllDirectChannelsForExportAfter(limit int, afterId s
 		channelIds = append(channelIds, channel.Id)
 	}
 	query = s.getQueryBuilder().
-		Select("u.Username as Username, ChannelId, UserId, cm.Roles as Roles, LastViewedAt, MsgCount, MentionCount, MentionCountRoot, COALESCE(UrgentMentionCount, 0) UrgentMentionCount, cm.NotifyProps as NotifyProps, LastUpdateAt, SchemeUser, SchemeAdmin, (SchemeGuest IS NOT NULL AND SchemeGuest) as SchemeGuest").
+		Select("u.Username as Username, ChannelId, UserId, cm.Roles as Roles, LastViewedAt, MsgCount, MentionCount, MentionCountRoot, COALESCE(UrgentMentionCount, 0) UrgentMentionCount, cm.NotifyProps as NotifyProps, LastUpdateAt, SchemeUser, (SchemeVerified IS NOT NULL AND SchemeVerified) as SchemeVerified, SchemeAdmin, (SchemeGuest IS NOT NULL AND SchemeGuest) as SchemeGuest").
 		From("ChannelMembers cm").
 		Join("Users u ON ( u.Id = cm.UserId )").
 		Where(sq.Eq{"cm.ChannelId": channelIds})

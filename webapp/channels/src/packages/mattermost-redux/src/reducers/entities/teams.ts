@@ -446,7 +446,7 @@ function groupsAssociatedToTeam(state: RelationOneToOne<Team, {ids: string[]; to
 }
 
 function updateTeamMemberSchemeRoles(state: RelationOneToOne<Team, RelationOneToOne<UserProfile, TeamMembership>>, action: AnyAction) {
-    const {teamId, userId, isSchemeUser, isSchemeAdmin} = action.data;
+    const {teamId, userId, isSchemeUser, isSchemeAdmin, isSchemeModerator} = action.data;
     const team = state[teamId];
     if (team) {
         const member = team[userId];
@@ -459,6 +459,7 @@ function updateTeamMemberSchemeRoles(state: RelationOneToOne<Team, RelationOneTo
                         ...state[teamId][userId],
                         scheme_user: isSchemeUser,
                         scheme_admin: isSchemeAdmin,
+                        scheme_moderator: isSchemeModerator,
                     },
                 },
             };

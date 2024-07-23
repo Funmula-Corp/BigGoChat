@@ -23,10 +23,10 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/mattermost/mattermost/server/public/model"
-	"github.com/mattermost/mattermost/server/v8/channels/app"
-	"github.com/mattermost/mattermost/server/v8/channels/utils/fileutils"
-	"github.com/mattermost/mattermost/server/v8/channels/utils/testutils"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/utils/fileutils"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/utils/testutils"
 )
 
 var testDir = ""
@@ -466,12 +466,12 @@ func TestUploadFiles(t *testing.T) {
 		{
 			title:                    "Webp image",
 			names:                    []string{"testwebp.webp"},
-			expectImage:              true,
+			expectImage:              false, // thumbnail is no longer generated for webp due to lack of support for animated webp in the go std lib
 			expectedImageWidths:      []int{128},
 			expectedImageHeights:     []int{256},
-			expectedImageHasPreview:  []bool{true},
+			expectedImageHasPreview:  []bool{false}, // preview is no longer generated for webp due to lack of support for animated webp in the go std lib
 			expectedCreatorId:        th.BasicUser.Id,
-			expectedImageMiniPreview: []bool{true},
+			expectedImageMiniPreview: []bool{false}, // mini preview is no longer generated for webp due to lack of support for animated webp in the go std lib
 		},
 		// Error cases
 		{
@@ -706,7 +706,7 @@ func TestUploadFiles(t *testing.T) {
 
 					if tc.expectImage {
 						// We convert all other image types to jpeg, except pngs.
-						if ext != ".png" {
+						if ext != ".png" && ext != ".webp" {
 							ext = ".jpg"
 						}
 						expectedThumbnailPath := fmt.Sprintf("%s/%s_thumb%s", expectedDir, name, ext)

@@ -11,9 +11,9 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/mattermost/mattermost/server/public/model"
-	"github.com/mattermost/mattermost/server/public/plugin/utils"
-	"github.com/mattermost/mattermost/server/public/shared/mlog"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin/utils"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
 )
 
 func TestPluginHealthCheck(t *testing.T) {
@@ -35,7 +35,7 @@ func testPluginHealthCheckSuccess(t *testing.T) {
 		package main
 
 		import (
-			"github.com/mattermost/mattermost/server/public/plugin"
+			"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
 		)
 
 		type MyPlugin struct {
@@ -71,8 +71,8 @@ func testPluginHealthCheckPanic(t *testing.T) {
 		package main
 
 		import (
-			"github.com/mattermost/mattermost/server/public/model"
-			"github.com/mattermost/mattermost/server/public/plugin"
+			"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+			"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
 		)
 
 		type MyPlugin struct {

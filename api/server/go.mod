@@ -1,6 +1,6 @@
-module github.com/mattermost/mattermost/api/internal
+module git.biggo.com/Funmula/mattermost-funmula/api/internal
 
-go 1.20
+go 1.21
 
 require (
 	github.com/pb33f/libopenapi v0.9.6

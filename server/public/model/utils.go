@@ -25,7 +25,7 @@ import (
 	"github.com/pborman/uuid"
 	"github.com/pkg/errors"
 
-	"github.com/mattermost/mattermost/server/public/shared/i18n"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/i18n"
 )
 
 const (
@@ -381,6 +381,15 @@ var encoding = base32.NewEncoding("ybndrfg8ejkmcpqxot1uwisza345h769").WithPaddin
 // without the padding.
 func NewId() string {
 	return encoding.EncodeToString(uuid.NewRandom())
+}
+
+// generate Id by hashing input
+func HashId(input string) string {
+	var Max = uuid.UUID{
+		0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+		0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+	}
+	return encoding.EncodeToString(uuid.NewSHA1(Max, []byte(input)))
 }
 
 // NewRandomTeamName is a NewId that will be a valid team name.

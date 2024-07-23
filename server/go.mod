@@ -1,4 +1,4 @@
-module github.com/mattermost/mattermost/server/v8
+module git.biggo.com/Funmula/mattermost-funmula/server/v8
 
 go 1.21
 
@@ -6,6 +6,9 @@ toolchain go1.21.8
 
 require (
 	code.sajari.com/docconv/v2 v2.0.0-pre.4
+	git.biggo.com/Funmula/mattermost-funmula/server/public v0.0.0-20240528130652-eab114624377
+	git.biggo.com/Funmula/mattermost-packages/grpc v0.0.0-20240531034050-3d22f388694c
+	git.biggo.com/Funmula/mattermost-packages/pluginAPI v0.0.0-20240531034050-3d22f388694c
 	github.com/Masterminds/semver/v3 v3.2.1
 	github.com/avct/uasurfer v0.0.0-20191028135549-26b5daa857f1
 	github.com/aws/aws-sdk-go v1.50.27
@@ -42,7 +45,6 @@ require (
 	github.com/mattermost/gosaml2 v0.8.0
 	github.com/mattermost/ldap v0.0.0-20231116144001-0f480c025956
 	github.com/mattermost/logr/v2 v2.0.21
-	github.com/mattermost/mattermost/server/public v0.1.4
 	github.com/mattermost/morph v1.1.0
 	github.com/mattermost/rsc v0.0.0-20160330161541-bbaefb05eaa0
 	github.com/mattermost/squirrel v0.4.0
@@ -53,7 +55,6 @@ require (
 	github.com/opentracing/opentracing-go v1.2.0
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.19.0
-	github.com/prometheus/client_model v0.6.0
 	github.com/reflog/dateconstraints v0.2.1
 	github.com/rs/cors v1.10.1
 	github.com/rudderlabs/analytics-go v3.3.3+incompatible
@@ -78,6 +79,8 @@ require (
 	golang.org/x/sync v0.6.0
 	golang.org/x/term v0.17.0
 	golang.org/x/tools v0.18.0
+	google.golang.org/grpc v1.62.0
+	google.golang.org/protobuf v1.32.0
 	gopkg.in/mail.v2 v2.3.1
 	gopkg.in/olivere/elastic.v6 v6.2.37
 	gopkg.in/yaml.v2 v2.4.0
@@ -157,6 +160,7 @@ require (
 	github.com/levigross/exp-html v0.0.0-20120902181939-8df60c69a8f5 // indirect
 	github.com/magiconair/properties v1.8.7 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
+	github.com/mattermost/mattermost/server/public v0.0.10-0.20231116111926-0bc542620ce2 // indirect
 	github.com/mattermost/xml-roundtrip-validator v0.1.0 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
@@ -182,6 +186,7 @@ require (
 	github.com/philhofer/fwd v1.1.2 // indirect
 	github.com/pierrec/lz4/v4 v4.1.21 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
+	github.com/prometheus/client_model v0.6.0 // indirect
 	github.com/prometheus/common v0.48.0 // indirect
 	github.com/prometheus/procfs v0.12.0 // indirect
 	github.com/redis/go-redis/v9 v9.5.1 // indirect
@@ -220,8 +225,6 @@ require (
 	golang.org/x/sys v0.17.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20240227224415-6ceb2ff114de // indirect
-	google.golang.org/grpc v1.62.0 // indirect
-	google.golang.org/protobuf v1.32.0 // indirect
 	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1 // indirect

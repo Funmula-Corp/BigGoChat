@@ -59,6 +59,7 @@ type Props = {
     allowedToSwitchToEmail: boolean;
     enableSignUpWithGitLab: boolean;
     enableSignUpWithGoogle: boolean;
+    enableSignUpWithBiggo: boolean;
     enableSignUpWithOpenId: boolean;
     enableLdap: boolean;
     enableSaml: boolean;
@@ -396,6 +397,22 @@ export class SecurityTab extends React.PureComponent<Props, State> {
                     </div>,
                 );
             } else if (
+                this.props.user.auth_service === Constants.BIGGO_SERVICE
+            ) {
+                inputs.push(
+                    <div
+                        key='oauthEmailInfo'
+                        className='form-group'
+                    >
+                        <div className='pb-3'>
+                            <FormattedMessage
+                                id='user.settings.security.passwordGoogleCantUpdate'
+                                defaultMessage='Login occurs through BigGo. Password cannot be updated.'
+                            />
+                        </div>
+                    </div>,
+                );
+            } else if (
                 this.props.user.auth_service === Constants.OFFICE365_SERVICE
             ) {
                 inputs.push(
@@ -488,6 +505,13 @@ export class SecurityTab extends React.PureComponent<Props, State> {
                     defaultMessage='Login done through Google Apps'
                 />
             );
+        } else if (this.props.user.auth_service === Constants.BIGGO_SERVICE) {
+            describe = (
+                <FormattedMessage
+                    id='user.settings.security.loginBiggo'
+                    defaultMessage='Login done through BigGo Apps'
+                />
+            );
         } else if (
             this.props.user.auth_service === Constants.OFFICE365_SERVICE
         ) {
@@ -526,6 +550,7 @@ export class SecurityTab extends React.PureComponent<Props, State> {
             let emailOption;
             let gitlabOption;
             let googleOption;
+            let biggoOption;
             let office365Option;
             let openidOption;
             let ldapOption;
@@ -573,6 +598,30 @@ export class SecurityTab extends React.PureComponent<Props, State> {
                                 <FormattedMessage
                                     id='user.settings.security.switchGoogle'
                                     defaultMessage='Switch to Using Google SSO'
+                                />
+                            </Link>
+                            <br/>
+                        </div>
+                    );
+                }
+
+                if (this.props.enableSignUpWithBiggo) {
+                    biggoOption = (
+                        <div className='pb-3'>
+                            <Link
+                                className='btn btn-primary'
+                                to={
+                                    '/claim/email_to_oauth?email=' +
+                                    encodeURIComponent(user.email) +
+                                    '&old_type=' +
+                                    user.auth_service +
+                                    '&new_type=' +
+                                    Constants.BIGGO_SERVICE
+                                }
+                            >
+                                <FormattedMessage
+                                    id='user.settings.security.switchBiggo'
+                                    defaultMessage='Switch to Using BigGo SSO'
                                 />
                             </Link>
                             <br/>
@@ -707,6 +756,7 @@ export class SecurityTab extends React.PureComponent<Props, State> {
                     {emailOption}
                     {gitlabOption}
                     {googleOption}
+                    {biggoOption}
                     {office365Option}
                     {openidOption}
                     {ldapOption}
@@ -755,6 +805,13 @@ export class SecurityTab extends React.PureComponent<Props, State> {
                 <FormattedMessage
                     id='user.settings.security.google'
                     defaultMessage='Google'
+                />
+            );
+        } else if (this.props.user.auth_service === Constants.BIGGO_SERVICE) {
+            describe = (
+                <FormattedMessage
+                    id='user.settings.security.biggo'
+                    defaultMessage='Biggo'
                 />
             );
         } else if (
@@ -958,6 +1015,7 @@ export class SecurityTab extends React.PureComponent<Props, State> {
         let numMethods = 0;
         numMethods = this.props.enableSignUpWithGitLab ? numMethods + 1 : numMethods;
         numMethods = this.props.enableSignUpWithGoogle ? numMethods + 1 : numMethods;
+        numMethods = this.props.enableSignUpWithBiggo ? numMethods + 1 : numMethods;
         numMethods = this.props.enableSignUpWithOffice365 ? numMethods + 1 : numMethods;
         numMethods = this.props.enableSignUpWithOpenId ? numMethods + 1 : numMethods;
         numMethods = this.props.enableLdap ? numMethods + 1 : numMethods;

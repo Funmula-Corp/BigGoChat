@@ -12,8 +12,8 @@ import (
 	sq "github.com/mattermost/squirrel"
 	"github.com/pkg/errors"
 
-	"github.com/mattermost/mattermost/server/public/model"
-	"github.com/mattermost/mattermost/server/v8/channels/store"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 )
 
 type SqlRoleStore struct {
@@ -140,7 +140,9 @@ func (s *SqlRoleStore) createRole(role *model.Role, transaction *sqlxTxWrapper) 
 
 	dbRole := NewRoleFromModel(role)
 
-	dbRole.Id = model.NewId()
+	if role.Id == "" {
+		dbRole.Id = model.NewId()
+	}
 	dbRole.CreateAt = model.GetMillis()
 	dbRole.UpdateAt = dbRole.CreateAt
 

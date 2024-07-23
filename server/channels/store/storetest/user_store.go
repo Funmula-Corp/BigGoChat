@@ -15,9 +15,9 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/mattermost/mattermost/server/public/model"
-	"github.com/mattermost/mattermost/server/public/shared/request"
-	"github.com/mattermost/mattermost/server/v8/channels/store"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
 )
 
 const (
@@ -99,6 +99,7 @@ func TestUserStore(t *testing.T, rctx request.CTX, ss store.Store, s SqlStore) {
 	t.Run("GetUsersWithInvalidEmails", func(t *testing.T) { testGetUsersWithInvalidEmails(t, rctx, ss) })
 	t.Run("UpdateLastLogin", func(t *testing.T) { testUpdateLastLogin(t, rctx, ss) })
 	t.Run("GetUserReport", func(t *testing.T) { testGetUserReport(t, rctx, ss, s) })
+	t.Run("UpdateMemberVerifiedStatus", func(t *testing.T) {testUpdateMemberVerifiedStatus(t, rctx, ss, s)})
 }
 
 func testUserStoreSave(t *testing.T, rctx request.CTX, ss store.Store) {
@@ -6606,4 +6607,97 @@ func testGetUserReport(t *testing.T, rctx request.CTX, ss store.Store, s SqlStor
 		require.NoError(t, err)
 		require.Len(t, userReport, 11)
 	})
+}
+
+func testUpdateMemberVerifiedStatus(t *testing.T, rctx request.CTX, ss store.Store, s SqlStore) {
+	c := []int{}
+	u1 := model.User{}
+	u1.Email = MakeEmail()
+	u1.Mobilephone = model.NewString( GenerateTestMobilephone())
+	u1.Roles = model.SystemVerifiedRoleId
+	savedU1, err := ss.User().Save(rctx, &u1)
+	require.NoError(t, err)
+
+	u2 := model.User{}
+	u2.Email = MakeEmail()
+	u2.Mobilephone = model.NewString( GenerateTestMobilephone())
+	savedU2, err := ss.User().Save(rctx, &u2)
+
+	require.NoError(t, err)
+
+	tm1 := model.TeamMember{
+		TeamId: model.NewId(),
+		UserId: u1.Id,
+	}
+	savedTm1, err := ss.Team().SaveMember(rctx, &tm1,  99999)
+	require.NoError(t, err)
+	require.NotNil(t, savedTm1)
+	require.False(t, savedTm1.SchemeVerified)
+
+	tm2 := model.TeamMember{
+		TeamId: tm1.TeamId,
+		UserId: u2.Id,
+	}
+	savedTm2, err := ss.Team().SaveMember(rctx, &tm2,  99999)
+	require.NoError(t, err)
+	require.NotNil(t, savedTm2)
+	require.False(t, savedTm2.SchemeVerified)
+
+	cm1 := model.ChannelMember {
+		ChannelId: model.NewId(),
+		UserId: u1.Id,
+		NotifyProps: model.GetDefaultChannelNotifyProps(),
+	}
+	savedCm1, err := ss.Channel().SaveMember(rctx, &cm1)
+	require.NoError(t, err)
+	require.NotNil(t, savedCm1)
+	require.False(t, savedCm1.SchemeVerified)
+
+	cm2 := model.ChannelMember {
+		ChannelId: cm1.ChannelId,
+		UserId: u2.Id,
+		NotifyProps: model.GetDefaultChannelNotifyProps(),
+	}
+	savedCm2, err := ss.Channel().SaveMember(rctx, &cm2)
+	require.NoError(t, err)
+	require.NotNil(t, savedCm2)
+	require.False(t, savedCm2.SchemeVerified)
+
+	require.True(t, savedU1.IsVerified())
+	require.False(t, savedU2.IsVerified())
+	err = ss.User().UpdateMemberVerifiedStatus(rctx, savedU1)
+	require.NoError(t, err)
+	err = ss.User().UpdateMemberVerifiedStatus(rctx, savedU2)
+	require.NoError(t, err)
+	tms1, err := ss.Team().GetTeamMembersForExport(u1.Id)
+	require.NoError(t, err)
+	for _, tm := range(tms1){
+		require.True(t, tm.SchemeVerified)
+	}
+	tms2, err := ss.Team().GetTeamMembersForExport(u2.Id)
+	require.NoError(t, err)
+	for _, tm := range(tms2){
+		require.False(t, tm.SchemeVerified)
+	}
+	err = s.GetMasterX().Select(&c,
+		"SELECT COUNT(*) FROM ChannelMembers WHERE ChannelId = ? and UserId = ? and SchemeVerified = true", cm1.ChannelId, cm1.UserId)
+	require.NoError(t, err)
+	require.Len(t, c, 1)
+	require.Equal(t, 1, c[0])
+	err = s.GetMasterX().Select(&c,
+		"SELECT COUNT(*) FROM ChannelMembers WHERE ChannelId = ? and UserId = ? and SchemeVerified = false", cm1.ChannelId, cm1.UserId)
+	require.NoError(t, err)
+	require.Len(t, c, 1)
+	require.Equal(t, 0, c[0])
+
+	err = s.GetMasterX().Select(&c,
+		"SELECT COUNT(*) FROM ChannelMembers WHERE ChannelId = ? and UserId = ? and SchemeVerified = true", cm2.ChannelId, cm2.UserId)
+	require.NoError(t, err)
+	require.Len(t, c, 1)
+	require.Equal(t, 0, c[0])
+	err = s.GetMasterX().Select(&c,
+		"SELECT COUNT(*) FROM ChannelMembers WHERE ChannelId = ? and UserId = ? and SchemeVerified = false", cm2.ChannelId, cm2.UserId)
+	require.NoError(t, err)
+	require.Len(t, c, 1)
+	require.Equal(t, 1, c[0])
 }

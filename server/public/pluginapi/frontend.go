@@ -1,8 +1,8 @@
 package pluginapi
 
 import (
-	"github.com/mattermost/mattermost/server/public/model"
-	"github.com/mattermost/mattermost/server/public/plugin"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
 )
 
 // FrontendService exposes methods to interact with the frontend.
@@ -27,4 +27,12 @@ func (f *FrontendService) OpenInteractiveDialog(dialog model.OpenDialogRequest) 
 // Minimum server version: 5.2
 func (f *FrontendService) PublishWebSocketEvent(event string, payload map[string]interface{}, broadcast *model.WebsocketBroadcast) {
 	f.api.PublishWebSocketEvent(event, payload, broadcast)
+}
+
+// BDPublishWebSocketEvent publish core websocket event without plugin prefix
+// core function, may break frontend, USE WITH CAUTION.
+//
+// Minimum server version: 9.8
+func (f *FrontendService) BDPublishWebSocketEvent(event model.WebsocketEventType, teamId string, channelId string, userId string, omitUsers map[string]bool, omitConnectionId string, data map[string]interface{}) {
+	f.api.BDPublishWebSocketEvent(event, teamId, channelId, userId, omitUsers, omitConnectionId, data)
 }

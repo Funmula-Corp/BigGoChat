@@ -9,8 +9,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/mattermost/mattermost/server/public/model"
-	"github.com/mattermost/mattermost/server/v8/channels/store"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
 
 	"github.com/pkg/errors"
 
@@ -726,7 +726,7 @@ func (s SqlSharedChannelStore) GetUsersForSync(filter model.GetUsersForSyncFilte
 	query := s.getQueryBuilder().
 		Select("u.Id", "u.CreateAt", "u.UpdateAt", "u.DeleteAt", "u.Username", "u.Email", "u.EmailVerified",
 			"u.Nickname", "u.FirstName", "u.LastName", "u.Position", "u.Roles", "u.AllowMarketing", "u.Props",
-			"u.NotifyProps", "u.LastPasswordUpdate", "u.LastPictureUpdate", "u.Locale", "u.Timezone", "u.RemoteId").
+			"u.NotifyProps", "u.LastPasswordUpdate", "u.LastPictureUpdate", "u.Locale", "u.Timezone", "u.RemoteId", "u.Mobilephone").
 		Distinct().
 		From("Users AS u").
 		Join("SharedChannelUsers AS scu ON u.Id = scu.UserId").

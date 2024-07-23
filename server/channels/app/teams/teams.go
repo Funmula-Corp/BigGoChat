@@ -4,9 +4,9 @@
 package teams
 
 import (
-	"github.com/mattermost/mattermost/server/public/model"
-	"github.com/mattermost/mattermost/server/public/shared/i18n"
-	"github.com/mattermost/mattermost/server/public/shared/request"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/i18n"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
 )
 
 func (ts *TeamService) CreateTeam(rctx request.CTX, team *model.Team) (*model.Team, error) {
@@ -146,6 +146,7 @@ func (ts *TeamService) JoinUserToTeam(rctx request.CTX, team *model.Team, user *
 		UserId:      user.Id,
 		SchemeGuest: user.IsGuest(),
 		SchemeUser:  !user.IsGuest(),
+		SchemeVerified: user.IsVerified(),
 		CreateAt:    model.GetMillis(),
 	}
 

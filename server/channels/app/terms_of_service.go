@@ -7,8 +7,8 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/mattermost/mattermost/server/public/model"
-	"github.com/mattermost/mattermost/server/v8/channels/store"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 )
 
 func (a *App) CreateTermsOfService(text, userID string) (*model.TermsOfService, *model.AppError) {

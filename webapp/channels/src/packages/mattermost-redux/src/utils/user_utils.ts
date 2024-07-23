@@ -57,12 +57,20 @@ export function isAdmin(roles: string): boolean {
     return isSystemAdmin(roles) || isTeamAdmin(roles);
 }
 
+export function isModerator(roles: string): boolean {
+    return isTeamModerator(roles);
+}
+
 export function isGuest(roles: string): boolean {
     return spaceSeparatedStringIncludes('system_guest', roles);
 }
 
 export function isTeamAdmin(roles: string): boolean {
     return spaceSeparatedStringIncludes(General.TEAM_ADMIN_ROLE, roles);
+}
+
+export function isTeamModerator(roles: string): boolean {
+    return spaceSeparatedStringIncludes(General.TEAM_MODERATOR_ROLE, roles);
 }
 
 export function isSystemAdmin(roles: string): boolean {

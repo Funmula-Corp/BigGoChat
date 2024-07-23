@@ -85,6 +85,7 @@ const Login = ({onCustomizeHeader}: LoginProps) => {
         EnableSignUpWithGitLab,
         EnableSignUpWithOffice365,
         EnableSignUpWithGoogle,
+        EnableSignUpWithBiggo,
         EnableSignUpWithOpenId,
         EnableOpenServer,
         LdapLoginFieldName,
@@ -131,6 +132,7 @@ const Login = ({onCustomizeHeader}: LoginProps) => {
     const enableSignUpWithEmail = EnableSignUpWithEmail === 'true';
     const enableSignUpWithGitLab = EnableSignUpWithGitLab === 'true';
     const enableSignUpWithGoogle = EnableSignUpWithGoogle === 'true';
+    const enableSignUpWithBiggo = EnableSignUpWithBiggo === 'true';
     const enableSignUpWithOffice365 = EnableSignUpWithOffice365 === 'true';
     const enableSignUpWithOpenId = EnableSignUpWithOpenId === 'true';
     const isLicensed = IsLicensed === 'true';
@@ -139,9 +141,9 @@ const Login = ({onCustomizeHeader}: LoginProps) => {
     const siteName = SiteName ?? '';
 
     const enableBaseLogin = enableSignInWithEmail || enableSignInWithUsername || ldapEnabled;
-    const enableExternalSignup = enableSignUpWithGitLab || enableSignUpWithOffice365 || enableSignUpWithGoogle || enableSignUpWithOpenId || enableSignUpWithSaml;
+    const enableExternalSignup = enableSignUpWithGitLab || enableSignUpWithOffice365 || enableSignUpWithGoogle || enableSignUpWithBiggo || enableSignUpWithOpenId || enableSignUpWithSaml;
     const showSignup = enableOpenServer && (enableExternalSignup || enableSignUpWithEmail || enableLdap);
-    const onlyLdapEnabled = enableLdap && !(enableSaml || enableSignInWithEmail || enableSignInWithUsername || enableSignUpWithEmail || enableSignUpWithGitLab || enableSignUpWithGoogle || enableSignUpWithOffice365 || enableSignUpWithOpenId);
+    const onlyLdapEnabled = enableLdap && !(enableSaml || enableSignInWithEmail || enableSignInWithUsername || enableSignUpWithEmail || enableSignUpWithGitLab || enableSignUpWithGoogle || enableSignUpWithBiggo || enableSignUpWithOffice365 || enableSignUpWithOpenId);
 
     const query = new URLSearchParams(search);
     const redirectTo = query.get('redirect_to');
@@ -174,6 +176,17 @@ const Login = ({onCustomizeHeader}: LoginProps) => {
                 url,
                 icon: <LoginGoogleIcon/>,
                 label: formatMessage({id: 'login.google', defaultMessage: 'Google'}),
+                onClick: desktopExternalAuth(url),
+            });
+        }
+
+        if (enableSignUpWithBiggo) {
+            const url = `${Client4.getOAuthRoute()}/biggo/login${search}`;
+            externalLoginOptions.push({
+                id: 'biggo',
+                url,
+                icon: <LoginOpenIDIcon/>,
+                label: formatMessage({id: 'login.biggo', defaultMessage: 'BigGo'}),
                 onClick: desktopExternalAuth(url),
             });
         }

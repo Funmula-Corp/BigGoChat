@@ -15,7 +15,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	sqlUtils "github.com/mattermost/mattermost/server/public/utils/sql"
+	sqlUtils "git.biggo.com/Funmula/mattermost-funmula/server/public/utils/sql"
 
 	sq "github.com/mattermost/squirrel"
 
@@ -26,11 +26,11 @@ import (
 	"github.com/mattermost/morph/models"
 	"github.com/pkg/errors"
 
-	"github.com/mattermost/mattermost/server/public/model"
-	"github.com/mattermost/mattermost/server/public/shared/mlog"
-	"github.com/mattermost/mattermost/server/v8/channels/db"
-	"github.com/mattermost/mattermost/server/v8/channels/store"
-	"github.com/mattermost/mattermost/server/v8/einterfaces"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/db"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/einterfaces"
 )
 
 type migrationDirection string
@@ -111,11 +111,12 @@ type SqlStoreStores struct {
 	postPersistentNotification store.PostPersistentNotificationStore
 	desktopTokens              store.DesktopTokensStore
 	channelBookmarks           store.ChannelBookmarkStore
+	blocklist                  store.BlocklistStore
 }
 
 type SqlStore struct {
 	// rrCounter and srCounter should be kept first.
-	// See https://github.com/mattermost/mattermost/server/v8/channels/pull/7281
+	// See https://git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/pull/7281
 	rrCounter int64
 	srCounter int64
 
@@ -238,6 +239,7 @@ func New(settings model.SqlSettings, logger mlog.LoggerIFace, metrics einterface
 	store.stores.channelBookmarks = newSqlChannelBookmarkStore(store)
 
 	store.stores.preference.(*SqlPreferenceStore).deleteUnusedFeatures()
+	store.stores.blocklist = newSqlChannelBlocklistStore(store)
 
 	return store, nil
 }
@@ -1037,6 +1039,10 @@ func (ss *SqlStore) DesktopTokens() store.DesktopTokensStore {
 
 func (ss *SqlStore) ChannelBookmark() store.ChannelBookmarkStore {
 	return ss.stores.channelBookmarks
+}
+
+func (ss *SqlStore) Blocklist() store.BlocklistStore {
+	return ss.stores.blocklist
 }
 
 func (ss *SqlStore) DropAllTables() {

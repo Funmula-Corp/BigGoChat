@@ -97,6 +97,7 @@ export type ClientConfig = {
     EnableSignUpWithEmail: string;
     EnableSignUpWithGitLab: string;
     EnableSignUpWithGoogle: string;
+    EnableSignUpWithBiggo: string;
     EnableSignUpWithOffice365: string;
     EnableSignUpWithOpenId: string;
     EnableSVGs: string;
@@ -944,6 +945,7 @@ export type AdminConfig = {
     ThemeSettings: ThemeSettings;
     GitLabSettings: SSOSettings;
     GoogleSettings: SSOSettings;
+    BiggoSettings: SSOSettings;
     Office365Settings: Office365Settings;
     OpenIdSettings: SSOSettings;
     LdapSettings: LdapSettings;

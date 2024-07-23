@@ -6,7 +6,7 @@ package users
 import (
 	"strings"
 
-	"github.com/mattermost/mattermost/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 )
 
 // CheckUserDomain checks that a user's email domain matches a list of space-delimited domains as a string.
@@ -48,6 +48,7 @@ func (us *UserService) SanitizeProfile(user *model.User, asAdmin bool) {
 func (us *UserService) GetSanitizeOptions(asAdmin bool) map[string]bool {
 	options := us.config().GetSanitizeOptions()
 	if asAdmin {
+		options["mobilephone"] = true
 		options["email"] = true
 		options["fullname"] = true
 		options["authservice"] = true

@@ -8,8 +8,8 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/mattermost/mattermost/server/public/model"
-	"github.com/mattermost/mattermost/server/public/shared/i18n"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/i18n"
 )
 
 func TestGroupMsgUsernames(t *testing.T) {
@@ -64,6 +64,7 @@ func TestGroupMsgProvider(t *testing.T) {
 	th.linkUserToTeam(th.BasicUser, team)
 	cmd := &groupmsgProvider{}
 
+	th.removePermissionFromRole(model.PermissionCreateGroupChannel.Id, model.SystemVerifiedRoleId)
 	th.removePermissionFromRole(model.PermissionCreateGroupChannel.Id, model.SystemUserRoleId)
 
 	t.Run("Check without permission to create a GM channel.", func(t *testing.T) {
@@ -79,9 +80,12 @@ func TestGroupMsgProvider(t *testing.T) {
 	})
 
 	th.addPermissionToRole(model.PermissionCreateGroupChannel.Id, model.SystemUserRoleId)
+	th.addPermissionToRole(model.PermissionCreateGroupChannel.Id, model.SystemVerifiedRoleId)
 
 	t.Run("Check without permissions to view a user in the list.", func(t *testing.T) {
 		th.removePermissionFromRole(model.PermissionViewMembers.Id, model.SystemUserRoleId)
+		th.removePermissionFromRole(model.PermissionViewMembers.Id, model.SystemVerifiedRoleId)
+		defer th.addPermissionToRole(model.PermissionViewMembers.Id, model.SystemVerifiedRoleId)
 		defer th.addPermissionToRole(model.PermissionViewMembers.Id, model.SystemUserRoleId)
 		resp := cmd.DoCommand(th.App, th.Context, &model.CommandArgs{
 			T:       i18n.IdentityTfunc(),

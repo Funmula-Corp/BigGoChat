@@ -8,8 +8,8 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/mattermost/mattermost/server/public/model"
-	"github.com/mattermost/mattermost/server/public/shared/i18n"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/i18n"
 )
 
 func TestMsgProvider(t *testing.T) {
@@ -21,6 +21,7 @@ func TestMsgProvider(t *testing.T) {
 	cmd := &msgProvider{}
 
 	th.removePermissionFromRole(model.PermissionCreateDirectChannel.Id, model.SystemUserRoleId)
+	th.removePermissionFromRole(model.PermissionCreateDirectChannel.Id, model.SystemVerifiedRoleId)
 
 	// Check without permission to create a DM channel.
 	resp := cmd.DoCommand(th.App, th.Context, &model.CommandArgs{
@@ -35,6 +36,7 @@ func TestMsgProvider(t *testing.T) {
 	assert.Equal(t, "", resp.GotoLocation)
 
 	th.addPermissionToRole(model.PermissionCreateDirectChannel.Id, model.SystemUserRoleId)
+	th.addPermissionToRole(model.PermissionCreateDirectChannel.Id, model.SystemVerifiedRoleId)
 
 	// Check with permission to create a DM channel.
 	resp = cmd.DoCommand(th.App, th.Context, &model.CommandArgs{

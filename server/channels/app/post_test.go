@@ -16,17 +16,17 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/mattermost/mattermost/server/public/model"
-	"github.com/mattermost/mattermost/server/public/plugin/plugintest/mock"
-	"github.com/mattermost/mattermost/server/public/shared/mlog"
-	"github.com/mattermost/mattermost/server/v8/channels/app/platform"
-	"github.com/mattermost/mattermost/server/v8/channels/store"
-	"github.com/mattermost/mattermost/server/v8/channels/store/storetest"
-	storemocks "github.com/mattermost/mattermost/server/v8/channels/store/storetest/mocks"
-	"github.com/mattermost/mattermost/server/v8/channels/testlib"
-	eMocks "github.com/mattermost/mattermost/server/v8/einterfaces/mocks"
-	"github.com/mattermost/mattermost/server/v8/platform/services/imageproxy"
-	"github.com/mattermost/mattermost/server/v8/platform/services/searchengine/mocks"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin/plugintest/mock"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app/platform"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store/storetest"
+	storemocks "git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store/storetest/mocks"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/testlib"
+	eMocks "git.biggo.com/Funmula/mattermost-funmula/server/v8/einterfaces/mocks"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/services/imageproxy"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/services/searchengine/mocks"
 )
 
 func TestCreatePostDeduplicate(t *testing.T) {
@@ -60,8 +60,8 @@ func TestCreatePostDeduplicate(t *testing.T) {
 			package main
 
 			import (
-				"github.com/mattermost/mattermost/server/public/plugin"
-				"github.com/mattermost/mattermost/server/public/model"
+				"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
+				"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 			)
 
 			type MyPlugin struct {
@@ -109,8 +109,8 @@ func TestCreatePostDeduplicate(t *testing.T) {
 			package main
 
 			import (
-				"github.com/mattermost/mattermost/server/public/plugin"
-				"github.com/mattermost/mattermost/server/public/model"
+				"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
+				"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 				"time"
 			)
 
@@ -417,8 +417,8 @@ func TestUpdatePostPluginHooks(t *testing.T) {
 				package main
 
 				import (
-					"github.com/mattermost/mattermost/server/public/plugin"
-					"github.com/mattermost/mattermost/server/public/model"
+					"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
+					"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 				)
 
 				type MyPlugin struct {
@@ -437,8 +437,8 @@ func TestUpdatePostPluginHooks(t *testing.T) {
 				package main
 
 				import (
-					"github.com/mattermost/mattermost/server/public/plugin"
-					"github.com/mattermost/mattermost/server/public/model"
+					"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
+					"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 				)
 
 				type MyPlugin struct {
@@ -486,8 +486,8 @@ func TestUpdatePostPluginHooks(t *testing.T) {
 				package main
 
 				import (
-					"github.com/mattermost/mattermost/server/public/plugin"
-					"github.com/mattermost/mattermost/server/public/model"
+					"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
+					"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 				)
 
 				type MyPlugin struct {
@@ -507,8 +507,8 @@ func TestUpdatePostPluginHooks(t *testing.T) {
 				package main
 
 				import (
-					"github.com/mattermost/mattermost/server/public/plugin"
-					"github.com/mattermost/mattermost/server/public/model"
+					"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
+					"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 				)
 
 				type MyPlugin struct {
@@ -889,7 +889,7 @@ func TestCreatePost(t *testing.T) {
 		})
 
 		t.Run("Sets prop when post has mentions and user does not have USE_CHANNEL_MENTIONS", func(t *testing.T) {
-			th.RemovePermissionFromRole(model.PermissionUseChannelMentions.Id, model.ChannelUserRoleId)
+			th.RemovePermissionFromRole(model.PermissionUseChannelMentions.Id, model.ChannelVerifiedRoleId)
 			th.RemovePermissionFromRole(model.PermissionUseChannelMentions.Id, model.ChannelAdminRoleId)
 
 			postWithNoMention := &model.Post{
@@ -910,7 +910,7 @@ func TestCreatePost(t *testing.T) {
 			require.Nil(t, err)
 			assert.Equal(t, rpost.GetProp(model.PostPropsMentionHighlightDisabled), true)
 
-			th.AddPermissionToRole(model.PermissionUseChannelMentions.Id, model.ChannelUserRoleId)
+			th.AddPermissionToRole(model.PermissionUseChannelMentions.Id, model.ChannelVerifiedRoleId)
 			th.AddPermissionToRole(model.PermissionUseChannelMentions.Id, model.ChannelAdminRoleId)
 		})
 	})
@@ -1169,7 +1169,7 @@ func TestPatchPost(t *testing.T) {
 		})
 
 		t.Run("Sets prop when user does not have USE_CHANNEL_MENTIONS", func(t *testing.T) {
-			th.RemovePermissionFromRole(model.PermissionUseChannelMentions.Id, model.ChannelUserRoleId)
+			th.RemovePermissionFromRole(model.PermissionUseChannelMentions.Id, model.ChannelVerifiedRoleId)
 			th.RemovePermissionFromRole(model.PermissionUseChannelMentions.Id, model.ChannelAdminRoleId)
 
 			patchWithNoMention := &model.PostPatch{Message: model.NewString("This patch still does not have a mention")}
@@ -1183,7 +1183,7 @@ func TestPatchPost(t *testing.T) {
 			require.Nil(t, err)
 			assert.Equal(t, rpost.GetProp(model.PostPropsMentionHighlightDisabled), true)
 
-			th.AddPermissionToRole(model.PermissionUseChannelMentions.Id, model.ChannelUserRoleId)
+			th.AddPermissionToRole(model.PermissionUseChannelMentions.Id, model.ChannelVerifiedRoleId)
 			th.AddPermissionToRole(model.PermissionUseChannelMentions.Id, model.ChannelAdminRoleId)
 		})
 	})
@@ -2818,7 +2818,7 @@ func TestCollapsedThreadFetch(t *testing.T) {
 		require.NoError(t, nErr)
 		require.Len(t, thread.Participants, 1)
 		th.App.MarkChannelAsUnreadFromPost(th.Context, postRoot.Id, user1.Id, true)
-		l, err := th.App.GetPostsForChannelAroundLastUnread(th.Context, channel.Id, user1.Id, 10, 10, true, true, false)
+		l, err := th.App.GetPostsForChannelAroundLastUnread(th.Context, channel.Id, user1.Id, 10, 10, true, true, false, false)
 		require.Nil(t, err)
 		require.Len(t, l.Order, 1)
 		require.EqualValues(t, 1, l.Posts[postRoot.Id].ReplyCount)
@@ -2828,7 +2828,7 @@ func TestCollapsedThreadFetch(t *testing.T) {
 		require.True(t, *l.Posts[postRoot.Id].IsFollowing)
 
 		// try extended fetch
-		l, err = th.App.GetPostsForChannelAroundLastUnread(th.Context, channel.Id, user1.Id, 10, 10, true, true, true)
+		l, err = th.App.GetPostsForChannelAroundLastUnread(th.Context, channel.Id, user1.Id, 10, 10, true, true, true, false)
 		require.Nil(t, err)
 		require.Len(t, l.Order, 1)
 		require.NotEmpty(t, l.Posts[postRoot.Id].Participants[0].Email)
@@ -2919,7 +2919,7 @@ func TestCollapsedThreadFetch(t *testing.T) {
 		th.App.MarkChannelAsUnreadFromPost(th.Context, postRoot.Id, user1.Id, true)
 
 		// extended fetch posts around
-		l, err = th.App.GetPostsForChannelAroundLastUnread(th.Context, channel.Id, user1.Id, 10, 10, true, true, true)
+		l, err = th.App.GetPostsForChannelAroundLastUnread(th.Context, channel.Id, user1.Id, 10, 10, true, true, true, false)
 		require.Nil(t, err)
 		require.Len(t, l.Order, 1)
 		require.NotEmpty(t, l.Posts[postRoot.Id].Participants[0].Email)

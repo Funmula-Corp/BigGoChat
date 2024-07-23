@@ -22,13 +22,13 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/mattermost/mattermost/server/public/model"
-	"github.com/mattermost/mattermost/server/public/plugin/plugintest/mock"
-	"github.com/mattermost/mattermost/server/public/shared/mlog"
-	"github.com/mattermost/mattermost/server/v8/channels/app"
-	"github.com/mattermost/mattermost/server/v8/channels/store/storetest/mocks"
-	"github.com/mattermost/mattermost/server/v8/channels/utils"
-	"github.com/mattermost/mattermost/server/v8/channels/utils/testutils"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin/plugintest/mock"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store/storetest/mocks"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/utils"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/utils/testutils"
 )
 
 func TestCreatePost(t *testing.T) {
@@ -123,6 +123,7 @@ func TestCreatePost(t *testing.T) {
 
 		defer th.RestoreDefaultRolePermissions(th.SaveDefaultRolePermissions())
 
+		th.RemovePermissionFromRole(model.PermissionUseChannelMentions.Id, model.ChannelVerifiedRoleId)
 		th.RemovePermissionFromRole(model.PermissionUseChannelMentions.Id, model.ChannelUserRoleId)
 
 		post.RootId = rpost.Id
@@ -1878,10 +1879,12 @@ func TestGetPostsForChannel(t *testing.T) {
 	client.DeletePost(context.Background(), post10.Id)
 	client.DeletePost(context.Background(), post8.Id)
 
-	// include deleted posts for non-admin users.
-	_, resp, err = client.GetPostsForChannel(context.Background(), th.BasicChannel.Id, 0, 100, "", false, true)
-	require.Error(t, err)
-	CheckForbiddenStatus(t, resp)
+	// include deleted posts for all users.
+	posts, resp, err = client.GetPostsForChannel(context.Background(), th.BasicChannel.Id, 0, 100, "", false, true)
+	require.NoError(t, err)
+	CheckOKStatus(t, resp)
+	require.Contains(t, posts.Order, post10.Id)
+	require.Contains(t, posts.Order, post8.Id)
 
 	th.TestForSystemAdminAndLocal(t, func(t *testing.T, c *model.Client4) {
 		// include deleted posts for admin users.
@@ -2247,10 +2250,12 @@ func TestGetPostsBefore(t *testing.T) {
 	client.DeletePost(context.Background(), post9.Id)
 	client.DeletePost(context.Background(), post8.Id)
 
-	// include deleted posts for non-admin users.
-	_, resp, err = client.GetPostsBefore(context.Background(), th.BasicChannel.Id, post9.Id, 0, 60, "", false, true)
-	require.Error(t, err)
-	CheckForbiddenStatus(t, resp)
+	// include deleted posts for all users.
+	posts, resp, err = client.GetPostsBefore(context.Background(), th.BasicChannel.Id, post9.Id, 0, 60, "", false, true)
+	require.NoError(t, err)
+	CheckOKStatus(t, resp)
+	// get before by post9 id, so post9 not included.
+	require.Contains(t, posts.Order, post8.Id)
 
 	th.TestForSystemAdminAndLocal(t, func(t *testing.T, c *model.Client4) {
 		// include deleted posts for admin users.
@@ -2395,8 +2400,8 @@ func TestGetPostsAfter(t *testing.T) {
 
 	// include deleted posts for non-admin users.
 	_, resp, err = client.GetPostsAfter(context.Background(), th.BasicChannel.Id, post1.Id, 0, 60, "", false, true)
-	require.Error(t, err)
-	CheckForbiddenStatus(t, resp)
+	require.NoError(t, err)
+	CheckOKStatus(t, resp)
 
 	th.TestForSystemAdminAndLocal(t, func(t *testing.T, c *model.Client4) {
 		// include deleted posts for admin users.
@@ -2793,6 +2798,23 @@ func TestDeletePost(t *testing.T) {
 	CheckUnauthorizedStatus(t, resp)
 
 	_, err = th.SystemAdminClient.DeletePost(context.Background(), post.Id)
+	require.NoError(t, err)
+
+	client.Logout(context.Background())
+	th.LoginBasic2()
+	post2 := th.CreatePost()
+	
+	client.Logout(context.Background())
+	th.LoginBasic()
+
+	resp, err = client.DeletePost(context.Background(), post2.Id)
+	require.Error(t, err)
+	CheckForbiddenStatus(t, resp)
+
+	th.MakeUserChannelAdmin(th.BasicUser, th.BasicChannel)
+	th.App.Srv().InvalidateAllCaches()
+
+	_, err = client.DeletePost(context.Background(), post2.Id)
 	require.NoError(t, err)
 }
 
@@ -3192,6 +3214,8 @@ func TestSearchPostsFromUser(t *testing.T) {
 	th.LinkUserToTeam(user, th.BasicTeam)
 	th.App.AddUserToChannel(th.Context, user, th.BasicChannel, false)
 	th.App.AddUserToChannel(th.Context, user, th.BasicChannel2, false)
+	appErr := th.App.MarkUserVerified(th.Context, user.Id)
+	require.Nil(t, appErr)
 
 	message := "sgtitlereview with space"
 	_ = th.CreateMessagePost(message)
@@ -4361,4 +4385,38 @@ func TestUnacknowledgePost(t *testing.T) {
 	resp, err = client.UnacknowledgePost(context.Background(), post.Id, th.BasicUser.Id)
 	require.Error(t, err)
 	CheckUnauthorizedStatus(t, resp)
+}
+
+func TestDirectChannelDeletePost(t *testing.T) {
+	th := Setup(t).InitBasic()
+	defer th.TearDown()
+	client := th.Client
+	
+	channel, _, err := client.CreateDirectChannel(context.Background(), th.BasicUser.Id, th.BasicUser2.Id)
+	require.NoError(t, err)
+
+	post := &model.Post{
+		ChannelId: channel.Id,
+		Message:   "should not delete this message",
+		UserId:    th.BasicUser.Id,
+	}
+
+	rpost, _, err := client.CreatePost(context.Background(), post)
+	require.NoError(t, err)
+
+	client.Logout(context.Background())
+	th.LoginBasic2()
+
+	// user
+	resp, err := client.DeletePost(context.Background(), rpost.Id)
+	require.Error(t, err)
+	CheckForbiddenStatus(t, resp)
+
+	_, appErr := th.App.UpdateUserRoles(th.Context, th.BasicUser2.Id, model.SystemAdminRoleId, false)
+	require.Nil(t, appErr)
+
+	// system_admin 
+	resp, err = client.DeletePost(context.Background(), rpost.Id)
+	require.Error(t, err)
+	CheckForbiddenStatus(t, resp)
 }

@@ -9,6 +9,12 @@ dmitri.shuralyov.com/html/belt v0.0.0-20180602232347-f7d459c86be0/go.mod h1:JLBr
 dmitri.shuralyov.com/service/change v0.0.0-20181023043359-a85b471d5412/go.mod h1:a1inKt/atXimZ4Mv927x+r7UpyzRUf4emIoiiSC2TN4=
 dmitri.shuralyov.com/state v0.0.0-20180228185332-28bcc343414c/go.mod h1:0PRwlb0D6DFvNNtx+9ybjezNCa8XF0xaYcETyp6rHWU=
 git.apache.org/thrift.git v0.0.0-20180902110319-2566ecd5d999/go.mod h1:fPE2ZNJGynbRyZ4dJvy6G277gSllfV2HJqblrnkyeyg=
+git.biggo.com/Funmula/mattermost-funmula/server/public v0.0.0-20240528130652-eab114624377 h1:ZH5fejKmxcUbFwzKLhowAFL6+omd/zGJPxSK8zO5/wU=
+git.biggo.com/Funmula/mattermost-funmula/server/public v0.0.0-20240528130652-eab114624377/go.mod h1:KV+cj12fsfCwO6prpP7s/7VNs0ikewmIjapx8iqD62k=
+git.biggo.com/Funmula/mattermost-packages/grpc v0.0.0-20240531034050-3d22f388694c h1:ViRm7hwtPzfOxqy9mHP7wGapD19pxtqn3hZtf+/iIww=
+git.biggo.com/Funmula/mattermost-packages/grpc v0.0.0-20240531034050-3d22f388694c/go.mod h1:Bohs77XZTkET/iPhNx73q+R3MkaFaqrr0RcZ4oqhkog=
+git.biggo.com/Funmula/mattermost-packages/pluginAPI v0.0.0-20240531034050-3d22f388694c h1:byiID4ltH40grqvmV2vCANObksWLkZI5eYLJRAE3mJI=
+git.biggo.com/Funmula/mattermost-packages/pluginAPI v0.0.0-20240531034050-3d22f388694c/go.mod h1:EuiXF+Q06ywwmFkLCYPWE4tpFRDldOQDxFGrzRXihw0=
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
 github.com/DataDog/datadog-go v3.2.0+incompatible/go.mod h1:LButxg5PwREeZtORoXG3tL4fMGNddJ+vMq1mwgfaqoQ=
 github.com/HdrHistogram/hdrhistogram-go v0.9.0 h1:dpujRju0R4M/QZzcnR1LH1qm+TVG3UzkWdp5tH1WMcg=
@@ -356,8 +362,8 @@ github.com/mattermost/ldap v0.0.0-20231116144001-0f480c025956 h1:Y1Tu/swM31pVwwb
 github.com/mattermost/ldap v0.0.0-20231116144001-0f480c025956/go.mod h1:SRl30Lb7/QoYyohYeVBuqYvvmXSZJxZgiV3Zf6VbxjI=
 github.com/mattermost/logr/v2 v2.0.21 h1:CMHsP+nrbRlEC4g7BwOk1GAnMtHkniFhlSQPXy52be4=
 github.com/mattermost/logr/v2 v2.0.21/go.mod h1:kZkB/zqKL9e+RY5gB3vGpsyenC+TpuiOenjMkvJJbzc=
-github.com/mattermost/mattermost/server/public v0.1.4 h1:goP0DbsrKTS79Sh0ozHRU/CGScaxU9FEaWbhanslCCc=
-github.com/mattermost/mattermost/server/public v0.1.4/go.mod h1:PDPb/iqzJJ5ZvK/m70oDF55AXN/cOvVFj96Yu4e6j+Q=
+github.com/mattermost/mattermost/server/public v0.0.10-0.20231116111926-0bc542620ce2 h1:wHfzhrRC64yqKNAWnwjC45pDewbaOGJ9/n2ocGMJ8Ec=
+github.com/mattermost/mattermost/server/public v0.0.10-0.20231116111926-0bc542620ce2/go.mod h1:Pu0zZn5n/rVj6LJvDc+Q0PnK/LAVE09CXCyY4wsn3w8=
 github.com/mattermost/morph v1.1.0 h1:Q9vrJbeM3s2jfweGheq12EFIzdNp9a/6IovcbvOQ6Cw=
 github.com/mattermost/morph v1.1.0/go.mod h1:gD+EaqX2UMyyuzmF4PFh4r33XneQ8Nzi+0E8nXjMa3A=
 github.com/mattermost/rsc v0.0.0-20160330161541-bbaefb05eaa0 h1:G9tL6JXRBMzjuD1kkBtcnd42kUiT6QDwxfFYu7adM6o=

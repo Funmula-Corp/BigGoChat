@@ -1,0 +1,170 @@
+<mxfile host="Electron" modified="2024-05-07T09:15:11.517Z" agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/24.2.5 Chrome/120.0.6099.109 Electron/28.1.0 Safari/537.36" etag="2ZN96tXbyxyCgM-SxP2Z" version="24.2.5" type="device">
+  <diagram name="Page-1" id="s_8aUNFBbQeepLU4HA4D">
+    <mxGraphModel dx="1687" dy="1027" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="sb7a33DpKUGm08fc_Rfz-96" value="Message Persistance" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fillStyle=zigzag-line;fontSize=18;fontStyle=1;verticalAlign=top;align=left;" vertex="1" parent="1">
+          <mxGeometry x="1160" y="200" width="400" height="600" as="geometry" />
+        </mxCell>
+        <mxCell id="sb7a33DpKUGm08fc_Rfz-94" value="&lt;font style=&quot;font-size: 18px;&quot;&gt;&lt;b&gt;Message Send &amp;amp; Receive&lt;/b&gt;&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fillStyle=zigzag-line;align=left;verticalAlign=top;" vertex="1" parent="1">
+          <mxGeometry x="40" y="200" width="1080" height="600" as="geometry" />
+        </mxCell>
+        <mxCell id="sb7a33DpKUGm08fc_Rfz-3" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="sb7a33DpKUGm08fc_Rfz-1" target="sb7a33DpKUGm08fc_Rfz-2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="sb7a33DpKUGm08fc_Rfz-4" value="HTTP POST&lt;div&gt;/api/v4/posts&lt;/div&gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="sb7a33DpKUGm08fc_Rfz-3">
+          <mxGeometry x="0.0253" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="sb7a33DpKUGm08fc_Rfz-1" value="" style="sketch=0;outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#232F3D;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=12;fontStyle=0;aspect=fixed;pointerEvents=1;shape=mxgraph.aws4.client;" vertex="1" parent="1">
+          <mxGeometry x="50" y="269.61" width="60" height="58.46" as="geometry" />
+        </mxCell>
+        <mxCell id="sb7a33DpKUGm08fc_Rfz-55" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="sb7a33DpKUGm08fc_Rfz-2" target="sb7a33DpKUGm08fc_Rfz-50">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="sb7a33DpKUGm08fc_Rfz-2" value="" style="sketch=0;pointerEvents=1;shadow=0;dashed=0;html=1;strokeColor=none;fillColor=#505050;labelPosition=center;verticalLabelPosition=bottom;verticalAlign=top;outlineConnect=0;align=center;shape=mxgraph.office.concepts.website;" vertex="1" parent="1">
+          <mxGeometry x="250" y="269.61" width="70" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="sb7a33DpKUGm08fc_Rfz-7" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;verticalAlign=middle;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="440" y="340" as="sourcePoint" />
+            <mxPoint x="440" y="340" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="sb7a33DpKUGm08fc_Rfz-16" value="Message Post Workflow" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=36;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="40" y="110" width="410" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="sb7a33DpKUGm08fc_Rfz-35" value="Parameters" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=40;fillColor=#dae8fc;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;html=1;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="600" y="400" width="120" height="280" as="geometry">
+            <mxRectangle x="600" y="720" width="120" height="40" as="alternateBounds" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="sb7a33DpKUGm08fc_Rfz-36" value="- post" style="text;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" vertex="1" parent="sb7a33DpKUGm08fc_Rfz-35">
+          <mxGeometry y="40" width="120" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="sb7a33DpKUGm08fc_Rfz-37" value="- team" style="text;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" vertex="1" parent="sb7a33DpKUGm08fc_Rfz-35">
+          <mxGeometry y="80" width="120" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="sb7a33DpKUGm08fc_Rfz-38" value="- channel" style="text;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" vertex="1" parent="sb7a33DpKUGm08fc_Rfz-35">
+          <mxGeometry y="120" width="120" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="sb7a33DpKUGm08fc_Rfz-39" value="- user" style="text;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" vertex="1" parent="sb7a33DpKUGm08fc_Rfz-35">
+          <mxGeometry y="160" width="120" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="sb7a33DpKUGm08fc_Rfz-40" value="- parentPostList" style="text;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" vertex="1" parent="sb7a33DpKUGm08fc_Rfz-35">
+          <mxGeometry y="200" width="120" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="sb7a33DpKUGm08fc_Rfz-41" value="- setOnline" style="text;align=left;verticalAlign=middle;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" vertex="1" parent="sb7a33DpKUGm08fc_Rfz-35">
+          <mxGeometry y="240" width="120" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="sb7a33DpKUGm08fc_Rfz-51" value="" style="group;fillColor=#f5f5f5;fontColor=#333333;strokeColor=#666666;" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="400" y="239.23" width="320" height="120.77" as="geometry" />
+        </mxCell>
+        <mxCell id="sb7a33DpKUGm08fc_Rfz-48" value="&lt;span style=&quot;text-wrap: nowrap;&quot;&gt;&lt;font style=&quot;font-size: 14px;&quot;&gt;&lt;b&gt;server/channels/api4/post.go&lt;/b&gt;&lt;/font&gt;&lt;/span&gt;" style="whiteSpace=wrap;html=1;fillStyle=dashed;fillColor=#dae8fc;strokeColor=#6c8ebf;verticalAlign=top;align=left;" vertex="1" parent="sb7a33DpKUGm08fc_Rfz-51">
+          <mxGeometry width="320" height="120.77000000000002" as="geometry" />
+        </mxCell>
+        <mxCell id="sb7a33DpKUGm08fc_Rfz-50" value="&lt;span style=&quot;color: rgb(121, 94, 38); font-family: &amp;quot;Droid Sans Mono&amp;quot;, &amp;quot;monospace&amp;quot;, monospace; font-size: 14px; text-align: left; white-space: pre; background-color: rgb(255, 255, 255);&quot;&gt;createPost&lt;/span&gt;" style="shape=process;whiteSpace=wrap;html=1;backgroundOutline=1;" vertex="1" parent="sb7a33DpKUGm08fc_Rfz-51">
+          <mxGeometry y="40.38999999999999" width="320" height="40.00000000000001" as="geometry" />
+        </mxCell>
+        <mxCell id="sb7a33DpKUGm08fc_Rfz-52" value="" style="group;fillColor=#f5f5f5;fontColor=#333333;strokeColor=#666666;" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="760" y="239.23" width="320" height="120.77" as="geometry" />
+        </mxCell>
+        <mxCell id="sb7a33DpKUGm08fc_Rfz-53" value="&lt;span style=&quot;text-align: center; text-wrap: nowrap;&quot;&gt;&lt;b&gt;&lt;font style=&quot;font-size: 14px;&quot;&gt;server/channels/app/authorization.go&lt;/font&gt;&lt;/b&gt;&lt;/span&gt;" style="whiteSpace=wrap;html=1;fillStyle=dashed;fillColor=#dae8fc;strokeColor=#6c8ebf;verticalAlign=top;align=left;" vertex="1" parent="sb7a33DpKUGm08fc_Rfz-52">
+          <mxGeometry width="320" height="120.77" as="geometry" />
+        </mxCell>
+        <mxCell id="sb7a33DpKUGm08fc_Rfz-54" value="&lt;span style=&quot;color: rgb(121, 94, 38); font-family: &amp;quot;Droid Sans Mono&amp;quot;, &amp;quot;monospace&amp;quot;, monospace; font-size: 14px; text-align: left; white-space: pre; background-color: rgb(255, 255, 255);&quot;&gt;SessionHasPermissionToChannel&lt;/span&gt;" style="shape=process;whiteSpace=wrap;html=1;backgroundOutline=1;" vertex="1" parent="sb7a33DpKUGm08fc_Rfz-52">
+          <mxGeometry y="40.39" width="320" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="sb7a33DpKUGm08fc_Rfz-56" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="sb7a33DpKUGm08fc_Rfz-50" target="sb7a33DpKUGm08fc_Rfz-54">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="sb7a33DpKUGm08fc_Rfz-83" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.003;entryY=0.173;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="sb7a33DpKUGm08fc_Rfz-60" target="sb7a33DpKUGm08fc_Rfz-90">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="sb7a33DpKUGm08fc_Rfz-77" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="sb7a33DpKUGm08fc_Rfz-62" target="sb7a33DpKUGm08fc_Rfz-76">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="sb7a33DpKUGm08fc_Rfz-67" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="sb7a33DpKUGm08fc_Rfz-50" target="sb7a33DpKUGm08fc_Rfz-59">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="sb7a33DpKUGm08fc_Rfz-74" value="" style="group;fillColor=#f5f5f5;fontColor=#333333;strokeColor=#666666;" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="240" y="639.23" width="320" height="120.77" as="geometry" />
+        </mxCell>
+        <mxCell id="sb7a33DpKUGm08fc_Rfz-75" value="&lt;span style=&quot;text-align: center; text-wrap: nowrap;&quot;&gt;&lt;font style=&quot;font-size: 14px;&quot;&gt;&lt;b&gt;server/channels/app/notification.go&lt;/b&gt;&lt;/font&gt;&lt;/span&gt;" style="whiteSpace=wrap;html=1;fillStyle=dashed;fillColor=#dae8fc;strokeColor=#6c8ebf;verticalAlign=top;align=left;" vertex="1" parent="sb7a33DpKUGm08fc_Rfz-74">
+          <mxGeometry width="320" height="120.77" as="geometry" />
+        </mxCell>
+        <mxCell id="sb7a33DpKUGm08fc_Rfz-76" value="&lt;div style=&quot;color: rgb(59, 59, 59); background-color: rgb(255, 255, 255); font-family: &amp;quot;Droid Sans Mono&amp;quot;, &amp;quot;monospace&amp;quot;, monospace; font-size: 14px; line-height: 19px; white-space: pre;&quot;&gt;&lt;span style=&quot;color: #795e26;&quot;&gt;SendNotifications&lt;/span&gt;&lt;/div&gt;" style="shape=process;whiteSpace=wrap;html=1;backgroundOutline=1;" vertex="1" parent="sb7a33DpKUGm08fc_Rfz-74">
+          <mxGeometry y="40.39" width="320" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="sb7a33DpKUGm08fc_Rfz-80" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="sb7a33DpKUGm08fc_Rfz-78" target="sb7a33DpKUGm08fc_Rfz-1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="sb7a33DpKUGm08fc_Rfz-78" value="All relevant&lt;br&gt;Channels, &lt;br&gt;Sockets, APIs" style="ellipse;shape=cloud;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="50" y="650" width="140" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="sb7a33DpKUGm08fc_Rfz-79" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="sb7a33DpKUGm08fc_Rfz-76" target="sb7a33DpKUGm08fc_Rfz-78">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="sb7a33DpKUGm08fc_Rfz-81" value="To Call on InterCluster Notice" style="shape=callout;whiteSpace=wrap;html=1;perimeter=calloutPerimeter;" vertex="1" parent="1">
+          <mxGeometry x="260" y="559.23" width="280" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="sb7a33DpKUGm08fc_Rfz-91" value="" style="group;fillColor=#f5f5f5;fontColor=#333333;strokeColor=#666666;" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="760" y="400" width="320" height="360" as="geometry" />
+        </mxCell>
+        <mxCell id="sb7a33DpKUGm08fc_Rfz-58" value="&lt;span style=&quot;text-align: center; text-wrap: nowrap;&quot;&gt;&lt;font style=&quot;font-size: 14px;&quot;&gt;&lt;b&gt;server/channels/app/post.go&lt;/b&gt;&lt;/font&gt;&lt;/span&gt;" style="whiteSpace=wrap;html=1;fillStyle=dashed;fillColor=#dae8fc;strokeColor=#6c8ebf;verticalAlign=top;align=left;" vertex="1" parent="sb7a33DpKUGm08fc_Rfz-91">
+          <mxGeometry width="320" height="360" as="geometry" />
+        </mxCell>
+        <mxCell id="sb7a33DpKUGm08fc_Rfz-69" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="sb7a33DpKUGm08fc_Rfz-91" source="sb7a33DpKUGm08fc_Rfz-59" target="sb7a33DpKUGm08fc_Rfz-60">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="sb7a33DpKUGm08fc_Rfz-59" value="&lt;span style=&quot;color: rgb(121, 94, 38); font-family: &amp;quot;Droid Sans Mono&amp;quot;, &amp;quot;monospace&amp;quot;, monospace; font-size: 14px; text-align: left; white-space: pre; background-color: rgb(255, 255, 255);&quot;&gt;CreatePostAsUser&lt;/span&gt;" style="shape=process;whiteSpace=wrap;html=1;backgroundOutline=1;" vertex="1" parent="sb7a33DpKUGm08fc_Rfz-91">
+          <mxGeometry y="40.389999999999986" width="320" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="sb7a33DpKUGm08fc_Rfz-70" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="sb7a33DpKUGm08fc_Rfz-91" source="sb7a33DpKUGm08fc_Rfz-60" target="sb7a33DpKUGm08fc_Rfz-61">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="sb7a33DpKUGm08fc_Rfz-60" value="&lt;span style=&quot;color: rgb(121, 94, 38); font-family: &amp;quot;Droid Sans Mono&amp;quot;, &amp;quot;monospace&amp;quot;, monospace; font-size: 14px; text-align: left; white-space: pre; background-color: rgb(255, 255, 255);&quot;&gt;CreatePost&lt;/span&gt;" style="shape=process;whiteSpace=wrap;html=1;backgroundOutline=1;" vertex="1" parent="sb7a33DpKUGm08fc_Rfz-91">
+          <mxGeometry y="120" width="320" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="sb7a33DpKUGm08fc_Rfz-71" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="sb7a33DpKUGm08fc_Rfz-91" source="sb7a33DpKUGm08fc_Rfz-61" target="sb7a33DpKUGm08fc_Rfz-62">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="sb7a33DpKUGm08fc_Rfz-61" value="&lt;span style=&quot;color: rgb(121, 94, 38); font-family: &amp;quot;Droid Sans Mono&amp;quot;, &amp;quot;monospace&amp;quot;, monospace; font-size: 14px; text-align: left; white-space: pre; background-color: rgb(255, 255, 255);&quot;&gt;applyPostWillBeConsumedHook&lt;/span&gt;" style="shape=process;whiteSpace=wrap;html=1;backgroundOutline=1;" vertex="1" parent="sb7a33DpKUGm08fc_Rfz-91">
+          <mxGeometry y="200" width="320" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="sb7a33DpKUGm08fc_Rfz-62" value="&lt;span style=&quot;color: rgb(121, 94, 38); font-family: &amp;quot;Droid Sans Mono&amp;quot;, &amp;quot;monospace&amp;quot;, monospace; font-size: 14px; text-align: left; white-space: pre; background-color: rgb(255, 255, 255);&quot;&gt;handlePostEvents&lt;/span&gt;" style="shape=process;whiteSpace=wrap;html=1;backgroundOutline=1;" vertex="1" parent="sb7a33DpKUGm08fc_Rfz-91">
+          <mxGeometry y="280" width="320" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="sb7a33DpKUGm08fc_Rfz-93" value="" style="group;fillColor=#f5f5f5;fontColor=#333333;strokeColor=#666666;" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="1200" y="239.23" width="320" height="360" as="geometry" />
+        </mxCell>
+        <mxCell id="sb7a33DpKUGm08fc_Rfz-89" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="sb7a33DpKUGm08fc_Rfz-93" source="sb7a33DpKUGm08fc_Rfz-86" target="sb7a33DpKUGm08fc_Rfz-88">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="sb7a33DpKUGm08fc_Rfz-88" value="&lt;span style=&quot;color: rgb(121, 94, 38); font-family: &amp;quot;Droid Sans Mono&amp;quot;, &amp;quot;monospace&amp;quot;, monospace; font-size: 14px; text-align: left; white-space: pre; background-color: rgb(255, 255, 255);&quot;&gt;Save(&lt;/span&gt;&lt;span style=&quot;font-family: &amp;quot;Droid Sans Mono&amp;quot;, &amp;quot;monospace&amp;quot;, monospace; font-size: 14px; white-space: pre; color: rgb(0, 16, 128);&quot;&gt;c&lt;/span&gt;&lt;span style=&quot;background-color: rgb(255, 255, 255); color: rgb(59, 59, 59); font-family: &amp;quot;Droid Sans Mono&amp;quot;, &amp;quot;monospace&amp;quot;, monospace; font-size: 14px; white-space: pre;&quot;&gt;, &lt;/span&gt;&lt;span style=&quot;font-family: &amp;quot;Droid Sans Mono&amp;quot;, &amp;quot;monospace&amp;quot;, monospace; font-size: 14px; white-space: pre; color: rgb(0, 16, 128);&quot;&gt;post&lt;/span&gt;&lt;span style=&quot;background-color: rgb(255, 255, 255); color: rgb(121, 94, 38); font-family: &amp;quot;Droid Sans Mono&amp;quot;, &amp;quot;monospace&amp;quot;, monospace; font-size: 14px; text-align: left; white-space: pre;&quot;&gt;)&lt;/span&gt;" style="shape=process;whiteSpace=wrap;html=1;backgroundOutline=1;" vertex="1" parent="sb7a33DpKUGm08fc_Rfz-93">
+          <mxGeometry y="280" width="320" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="sb7a33DpKUGm08fc_Rfz-85" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="sb7a33DpKUGm08fc_Rfz-93" source="sb7a33DpKUGm08fc_Rfz-82" target="sb7a33DpKUGm08fc_Rfz-84">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="sb7a33DpKUGm08fc_Rfz-82" value="&lt;span style=&quot;color: rgb(121, 94, 38); font-family: &amp;quot;Droid Sans Mono&amp;quot;, &amp;quot;monospace&amp;quot;, monospace; font-size: 14px; text-align: left; white-space: pre; background-color: rgb(255, 255, 255);&quot;&gt;Srv()&lt;/span&gt;" style="shape=process;whiteSpace=wrap;html=1;backgroundOutline=1;" vertex="1" parent="sb7a33DpKUGm08fc_Rfz-93">
+          <mxGeometry y="40" width="320" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="sb7a33DpKUGm08fc_Rfz-87" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="sb7a33DpKUGm08fc_Rfz-93" source="sb7a33DpKUGm08fc_Rfz-84" target="sb7a33DpKUGm08fc_Rfz-86">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="sb7a33DpKUGm08fc_Rfz-84" value="&lt;span style=&quot;color: rgb(121, 94, 38); font-family: &amp;quot;Droid Sans Mono&amp;quot;, &amp;quot;monospace&amp;quot;, monospace; font-size: 14px; text-align: left; white-space: pre; background-color: rgb(255, 255, 255);&quot;&gt;Store()&lt;/span&gt;" style="shape=process;whiteSpace=wrap;html=1;backgroundOutline=1;" vertex="1" parent="sb7a33DpKUGm08fc_Rfz-93">
+          <mxGeometry y="119.23000000000002" width="320" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="sb7a33DpKUGm08fc_Rfz-86" value="&lt;span style=&quot;color: rgb(121, 94, 38); font-family: &amp;quot;Droid Sans Mono&amp;quot;, &amp;quot;monospace&amp;quot;, monospace; font-size: 14px; text-align: left; white-space: pre; background-color: rgb(255, 255, 255);&quot;&gt;Post()&lt;/span&gt;" style="shape=process;whiteSpace=wrap;html=1;backgroundOutline=1;" vertex="1" parent="sb7a33DpKUGm08fc_Rfz-93">
+          <mxGeometry y="199.61" width="320" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="sb7a33DpKUGm08fc_Rfz-90" value="&lt;span style=&quot;text-align: center; text-wrap: nowrap;&quot;&gt;server/channels/store/post.go&lt;/span&gt;" style="whiteSpace=wrap;html=1;fillStyle=dashed;fillColor=#dae8fc;strokeColor=#6c8ebf;verticalAlign=top;align=left;" vertex="1" parent="sb7a33DpKUGm08fc_Rfz-93">
+          <mxGeometry width="320" height="360" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

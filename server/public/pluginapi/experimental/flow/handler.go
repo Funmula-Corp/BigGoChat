@@ -10,8 +10,8 @@ import (
 
 	"github.com/pkg/errors"
 
-	"github.com/mattermost/mattermost/server/public/model"
-	"github.com/mattermost/mattermost/server/public/pluginapi/experimental/common"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/pluginapi/experimental/common"
 )
 
 func (f *Flow) handleButtonHTTP(w http.ResponseWriter, r *http.Request) {

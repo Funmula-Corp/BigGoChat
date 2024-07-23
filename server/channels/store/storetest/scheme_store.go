@@ -10,9 +10,9 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/mattermost/mattermost/server/public/model"
-	"github.com/mattermost/mattermost/server/public/shared/request"
-	"github.com/mattermost/mattermost/server/v8/channels/store"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
 )
 
 func TestSchemeStore(t *testing.T, rctx request.CTX, ss store.Store) {
@@ -38,8 +38,34 @@ func createDefaultRoles(ss store.Store) {
 	})
 
 	ss.Role().Save(&model.Role{
+		Name:        model.TeamModeratorRoleId,
+		DisplayName: model.TeamModeratorRoleId,
+		Permissions: []string{
+			model.PermissionDeleteOthersPosts.Id,
+		},
+	})
+
+	ss.Role().Save(&model.Role{
+		Name:        model.TeamVerifiedRoleId,
+		DisplayName: model.TeamVerifiedRoleId,
+		Permissions: []string{
+			model.PermissionViewTeam.Id,
+			model.PermissionAddUserToTeam.Id,
+		},
+	})
+
+	ss.Role().Save(&model.Role{
 		Name:        model.TeamUserRoleId,
 		DisplayName: model.TeamUserRoleId,
+		Permissions: []string{
+			model.PermissionViewTeam.Id,
+			model.PermissionAddUserToTeam.Id,
+		},
+	})
+
+	ss.Role().Save(&model.Role{
+		Name:        model.TeamVerifiedRoleId,
+		DisplayName: model.TeamVerifiedRoleId,
 		Permissions: []string{
 			model.PermissionViewTeam.Id,
 			model.PermissionAddUserToTeam.Id,
@@ -60,6 +86,16 @@ func createDefaultRoles(ss store.Store) {
 		Permissions: []string{
 			model.PermissionManagePublicChannelMembers.Id,
 			model.PermissionManagePrivateChannelMembers.Id,
+		},
+	})
+
+	ss.Role().Save(&model.Role{
+		Name:        model.ChannelVerifiedRoleId,
+		DisplayName: model.ChannelVerifiedRoleId,
+		Permissions: []string{
+			model.PermissionReadChannel.Id,
+			model.PermissionReadChannelContent.Id,
+			model.PermissionCreatePost.Id,
 		},
 	})
 
@@ -137,9 +173,12 @@ func testSchemeStoreSave(t *testing.T, rctx request.CTX, ss store.Store) {
 	assert.Zero(t, d1.DeleteAt)
 	assert.Equal(t, s1.Scope, d1.Scope)
 	assert.Len(t, d1.DefaultTeamAdminRole, 26)
+	assert.Len(t, d1.DefaultTeamModeratorRole, 26)
+	assert.Len(t, d1.DefaultTeamVerifiedRole, 26)
 	assert.Len(t, d1.DefaultTeamUserRole, 26)
 	assert.Len(t, d1.DefaultTeamGuestRole, 26)
 	assert.Len(t, d1.DefaultChannelAdminRole, 26)
+	assert.Len(t, d1.DefaultChannelVerifiedRole, 26)
 	assert.Len(t, d1.DefaultChannelUserRole, 26)
 	assert.Len(t, d1.DefaultChannelGuestRole, 26)
 
@@ -188,9 +227,12 @@ func testSchemeStoreSave(t *testing.T, rctx request.CTX, ss store.Store) {
 	assert.Zero(t, d2.DeleteAt)
 	assert.Equal(t, s1.Scope, d2.Scope)
 	assert.Equal(t, d1.DefaultTeamAdminRole, d2.DefaultTeamAdminRole)
+	assert.Equal(t, d1.DefaultTeamModeratorRole, d2.DefaultTeamModeratorRole)
+	assert.Equal(t, d1.DefaultTeamVerifiedRole, d2.DefaultTeamVerifiedRole)
 	assert.Equal(t, d1.DefaultTeamUserRole, d2.DefaultTeamUserRole)
 	assert.Equal(t, d1.DefaultTeamGuestRole, d2.DefaultTeamGuestRole)
 	assert.Equal(t, d1.DefaultChannelAdminRole, d2.DefaultChannelAdminRole)
+	assert.Equal(t, d1.DefaultChannelVerifiedRole, d2.DefaultChannelVerifiedRole)
 	assert.Equal(t, d1.DefaultChannelUserRole, d2.DefaultChannelUserRole)
 	assert.Equal(t, d1.DefaultChannelGuestRole, d2.DefaultChannelGuestRole)
 
@@ -232,6 +274,8 @@ func testSchemeStoreGet(t *testing.T, rctx request.CTX, ss store.Store) {
 	assert.Zero(t, d2.DeleteAt)
 	assert.Equal(t, s1.Scope, d2.Scope)
 	assert.Equal(t, d1.DefaultTeamAdminRole, d2.DefaultTeamAdminRole)
+	assert.Equal(t, d1.DefaultTeamModeratorRole, d2.DefaultTeamModeratorRole)
+	assert.Equal(t, d1.DefaultTeamVerifiedRole, d2.DefaultTeamVerifiedRole)
 	assert.Equal(t, d1.DefaultTeamUserRole, d2.DefaultTeamUserRole)
 	assert.Equal(t, d1.DefaultTeamGuestRole, d2.DefaultTeamGuestRole)
 	assert.Equal(t, d1.DefaultChannelAdminRole, d2.DefaultChannelAdminRole)
@@ -268,9 +312,12 @@ func testSchemeStoreGetByName(t *testing.T, rctx request.CTX, ss store.Store) {
 	assert.Zero(t, d2.DeleteAt)
 	assert.Equal(t, s1.Scope, d2.Scope)
 	assert.Equal(t, d1.DefaultTeamAdminRole, d2.DefaultTeamAdminRole)
+	assert.Equal(t, d1.DefaultTeamModeratorRole, d2.DefaultTeamModeratorRole)
+	assert.Equal(t, d1.DefaultTeamVerifiedRole, d2.DefaultTeamVerifiedRole)
 	assert.Equal(t, d1.DefaultTeamUserRole, d2.DefaultTeamUserRole)
 	assert.Equal(t, d1.DefaultTeamGuestRole, d2.DefaultTeamGuestRole)
 	assert.Equal(t, d1.DefaultChannelAdminRole, d2.DefaultChannelAdminRole)
+	assert.Equal(t, d1.DefaultChannelVerifiedRole, d2.DefaultChannelVerifiedRole)
 	assert.Equal(t, d1.DefaultChannelUserRole, d2.DefaultChannelUserRole)
 	assert.Equal(t, d1.DefaultChannelGuestRole, d2.DefaultChannelGuestRole)
 
@@ -365,9 +412,12 @@ func testSchemeStoreDelete(t *testing.T, rctx request.CTX, ss store.Store) {
 	assert.Zero(t, d1.DeleteAt)
 	assert.Equal(t, s1.Scope, d1.Scope)
 	assert.Len(t, d1.DefaultTeamAdminRole, 26)
+	assert.Len(t, d1.DefaultTeamModeratorRole, 26)
+	assert.Len(t, d1.DefaultTeamVerifiedRole, 26)
 	assert.Len(t, d1.DefaultTeamUserRole, 26)
 	assert.Len(t, d1.DefaultTeamGuestRole, 26)
 	assert.Len(t, d1.DefaultChannelAdminRole, 26)
+	assert.Len(t, d1.DefaultChannelVerifiedRole, 26)
 	assert.Len(t, d1.DefaultChannelUserRole, 26)
 	assert.Len(t, d1.DefaultChannelGuestRole, 26)
 

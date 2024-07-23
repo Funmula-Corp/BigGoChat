@@ -10,8 +10,8 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/mattermost/mattermost/server/public/model"
-	"github.com/mattermost/mattermost/server/public/shared/mlog"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
 )
 
 func init() {
@@ -6598,6 +6598,67 @@ func (s *apiRPCServer) UpdateUserRoles(args *Z_UpdateUserRolesArgs, returns *Z_U
 		returns.A, returns.B = hook.UpdateUserRoles(args.A, args.B)
 	} else {
 		return encodableError(fmt.Errorf("API UpdateUserRoles called but not implemented."))
+	}
+	return nil
+}
+
+type Z_BDPublishWebSocketEventArgs struct {
+	A model.WebsocketEventType
+	B string
+	C string
+	D string
+	E map[string]bool
+	F string
+	G map[string]any
+}
+
+type Z_BDPublishWebSocketEventReturns struct {
+}
+
+func (g *apiRPCClient) BDPublishWebSocketEvent(event model.WebsocketEventType, teamId string, channelId string, userId string, omitUsers map[string]bool, omitConnectionId string, data map[string]any) {
+	_args := &Z_BDPublishWebSocketEventArgs{event, teamId, channelId, userId, omitUsers, omitConnectionId, data}
+	_returns := &Z_BDPublishWebSocketEventReturns{}
+	if err := g.client.Call("Plugin.BDPublishWebSocketEvent", _args, _returns); err != nil {
+		log.Printf("RPC call to BDPublishWebSocketEvent API failed: %s", err.Error())
+	}
+
+}
+
+func (s *apiRPCServer) BDPublishWebSocketEvent(args *Z_BDPublishWebSocketEventArgs, returns *Z_BDPublishWebSocketEventReturns) error {
+	if hook, ok := s.impl.(interface {
+		BDPublishWebSocketEvent(event model.WebsocketEventType, teamId string, channelId string, userId string, omitUsers map[string]bool, omitConnectionId string, data map[string]any)
+	}); ok {
+		hook.BDPublishWebSocketEvent(args.A, args.B, args.C, args.D, args.E, args.F, args.G)
+	} else {
+		return encodableError(fmt.Errorf("API BDPublishWebSocketEvent called but not implemented."))
+	}
+	return nil
+}
+
+type Z_MarkUserVerifiedArgs struct {
+	A string
+}
+
+type Z_MarkUserVerifiedReturns struct {
+	A *model.AppError
+}
+
+func (g *apiRPCClient) MarkUserVerified(userId string) *model.AppError {
+	_args := &Z_MarkUserVerifiedArgs{userId}
+	_returns := &Z_MarkUserVerifiedReturns{}
+	if err := g.client.Call("Plugin.MarkUserVerified", _args, _returns); err != nil {
+		log.Printf("RPC call to MarkUserVerified API failed: %s", err.Error())
+	}
+	return _returns.A
+}
+
+func (s *apiRPCServer) MarkUserVerified(args *Z_MarkUserVerifiedArgs, returns *Z_MarkUserVerifiedReturns) error {
+	if hook, ok := s.impl.(interface {
+		MarkUserVerified(userId string) *model.AppError
+	}); ok {
+		returns.A = hook.MarkUserVerified(args.A)
+	} else {
+		return encodableError(fmt.Errorf("API MarkUserVerified called but not implemented."))
 	}
 	return nil
 }

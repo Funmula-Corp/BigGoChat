@@ -13,11 +13,11 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/mattermost/mattermost/server/public/model"
-	"github.com/mattermost/mattermost/server/v8/channels/utils"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/utils"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 
-	"github.com/mattermost/mattermost/server/v8/cmd/mmctl/client"
-	"github.com/mattermost/mattermost/server/v8/cmd/mmctl/printer"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/cmd/mmctl/client"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/cmd/mmctl/printer"
 
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"

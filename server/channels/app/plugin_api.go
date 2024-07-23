@@ -15,10 +15,10 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/mattermost/mattermost/server/public/model"
-	"github.com/mattermost/mattermost/server/public/shared/i18n"
-	"github.com/mattermost/mattermost/server/public/shared/mlog"
-	"github.com/mattermost/mattermost/server/public/shared/request"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/i18n"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
 )
 
 type PluginAPI struct {
@@ -427,6 +427,10 @@ func (api *PluginAPI) GetLDAPUserAttributes(userID string, attributes []string) 
 	}
 
 	return map[string]string{}, nil
+}
+
+func (api *PluginAPI) MarkUserVerified (userID string) *model.AppError {
+	return api.app.MarkUserVerified(api.ctx, userID)
 }
 
 func (api *PluginAPI) CreateChannel(channel *model.Channel) (*model.Channel, *model.AppError) {
@@ -1338,4 +1342,12 @@ func (api *PluginAPI) InviteRemoteToChannel(channelID string, remoteID, userID s
 
 func (api *PluginAPI) UninviteRemoteFromChannel(channelID string, remoteID string) error {
 	return api.app.UninviteRemoteFromChannel(channelID, remoteID)
+}
+
+func (api *PluginAPI) BDPublishWebSocketEvent(event model.WebsocketEventType, teamId string, channelId string, userId string, omitUsers map[string]bool, omitConnectionId string, data map[string]any) {
+	evt := model.NewWebSocketEvent(event, teamId, channelId, userId, omitUsers, omitConnectionId)
+	for key, value := range data {
+		evt.Add(key, value)
+	}
+	api.app.Publish(evt)
 }

@@ -17,10 +17,10 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/mattermost/mattermost/server/public/model"
-	"github.com/mattermost/mattermost/server/v8/channels/api4"
-	"github.com/mattermost/mattermost/server/v8/channels/store/storetest/mocks"
-	"github.com/mattermost/mattermost/server/v8/channels/testlib"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/api4"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store/storetest/mocks"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/testlib"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 )
 
 var coverprofileCounters = make(map[string]int)

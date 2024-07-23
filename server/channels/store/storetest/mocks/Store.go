@@ -7,14 +7,14 @@ package mocks
 import (
 	context "context"
 
-	mlog "github.com/mattermost/mattermost/server/public/shared/mlog"
+	mlog "git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
 	mock "github.com/stretchr/testify/mock"
 
-	model "github.com/mattermost/mattermost/server/public/model"
+	model "git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 
 	sql "database/sql"
 
-	store "github.com/mattermost/mattermost/server/v8/channels/store"
+	store "git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
 
 	time "time"
 )
@@ -38,6 +38,26 @@ func (_m *Store) Audit() store.AuditStore {
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(store.AuditStore)
+		}
+	}
+
+	return r0
+}
+
+// Blocklist provides a mock function with given fields:
+func (_m *Store) Blocklist() store.BlocklistStore {
+	ret := _m.Called()
+
+	if len(ret) == 0 {
+		panic("no return value specified for Blocklist")
+	}
+
+	var r0 store.BlocklistStore
+	if rf, ok := ret.Get(0).(func() store.BlocklistStore); ok {
+		r0 = rf()
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(store.BlocklistStore)
 		}
 	}
 

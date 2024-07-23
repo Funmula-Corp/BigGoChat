@@ -128,6 +128,10 @@ func (fi *FileInfo) IsSvg() bool {
 	return fi.MimeType == "image/svg+xml"
 }
 
+func (fi *FileInfo) IsWebP() bool {
+	return fi.MimeType == "image/webp"
+}
+
 func NewInfo(name string) *FileInfo {
 	info := &FileInfo{
 		Name: name,

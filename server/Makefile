@@ -1,4 +1,4 @@
-.PHONY: build package run stop run-client run-server run-haserver stop-haserver stop-client stop-server restart restart-server restart-client restart-haserver start-docker update-docker clean-dist clean nuke check-style check-client-style check-server-style check-unit-tests test dist run-client-tests setup-run-client-tests cleanup-run-client-tests test-client build-linux build-osx build-windows package-prep package-linux package-osx package-windows internal-test-web-client vet run-server-for-web-client-tests diff-config prepackaged-plugins prepackaged-binaries test-server test-server-ee test-server-quick test-server-race test-mmctl-unit test-mmctl-e2e test-mmctl test-mmctl-coverage mmctl-build mmctl-docs new-migration migrations-extract test-public mocks-public
+.PHONY: build install-msgp package run stop run-client run-server run-haserver stop-haserver stop-client stop-server restart restart-server restart-client restart-haserver start-docker update-docker clean-dist clean nuke check-style check-client-style check-server-style check-unit-tests test dist run-client-tests setup-run-client-tests cleanup-run-client-tests test-client build-linux build-osx build-windows package-prep package-linux package-osx package-windows internal-test-web-client vet run-server-for-web-client-tests diff-config prepackaged-plugins prepackaged-binaries test-server test-server-ee test-server-quick test-server-race test-mmctl-unit test-mmctl-e2e test-mmctl test-mmctl-coverage mmctl-build mmctl-docs new-migration migrations-extract test-public mocks-public
 
 ROOT := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 
@@ -56,33 +56,15 @@ GOTESTSUM_JSONFILE ?= gotestsum.json
 # mmctl
 MMCTL_BUILD_TAGS =
 MMCTL_TESTFLAGS ?= -timeout 30m
-MMCTL_PKG = github.com/mattermost/mattermost/server/v8/cmd/mmctl/commands
+MMCTL_PKG = git.biggo.com/Funmula/mattermost-funmula/server/v8/cmd/mmctl/commands
 MMCTL_BUILD_DATE = $(shell date -u +'%Y-%m-%dT%H:%M:%SZ')
 MMCTL_LDFLAGS += -X "$(MMCTL_PKG).buildDate=$(MMCTL_BUILD_DATE)"
 
 # Enterprise
 BUILD_ENTERPRISE_DIR ?= ../../enterprise
 BUILD_ENTERPRISE ?= true
-BUILD_ENTERPRISE_READY = false
+BUILD_ENTERPRISE_READY ?= true
 BUILD_TYPE_NAME = team
-BUILD_HASH_ENTERPRISE = none
-ifneq ($(wildcard $(BUILD_ENTERPRISE_DIR)/.),)
-	MMCTL_TESTFLAGS += -ldflags '-X "$(MMCTL_PKG).EnableEnterpriseTests=true" -X "github.com/mattermost/mattermost/server/public/model.BuildEnterpriseReady=true"'
-	MMCTL_BUILD_TAGS += enterprise
-
-  ifeq ($(BUILD_ENTERPRISE),true)
-	BUILD_ENTERPRISE_READY = true
-	BUILD_TYPE_NAME = enterprise
-	BUILD_HASH_ENTERPRISE = $(shell cd $(BUILD_ENTERPRISE_DIR) && git rev-parse HEAD)
-	BUILD_TAGS += enterprise
-  else
-	BUILD_ENTERPRISE_READY = false
-	BUILD_TYPE_NAME = team
-  endif
-else
-	BUILD_ENTERPRISE_READY = false
-	BUILD_TYPE_NAME = team
-endif
 
 # Clean up the old means of importing enterprise source, if it exists
 ifneq ($(wildcard channels/imports/imports.go),)
@@ -113,11 +95,11 @@ GOFLAGS ?= $(GOFLAGS:)
 export GOBIN ?= $(PWD)/bin
 GO ?= go
 DELVE ?= dlv
-LDFLAGS += -X "github.com/mattermost/mattermost/server/public/model.BuildNumber=$(BUILD_NUMBER)"
-LDFLAGS += -X "github.com/mattermost/mattermost/server/public/model.BuildDate=$(BUILD_DATE)"
-LDFLAGS += -X "github.com/mattermost/mattermost/server/public/model.BuildHash=$(BUILD_HASH)"
-LDFLAGS += -X "github.com/mattermost/mattermost/server/public/model.BuildHashEnterprise=$(BUILD_HASH_ENTERPRISE)"
-LDFLAGS += -X "github.com/mattermost/mattermost/server/public/model.BuildEnterpriseReady=$(BUILD_ENTERPRISE_READY)"
+LDFLAGS += -X "git.biggo.com/Funmula/mattermost-funmula/server/public/model.BuildNumber=$(BUILD_NUMBER)"
+LDFLAGS += -X "git.biggo.com/Funmula/mattermost-funmula/server/public/model.BuildDate=$(BUILD_DATE)"
+LDFLAGS += -X "git.biggo.com/Funmula/mattermost-funmula/server/public/model.BuildHash=$(BUILD_HASH)"
+LDFLAGS += -X "git.biggo.com/Funmula/mattermost-funmula/server/public/model.BuildHashEnterprise=$(BUILD_HASH)"
+LDFLAGS += -X "git.biggo.com/Funmula/mattermost-funmula/server/public/model.BuildEnterpriseReady=$(BUILD_ENTERPRISE_READY)"
 
 GO_MAJOR_VERSION = $(shell $(GO) version | cut -c 14- | cut -d' ' -f1 | cut -d'.' -f1)
 GO_MINOR_VERSION = $(shell $(GO) version | cut -c 14- | cut -d' ' -f1 | cut -d'.' -f2)
@@ -156,15 +138,11 @@ PLUGIN_PACKAGES += mattermost-plugin-nps-v1.3.3
 PLUGIN_PACKAGES += mattermost-plugin-servicenow-v2.3.4
 PLUGIN_PACKAGES += mattermost-plugin-zoom-v1.8.0
 PLUGIN_PACKAGES += mattermost-plugin-ai-v0.6.3
+PLUGIN_PACKAGES += mattermost-plugin-jitsi-v2.0.1
 PLUGIN_PACKAGES += focalboard-v8.0.0
 
-EE_PACKAGES=$(shell $(GO) list $(BUILD_ENTERPRISE_DIR)/...)
 
-ifeq ($(BUILD_ENTERPRISE_READY),true)
-  ALL_PACKAGES=$(TE_PACKAGES) $(EE_PACKAGES)
-else
-  ALL_PACKAGES=$(TE_PACKAGES)
-endif
+ALL_PACKAGES=$(TE_PACKAGES)
 
 all: run ## Alias for 'run'.
 
@@ -181,8 +159,8 @@ include config.mk
 include build/*.mk
 include public/Makefile
 
-LDFLAGS += -X "github.com/mattermost/mattermost/server/public/model.MockCWS=$(MM_ENABLE_CWS_MOCK)"
-LDFLAGS += -X "github.com/mattermost/mattermost/server/public/model.MattermostGiphySdkKey=$(MM_GIPHY_SDK_KEY)"
+LDFLAGS += -X "git.biggo.com/Funmula/mattermost-funmula/server/public/model.MockCWS=$(MM_ENABLE_CWS_MOCK)"
+LDFLAGS += -X "git.biggo.com/Funmula/mattermost-funmula/server/public/model.MattermostGiphySdkKey=$(MM_GIPHY_SDK_KEY)"
 
 RUN_IN_BACKGROUND ?=
 ifeq ($(RUN_SERVER_IN_BACKGROUND),true)
@@ -214,6 +192,7 @@ ifneq ($(DOCKER_SERVICES_OVERRIDE),true)
   ENABLED_DOCKER_SERVICES:=$(ENABLED_DOCKER_SERVICES) $(TEMP_DOCKER_SERVICES)
 endif
 
+MC_HOST="http://minioaccesskey:miniosecretkey@minio:9000"
 start-docker: ## Starts the docker containers for local development.
 ifneq ($(IS_CI),false)
 	@echo CI Build: skipping docker start
@@ -230,6 +209,7 @@ else
   ifneq (,$(findstring mysql-read-replica,$(ENABLED_DOCKER_SERVICES)))
 	./scripts/replica-mysql-config.sh
   endif
+	docker run --network mattermost-server_mm-test -e MC_HOST_A=$(MC_HOST) minio/mc mb A/mattermost-test || true
 endif
 
 update-docker: stop-docker ## Updates the docker containers for local development.
@@ -371,7 +351,7 @@ platform-mocks: ## Creates mocks for platform interfaces.
 
 mmctl-mocks: ## Creates mocks for mmctl
 	$(GO) install github.com/golang/mock/mockgen@v1.6.0
-	$(GOBIN)/mockgen -destination=cmd/mmctl/mocks/client_mock.go -copyright_file=cmd/mmctl/mocks/copyright.txt -package=mocks github.com/mattermost/mattermost/server/v8/cmd/mmctl/client Client
+	$(GOBIN)/mockgen -destination=cmd/mmctl/mocks/client_mock.go -copyright_file=cmd/mmctl/mocks/copyright.txt -package=mocks git.biggo.com/Funmula/mattermost-funmula/server/v8/cmd/mmctl/client Client
 
 pluginapi: ## Generates api and hooks glue code for plugins
 	cd ./public && $(GO) generate $(GOFLAGS) ./plugin
@@ -380,12 +360,8 @@ mocks: store-mocks telemetry-mocks filestore-mocks ldap-mocks plugin-mocks einte
 
 layers: app-layers store-layers pluginapi
 
-generated: mocks layers
+generated: mocks layers gen-serialized
 
-check-prereqs-enterprise: setup-go-work ## Checks prerequisite software status for enterprise.
-ifeq ($(BUILD_ENTERPRISE_READY),true)
-	./scripts/prereq-check-enterprise.sh
-endif
 
 setup-go-work: export BUILD_ENTERPRISE_READY := $(BUILD_ENTERPRISE_READY)
 setup-go-work: ## Sets up your go.work file
@@ -395,9 +371,6 @@ ifneq ($(IGNORE_GO_WORK_IF_EXISTS),true)
 	$(GO) work init
 	$(GO) work use .
 	$(GO) work use ./public
-ifeq ($(BUILD_ENTERPRISE_READY),true)
-	$(GO) work use ../../enterprise
-endif
 endif
 
 check-style: plugin-checker vet golangci-lint ## Runs style/lint checks
@@ -409,7 +382,7 @@ gotestsum:
 test-compile: gotestsum ## Compile tests.
 	@echo COMPILE TESTS
 
-	for package in $(TE_PACKAGES) $(EE_PACKAGES); do \
+	for package in $(TE_PACKAGES); do \
 		$(GO) test $(GOFLAGS) -c $$package; \
 	done
 
@@ -419,7 +392,7 @@ modules-tidy:
 	-cd public && $(GO) mod tidy
 	mv enterprise/external_imports.go.orig enterprise/external_imports.go
 
-test-server-pre: check-prereqs-enterprise start-docker gotestsum ## Runs tests.
+test-server-pre: gen-serialized start-docker gotestsum ## Runs tests.
 ifeq ($(BUILD_ENTERPRISE_READY),true)
 	@echo Running all tests
 else
@@ -432,9 +405,9 @@ test-server-race: export GOTESTSUM_JUNITFILE := $(GOTESTSUM_JUNITFILE)
 test-server-race: export GOTESTSUM_JSONFILE := $(GOTESTSUM_JSONFILE)
 test-server-race: test-server-pre
 ifeq ($(IS_CI),true)
-	GOMAXPROCS=4 $(GOBIN)/gotestsum --rerun-fails=3 --packages="$(TE_PACKAGES) $(EE_PACKAGES)" -- -race $(GOFLAGS) -timeout=90m
+	GOMAXPROCS=4 $(GOBIN)/gotestsum --rerun-fails=3 --packages="$(TE_PACKAGES)" -- -race $(GOFLAGS) -timeout=90m
 else
-	$(GOBIN)/gotestsum --rerun-fails=3 --packages="$(TE_PACKAGES) $(EE_PACKAGES)" -- -race $(GOFLAGS) -timeout=90m
+	$(GOBIN)/gotestsum --rerun-fails=3 --packages="$(TE_PACKAGES)" -- -race $(GOFLAGS) -timeout=90m
 endif
 ifneq ($(IS_CI),true)
   ifneq ($(MM_NO_DOCKER),true)
@@ -450,7 +423,7 @@ test-server: export GOTESTSUM_FORMAT := $(GOTESTSUM_FORMAT)
 test-server: export GOTESTSUM_JUNITFILE := $(GOTESTSUM_JUNITFILE)
 test-server: export GOTESTSUM_JSONFILE := $(GOTESTSUM_JSONFILE)
 test-server: test-server-pre
-	$(GOBIN)/gotestsum --rerun-fails=3 --packages="$(TE_PACKAGES) $(EE_PACKAGES)" -- $(GOFLAGS)-timeout=90m
+	$(GOBIN)/gotestsum --rerun-fails=3 --packages="$(TE_PACKAGES)" -- $(GOFLAGS)-timeout=90m
 ifneq ($(IS_CI),true)
   ifneq ($(MM_NO_DOCKER),true)
     ifneq ($(TEMP_DOCKER_SERVICES),)
@@ -460,26 +433,13 @@ ifneq ($(IS_CI),true)
   endif
 endif
 
-test-server-ee: export MM_SERVER_PATH := $(MM_SERVER_PATH)
-test-server-ee: export GOTESTSUM_FORMAT := $(GOTESTSUM_FORMAT)
-test-server-ee: export GOTESTSUM_JUNITFILE := $(GOTESTSUM_JUNITFILE)
-test-server-ee: export GOTESTSUM_JSONFILE := $(GOTESTSUM_JSONFILE)
-test-server-ee: check-prereqs-enterprise start-docker gotestsum ## Runs EE tests.
-	@echo Running only EE tests
-	$(GOBIN)/gotestsum --packages="$(EE_PACKAGES)" -- $(GOFLAGS) -timeout=20m
-
 test-server-quick: export MM_SERVER_PATH := $(MM_SERVER_PATH)
 test-server-quick: export GOTESTSUM_FORMAT := $(GOTESTSUM_FORMAT)
 test-server-quick: export GOTESTSUM_JUNITFILE := $(GOTESTSUM_JUNITFILE)
 test-server-quick: export GOTESTSUM_JSONFILE := $(GOTESTSUM_JSONFILE)
-test-server-quick: check-prereqs-enterprise ## Runs only quick tests.
-ifeq ($(BUILD_ENTERPRISE_READY),true)
-	@echo Running all tests
-	$(GOBIN)/gotestsum --packages="$(TE_PACKAGES) $(EE_PACKAGES)" -- $(GOFLAGS) -short
-else
+test-server-quick: generated
 	@echo Running only TE tests
 	$(GOBIN)/gotestsum --packages="$(TE_PACKAGES)" -- $(GOFLAGS) -short
-endif
 
 internal-test-web-client: ## Runs web client tests.
 	$(GO) run $(GOFLAGS) $(PLATFORM_FILES) test web_client_tests
@@ -487,7 +447,7 @@ internal-test-web-client: ## Runs web client tests.
 run-server-for-web-client-tests: ## Tests the server for web client.
 	$(GO) run $(GOFLAGS) $(PLATFORM_FILES) test web_client_tests_server
 
-test-client: ## Test client app.
+test-client: generated ## Test client app.
 	@echo Running client tests
 
 	cd $(BUILD_WEBAPP_DIR) && $(MAKE) test
@@ -501,7 +461,7 @@ cover: ## Runs the golang coverage tool. You must run the unit tests first.
 	$(GO) tool cover -html=ecover.out
 
 test-data: export MM_SERVICESETTINGS_ENABLELOCALMODE := true
-test-data: run-server inject-test-data stop-server ## start a local instance and add test data to it.
+test-data: generated run-server inject-test-data stop-server ## start a local instance and add test data to it.
 
 inject-test-data: # add test data to the local instance.
 	@if ! ./scripts/wait-for-system-start.sh; then \
@@ -521,7 +481,7 @@ test-mmctl-unit: export MM_SERVER_PATH := $(MM_SERVER_PATH)
 test-mmctl-unit: export GOTESTSUM_FORMAT := $(GOTESTSUM_FORMAT)
 test-mmctl-unit: export GOTESTSUM_JUNITFILE := $(GOTESTSUM_JUNITFILE)
 test-mmctl-unit: export GOTESTSUM_JSONFILE := $(GOTESTSUM_JSONFILE)
-test-mmctl-unit: gotestsum
+test-mmctl-unit: gotestsum generated
 	@echo Running mmctl unit tests
 	$(GOBIN)/gotestsum --packages="$(MMCTL_PACKAGES)" -- -tags 'unit $(MMCTL_BUILD_TAGS)' $(MMCTL_TESTFLAGS)
 
@@ -529,7 +489,7 @@ test-mmctl-e2e: export MM_SERVER_PATH := $(MM_SERVER_PATH)
 test-mmctl-e2e: export GOTESTSUM_FORMAT := $(GOTESTSUM_FORMAT)
 test-mmctl-e2e: export GOTESTSUM_JUNITFILE := $(GOTESTSUM_JUNITFILE)
 test-mmctl-e2e: export GOTESTSUM_JSONFILE := $(GOTESTSUM_JSONFILE)
-test-mmctl-e2e: gotestsum start-docker
+test-mmctl-e2e: gotestsum start-docker generated
 	@echo Running mmctl e2e tests
 	$(GOBIN)/gotestsum --packages="$(MMCTL_PACKAGES)" -- -tags 'e2e $(MMCTL_BUILD_TAGS)' $(MMCTL_TESTFLAGS)
 
@@ -537,7 +497,7 @@ test-mmctl: export MM_SERVER_PATH := $(MM_SERVER_PATH)
 test-mmctl: export GOTESTSUM_FORMAT := $(GOTESTSUM_FORMAT)
 test-mmctl: export GOTESTSUM_JUNITFILE := $(GOTESTSUM_JUNITFILE)
 test-mmctl: export GOTESTSUM_JSONFILE := $(GOTESTSUM_JSONFILE)
-test-mmctl: gotestsum start-docker
+test-mmctl: gotestsum start-docker generated
 	@echo Running all mmctl tests
 	$(GOBIN)/gotestsum --packages="$(MMCTL_PACKAGES)" -- -tags 'unit e2e $(MMCTL_BUILD_TAGS)' $(MMCTL_TESTFLAGS)
 
@@ -545,12 +505,12 @@ test-mmctl-coverage: export MM_SERVER_PATH := $(MM_SERVER_PATH)
 test-mmctl-coverage: export GOTESTSUM_FORMAT := $(GOTESTSUM_FORMAT)
 test-mmctl-coverage: export GOTESTSUM_JUNITFILE := $(GOTESTSUM_JUNITFILE)
 test-mmctl-coverage: export GOTESTSUM_JSONFILE := $(GOTESTSUM_JSONFILE)
-test-mmctl-coverage: gotestsum start-docker
+test-mmctl-coverage: gotestsum start-docker generated
 	@echo Running all mmctl tests with coverage
 	$(GOBIN)/gotestsum --packages="$(MMCTL_PACKAGES)" -- -tags 'unit e2e $(MMCTL_BUILD_TAGS)' -coverprofile=mmctlcover.out $(MMCTL_TESTFLAGS)
 	$(GO) tool cover -html=mmctlcover.out
 
-validate-go-version: ## Validates the installed version of go against Mattermost's minimum requirement.
+validate-go-version: gen-serialized ## Validates the installed version of go against Mattermost's minimum requirement.
 	@if [ $(GO_MAJOR_VERSION) -gt $(MINIMUM_SUPPORTED_GO_MAJOR_VERSION) ]; then \
 		exit 0 ;\
 	elif [ $(GO_MAJOR_VERSION) -lt $(MINIMUM_SUPPORTED_GO_MAJOR_VERSION) ]; then \
@@ -573,21 +533,21 @@ run-server: setup-go-work prepackaged-binaries validate-go-version start-docker 
 debug-server: start-docker ## Compile and start server using delve.
 	mkdir -p $(BUILD_WEBAPP_DIR)/channels/dist/files
 	$(DELVE) debug $(PLATFORM_FILES) --build-flags="-ldflags '\
-		-X github.com/mattermost/mattermost/server/public/model.BuildNumber=$(BUILD_NUMBER)\
-		-X \"github.com/mattermost/mattermost/server/public/model.BuildDate=$(BUILD_DATE)\"\
-		-X github.com/mattermost/mattermost/server/public/model.BuildHash=$(BUILD_HASH)\
-		-X github.com/mattermost/mattermost/server/public/model.BuildHashEnterprise=$(BUILD_HASH_ENTERPRISE)\
-		-X github.com/mattermost/mattermost/server/public/model.BuildEnterpriseReady=$(BUILD_ENTERPRISE_READY)'\
+		-X git.biggo.com/Funmula/mattermost-funmula/server/public/model.BuildNumber=$(BUILD_NUMBER)\
+		-X \"git.biggo.com/Funmula/mattermost-funmula/server/public/model.BuildDate=$(BUILD_DATE)\"\
+		-X git.biggo.com/Funmula/mattermost-funmula/server/public/model.BuildHash=$(BUILD_HASH)\
+		-X git.biggo.com/Funmula/mattermost-funmula/server/public/model.BuildHashEnterprise=$(BUILD_HASH)\
+		-X git.biggo.com/Funmula/mattermost-funmula/server/public/model.BuildEnterpriseReady=$(BUILD_ENTERPRISE_READY)'\
 		-tags '$(BUILD_TAGS)'"
 
 debug-server-headless: start-docker ## Debug server from within an IDE like VSCode or IntelliJ.
 	mkdir -p $(BUILD_WEBAPP_DIR)/channels/dist/files
 	$(DELVE) debug --headless --listen=:2345 --api-version=2 --accept-multiclient $(PLATFORM_FILES) --build-flags="-ldflags '\
-		-X github.com/mattermost/mattermost/server/public/model.BuildNumber=$(BUILD_NUMBER)\
-		-X \"github.com/mattermost/mattermost/server/public/model.BuildDate=$(BUILD_DATE)\"\
-		-X github.com/mattermost/mattermost/server/public/model.BuildHash=$(BUILD_HASH)\
-		-X github.com/mattermost/mattermost/server/public/model.BuildHashEnterprise=$(BUILD_HASH_ENTERPRISE)\
-		-X github.com/mattermost/mattermost/server/public/model.BuildEnterpriseReady=$(BUILD_ENTERPRISE_READY)'\
+		-X git.biggo.com/Funmula/mattermost-funmula/server/public/model.BuildNumber=$(BUILD_NUMBER)\
+		-X \"git.biggo.com/Funmula/mattermost-funmula/server/public/model.BuildDate=$(BUILD_DATE)\"\
+		-X git.biggo.com/Funmula/mattermost-funmula/server/public/model.BuildHash=$(BUILD_HASH)\
+		-X git.biggo.com/Funmula/mattermost-funmula/server/public/model.BuildHashEnterprise=$(BUILD_HASH)\
+		-X git.biggo.com/Funmula/mattermost-funmula/server/public/model.BuildEnterpriseReady=$(BUILD_ENTERPRISE_READY)'\
 		-tags '$(BUILD_TAGS)'"
 
 run-cli: start-docker ## Runs CLI.
@@ -766,8 +726,19 @@ vet-api: ## Run mattermost go vet to verify api4 documentation, currently not pa
 	make -C ../api build
 	./scripts/vet-api-check.sh
 
+SERIAL_GEN=public/model/session_serial_gen.go public/model/user_serial_gen.go public/model/team_member_serial_gen.go
+public/model/%_serial_gen.go: public/model/%.go
+	$(GOBIN)/msgp -file=$< -tests=false -o=$@
+	@echo "$$LICENSE_HEADER" > tmp.go
+	@cat $@ >> tmp.go
+	@mv tmp.go $@
+
+install-msgp:
+	$(GO) install github.com/tinylib/msgp@v1.1.6
+
 gen-serialized:	export LICENSE_HEADER:=$(LICENSE_HEADER)
-gen-serialized: ## Generates serialization methods for hot structs
+gen-serialized:	install-msgp
+gen-serialized: $(SERIAL_GEN)## Generates serialization methods for hot structs
 	# This tool only works at a file level, not at a package level.
 	# There will be some warnings about "unresolved identifiers",
 	# but that is because of the above problem. Since we are generating
@@ -775,19 +746,6 @@ gen-serialized: ## Generates serialization methods for hot structs
 	# identifiers will be resolved. An alternative to remove the warnings
 	# would be to temporarily move all the structs to the same file,
 	# but that involves a lot of manual work.
-	$(GO) install github.com/tinylib/msgp@v1.1.6
-	$(GOBIN)/msgp -file=./public/model/session.go -tests=false -o=./public/model/session_serial_gen.go
-	@echo "$$LICENSE_HEADER" > tmp.go
-	@cat ./public/model/session_serial_gen.go >> tmp.go
-	@mv tmp.go ./public/model/session_serial_gen.go
-	$(GOBIN)/msgp -file=./public/model/user.go -tests=false -o=./public/model/user_serial_gen.go
-	@echo "$$LICENSE_HEADER" > tmp.go
-	@cat ./public/model/user_serial_gen.go >> tmp.go
-	@mv tmp.go ./public/model/user_serial_gen.go
-	$(GOBIN)/msgp -file=./public/model/team_member.go -tests=false -o=./public/model/team_member_serial_gen.go
-	@echo "$$LICENSE_HEADER" > tmp.go
-	@cat ./public/model/team_member_serial_gen.go >> tmp.go
-	@mv tmp.go ./public/model/team_member_serial_gen.go
 
 todo: ## Display TODO and FIXME items in the source code.
 	@! ag --ignore Makefile --ignore-dir runtime '(TODO|XXX|FIXME|"FIX ME")[: ]+'
@@ -842,3 +800,11 @@ test-migration:
 	# for now we exclude plugins such as playbooks and focalboard
 	# we also exlude systems table temporarily due to adding some keys while running the initial migration
 	bin/dbcmp --source "${MYSQL_DSN}" --target "${POSTGRES_DSN}" --exclude="db_migrations","ir_","focalboard","systems"
+
+# to test specific module.
+# test-it: export MM_SERVER_PATH := $(MM_SERVER_PATH)
+# test-it: export GOTESTSUM_FORMAT := $(GOTESTSUM_FORMAT)
+# test-it: export GOTESTSUM_JUNITFILE := $(GOTESTSUM_JUNITFILE)
+# test-it: export GOTESTSUM_JSONFILE := $(GOTESTSUM_JSONFILE)
+# test-it: test-server-pre
+# 	$(GOBIN)/gotestsum  --rerun-fails=0 --packages="git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/api4" -- $(GOFLAGS)-timeout=90m -run TestCreateBot/create_bot_with_permissions

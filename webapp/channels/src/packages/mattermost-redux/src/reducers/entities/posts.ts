@@ -196,6 +196,10 @@ export function handlePosts(state: IDMappedObjects<Post> = {}, action: AnyAction
                 state: Posts.POST_DELETED,
                 file_ids: [],
                 has_reactions: false,
+                props: {
+                    ...state[post.id].props,
+                    deleteBy: action.data.props.deleteBy,
+                }
             },
         };
 
@@ -349,14 +353,12 @@ function handlePostReceived(nextState: any, post: Post, nestedPermalinkLevel?: n
 
     if (post.delete_at > 0) {
         // We've received a deleted post, so mark the post as deleted if we already have it
-        if (currentState[post.id]) {
-            currentState[post.id] = {
-                ...removeUnneededMetadata(post),
-                state: Posts.POST_DELETED,
-                file_ids: [],
-                has_reactions: false,
-            };
-        }
+        currentState[post.id] = {
+            ...removeUnneededMetadata(post),
+            state: Posts.POST_DELETED,
+            file_ids: [],
+            has_reactions: false,
+        };
     } else if (post.metadata && post.metadata.embeds) {
         post.metadata.embeds.forEach((embed) => {
             if (embed.type === 'permalink') {
@@ -577,8 +579,9 @@ export function postsInChannel(state: Record<string, PostOrderBlock[]> = {}, act
 
         nextRecentBlock.order[index] = post.id;
 
-        const nextPostsForChannel = [...postsForChannel];
+        let nextPostsForChannel = [...postsForChannel];
         nextPostsForChannel[recentBlockIndex] = nextRecentBlock;
+        nextPostsForChannel = removeDeleteBySelfPostBlocks(nextPostsForChannel, nextPosts)
 
         return {
             ...state,
@@ -683,7 +686,6 @@ export function postsInChannel(state: Record<string, PostOrderBlock[]> = {}, act
 
         let nextPostsForChannel = [...postsForChannel, newBlock];
         nextPostsForChannel = mergePostBlocks(nextPostsForChannel, nextPosts);
-
         return {
             ...state,
             [action.channelId]: nextPostsForChannel,
@@ -747,8 +749,9 @@ export function postsInChannel(state: Record<string, PostOrderBlock[]> = {}, act
             return comparePosts(nextPosts[a], nextPosts[b]);
         });
 
-        const nextPostsForChannel = [...postsForChannel];
+        let nextPostsForChannel = [...postsForChannel];
         nextPostsForChannel[recentBlockIndex] = nextRecentBlock;
+        nextPostsForChannel = removeDeleteBySelfPostBlocks(nextPostsForChannel, nextPosts);
 
         return {
             ...state,
@@ -766,8 +769,6 @@ export function postsInChannel(state: Record<string, PostOrderBlock[]> = {}, act
             return state;
         }
 
-        let changed = false;
-
         let nextPostsForChannel = [...postsForChannel];
         for (let i = 0; i < nextPostsForChannel.length; i++) {
             const block = nextPostsForChannel[i];
@@ -780,16 +781,10 @@ export function postsInChannel(state: Record<string, PostOrderBlock[]> = {}, act
                     ...block,
                     order: nextOrder,
                 };
-
-                changed = true;
             }
         }
 
-        if (!changed) {
-            // Nothing was removed
-            return state;
-        }
-
+        nextPostsForChannel = removeDeleteBySelfPostBlocks(nextPostsForChannel, nextPosts);
         nextPostsForChannel = removeNonRecentEmptyPostBlocks(nextPostsForChannel);
 
         return {
@@ -808,8 +803,6 @@ export function postsInChannel(state: Record<string, PostOrderBlock[]> = {}, act
             return state;
         }
 
-        let changed = false;
-
         // Remove the post and its comments from the channel
         let nextPostsForChannel = [...postsForChannel];
         for (let i = 0; i < nextPostsForChannel.length; i++) {
@@ -822,16 +815,10 @@ export function postsInChannel(state: Record<string, PostOrderBlock[]> = {}, act
                     ...block,
                     order: nextOrder,
                 };
-
-                changed = true;
             }
         }
 
-        if (!changed) {
-            // Nothing was removed
-            return state;
-        }
-
+        nextPostsForChannel = removeDeleteBySelfPostBlocks(nextPostsForChannel, nextPosts);
         nextPostsForChannel = removeNonRecentEmptyPostBlocks(nextPostsForChannel);
 
         return {
@@ -873,11 +860,40 @@ export function removeNonRecentEmptyPostBlocks(blocks: PostOrderBlock[]) {
     return blocks.filter((block: PostOrderBlock) => block.order.length !== 0 || block.recent);
 }
 
+export function isNotDeleteBySelf(post: Post) {
+    return !!post.props.deleteBy && post.props.deleteBy !== post.user_id;
+}
+
+export function shouldShowPost(post: Post) {
+    return !post.original_id && post.message !== '' && !post.delete_at || post.file_ids?.length;
+}
+
+export function removeDeleteBySelfPostBlockOrder(order: string[], posts: Record<string, Post>) {
+    return order.filter((postId: string) => shouldShowPost(posts[postId]) || isNotDeleteBySelf(posts[postId]));
+}
+
+export function removeDeleteBySelfPostBlock(block: PostOrderBlock, posts: Record<string, Post>): PostOrderBlock {
+    return {
+        ...block,
+        order: removeDeleteBySelfPostBlockOrder(block.order, posts),
+    };
+}
+
+export function removeDeleteBySelfPostBlocks(blocks: PostOrderBlock[], posts: Record<string, Post>) {
+    return blocks.map((block) => removeDeleteBySelfPostBlock(block, posts));
+}
+
+export function IsBlocksEqual(blocks: PostOrderBlock[], otherBlocks: PostOrderBlock[]) {
+    return blocks.length === otherBlocks.length &&
+        blocks.every((block, i) => block.order.length == otherBlocks[i].order.length);
+}
+
 export function mergePostBlocks(blocks: PostOrderBlock[], posts: Record<string, Post>) {
     let nextBlocks = [...blocks];
 
+    nextBlocks = removeDeleteBySelfPostBlocks(nextBlocks, posts);
     // Remove any blocks that may have become empty by removing posts
-    nextBlocks = removeNonRecentEmptyPostBlocks(blocks);
+    nextBlocks = removeNonRecentEmptyPostBlocks(nextBlocks);
 
     // If a channel does not have any posts(Experimental feature where join and leave messages don't exist)
     // return the previous state i.e an empty block
@@ -922,7 +938,7 @@ export function mergePostBlocks(blocks: PostOrderBlock[], posts: Record<string, 
         }
     }
 
-    if (blocks.length === nextBlocks.length) {
+    if (IsBlocksEqual(blocks, nextBlocks)) {
         // No changes were made
         return blocks;
     }
@@ -999,7 +1015,7 @@ export function postsInThread(state: RelationOneToMany<Post, Post> = {}, action:
     case PostTypes.RECEIVED_POSTS_BEFORE:
     case PostTypes.RECEIVED_POSTS_IN_CHANNEL:
     case PostTypes.RECEIVED_POSTS_SINCE: {
-        const newPosts: Post[] = Object.values(action.data.posts);
+        const newPosts: Post[] = (Object.values(action.data.posts) as Post[]).filter(isNotDeleteBySelf);
 
         if (newPosts.length === 0) {
             // Nothing to add
@@ -1212,7 +1228,9 @@ export function reactions(state: RelationOneToOne<Post, Record<string, Reaction>
     case PostTypes.RECEIVED_POSTS: {
         const posts: Post[] = Object.values(action.data.posts);
 
-        return posts.reduce(storeReactionsForPost, state);
+        return posts
+            .filter(isNotDeleteBySelf)
+            .reduce(storeReactionsForPost, state);
     }
 
     case PostTypes.POST_DELETED:

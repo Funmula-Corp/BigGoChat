@@ -9,7 +9,7 @@ import (
 
 	"github.com/pkg/errors"
 
-	"github.com/mattermost/mattermost/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 )
 
 var versionRegexp = regexp.MustCompile(`/v\d$`)

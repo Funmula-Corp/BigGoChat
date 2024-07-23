@@ -6,7 +6,7 @@ package main
 import (
 	"os"
 
-	"github.com/mattermost/mattermost/tools/mmgotool/commands"
+	"git.biggo.com/Funmula/mattermost-funmula/tools/mmgotool/commands"
 )
 
 func main() {

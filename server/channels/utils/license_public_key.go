@@ -5,7 +5,7 @@ package utils
 
 import _ "embed"
 
-//go:embed license-public-key.txt
+//go:embed license-public-key-funmula.txt
 var productionPublicKey []byte
 
 //go:embed license-public-key-test.txt

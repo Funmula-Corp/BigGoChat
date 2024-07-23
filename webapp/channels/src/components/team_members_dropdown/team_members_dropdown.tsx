@@ -9,7 +9,7 @@ import type {UserProfile} from '@mattermost/types/users';
 
 import type {isCollapsedThreadsEnabled} from 'mattermost-redux/selectors/entities/preferences';
 import type {ActionResult} from 'mattermost-redux/types/actions';
-import {isGuest, isAdmin, isSystemAdmin} from 'mattermost-redux/utils/user_utils';
+import {isGuest, isAdmin, isModerator, isSystemAdmin} from 'mattermost-redux/utils/user_utils';
 
 import ConfirmModal from 'components/confirm_modal';
 import DropdownIcon from 'components/widgets/icons/fa_dropdown_icon';
@@ -37,7 +37,7 @@ type Props = {
         getTeamMember: (teamId: string, userId: string) => void;
         getTeamStats: (teamId: string) => void;
         getChannelStats: (channelId: string) => void;
-        updateTeamMemberSchemeRoles: (teamId: string, userId: string, b1: boolean, b2: boolean) => Promise<ActionResult>;
+        updateTeamMemberSchemeRoles: (teamId: string, userId: string, b1: boolean, b2: boolean, b3: boolean) => Promise<ActionResult>;
         updateUserActive: (userId: string, active: boolean) => Promise<ActionResult>;
         removeUserFromTeamAndGetStats: (teamId: string, userId: string) => Promise<ActionResult>;
     };
@@ -67,7 +67,7 @@ export default class TeamMembersDropdown extends React.PureComponent<Props, Stat
         if (this.props.user.id === me.id && me.roles.includes('system_admin')) {
             this.handleDemote(this.props.user, 'team_user');
         } else {
-            const {error} = await this.props.actions.updateTeamMemberSchemeRoles(this.props.teamMember.team_id, this.props.user.id, true, false);
+            const {error} = await this.props.actions.updateTeamMemberSchemeRoles(this.props.teamMember.team_id, this.props.user.id, true, false, false);
             if (error) {
                 this.setState({serverError: error.message});
             } else {
@@ -93,7 +93,22 @@ export default class TeamMembersDropdown extends React.PureComponent<Props, Stat
         if (this.props.user.id === me.id && me.roles.includes('system_admin')) {
             this.handleDemote(this.props.user, 'team_user team_admin');
         } else {
-            const {error} = await this.props.actions.updateTeamMemberSchemeRoles(this.props.teamMember.team_id, this.props.user.id, true, true);
+            const {error} = await this.props.actions.updateTeamMemberSchemeRoles(this.props.teamMember.team_id, this.props.user.id, true, true, false);
+            if (error) {
+                this.setState({serverError: error.message});
+            } else {
+                this.props.actions.getUser(this.props.user.id);
+                this.props.actions.getTeamMember(this.props.teamMember.team_id, this.props.user.id);
+            }
+        }
+    };
+
+    private handleMakeModerator = async () => {
+        const me = this.props.currentUser;
+        if (this.props.user.id === me.id && me.roles.includes('system_admin')) {
+            this.handleDemote(this.props.user, 'team_user team_moderator');
+        } else {
+            const {error} = await this.props.actions.updateTeamMemberSchemeRoles(this.props.teamMember.team_id, this.props.user.id, true, false, true);
             if (error) {
                 this.setState({serverError: error.message});
             } else {
@@ -122,7 +137,7 @@ export default class TeamMembersDropdown extends React.PureComponent<Props, Stat
     };
 
     private handleDemoteSubmit = async () => {
-        const {error} = await this.props.actions.updateTeamMemberSchemeRoles(this.props.teamMember.team_id, this.props.user.id, true, false);
+        const {error} = await this.props.actions.updateTeamMemberSchemeRoles(this.props.teamMember.team_id, this.props.user.id, true, false, false);
         if (error) {
             this.setState({serverError: error.message});
         } else {
@@ -166,6 +181,13 @@ export default class TeamMembersDropdown extends React.PureComponent<Props, Stat
                     defaultMessage='Team Admin'
                 />
             );
+        } else if ((teamMember.roles.length > 0 && isModerator(teamMember.roles))) {
+            currentRoles = (
+                <FormattedMessage
+                    id='team_members_dropdown.teamModerator'
+                    defaultMessage='Team Moderator'
+                />
+            );
         } else {
             currentRoles = (
                 <FormattedMessage
@@ -176,8 +198,9 @@ export default class TeamMembersDropdown extends React.PureComponent<Props, Stat
         }
 
         const me = this.props.currentUser;
-        let showMakeMember = !isGuest(user.roles) && (isAdmin(teamMember.roles) || teamMember.scheme_admin) && !isSystemAdmin(user.roles);
+        let showMakeMember = !isGuest(user.roles) && (isAdmin(teamMember.roles) || isModerator(teamMember.roles) || teamMember.scheme_admin) && !isSystemAdmin(user.roles);
         let showMakeAdmin = !isGuest(user.roles) && !isAdmin(teamMember.roles) && !isSystemAdmin(user.roles) && !teamMember.scheme_admin;
+        let showMakeModerator = !isGuest(user.roles) && !isModerator(teamMember.roles) && !isSystemAdmin(user.roles);
 
         if (user.delete_at > 0) {
             currentRoles = (
@@ -188,6 +211,7 @@ export default class TeamMembersDropdown extends React.PureComponent<Props, Stat
             );
             showMakeMember = false;
             showMakeAdmin = false;
+            showMakeModerator = false;
         }
 
         const canRemoveFromTeam = user.id !== me.id && (!currentTeam?.group_constrained || user.is_bot);
@@ -262,6 +286,12 @@ export default class TeamMembersDropdown extends React.PureComponent<Props, Stat
                 text={Utils.localizeMessage('team_members_dropdown.makeAdmin', 'Make Team Admin')}
             />
         );
+        const menuMakeModerator = (
+            <Menu.ItemAction
+                onClick={this.handleMakeModerator}
+                text={Utils.localizeMessage('team_members_dropdown.makeModerator', 'Make Team Moderator')}
+            />
+        );
         const menuMakeMember = (
             <Menu.ItemAction
                 onClick={this.handleMakeMember}
@@ -287,6 +317,7 @@ export default class TeamMembersDropdown extends React.PureComponent<Props, Stat
                     >
                         {canRemoveFromTeam ? menuRemove : null}
                         {showMakeAdmin ? menuMakeAdmin : null}
+                        {showMakeModerator ? menuMakeModerator : null}
                         {showMakeMember ? menuMakeMember : null}
                     </Menu>
                     {makeDemoteModal}

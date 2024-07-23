@@ -6,9 +6,9 @@ package main
 import (
 	"fmt"
 
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app/plugin_api_tests"
 	"github.com/mattermost/mattermost/server/public/model"
 	"github.com/mattermost/mattermost/server/public/plugin"
-	"github.com/mattermost/mattermost/server/v8/channels/app/plugin_api_tests"
 )
 
 type MyPlugin struct {
@@ -47,6 +47,10 @@ func (p *MyPlugin) MessageWillBePosted(_ *plugin.Context, _ *model.Post) (*model
 	}
 	if status != nil {
 		return nil, "Status was expected to be nil, got: " + status.Status
+	}
+
+	if _, err := p.API.GetUser(uid); err != nil {
+		return nil, fmt.Sprintf("GetUser failed: %v", err)
 	}
 
 	return nil, "OK"

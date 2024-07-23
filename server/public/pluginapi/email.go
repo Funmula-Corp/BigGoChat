@@ -1,7 +1,7 @@
 package pluginapi
 
 import (
-	"github.com/mattermost/mattermost/server/public/plugin"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
 )
 
 // MailService exposes methods to send email.

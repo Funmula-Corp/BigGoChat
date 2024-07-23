@@ -13,7 +13,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/mattermost/mattermost/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 )
 
 func TestCreateCategoryForTeamForUser(t *testing.T) {
@@ -276,7 +276,7 @@ func TestUpdateCategoryForTeamForUser(t *testing.T) {
 		require.Len(t, channelsCategory.Channels, 5) // Town Square, Off Topic, and the 3 channels created by InitBasic
 
 		// Delete one of the channels
-		_, err = client.DeleteChannel(context.Background(), th.BasicChannel.Id)
+		_, err = th.SystemAdminClient.DeleteChannel(context.Background(), th.BasicChannel.Id)
 		require.NoError(t, err)
 
 		// Should still be able to reorder the channels

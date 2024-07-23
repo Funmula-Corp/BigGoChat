@@ -4,13 +4,14 @@
 package searchtest
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/mattermost/mattermost/server/public/model"
-	"github.com/mattermost/mattermost/server/public/shared/request"
-	"github.com/mattermost/mattermost/server/v8/channels/store"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
 )
 
 var searchUserStoreTests = []searchTest{
@@ -156,6 +157,11 @@ var searchUserStoreTests = []searchTest{
 	{
 		Name: "Should support search all users containing a substring in any name",
 		Fn:   testSearchUserBySubstringInAnyName,
+		Tags: []string{EngineAll},
+	},
+	{
+		Name: "Should find users based on email and mobilenumbers",
+		Fn:   testSearchUesrViaMobileNumberAndEmail,
 		Tags: []string{EngineAll},
 	},
 }
@@ -949,4 +955,45 @@ func createDefaultOptions(allowFullName, allowEmails, allowInactive bool) *model
 		AllowInactive:  allowInactive,
 		Limit:          model.UserSearchDefaultLimit,
 	}
+}
+
+func testSearchUesrViaMobileNumberAndEmail(t *testing.T, th *SearchTestHelper) {
+	// the amount of test uers to be created
+	userCount := 5
+
+	allUsers := []*model.User{}
+	for i := 0; i < userCount; i++ {
+		username := fmt.Sprintf("user%d", i)
+		user, err := th.createUser(username, username+"_nick", username+"_firstname", username+"_lastname")
+		require.NoError(t, err)
+
+		user.Mobilephone = model.NewString(fmt.Sprintf("886123456789%d", i))
+		patch, err := th.Store.User().Update(th.Context, user, false)
+		require.NoError(t, err)
+		require.NotNil(t, patch)
+
+		allUsers = append(allUsers, user)
+	}
+
+	options := &model.UserSearchOptions{
+		AllowEmails:       true,
+		AllowMobilephones: true,
+		Limit:             userCount,
+	}
+
+	// search for exact match on mobile phone number
+	users, err := th.Store.User().Search(th.Context, "", *allUsers[3].Mobilephone, options)
+	require.NoError(t, err)
+	th.assertUsersMatchInAnyOrder(t, []*model.User{allUsers[3]}, users)
+
+	// check search with +
+	users, err = th.Store.User().Search(th.Context, "", "+"+*allUsers[2].Mobilephone, options)
+	require.NoError(t, err)
+	th.assertUsersMatchInAnyOrder(t, []*model.User{allUsers[2]}, users)
+
+	// search for partial match on mobile phone number
+	mobilephone := *allUsers[0].Mobilephone
+	users, err = th.Store.User().Search(th.Context, "", mobilephone[:len(mobilephone)-1], options)
+	require.NoError(t, err)
+	th.assertUsersMatchInAnyOrder(t, []*model.User{}, users)
 }

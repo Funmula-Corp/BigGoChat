@@ -11,9 +11,9 @@ import (
 
 	"github.com/stretchr/testify/require"
 
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
 	goPlugin "github.com/hashicorp/go-plugin"
-	"github.com/mattermost/mattermost/server/public/model"
-	"github.com/mattermost/mattermost/server/public/plugin"
 )
 
 type UnitTestedPlugin struct {

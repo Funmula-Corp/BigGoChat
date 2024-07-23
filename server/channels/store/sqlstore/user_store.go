@@ -8,6 +8,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"slices"
 	"sort"
 	"strings"
 	"time"
@@ -17,11 +18,11 @@ import (
 	"github.com/pkg/errors"
 	"golang.org/x/sync/errgroup"
 
-	"github.com/mattermost/mattermost/server/public/model"
-	"github.com/mattermost/mattermost/server/public/shared/mlog"
-	"github.com/mattermost/mattermost/server/public/shared/request"
-	"github.com/mattermost/mattermost/server/v8/channels/store"
-	"github.com/mattermost/mattermost/server/v8/einterfaces"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/einterfaces"
 )
 
 const (
@@ -56,7 +57,7 @@ func newSqlUserStore(sqlStore *SqlStore, metrics einterfaces.MetricsInterface) s
 	// note: we are providing field names explicitly here to maintain order of columns (needed when using raw queries)
 	us.usersQuery = us.getQueryBuilder().
 		Select("u.Id", "u.CreateAt", "u.UpdateAt", "u.DeleteAt", "u.Username", "u.Password", "u.AuthData", "u.AuthService", "u.Email", "u.EmailVerified", "u.Nickname", "u.FirstName", "u.LastName", "u.Position", "u.Roles", "u.AllowMarketing", "u.Props", "u.NotifyProps", "u.LastPasswordUpdate", "u.LastPictureUpdate", "u.FailedAttempts", "u.Locale", "u.Timezone", "u.MfaActive", "u.MfaSecret",
-			"b.UserId IS NOT NULL AS IsBot", "COALESCE(b.Description, '') AS BotDescription", "COALESCE(b.LastIconUpdate, 0) AS BotLastIconUpdate", "u.RemoteId", "u.LastLogin").
+			"b.UserId IS NOT NULL AS IsBot", "COALESCE(b.Description, '') AS BotDescription", "COALESCE(b.LastIconUpdate, 0) AS BotLastIconUpdate", "u.RemoteId", "u.LastLogin", "u.Mobilephone").
 		From("Users u").
 		LeftJoin("Bots b ON ( b.UserId = u.Id )")
 
@@ -85,12 +86,12 @@ func (us SqlUserStore) insert(user *model.User) (sql.Result, error) {
 		(Id, CreateAt, UpdateAt, DeleteAt, Username, Password, AuthData, AuthService,
 			Email, EmailVerified, Nickname, FirstName, LastName, Position, Roles, AllowMarketing,
 			Props, NotifyProps, LastPasswordUpdate, LastPictureUpdate, FailedAttempts,
-			Locale, Timezone, MfaActive, MfaSecret, RemoteId)
+			Locale, Timezone, MfaActive, MfaSecret, RemoteId, Mobilephone)
 		VALUES
 		(:Id, :CreateAt, :UpdateAt, :DeleteAt, :Username, :Password, :AuthData, :AuthService,
 			:Email, :EmailVerified, :Nickname, :FirstName, :LastName, :Position, :Roles, :AllowMarketing,
 			:Props, :NotifyProps, :LastPasswordUpdate, :LastPictureUpdate, :FailedAttempts,
-			:Locale, :Timezone, :MfaActive, :MfaSecret, :RemoteId)`
+			:Locale, :Timezone, :MfaActive, :MfaSecret, :RemoteId, :Mobilephone)`
 
 	user.Props = wrapBinaryParamStringMap(us.IsBinaryParamEnabled(), user.Props)
 	return us.GetMasterX().NamedExec(query, user)
@@ -108,7 +109,7 @@ func (us SqlUserStore) InsertUsers(users []*model.User) error {
 }
 
 func (us SqlUserStore) Save(rctx request.CTX, user *model.User) (*model.User, error) {
-	if user.Id != "" && !user.IsRemote() {
+	if user.Id != "" && !user.IsRemote() && user.AuthService != model.ServiceBiggo {
 		return nil, store.NewErrInvalidInput("User", "id", user.Id)
 	}
 
@@ -196,6 +197,9 @@ func (us SqlUserStore) Update(rctx request.CTX, user *model.User, trustedUpdateD
 	user.MfaSecret = oldUser.MfaSecret
 	user.MfaActive = oldUser.MfaActive
 	user.LastLogin = oldUser.LastLogin
+	if user.Mobilephone == nil || *user.Mobilephone == "" {
+		user.Mobilephone = oldUser.Mobilephone
+	}
 
 	if !trustedUpdateData {
 		user.Roles = oldUser.Roles
@@ -225,7 +229,7 @@ func (us SqlUserStore) Update(rctx request.CTX, user *model.User, trustedUpdateD
 				AllowMarketing=:AllowMarketing, Props=:Props, NotifyProps=:NotifyProps,
 				LastPasswordUpdate=:LastPasswordUpdate, LastPictureUpdate=:LastPictureUpdate,
 				FailedAttempts=:FailedAttempts,Locale=:Locale, Timezone=:Timezone, MfaActive=:MfaActive,
-				MfaSecret=:MfaSecret, RemoteId=:RemoteId, LastLogin=:LastLogin
+				MfaSecret=:MfaSecret, RemoteId=:RemoteId, LastLogin=:LastLogin, Mobilephone=:Mobilephone
 			WHERE Id=:Id`
 
 	user.Props = wrapBinaryParamStringMap(us.IsBinaryParamEnabled(), user.Props)
@@ -473,7 +477,7 @@ func (us SqlUserStore) Get(ctx context.Context, id string) (*model.User, error) 
 		&user.Nickname, &user.FirstName, &user.LastName, &user.Position, &user.Roles,
 		&user.AllowMarketing, &props, &notifyProps, &user.LastPasswordUpdate, &user.LastPictureUpdate,
 		&user.FailedAttempts, &user.Locale, &timezone, &user.MfaActive, &user.MfaSecret,
-		&user.IsBot, &user.BotDescription, &user.BotLastIconUpdate, &user.RemoteId, &user.LastLogin)
+		&user.IsBot, &user.BotDescription, &user.BotLastIconUpdate, &user.RemoteId, &user.LastLogin, &user.Mobilephone)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, store.NewErrNotFound("User", id)
@@ -875,7 +879,14 @@ func (us SqlUserStore) GetAllProfilesInChannel(ctx context.Context, channelID st
 	for rows.Next() {
 		var user model.User
 		var props, notifyProps, timezone []byte
-		if err = rows.Scan(&user.Id, &user.CreateAt, &user.UpdateAt, &user.DeleteAt, &user.Username, &user.Password, &user.AuthData, &user.AuthService, &user.Email, &user.EmailVerified, &user.Nickname, &user.FirstName, &user.LastName, &user.Position, &user.Roles, &user.AllowMarketing, &props, &notifyProps, &user.LastPasswordUpdate, &user.LastPictureUpdate, &user.FailedAttempts, &user.Locale, &timezone, &user.MfaActive, &user.MfaSecret, &user.IsBot, &user.BotDescription, &user.BotLastIconUpdate, &user.RemoteId, &user.LastLogin); err != nil {
+		if err = rows.Scan(
+			&user.Id, &user.CreateAt, &user.UpdateAt, &user.DeleteAt, &user.Username, &user.Password,
+			&user.AuthData, &user.AuthService, &user.Email, &user.EmailVerified, &user.Nickname,
+			&user.FirstName, &user.LastName, &user.Position, &user.Roles, &user.AllowMarketing,
+			&props, &notifyProps, &user.LastPasswordUpdate, &user.LastPictureUpdate, &user.FailedAttempts,
+			&user.Locale, &timezone, &user.MfaActive, &user.MfaSecret, &user.IsBot, &user.BotDescription,
+			&user.BotLastIconUpdate, &user.RemoteId, &user.LastLogin, &user.Mobilephone,
+		); err != nil {
 			return nil, errors.Wrap(err, "failed to scan values from rows into User entity")
 		}
 		if err = json.Unmarshal(props, &user.Props); err != nil {
@@ -1606,12 +1617,25 @@ func generateSearchQuery(query sq.SelectBuilder, terms []string, fields []string
 		searchFields := []string{}
 		termArgs := []any{}
 		for _, field := range fields {
-			if isPostgreSQL {
-				searchFields = append(searchFields, fmt.Sprintf("lower(%s) LIKE lower(?) escape '*' ", field))
+			// only allow for exact match searches on the predefiend fields
+			if slices.Contains([]string{"email", "mobilephone"}, strings.ToLower(field)) {
+				if isPostgreSQL {
+					searchFields = append(searchFields, fmt.Sprintf("lower(%s) = lower(?) ", field))
+				} else {
+					searchFields = append(searchFields, fmt.Sprintf("%s = ? ", field))
+				}
+				// trim '+' first to ensure we are preventing a leading '@' which
+				// would introduce a SQL injection vulnerability
+				// (order of operation is from the inside outwards)
+				termArgs = append(termArgs, strings.TrimLeft(strings.TrimLeft(term, "+"), "@"))
 			} else {
-				searchFields = append(searchFields, fmt.Sprintf("%s LIKE ? escape '*' ", field))
+				if isPostgreSQL {
+					searchFields = append(searchFields, fmt.Sprintf("lower(%s) LIKE lower(?) escape '*' ", field))
+				} else {
+					searchFields = append(searchFields, fmt.Sprintf("%s LIKE ? escape '*' ", field))
+				}
+				termArgs = append(termArgs, fmt.Sprintf("%%%s%%", strings.TrimLeft(term, "@")))
 			}
-			termArgs = append(termArgs, fmt.Sprintf("%%%s%%", strings.TrimLeft(term, "@")))
 		}
 		searchFields = append(searchFields, "Id = ?")
 		termArgs = append(termArgs, strings.TrimLeft(term, "@"))
@@ -1638,6 +1662,14 @@ func (us SqlUserStore) performSearch(query sq.SelectBuilder, term string, option
 			searchType = UserSearchTypeNamesNoFullName
 		}
 	}
+
+	// ===========================================================================
+	// generally allow the search via email address and via phone number thrue API
+	// ===========================================================================
+	if options.AllowMobilephones {
+		searchType = append(searchType, "Mobilephone")
+	}
+	// ===========================================================================
 
 	isPostgreSQL := us.DriverName() == model.DatabaseDriverPostgres
 
@@ -2416,4 +2448,26 @@ func (us SqlUserStore) GetUserReport(filter *model.UserReportOptions) ([]*model.
 	}
 
 	return userResults, nil
+}
+
+func (s SqlUserStore) UpdateMemberVerifiedStatus(rctx request.CTX, user *model.User) (err error) {
+	var transaction *sqlxTxWrapper
+
+	if transaction, err = s.GetMasterX().Beginx(); err != nil {
+		return errors.Wrap(err, "begin_transaction")
+	}
+	defer finalizeTransactionX(transaction, &err)
+	verified := user.IsVerified()
+	if _, err := transaction.Exec(`UPDATE TeamMembers
+		SET SchemeVerified= ? WHERE UserId= ?`, verified, user.Id); err != nil {
+		return errors.Wrap(err, "failed to update TeamMember")
+	}
+	if _, err := transaction.Exec(`UPDATE ChannelMembers
+		SET SchemeVerified= ? WHERE UserId= ?`, verified, user.Id); err != nil {
+		return errors.Wrap(err, "failed to update ChannelMember")
+	}
+	if err := transaction.Commit(); err != nil {
+		return errors.Wrap(err, "commit_transaction")
+	}
+	return nil
 }

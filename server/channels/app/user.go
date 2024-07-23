@@ -19,17 +19,17 @@ import (
 
 	"golang.org/x/sync/errgroup"
 
-	"github.com/mattermost/mattermost/server/public/model"
-	"github.com/mattermost/mattermost/server/public/plugin"
-	"github.com/mattermost/mattermost/server/public/shared/i18n"
-	"github.com/mattermost/mattermost/server/public/shared/mlog"
-	"github.com/mattermost/mattermost/server/public/shared/request"
-	"github.com/mattermost/mattermost/server/v8/channels/app/email"
-	"github.com/mattermost/mattermost/server/v8/channels/app/imaging"
-	"github.com/mattermost/mattermost/server/v8/channels/app/users"
-	"github.com/mattermost/mattermost/server/v8/channels/store"
-	"github.com/mattermost/mattermost/server/v8/einterfaces"
-	"github.com/mattermost/mattermost/server/v8/platform/shared/mfa"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/i18n"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app/email"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app/imaging"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app/users"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/einterfaces"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/shared/mfa"
 )
 
 const (
@@ -2873,6 +2873,25 @@ func (a *App) GetUsersWithInvalidEmails(page int, perPage int) ([]*model.User, *
 	}
 
 	return users, nil
+}
+
+func (a *App) MarkUserVerified(c request.CTX, id string) *model.AppError {
+	user, err := a.Srv().Store().User().Get(c.Context(), id)
+	if err != nil {
+		return model.NewAppError("AddVerifiedRoleToUser", "app.user.get.app_error", nil, "", http.StatusInternalServerError).Wrap(err)
+	}
+	if user.AddRole(model.SystemVerifiedRoleId){
+		uu, err := a.Srv().Store().User().Update(c, user, true)
+		if err != nil {
+			return model.NewAppError("AddVerifiedRoleToUser", "app.user.update_role.app_error", nil, "", http.StatusInternalServerError).Wrap(err)
+		}
+		err = a.Srv().Store().User().UpdateMemberVerifiedStatus(c, uu.New)
+		if err != nil {
+			return model.NewAppError("AddVerifiedRoleToUser", "app.user.update_teammember_channelmember.app_error", nil, "", http.StatusInternalServerError).Wrap(err)
+		}
+		a.InvalidateCacheForUser(id)
+	}
+	return nil
 }
 
 func getProfileImagePath(userID string) string {

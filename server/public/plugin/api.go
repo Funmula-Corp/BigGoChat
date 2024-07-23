@@ -9,7 +9,7 @@ import (
 
 	plugin "github.com/hashicorp/go-plugin"
 
-	"github.com/mattermost/mattermost/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 )
 
 // The API can be used to retrieve data or perform actions on behalf of the plugin. Most methods
@@ -1300,6 +1300,20 @@ type API interface {
 	// @tag User
 	// Minimum server version: 9.8
 	UpdateUserRoles(userID, newRoles string) (*model.User, *model.AppError)
+
+	// BDPublishWebSocketEvent publish core websocket event without plugin prefix
+	// core function, may break frontend, USE WITH CAUTION.
+	//
+	// @tag WebSocketEvent
+	// Minimum server version: 9.8
+	BDPublishWebSocketEvent(event model.WebsocketEventType, teamId string, channelId string, userId string, omitUsers map[string]bool, omitConnectionId string, data map[string]any)
+
+	// MarkUserVerified
+	// it updates TeamMembers and ChannelMembers too.
+	//
+	// @tag User
+	// Minimum server version: 9.9.0-bc2
+	MarkUserVerified(userId string) *model.AppError
 }
 
 var handshake = plugin.HandshakeConfig{

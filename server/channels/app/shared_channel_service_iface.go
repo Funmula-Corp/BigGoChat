@@ -5,8 +5,8 @@ package app
 
 // TODO: platform: remove this and use from platform package
 import (
-	"github.com/mattermost/mattermost/server/public/model"
-	"github.com/mattermost/mattermost/server/v8/platform/services/sharedchannel"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/services/sharedchannel"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 )
 
 // SharedChannelServiceIFace is the interface to the shared channel service

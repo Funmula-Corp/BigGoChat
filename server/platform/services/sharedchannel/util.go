@@ -8,8 +8,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/mattermost/mattermost/server/public/model"
-	"github.com/mattermost/mattermost/server/v8/channels/store"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 )
 
 // fixMention replaces any mentions in a post for the user with the user's real username.

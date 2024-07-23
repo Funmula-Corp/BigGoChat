@@ -11,9 +11,9 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	_ "github.com/mattermost/mattermost/server/v8/channels/app/slashcommands"
+	_ "git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app/slashcommands"
 
-	"github.com/mattermost/mattermost/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 )
 
 func TestEchoCommand(t *testing.T) {
@@ -284,8 +284,7 @@ func TestLeaveCommands(t *testing.T) {
 	require.NoError(t, err)
 	_, _, err = client.AddChannelMember(context.Background(), channel2.Id, th.BasicUser.Id)
 	require.NoError(t, err)
-	_, _, err = client.AddChannelMember(context.Background(), channel2.Id, user2.Id)
-	require.NoError(t, err)
+	th.AddUserToChannel(user2, channel2)
 
 	channel3, _, err := client.CreateDirectChannel(context.Background(), th.BasicUser.Id, user2.Id)
 	require.NoError(t, err)

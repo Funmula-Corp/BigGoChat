@@ -9,14 +9,13 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/mattermost/mattermost/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 )
 
 func TestRenameProviderDoCommand(t *testing.T) {
 	th := setup(t).initBasic()
 	defer th.tearDown()
 
-	th.addPermissionToRole(model.PermissionManagePublicChannelProperties.Id, model.ChannelUserRoleId)
 
 	rp := RenameProvider{}
 	args := &model.CommandArgs{
@@ -38,7 +37,7 @@ func TestRenameProviderDoCommand(t *testing.T) {
 	}
 
 	// Try a public channel *without* permission.
-	th.removePermissionFromRole(model.PermissionManagePublicChannelProperties.Id, model.ChannelUserRoleId)
+	th.removePermissionFromRole(model.PermissionManagePublicChannelProperties.Id, model.ChannelAdminRoleId)
 
 	args = &model.CommandArgs{
 		T:         func(s string, args ...any) string { return s },
@@ -52,8 +51,6 @@ func TestRenameProviderDoCommand(t *testing.T) {
 	// Try a private channel *with* permission.
 	privateChannel := th.createPrivateChannel(th.BasicTeam)
 
-	th.addPermissionToRole(model.PermissionManagePrivateChannelProperties.Id, model.ChannelUserRoleId)
-
 	args = &model.CommandArgs{
 		T:         func(s string, args ...any) string { return s },
 		ChannelId: privateChannel.Id,
@@ -64,7 +61,7 @@ func TestRenameProviderDoCommand(t *testing.T) {
 	assert.Equal(t, "", actual)
 
 	// Try a private channel *without* permission.
-	th.removePermissionFromRole(model.PermissionManagePrivateChannelProperties.Id, model.ChannelUserRoleId)
+	th.removePermissionFromRole(model.PermissionManagePrivateChannelProperties.Id, model.ChannelAdminRoleId)
 
 	args = &model.CommandArgs{
 		T:         func(s string, args ...any) string { return s },

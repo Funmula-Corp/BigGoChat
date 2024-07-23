@@ -17,8 +17,8 @@ import (
 	"golang.org/x/crypto/bcrypt"
 	"golang.org/x/text/language"
 
-	"github.com/mattermost/mattermost/server/public/shared/mlog"
-	"github.com/mattermost/mattermost/server/public/shared/timezones"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/timezones"
 )
 
 const (
@@ -107,6 +107,7 @@ type User struct {
 	TermsOfServiceCreateAt int64     `json:"terms_of_service_create_at,omitempty"`
 	DisableWelcomeEmail    bool      `json:"disable_welcome_email"`
 	LastLogin              int64     `json:"last_login,omitempty"`
+	Mobilephone            *string   `json:"mobilephone"`
 }
 
 func (u *User) Auditable() map[string]interface{} {
@@ -171,6 +172,7 @@ type UserPatch struct {
 	Locale      *string   `json:"locale"`
 	Timezone    StringMap `json:"timezone"`
 	RemoteId    *string   `json:"remote_id"`
+	Mobilephone *string   `json:"mobilephone"`
 }
 
 func (u *UserPatch) Auditable() map[string]interface{} {
@@ -309,6 +311,9 @@ func (u *User) DeepCopy() *User {
 	if u.AuthData != nil {
 		copyUser.AuthData = NewString(*u.AuthData)
 	}
+	if u.Mobilephone != nil {
+		copyUser.Mobilephone = NewString(*u.Mobilephone)
+	}
 	if u.Props != nil {
 		copyUser.Props = CopyStringMap(u.Props)
 	}
@@ -432,7 +437,11 @@ func NormalizeEmail(email string) string {
 // be run before saving the user to the db.
 func (u *User) PreSave() {
 	if u.Id == "" {
-		u.Id = NewId()
+		if u.AuthService == ServiceBiggo && u.AuthData != nil {
+			u.Id = HashId(*u.AuthData)
+		} else {
+			u.Id = NewId()
+		}
 	}
 
 	if u.Username == "" {
@@ -621,6 +630,10 @@ func (u *User) Patch(patch *UserPatch) {
 	if patch.RemoteId != nil {
 		u.RemoteId = patch.RemoteId
 	}
+
+	if patch.Mobilephone != nil {
+		u.Mobilephone = patch.Mobilephone
+	}
 }
 
 // Generate a valid strong etag so the browser can cache the results
@@ -635,6 +648,9 @@ func (u *User) Sanitize(options map[string]bool) {
 	u.MfaSecret = ""
 	u.LastLogin = 0
 
+	if len(options) != 0 && !options["mobilephone"] {
+		u.Mobilephone = NewString("")
+	}
 	if len(options) != 0 && !options["email"] {
 		u.Email = ""
 		delete(u.Props, UserPropsKeyRemoteEmail)
@@ -820,6 +836,10 @@ func (u *User) IsGuest() bool {
 	return IsInRole(u.Roles, SystemGuestRoleId)
 }
 
+func (u *User) IsVerified() bool {
+	return IsInRole(u.Roles, SystemVerifiedRoleId)
+}
+
 func (u *User) IsSystemAdmin() bool {
 	return IsInRole(u.Roles, SystemAdminRoleId)
 }
@@ -842,6 +862,18 @@ func IsInRole(userRoles string, inRole string) bool {
 	}
 
 	return false
+}
+
+func (u *User) AddRole(role string) bool {
+	if !IsValidRoleName(role) {
+		return false
+	}
+	if IsInRole(u.Roles, role) {
+		return false
+	}else{
+		u.Roles += " " + role
+		return true
+	}
 }
 
 func (u *User) IsSSOUser() bool {
@@ -910,6 +942,7 @@ func (u *User) ToPatch() *UserPatch {
 		Position: &u.Position, Email: &u.Email,
 		Props: u.Props, NotifyProps: u.NotifyProps,
 		Locale: &u.Locale, Timezone: u.Timezone,
+		Mobilephone: u.Mobilephone,
 	}
 }
 
@@ -927,6 +960,8 @@ func (u *UserPatch) SetField(fieldName string, fieldValue string) {
 		u.Position = &fieldValue
 	case "Username":
 		u.Username = &fieldValue
+	case "Mobilephone":
+		u.Mobilephone = &fieldValue
 	}
 }
 

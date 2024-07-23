@@ -16,7 +16,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/wiggin77/merror"
 
-	"github.com/mattermost/mattermost/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 )
 
 const (

@@ -24,15 +24,15 @@ import (
 	"sync"
 	"time"
 
-	"github.com/mattermost/mattermost/server/public/model"
-	"github.com/mattermost/mattermost/server/public/plugin"
-	"github.com/mattermost/mattermost/server/public/shared/mlog"
-	"github.com/mattermost/mattermost/server/public/shared/request"
-	"github.com/mattermost/mattermost/server/v8/channels/app/imaging"
-	"github.com/mattermost/mattermost/server/v8/channels/store"
-	"github.com/mattermost/mattermost/server/v8/channels/utils"
-	"github.com/mattermost/mattermost/server/v8/platform/services/docextractor"
-	"github.com/mattermost/mattermost/server/v8/platform/shared/filestore"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app/imaging"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/utils"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/services/docextractor"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/shared/filestore"
 
 	"github.com/pkg/errors"
 )
@@ -763,11 +763,13 @@ func (a *App) UploadFileX(c request.CTX, channelID, name string, input io.Reader
 	t.init(a)
 
 	var aerr *model.AppError
-	if !t.Raw && t.fileinfo.IsImage() {
+	if !t.Raw && t.fileinfo.IsImage() && !t.fileinfo.IsWebP() {
 		aerr = t.preprocessImage()
 		if aerr != nil {
 			return t.fileinfo, aerr
 		}
+	} else {
+		t.fileinfo.HasPreviewImage = false
 	}
 
 	written, aerr := t.writeFile(io.MultiReader(t.buf, t.limitedInput), t.fileinfo.Path)
@@ -795,7 +797,7 @@ func (a *App) UploadFileX(c request.CTX, channelID, name string, input io.Reader
 		return nil, aerr
 	}
 
-	if !t.Raw && t.fileinfo.IsImage() {
+	if !t.Raw && t.fileinfo.IsImage() && !t.fileinfo.IsWebP() {
 		file, aerr = a.FileReader(t.fileinfo.Path)
 		if aerr != nil {
 			return nil, aerr

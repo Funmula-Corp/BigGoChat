@@ -6,7 +6,7 @@ package bleveengine
 import (
 	"strconv"
 
-	"github.com/mattermost/mattermost/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 )
 
 func createPost(userId string, channelId string) *model.Post {

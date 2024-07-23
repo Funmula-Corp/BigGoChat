@@ -161,6 +161,8 @@ export type Props = {
 
     isPostPriorityEnabled: boolean;
 
+    isPhoneVerified: boolean;
+
     actions: {
 
         //Set show preview for textbox
@@ -1441,6 +1443,7 @@ class AdvancedCreatePost extends React.PureComponent<Props, State> {
                     shouldShowPreview={this.props.shouldShowPreview}
                     maxPostSize={this.props.maxPostSize}
                     canPost={canPost}
+                    isPhoneVerified={this.props.isPhoneVerified}
                     applyMarkdown={this.applyMarkdown}
                     useChannelMentions={this.props.useChannelMentions}
                     badConnection={this.props.badConnection}

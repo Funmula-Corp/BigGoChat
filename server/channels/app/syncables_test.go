@@ -11,8 +11,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/mattermost/mattermost/server/public/model"
-	"github.com/mattermost/mattermost/server/v8/channels/store"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
 )
 
 //nolint:govet // The setup code leads to a lot of variable shadowing.
@@ -570,7 +570,7 @@ func TestDeleteGroupMemberships(t *testing.T) {
 	// verify the member count
 	tmembers, err := th.App.GetTeamMembers(th.BasicTeam.Id, 0, 100, nil)
 	require.Nil(t, err)
-	require.Len(t, tmembers, 3)
+	require.Len(t, tmembers, 4)
 
 	cmemberCount, err := th.App.GetChannelMemberCount(th.Context, th.BasicChannel.Id)
 	require.Nil(t, err)

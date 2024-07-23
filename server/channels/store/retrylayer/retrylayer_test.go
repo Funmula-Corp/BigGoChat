@@ -10,13 +10,14 @@ import (
 	"github.com/lib/pq"
 	"github.com/pkg/errors"
 
-	"github.com/mattermost/mattermost/server/public/model"
-	"github.com/mattermost/mattermost/server/v8/channels/store/storetest/mocks"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store/storetest/mocks"
 )
 
 func genStore() *mocks.Store {
 	mock := &mocks.Store{}
 	mock.On("Audit").Return(&mocks.AuditStore{})
+	mock.On("Blocklist").Return(&mocks.BlocklistStore{})
 	mock.On("Bot").Return(&mocks.BotStore{})
 	mock.On("Channel").Return(&mocks.ChannelStore{})
 	mock.On("ChannelMemberHistory").Return(&mocks.ChannelMemberHistoryStore{})

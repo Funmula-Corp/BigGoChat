@@ -23,18 +23,18 @@ import (
 	"github.com/minio/minio-go/v7/pkg/credentials"
 	"github.com/stretchr/testify/require"
 
-	"github.com/mattermost/mattermost/server/public/model"
-	"github.com/mattermost/mattermost/server/public/plugin/plugintest/mock"
-	"github.com/mattermost/mattermost/server/public/shared/mlog"
-	"github.com/mattermost/mattermost/server/public/shared/request"
-	"github.com/mattermost/mattermost/server/v8/channels/app"
-	"github.com/mattermost/mattermost/server/v8/channels/store"
-	"github.com/mattermost/mattermost/server/v8/channels/store/storetest/mocks"
-	"github.com/mattermost/mattermost/server/v8/channels/testlib"
-	"github.com/mattermost/mattermost/server/v8/channels/web"
-	"github.com/mattermost/mattermost/server/v8/channels/wsapi"
-	"github.com/mattermost/mattermost/server/v8/config"
-	"github.com/mattermost/mattermost/server/v8/platform/services/searchengine"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin/plugintest/mock"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store/storetest/mocks"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/testlib"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/web"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/wsapi"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/config"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/services/searchengine"
 )
 
 type TestHelper struct {
@@ -434,15 +434,19 @@ func (th *TestHelper) InitLogin() *TestHelper {
 		userCache.SystemManagerUser = th.SystemManagerUser.DeepCopy()
 
 		th.TeamAdminUser = th.CreateUser()
-		th.App.UpdateUserRoles(th.Context, th.TeamAdminUser.Id, model.SystemUserRoleId, false)
+		th.App.UpdateUserRoles(th.Context, th.TeamAdminUser.Id, model.SystemUserRoleId+" "+model.SystemVerifiedRoleId, false)
 		th.TeamAdminUser, _ = th.App.GetUser(th.TeamAdminUser.Id)
 		userCache.TeamAdminUser = th.TeamAdminUser.DeepCopy()
 
 		th.BasicUser = th.CreateUser()
 		th.BasicUser, _ = th.App.GetUser(th.BasicUser.Id)
+		th.App.UpdateUserRoles(th.Context, th.BasicUser.Id, model.SystemUserRoleId+" "+model.SystemVerifiedRoleId, false)
+		th.BasicUser, _ = th.App.GetUser(th.BasicUser.Id)
 		userCache.BasicUser = th.BasicUser.DeepCopy()
 
 		th.BasicUser2 = th.CreateUser()
+		th.BasicUser2, _ = th.App.GetUser(th.BasicUser2.Id)
+		th.App.UpdateUserRoles(th.Context, th.BasicUser2.Id, model.SystemUserRoleId+" "+model.SystemVerifiedRoleId, false)
 		th.BasicUser2, _ = th.App.GetUser(th.BasicUser2.Id)
 		userCache.BasicUser2 = th.BasicUser2.DeepCopy()
 	})
@@ -495,7 +499,7 @@ func (th *TestHelper) InitBasic() *TestHelper {
 	th.App.AddUserToChannel(th.Context, th.BasicUser2, th.BasicPrivateChannel, false)
 	th.App.AddUserToChannel(th.Context, th.BasicUser, th.BasicDeletedChannel, false)
 	th.App.AddUserToChannel(th.Context, th.BasicUser2, th.BasicDeletedChannel, false)
-	th.App.UpdateUserRoles(th.Context, th.BasicUser.Id, model.SystemUserRoleId, false)
+	th.App.UpdateUserRoles(th.Context, th.BasicUser.Id, model.SystemUserRoleId + " " + model.SystemVerifiedRoleId, false)
 	th.Client.DeleteChannel(context.Background(), th.BasicDeletedChannel.Id)
 	th.LoginBasic()
 	th.Group = th.CreateGroup()
@@ -582,6 +586,7 @@ func (th *TestHelper) CreateUser() *model.User {
 }
 
 func (th *TestHelper) CreateTeam() *model.Team {
+	th.App.MarkUserVerified(th.Context, th.BasicUser.Id)
 	return th.CreateTeamWithClient(th.Client)
 }
 
@@ -605,12 +610,13 @@ func (th *TestHelper) CreateUserWithClient(client *model.Client4) *model.User {
 	id := model.NewId()
 
 	user := &model.User{
-		Email:     th.GenerateTestEmail(),
-		Username:  GenerateTestUsername(),
-		Nickname:  "nn_" + id,
-		FirstName: "f_" + id,
-		LastName:  "l_" + id,
-		Password:  "Pa$$word11",
+		Email:       th.GenerateTestEmail(),
+		Username:    GenerateTestUsername(),
+		Nickname:    "nn_" + id,
+		FirstName:   "f_" + id,
+		LastName:    "l_" + id,
+		Password:    "Pa$$word11",
+		Mobilephone: model.NewString(th.GenerateTestMobilephone()),
 	}
 
 	ruser, _, err := client.CreateUser(context.Background(), user)
@@ -634,6 +640,7 @@ func (th *TestHelper) CreateUserWithAuth(authService string) *model.User {
 		Nickname:      "nn_" + id,
 		EmailVerified: true,
 		AuthService:   authService,
+		Mobilephone:   model.NewString(th.GenerateTestMobilephone()),
 	}
 	user, err := th.App.CreateUser(th.Context, user)
 	if err != nil {
@@ -655,6 +662,7 @@ func (th *TestHelper) CreateGuestAndClient() (*model.User, *model.Client4) {
 		Nickname:      "guest_" + id,
 		Password:      "Password1",
 		EmailVerified: true,
+		Mobilephone:   model.NewString(th.GenerateTestMobilephone()),
 	})
 	if cgErr != nil {
 		panic(cgErr)
@@ -949,6 +957,33 @@ func (th *TestHelper) LinkUserToTeam(user *model.User, team *model.Team) {
 	}
 }
 
+func (th *TestHelper) UpdateTeamMemberRole(teamID, userID string, p model.SchemeRolesPatch) *model.TeamMember {
+	tm, err := th.App.GetTeamMember(th.Context, teamID, userID)
+	if err != nil {
+		panic(err)
+	}
+	if p.SchemeGuest != nil {
+		tm.SchemeGuest = *p.SchemeGuest
+	}
+	if p.SchemeUser != nil {
+		tm.SchemeUser = *p.SchemeUser
+	}
+	if p.SchemeVerified != nil {
+		tm.SchemeVerified = *p.SchemeVerified
+	}
+	if p.SchemeModerator != nil {
+		tm.SchemeModerator = *p.SchemeModerator
+	}
+	if p.SchemeAdmin != nil {
+		tm.SchemeAdmin = *p.SchemeAdmin
+	}
+	tm, err = th.App.UpdateTeamMemberSchemeRoles(th.Context, teamID, userID, tm.SchemeGuest, tm.SchemeUser, tm.SchemeVerified, tm.SchemeModerator, tm.SchemeAdmin)
+	if err != nil {
+		panic(err)
+	}
+	return tm
+}
+
 func (th *TestHelper) UnlinkUserFromTeam(user *model.User, team *model.Team) {
 	err := th.App.RemoveUserFromTeam(th.Context, team.Id, user.Id, "")
 	if err != nil {
@@ -971,11 +1006,44 @@ func (th *TestHelper) RemoveUserFromChannel(user *model.User, channel *model.Cha
 	}
 }
 
+func (th *TestHelper) UpdateChannelMemberRole(channelId, userId string, p model.SchemeRolesPatch) *model.ChannelMember {
+	cm, err := th.App.GetChannelMember(th.Context, channelId, userId)
+	if err != nil {
+		panic(err)
+	}
+	if p.SchemeGuest != nil {
+		cm.SchemeGuest = *p.SchemeGuest
+	}
+	if p.SchemeUser != nil {
+		cm.SchemeUser = *p.SchemeUser
+	}
+	if p.SchemeVerified != nil {
+		cm.SchemeVerified = *p.SchemeVerified
+	}
+	if p.SchemeAdmin != nil {
+		cm.SchemeAdmin = *p.SchemeAdmin
+	}
+	cm, err = th.App.UpdateChannelMemberSchemeRoles(th.Context, channelId, userId, cm.SchemeGuest, cm.SchemeUser, cm.SchemeVerified, cm.SchemeAdmin)
+	if err != nil {
+		panic(err)
+	}
+	return cm
+}
+
 func (th *TestHelper) GenerateTestEmail() string {
 	if *th.App.Config().EmailSettings.SMTPServer != "localhost" && os.Getenv("CI_INBUCKET_PORT") == "" {
 		return strings.ToLower("success+" + model.NewId() + "@simulator.amazonses.com")
 	}
 	return strings.ToLower(model.NewId() + "@localhost")
+}
+
+func (th *TestHelper) GenerateTestMobilephone() string {
+	var letterRunes = []rune("0123456789")
+	b := make([]rune, 15)
+	for i := range b {
+		b[i] = letterRunes[rand.Intn(len(letterRunes))]
+	}
+	return "886" + string(b)
 }
 
 func (th *TestHelper) CreateGroup() *model.Group {
@@ -1259,10 +1327,14 @@ func (th *TestHelper) SaveDefaultRolePermissions() map[string][]string {
 
 	for _, roleName := range []string{
 		"system_user",
+		"system_verified",
 		"system_admin",
 		"team_user",
+		"team_verified",
+		"team_moderator",
 		"team_admin",
 		"channel_user",
+		"channel_verified",
 		"channel_admin",
 	} {
 		role, err1 := th.App.GetRoleByName(context.Background(), roleName)

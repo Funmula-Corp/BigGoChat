@@ -8,16 +8,16 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/mattermost/mattermost/server/public/model"
-	"github.com/mattermost/mattermost/server/public/plugin/plugintest/mock"
-	"github.com/mattermost/mattermost/server/public/shared/mlog"
-	"github.com/mattermost/mattermost/server/public/shared/request"
-	"github.com/mattermost/mattermost/server/v8/channels/app/users"
-	"github.com/mattermost/mattermost/server/v8/channels/store"
-	"github.com/mattermost/mattermost/server/v8/channels/store/storetest/mocks"
-	"github.com/mattermost/mattermost/server/v8/channels/testlib"
-	"github.com/mattermost/mattermost/server/v8/config"
-	"github.com/mattermost/mattermost/server/v8/platform/shared/templates"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app/users"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store/storetest/mocks"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/testlib"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/config"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/shared/templates"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin/plugintest/mock"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
 )
 
 type TestHelper struct {

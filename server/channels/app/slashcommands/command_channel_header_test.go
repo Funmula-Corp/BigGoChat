@@ -8,7 +8,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/mattermost/mattermost/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 )
 
 func TestHeaderProviderDoCommand(t *testing.T) {
@@ -16,8 +16,6 @@ func TestHeaderProviderDoCommand(t *testing.T) {
 	defer th.tearDown()
 
 	hp := HeaderProvider{}
-
-	th.addPermissionToRole(model.PermissionManagePublicChannelProperties.Id, model.ChannelUserRoleId)
 
 	// Try a public channel *with* permission.
 	args := &model.CommandArgs{
@@ -34,7 +32,7 @@ func TestHeaderProviderDoCommand(t *testing.T) {
 		assert.Equal(t, expected, actual)
 	}
 
-	th.removePermissionFromRole(model.PermissionManagePublicChannelProperties.Id, model.ChannelUserRoleId)
+	th.removePermissionFromRole(model.PermissionManagePublicChannelProperties.Id, model.ChannelAdminRoleId)
 
 	// Try a public channel *without* permission.
 	args = &model.CommandArgs{
@@ -46,7 +44,7 @@ func TestHeaderProviderDoCommand(t *testing.T) {
 	actual := hp.DoCommand(th.App, th.Context, args, "hello").Text
 	assert.Equal(t, "api.command_channel_header.permission.app_error", actual)
 
-	th.addPermissionToRole(model.PermissionManagePrivateChannelProperties.Id, model.ChannelUserRoleId)
+	th.addPermissionToRole(model.PermissionManagePrivateChannelProperties.Id, model.ChannelAdminRoleId)
 
 	// Try a private channel *with* permission.
 	privateChannel := th.createPrivateChannel(th.BasicTeam)
@@ -60,7 +58,7 @@ func TestHeaderProviderDoCommand(t *testing.T) {
 	actual = hp.DoCommand(th.App, th.Context, args, "hello").Text
 	assert.Equal(t, "", actual)
 
-	th.removePermissionFromRole(model.PermissionManagePrivateChannelProperties.Id, model.ChannelUserRoleId)
+	th.removePermissionFromRole(model.PermissionManagePrivateChannelProperties.Id, model.ChannelAdminRoleId)
 
 	// Try a private channel *without* permission.
 	args = &model.CommandArgs{

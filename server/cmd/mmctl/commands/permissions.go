@@ -7,10 +7,10 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/mattermost/mattermost/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 
-	"github.com/mattermost/mattermost/server/v8/cmd/mmctl/client"
-	"github.com/mattermost/mattermost/server/v8/cmd/mmctl/printer"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/cmd/mmctl/client"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/cmd/mmctl/printer"
 
 	"github.com/spf13/cobra"
 )
@@ -50,6 +50,15 @@ var ShowRoleCmd = &cobra.Command{
 	RunE:       withClient(showRoleCmdF),
 }
 
+var ShowRolesCmd = &cobra.Command{
+	Use:        "csv",
+	Short:      "List all the role information",
+	Long:       "List all the information of all roles.",
+	Example:    `  permissions csv`,
+	Args:       cobra.ExactArgs(0),
+	RunE:       withClient(showRolesCmdF),
+}
+
 var ResetCmd = &cobra.Command{
 	Use:   "reset <role_name>",
 	Short: "Reset default permissions for role (EE Only)",
@@ -65,6 +74,7 @@ func init() {
 		AddPermissionsCmd,
 		RemovePermissionsCmd,
 		ShowRoleCmd,
+		ShowRolesCmd,
 		ResetCmd,
 	)
 

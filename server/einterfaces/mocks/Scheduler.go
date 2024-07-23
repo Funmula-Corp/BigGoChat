@@ -5,8 +5,8 @@
 package mocks
 
 import (
-	model "github.com/mattermost/mattermost/server/public/model"
-	request "github.com/mattermost/mattermost/server/public/shared/request"
+	model "git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	request "git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
 	mock "github.com/stretchr/testify/mock"
 
 	time "time"

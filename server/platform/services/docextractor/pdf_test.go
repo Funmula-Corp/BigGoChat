@@ -9,7 +9,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/mattermost/mattermost/server/v8/channels/utils/testutils"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/utils/testutils"
 )
 
 func TestPdfEmptyFile(t *testing.T) {

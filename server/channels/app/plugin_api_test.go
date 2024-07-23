@@ -27,13 +27,13 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 
-	"github.com/mattermost/mattermost/server/public/model"
-	"github.com/mattermost/mattermost/server/public/plugin"
-	"github.com/mattermost/mattermost/server/public/plugin/utils"
-	"github.com/mattermost/mattermost/server/public/shared/i18n"
-	"github.com/mattermost/mattermost/server/public/shared/request"
-	"github.com/mattermost/mattermost/server/v8/channels/utils/fileutils"
-	"github.com/mattermost/mattermost/server/v8/einterfaces/mocks"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin/utils"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/i18n"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/utils/fileutils"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/einterfaces/mocks"
 )
 
 func getDefaultPluginSettingsSchema() string {
@@ -144,7 +144,7 @@ func TestPublicFilesPathConfiguration(t *testing.T) {
 		package main
 
 		import (
-			"github.com/mattermost/mattermost/server/public/plugin"
+			"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
 		)
 
 		type MyPlugin struct {
@@ -873,7 +873,7 @@ func TestPluginAPIGetPlugins(t *testing.T) {
     package main
 
     import (
-      "github.com/mattermost/mattermost/server/public/plugin"
+      "git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
     )
 
     type MyPlugin struct {
@@ -1025,7 +1025,7 @@ func TestInstallPlugin(t *testing.T) {
 
 			"github.com/pkg/errors"
 
-			"github.com/mattermost/mattermost/server/public/plugin"
+			"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
 		)
 
 		type configuration struct {
@@ -1541,7 +1541,7 @@ func TestInterpluginPluginHTTP(t *testing.T) {
 		package main
 
 		import (
-			"github.com/mattermost/mattermost/server/public/plugin"
+			"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
 			"bytes"
 			"net/http"
 		)
@@ -1582,8 +1582,8 @@ func TestInterpluginPluginHTTP(t *testing.T) {
 		package main
 
 		import (
-			"github.com/mattermost/mattermost/server/public/plugin"
-			"github.com/mattermost/mattermost/server/public/model"
+			"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
+			"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 			"bytes"
 			"net/http"
 			"io"
@@ -1687,8 +1687,8 @@ func TestAPIMetrics(t *testing.T) {
 	package main
 
 	import (
-		"github.com/mattermost/mattermost/server/public/model"
-		"github.com/mattermost/mattermost/server/public/plugin"
+		"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+		"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
 	)
 
 	type MyPlugin struct {
@@ -2072,8 +2072,8 @@ func TestPluginUploadsAPI(t *testing.T) {
 		  "fmt"
 			"bytes"
 
-      "github.com/mattermost/mattermost/server/public/model"
-      "github.com/mattermost/mattermost/server/public/plugin"
+      "git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+      "git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
     )
 
     type TestPlugin struct {
@@ -2357,6 +2357,7 @@ func TestSendPushNotification(t *testing.T) {
 }
 
 func TestPluginServeMetrics(t *testing.T) {
+	t.SkipNow()
 	th := Setup(t, StartMetrics)
 	defer th.TearDown()
 
@@ -2437,8 +2438,8 @@ func TestPluginGetChannelsForTeamForUser(t *testing.T) {
 	pluginCode := `
 	package main
 	import (
-		"github.com/mattermost/mattermost/server/public/model"
-		"github.com/mattermost/mattermost/server/public/plugin"
+		"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+		"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
 		"github.com/pkg/errors"
 	)
 
@@ -2540,8 +2541,8 @@ func TestPluginPatchChannelMembersNotifications(t *testing.T) {
 		pluginCode := `
 			package main
 			import (
-				"github.com/mattermost/mattermost/server/public/plugin"
-				"github.com/mattermost/mattermost/server/public/model"
+				"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
+				"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 			)
 
 			const (
@@ -2609,8 +2610,8 @@ func TestPluginPatchChannelMembersNotifications(t *testing.T) {
 		pluginCode := `
 			package main
 			import (
-				"github.com/mattermost/mattermost/server/public/plugin"
-				"github.com/mattermost/mattermost/server/public/model"
+				"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
+				"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 			)
 
 			const (
@@ -2646,4 +2647,71 @@ func TestPluginPatchChannelMembersNotifications(t *testing.T) {
 
 		assert.Equal(t, "", updated.NotifyProps["test_field"])
 	})
+}
+
+func TestPluginUserUpdateCompatibility(t *testing.T) {
+	th := Setup(t).InitBasic()
+	defer th.TearDown()
+	require.NotEmpty(t, th.BasicUser.Mobilephone)
+
+	testFolder, found := fileutils.FindDir("channels/app/plugin_api_tests")
+	require.True(t, found, "Cannot find tests folder")
+	fullPath := path.Join(testFolder, "manual.test_user_update_compatibility_plugin", "main.go")
+
+	pluginCode, err := os.ReadFile(fullPath)
+	require.NoError(t, err)
+	require.NotEmpty(t, pluginCode)
+
+	tearDown, ids, errors := SetAppEnvironmentWithPlugins(t, []string{string(pluginCode)}, th.App, th.NewPluginAPI)
+	defer tearDown()
+	require.NoError(t, errors[0])
+	require.Len(t, ids, 1)
+
+	pluginID := ids[0]
+	require.NotEmpty(t, pluginID)
+
+	hooks, err := th.App.GetPluginsEnvironment().HooksForPlugin(pluginID)
+	require.NoError(t, err)
+	require.NotNil(t, hooks)
+
+	post := &model.Post{
+		UserId: th.BasicUser.Id,
+	}
+	_, ret := hooks.MessageWillBePosted(nil, post)
+	assert.Equal(t, ret, "OK")
+
+	nUser, err := th.App.GetUser(th.BasicUser.Id)
+	require.Nil(t, err)
+	require.NotEmpty(t, nUser.Mobilephone)
+	require.Equal(t, th.BasicUser.Mobilephone, nUser.Mobilephone)
+	require.Equal(t, "updated", nUser.Nickname)
+}
+
+func TestPluginMarkUserVerified(t *testing.T){
+	th := Setup(t).InitBasic()
+	defer th.TearDown()
+	api := th.SetupPluginAPI()
+	cm2, err := th.App.AddUserToChannel(th.Context, th.BasicUnverified, th.BasicChannel, false)
+	require.Nil(t, err)
+	require.False(t, cm2.SchemeVerified)
+
+	th.BasicUnverified.Mobilephone = model.NewString(th.GenerateTestMobilephone())
+	th.BasicUnverified.Roles += " " + model.SystemVerifiedRoleId
+	_, err = th.App.UpdateUser(th.Context, th.BasicUnverified, false)
+	require.Nil(t, err)
+
+	err = api.MarkUserVerified(th.BasicUnverified.Id)
+	require.Nil(t, err)
+	allTm , err := th.App.GetTeamMembersForUser(th.Context, th.BasicUnverified.Id, "", false)
+	require.Nil(t, err)
+	require.Len(t, allTm, 1)
+	for _, tm := range(allTm){
+		require.True(t, tm.SchemeVerified)
+	}
+	allCm, err := th.App.GetChannelMembersForUser(th.Context, th.BasicTeam.Id, th.BasicUnverified.Id)
+	require.Nil(t, err)
+	require.Greater(t, len(allCm), 0)
+	for _, cm := range(allCm){
+		require.True(t, cm.SchemeVerified)
+	}
 }

@@ -65,6 +65,7 @@ type ChannelMember struct {
 	LastUpdateAt       int64     `json:"last_update_at"`
 	SchemeGuest        bool      `json:"scheme_guest"`
 	SchemeUser         bool      `json:"scheme_user"`
+	SchemeVerified     bool     `json:"scheme_verified"`
 	SchemeAdmin        bool      `json:"scheme_admin"`
 	ExplicitRoles      string    `json:"explicit_roles"`
 }

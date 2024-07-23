@@ -5,17 +5,18 @@ package slashcommands
 
 import (
 	"bytes"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/mattermost/mattermost/server/v8/channels/testlib"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/testlib"
 
-	"github.com/mattermost/mattermost/server/v8/channels/app"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app"
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/mattermost/mattermost/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 )
 
 func setupForSharedChannels(tb testing.TB) *TestHelper {
@@ -30,7 +31,7 @@ func TestShareProviderDoCommand(t *testing.T) {
 		th := setupForSharedChannels(t).initBasic()
 		defer th.tearDown()
 
-		th.addPermissionToRole(model.PermissionManageSharedChannels.Id, th.BasicUser.Roles)
+		th.addPermissionToRole(model.PermissionManageSharedChannels.Id, strings.Fields(th.BasicUser.Roles)[0])
 
 		mockSyncService := app.NewMockSharedChannelService(th.Server.GetSharedChannelSyncService())
 		th.Server.SetSharedChannelSyncService(mockSyncService)
@@ -63,7 +64,7 @@ func TestShareProviderDoCommand(t *testing.T) {
 		th := setupForSharedChannels(t).initBasic()
 		defer th.tearDown()
 
-		th.addPermissionToRole(model.PermissionManageSharedChannels.Id, th.BasicUser.Roles)
+		th.addPermissionToRole(model.PermissionManageSharedChannels.Id, strings.Fields(th.BasicUser.Roles)[0])
 
 		mockSyncService := app.NewMockSharedChannelService(th.Server.GetSharedChannelSyncService())
 		th.Server.SetSharedChannelSyncService(mockSyncService)
@@ -95,7 +96,7 @@ func TestShareProviderDoCommand(t *testing.T) {
 		th := setupForSharedChannels(t).initBasic()
 		defer th.tearDown()
 
-		th.addPermissionToRole(model.PermissionManageSharedChannels.Id, th.BasicUser.Roles)
+		th.addPermissionToRole(model.PermissionManageSharedChannels.Id, strings.Fields(th.BasicUser.Roles)[0])
 
 		mockSyncService := app.NewMockSharedChannelService(th.Server.GetSharedChannelSyncService())
 		th.Server.SetSharedChannelSyncService(mockSyncService)

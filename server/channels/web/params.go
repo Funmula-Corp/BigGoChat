@@ -11,7 +11,7 @@ import (
 
 	"github.com/gorilla/mux"
 
-	"github.com/mattermost/mattermost/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 )
 
 const (
@@ -100,6 +100,8 @@ type Params struct {
 
 	// Cloud
 	InvoiceId string
+
+	BlockedUserId string
 }
 
 func ParamsFromRequest(r *http.Request) *Params {
@@ -250,6 +252,8 @@ func ParamsFromRequest(r *http.Request) *Params {
 	} else {
 		params.BookmarksSince = val
 	}
+
+	params.BlockedUserId = props["blocked_user_id"]
 
 	return params
 }

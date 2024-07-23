@@ -13,7 +13,7 @@ import (
 
 	"github.com/pkg/errors"
 
-	"github.com/mattermost/mattermost/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 )
 
 const permissionsExportBatchSize = 100
@@ -84,9 +84,11 @@ func (a *App) ExportPermissions(w io.Writer) error {
 		for _, scheme := range schemeBatch {
 			roleNames := []string{
 				scheme.DefaultTeamAdminRole,
+				scheme.DefaultTeamVerifiedRole,
 				scheme.DefaultTeamUserRole,
 				scheme.DefaultTeamGuestRole,
 				scheme.DefaultChannelAdminRole,
+				scheme.DefaultChannelVerifiedRole,
 				scheme.DefaultChannelUserRole,
 				scheme.DefaultChannelGuestRole,
 			}
@@ -109,9 +111,11 @@ func (a *App) ExportPermissions(w io.Writer) error {
 				Description:  scheme.Description,
 				Scope:        scheme.Scope,
 				TeamAdmin:    scheme.DefaultTeamAdminRole,
+				TeamVerified: scheme.DefaultTeamVerifiedRole,
 				TeamUser:     scheme.DefaultTeamUserRole,
 				TeamGuest:    scheme.DefaultTeamGuestRole,
 				ChannelAdmin: scheme.DefaultChannelAdminRole,
+				ChannelVerified:  scheme.DefaultChannelVerifiedRole,
 				ChannelUser:  scheme.DefaultChannelUserRole,
 				ChannelGuest: scheme.DefaultChannelGuestRole,
 				Roles:        roles,

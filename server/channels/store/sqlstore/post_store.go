@@ -17,13 +17,13 @@ import (
 
 	sq "github.com/mattermost/squirrel"
 
-	"github.com/mattermost/mattermost/server/public/model"
-	"github.com/mattermost/mattermost/server/public/shared/mlog"
-	"github.com/mattermost/mattermost/server/public/shared/request"
-	"github.com/mattermost/mattermost/server/v8/channels/store"
-	"github.com/mattermost/mattermost/server/v8/channels/store/searchlayer"
-	"github.com/mattermost/mattermost/server/v8/channels/utils"
-	"github.com/mattermost/mattermost/server/v8/einterfaces"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store/searchlayer"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/utils"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/einterfaces"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
 )
 
 // Regex to get quoted strings
@@ -574,13 +574,18 @@ func (s *SqlPostStore) getPostWithCollapsedThreads(id, userID string, opts model
 	)
 	var post postWithExtra
 
-	postFetchQuery, args, err := s.getQueryBuilder().
+	threadsQuery := s.getQueryBuilder().
 		Select(columns...).
 		From("Posts").
 		LeftJoin("Threads ON Threads.PostId = Id").
 		LeftJoin("ThreadMemberships ON ThreadMemberships.PostId = Id AND ThreadMemberships.UserId = ?", userID).
-		Where(sq.Eq{"Posts.DeleteAt": 0}).
-		Where(sq.Eq{"Posts.Id": id}).ToSql()
+		Where(sq.Eq{"Posts.Id": id})
+
+	if !opts.IncludeDeleted {
+		threadsQuery = threadsQuery.Where(sq.Eq{"Posts.DeleteAt": 0})
+	}
+
+	postFetchQuery, args, err := threadsQuery.ToSql()
 	if err != nil {
 		return nil, errors.Wrap(err, "getPostWithCollapsedThreads_ToSql2")
 	}
@@ -598,10 +603,11 @@ func (s *SqlPostStore) getPostWithCollapsedThreads(id, userID string, opts model
 	query := s.getQueryBuilder().
 		Select("*").
 		From("Posts").
-		Where(sq.Eq{
-			"Posts.RootId":   id,
-			"Posts.DeleteAt": 0,
-		})
+		Where(sq.Eq{"Posts.RootId": id})
+
+	if !opts.IncludeDeleted {
+		query = query.Where(sq.Eq{"Posts.DeleteAt": 0})
+	}
 
 	var sort string
 	if opts.Direction != "" {
@@ -692,8 +698,30 @@ func (s *SqlPostStore) Get(ctx context.Context, id string, opts model.GetPostsOp
 		return nil, store.NewErrInvalidInput("Post", "id", id)
 	}
 	var post model.Post
-	postFetchQuery := "SELECT p.*, (SELECT count(*) FROM Posts WHERE Posts.RootId = (CASE WHEN p.RootId = '' THEN p.Id ELSE p.RootId END) AND Posts.DeleteAt = 0) as ReplyCount FROM Posts p WHERE p.Id = ? AND p.DeleteAt = 0"
-	err := s.DBXFromContext(ctx).Get(&post, postFetchQuery, id)
+	rcQuery := s.getQueryBuilder().
+		Select("count(*)").
+		From("Posts").
+		Where("Posts.RootId = (CASE WHEN p.RootId = '' THEN p.Id ELSE p.RootId END)").
+		Prefix("(").
+		Suffix(") as ReplyCount")
+	if !opts.IncludeDeleted {
+		rcQuery = rcQuery.Where("Posts.DeleteAt = 0")
+	}
+	replyCountQuery, _, _ := rcQuery.ToSql()
+	pfQuery := s.getQueryBuilder().
+		Select("p.*", replyCountQuery).
+		From("Posts p").
+		Where("p.Id = ?")
+	if !opts.IncludeDeleted {
+		pfQuery = pfQuery.Where("p.DeleteAt = 0")
+	}
+	postFetchQuery, _, err := pfQuery.ToSql()
+	if err != nil {
+		return nil, errors.Wrap(err, "Get_Tosql")
+	}
+
+	// postFetchQuery := "SELECT p.*, (SELECT count(*) FROM Posts WHERE Posts.RootId = (CASE WHEN p.RootId = '' THEN p.Id ELSE p.RootId END) AND Posts.DeleteAt = 0) as ReplyCount FROM Posts p WHERE p.Id = ? AND p.DeleteAt = 0"
+	err = s.DBXFromContext(ctx).Get(&post, postFetchQuery, id)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, store.NewErrNotFound("Post", id)
@@ -719,12 +747,9 @@ func (s *SqlPostStore) Get(ctx context.Context, id string, opts model.GetPostsOp
 			query = s.getQueryBuilder().
 				Select("p.*, (SELECT count(*) FROM Posts WHERE Posts.RootId = (CASE WHEN p.RootId = '' THEN p.Id ELSE p.RootId END) AND Posts.DeleteAt = 0) as ReplyCount").
 				From("Posts p").
-				Where(sq.And{
-					sq.Or{
-						sq.Eq{"p.Id": rootId},
-						sq.Eq{"p.RootId": rootId},
-					},
-					sq.Eq{"p.DeleteAt": 0},
+				Where(sq.Or{
+					sq.Eq{"p.Id": rootId},
+					sq.Eq{"p.RootId": rootId},
 				})
 		} else {
 			query = s.getQueryBuilder().
@@ -740,13 +765,14 @@ func (s *SqlPostStore) Get(ctx context.Context, id string, opts model.GetPostsOp
 					}).Suffix(")"),
 				).
 				From("Posts p, replycount").
-				Where(sq.And{
-					sq.Or{
-						sq.Eq{"p.Id": rootId},
-						sq.Eq{"p.RootId": rootId},
-					},
-					sq.Eq{"p.DeleteAt": 0},
+				Where(sq.Or{
+					sq.Eq{"p.Id": rootId},
+					sq.Eq{"p.RootId": rootId},
 				})
+		}
+
+		if !opts.IncludeDeleted {
+			query = query.Where(sq.Eq{"p.DeleteAt": 0})
 		}
 
 		var sort string
@@ -1201,17 +1227,22 @@ func (s *SqlPostStore) getPostsCollapsedThreads(options model.GetPostsOptions, s
 	var posts []*postWithExtra
 	offset := options.PerPage * options.Page
 
-	postFetchQuery, args, _ := s.getQueryBuilder().
+	query := s.getQueryBuilder().
 		Select(columns...).
 		From("Posts").
 		LeftJoin("Threads ON Threads.PostId = Posts.Id").
 		LeftJoin("ThreadMemberships ON ThreadMemberships.PostId = Posts.Id AND ThreadMemberships.UserId = ?", options.UserId).
-		Where(sq.Eq{"Posts.DeleteAt": 0}).
 		Where(sq.Eq{"Posts.ChannelId": options.ChannelId}).
 		Where(sq.Eq{"Posts.RootId": ""}).
 		Limit(uint64(options.PerPage)).
 		Offset(uint64(offset)).
-		OrderBy("Posts.CreateAt DESC").ToSql()
+		OrderBy("Posts.CreateAt DESC")
+
+	if !options.IncludeDeleted {
+		query = query.Where(sq.Eq{"Posts.DeleteAt": 0})
+	}
+
+	postFetchQuery, args, _ := query.ToSql()
 
 	err := s.GetReplicaX().Select(&posts, postFetchQuery, args...)
 	if err != nil {
@@ -1654,7 +1685,7 @@ func (s *SqlPostStore) getPostIdAroundTime(channelId string, time int64, before 
 	conditions := sq.And{
 		direction,
 		sq.Eq{"Posts.ChannelId": channelId},
-		sq.Eq{"Posts.DeleteAt": int(0)},
+		// sq.Eq{"Posts.DeleteAt": int(0)},
 	}
 	if collapsedThreads {
 		conditions = sq.And{conditions, sq.Eq{"Posts.RootId": ""}}
@@ -1695,7 +1726,7 @@ func (s *SqlPostStore) GetPostAfterTime(channelId string, time int64, collapsedT
 	conditions := sq.And{
 		sq.Gt{"Posts.CreateAt": time},
 		sq.Eq{"Posts.ChannelId": channelId},
-		sq.Eq{"Posts.DeleteAt": int(0)},
+		// sq.Eq{"Posts.DeleteAt": int(0)},
 	}
 	if collapsedThreads {
 		conditions = sq.And{conditions, sq.Eq{"RootId": ""}}
@@ -2470,7 +2501,7 @@ func (s *SqlPostStore) GetPostsBatchForIndexing(startTime int64, startPostID str
 	//     (CreateAt, Id) > (?, ?)
 	// The wrong choice for any of the two databases makes the query go from
 	// milliseconds to dozens of seconds.
-	// More information in: https://github.com/mattermost/mattermost/pull/26517
+	// More information in: https://git.biggo.com/Funmula/mattermost-funmula/pull/26517
 	// and https://community.mattermost.com/core/pl/ui5dz96shinetb8nq83myggbma
 	if s.DriverName() == model.DatabaseDriverMysql {
 		query := `SELECT

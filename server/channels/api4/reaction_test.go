@@ -11,7 +11,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/mattermost/mattermost/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 )
 
 func TestSaveReaction(t *testing.T) {
@@ -155,7 +155,7 @@ func TestSaveReaction(t *testing.T) {
 	t.Run("unable-to-create-reaction-without-permissions", func(t *testing.T) {
 		th.LoginBasic()
 
-		th.RemovePermissionFromRole(model.PermissionAddReaction.Id, model.ChannelUserRoleId)
+		th.RemovePermissionFromRole(model.PermissionAddReaction.Id, model.ChannelVerifiedRoleId)
 		_, resp, err := client.SaveReaction(context.Background(), reaction)
 		require.Error(t, err)
 		CheckForbiddenStatus(t, resp)
@@ -163,7 +163,7 @@ func TestSaveReaction(t *testing.T) {
 		reactions, appErr := th.App.GetReactionsForPost(postId)
 		require.Nil(t, appErr)
 		require.Equal(t, 3, len(reactions), "should have not created a reactions")
-		th.AddPermissionToRole(model.PermissionAddReaction.Id, model.ChannelUserRoleId)
+		th.AddPermissionToRole(model.PermissionAddReaction.Id, model.ChannelVerifiedRoleId)
 	})
 
 	t.Run("unable-to-react-in-an-archived-channel", func(t *testing.T) {
@@ -447,7 +447,7 @@ func TestDeleteReaction(t *testing.T) {
 	t.Run("unable-to-delete-reaction-without-permissions", func(t *testing.T) {
 		th.LoginBasic()
 
-		th.RemovePermissionFromRole(model.PermissionRemoveReaction.Id, model.ChannelUserRoleId)
+		th.RemovePermissionFromRole(model.PermissionRemoveReaction.Id, model.ChannelVerifiedRoleId)
 		th.App.SaveReactionForPost(th.Context, r1)
 
 		resp, err := client.DeleteReaction(context.Background(), r1)
@@ -457,7 +457,7 @@ func TestDeleteReaction(t *testing.T) {
 		reactions, appErr := th.App.GetReactionsForPost(postId)
 		require.Nil(t, appErr)
 		require.Equal(t, 1, len(reactions), "should have not deleted a reactions")
-		th.AddPermissionToRole(model.PermissionRemoveReaction.Id, model.ChannelUserRoleId)
+		th.AddPermissionToRole(model.PermissionRemoveReaction.Id, model.ChannelVerifiedRoleId)
 	})
 
 	t.Run("unable-to-delete-others-reactions-without-permissions", func(t *testing.T) {

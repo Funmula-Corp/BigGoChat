@@ -14,6 +14,7 @@ type Props = {
     team: TeamWithMembership;
     doRemoveUserFromTeam: (teamId: string) => void;
     doMakeUserTeamAdmin: (teamId: string) => void;
+    doMakeUserTeamModerator: (teamId: string) => void;
     doMakeUserTeamMember: (teamId: string) => void;
     isDisabled?: boolean;
 }
@@ -22,18 +23,22 @@ const TeamListDropdown = ({
     team,
     doRemoveUserFromTeam,
     doMakeUserTeamAdmin,
+    doMakeUserTeamModerator,
     doMakeUserTeamMember,
     isDisabled,
 }: Props) => {
     const intl = useIntl();
 
     const isAdmin = team.scheme_admin;
+    const isModerator = team.scheme_moderator;
     const isMember = team.scheme_user && !team.scheme_admin;
     const isGuest = team.scheme_guest;
     const showMakeTeamAdmin = !isAdmin && !isGuest;
+    const showMakeTeamModerator = !isModerator && !isGuest;
     const showMakeTeamMember = !isMember && !isGuest;
 
     const makeTeamAdminOnClick = useCallback(() => doMakeUserTeamAdmin(team.id), [team.id, doMakeUserTeamAdmin]);
+    const makeTeamModeratorOnClick = useCallback(() => doMakeUserTeamModerator(team.id), [team.id, doMakeUserTeamModerator]);
     const makeTeamMemberOnClick = useCallback(() => doMakeUserTeamMember(team.id), [team.id, doMakeUserTeamMember]);
     const removeUserTeamOnClick = useCallback(() => doRemoveUserFromTeam(team.id), [team.id, doRemoveUserFromTeam]);
 
@@ -58,6 +63,11 @@ const TeamListDropdown = ({
                         show={showMakeTeamAdmin}
                         onClick={makeTeamAdminOnClick}
                         text={intl.formatMessage({id: 'team_members_dropdown.makeAdmin', defaultMessage: 'Make Team Admin'})}
+                    />
+                    <Menu.ItemAction
+                        show={showMakeTeamModerator}
+                        onClick={makeTeamModeratorOnClick}
+                        text={intl.formatMessage({id: 'team_members_dropdown.makeModerator', defaultMessage: 'Make Team Moderator'})}
                     />
                     <Menu.ItemAction
                         show={showMakeTeamMember}

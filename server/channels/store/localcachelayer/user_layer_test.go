@@ -10,11 +10,11 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/mattermost/mattermost/server/public/model"
-	"github.com/mattermost/mattermost/server/public/plugin/plugintest/mock"
-	"github.com/mattermost/mattermost/server/v8/channels/store"
-	"github.com/mattermost/mattermost/server/v8/channels/store/storetest"
-	"github.com/mattermost/mattermost/server/v8/channels/store/storetest/mocks"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin/plugintest/mock"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store/storetest"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store/storetest/mocks"
 )
 
 func TestUserStore(t *testing.T) {
@@ -27,6 +27,7 @@ func TestUserStoreCache(t *testing.T) {
 		Id:          "123",
 		AuthData:    model.NewString("authData"),
 		AuthService: "authService",
+		Mobilephone: model.NewString("+8860900000000"),
 	}}
 
 	t.Run("first call not cached, second cached and returning same data", func(t *testing.T) {
@@ -233,6 +234,7 @@ func TestUserStoreGetCache(t *testing.T) {
 		Id:          "123",
 		AuthData:    model.NewString("authData"),
 		AuthService: "authService",
+		Mobilephone: model.NewString("+8860900000000"),
 	}
 	t.Run("first call not cached, second cached and returning same data", func(t *testing.T) {
 		mockStore := getMockStore(t)
@@ -303,6 +305,7 @@ func TestUserStoreGetManyCache(t *testing.T) {
 		Id:          "123",
 		AuthData:    model.NewString("authData"),
 		AuthService: "authService",
+		Mobilephone: model.NewString("+8860900000000"),
 	}
 	otherFakeUser := &model.User{
 		Id:          "456",

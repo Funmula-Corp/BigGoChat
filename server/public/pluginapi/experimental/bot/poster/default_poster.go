@@ -3,7 +3,7 @@ package poster
 import (
 	"fmt"
 
-	"github.com/mattermost/mattermost/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 )
 
 type defaultPoster struct {

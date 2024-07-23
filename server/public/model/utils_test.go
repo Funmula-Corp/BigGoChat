@@ -785,6 +785,10 @@ func TestIsValidId(t *testing.T) {
 			Result: false,
 		},
 		{
+			Input:  "biggoyyyyyyyyyyyyyyyyyyyyn",
+			Result: true,
+		},
+		{
 			Input:  NewId() + "}",
 			Result: false,
 		},

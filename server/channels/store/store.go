@@ -10,9 +10,9 @@ import (
 	"database/sql"
 	"time"
 
-	"github.com/mattermost/mattermost/server/public/model"
-	"github.com/mattermost/mattermost/server/public/shared/mlog"
-	"github.com/mattermost/mattermost/server/public/shared/request"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
 )
 
 type StoreResult[T any] struct {
@@ -91,6 +91,7 @@ type Store interface {
 	PostPersistentNotification() PostPersistentNotificationStore
 	DesktopTokens() DesktopTokensStore
 	ChannelBookmark() ChannelBookmarkStore
+	Blocklist() BlocklistStore
 }
 
 type RetentionPolicyStore interface {
@@ -482,6 +483,7 @@ type UserStore interface {
 	RefreshPostStatsForUsers() error
 	GetUserReport(filter *model.UserReportOptions) ([]*model.UserReportQuery, error)
 	GetUserCountForReport(filter *model.UserReportOptions) (int64, error)
+	UpdateMemberVerifiedStatus(rctx request.CTX, user *model.User) (error)
 }
 
 type BotStore interface {
@@ -812,6 +814,9 @@ type RoleStore interface {
 	// ChannelRolesUnderTeamRole returns all of the non-deleted roles that are affected by updates to the
 	// given role.
 	ChannelRolesUnderTeamRole(roleName string) ([]*model.Role, error)
+
+	// create role with customized id
+	CreateRole(role *model.Role) (*model.Role, error)
 }
 
 type SchemeStore interface {
@@ -823,6 +828,10 @@ type SchemeStore interface {
 	PermanentDeleteAll() error
 	CountByScope(scope string) (int64, error)
 	CountWithoutPermission(scope, permissionID string, roleScope model.RoleScope, roleType model.RoleType) (int64, error)
+
+	// create scheme with customized id
+	CreateBuiltInScheme(scheme *model.Scheme) (*model.Scheme, error)
+	CloneScheme(scheme *model.Scheme) (*model.Scheme, error)
 }
 
 type TermsOfServiceStore interface {
@@ -1036,6 +1045,26 @@ type ChannelBookmarkStore interface {
 	UpdateSortOrder(bookmarkId, channelId string, newIndex int64) ([]*model.ChannelBookmarkWithFileInfo, error)
 	Delete(bookmarkId string, deleteFile bool) error
 	GetBookmarksForChannelSince(channelId string, since int64) ([]*model.ChannelBookmarkWithFileInfo, error)
+}
+
+type BlocklistStore interface {
+	GetChannelBlockUser(channelId string, userId string) (*model.ChannelBlockUser, error)
+	GetChannelBlockUserByEmail(channelId string, email string) (*model.ChannelBlockUser, error)
+	ListChannelBlockUsers(channelId string) (*model.ChannelBlockUserList, error)
+	ListChannelBlockUsersByBlockedUser(blockedId string) (*model.ChannelBlockUserList, error)
+	DeleteChannelBlockUser(channelId string, userId string) error
+	SaveChannelBlockUser(blockUser *model.ChannelBlockUser) (*model.ChannelBlockUser, error)
+	GetTeamBlockUser(channelId string, userId string) (*model.TeamBlockUser, error)
+	GetTeamBlockUserByEmail(teamId string, email string) (*model.TeamBlockUser, error)
+	ListTeamBlockUsers(channelId string) (*model.TeamBlockUserList, error)
+	ListTeamBlockUsersByBlockedUser(blockedId string) (*model.TeamBlockUserList, error)
+	DeleteTeamBlockUser(channelId string, userId string) error
+	SaveTeamBlockUser(blockUser *model.TeamBlockUser) (*model.TeamBlockUser, error)
+	GetUserBlockUser(userId string, blockedId string) (*model.UserBlockUser, error)
+	ListUserBlockUsers(userId string) (*model.UserBlockUserList, error)
+	ListUserBlockUsersByBlockedUser(blockedId string) (*model.UserBlockUserList, error)
+	DeleteUserBlockUser(userId, blockedId string, userIsVerified, blockedIsVerified bool) error
+	SaveUserBlockUser(userBlockUser *model.UserBlockUser) (*model.UserBlockUser, error)
 }
 
 // ChannelSearchOpts contains options for searching channels.

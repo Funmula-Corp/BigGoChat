@@ -10,14 +10,14 @@ import (
 
 	"github.com/stretchr/testify/mock"
 
-	"github.com/mattermost/mattermost/server/public/model"
-	"github.com/mattermost/mattermost/server/public/shared/request"
-	"github.com/mattermost/mattermost/server/v8/channels/store"
-	"github.com/mattermost/mattermost/server/v8/channels/store/sqlstore"
-	"github.com/mattermost/mattermost/server/v8/channels/store/storetest/mocks"
-	"github.com/mattermost/mattermost/server/v8/channels/testlib"
-	"github.com/mattermost/mattermost/server/v8/platform/services/cache"
-	cachemocks "github.com/mattermost/mattermost/server/v8/platform/services/cache/mocks"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store/sqlstore"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store/storetest/mocks"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/testlib"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/services/cache"
+	cachemocks "git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/services/cache/mocks"
 )
 
 var mainHelper *testlib.MainHelper
@@ -147,6 +147,7 @@ func getMockStore(t *testing.T) *mocks.Store {
 		Id:          "123",
 		AuthData:    model.NewString("authData"),
 		AuthService: "authService",
+		Mobilephone: model.NewString("+8860900000000"),
 	}}
 	mockUserStore := mocks.UserStore{}
 	mockUserStore.On("GetProfileByIds", mock.Anything, []string{"123"}, &store.UserGetByIdsOpts{}, true).Return(fakeUser, nil)

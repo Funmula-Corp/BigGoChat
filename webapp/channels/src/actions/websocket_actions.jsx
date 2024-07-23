@@ -769,6 +769,7 @@ export function handlePostEditEvent(msg) {
 
 async function handlePostDeleteEvent(msg) {
     const post = JSON.parse(msg.data.post);
+    const deleteBy = post.props.deleteBy || msg.data.delete_by || "admin";
 
     if (window.logPostEvents) {
         // eslint-disable-next-line no-console
@@ -782,7 +783,13 @@ async function handlePostDeleteEvent(msg) {
         dispatch(decrementThreadCounts(post));
     }
 
-    dispatch(postDeleted(post));
+    dispatch(postDeleted({
+        ...post,
+        props: {
+            ...post.props,
+            deleteBy,
+        }
+    }));
 
     // update thread when a comment is deleted and CRT is on
     if (post.root_id && collapsedThreads) {

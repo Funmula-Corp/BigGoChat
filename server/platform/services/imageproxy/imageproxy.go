@@ -11,10 +11,10 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/mattermost/mattermost/server/public/model"
-	"github.com/mattermost/mattermost/server/public/shared/mlog"
-	"github.com/mattermost/mattermost/server/v8/platform/services/configservice"
-	"github.com/mattermost/mattermost/server/v8/platform/services/httpservice"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/services/configservice"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/services/httpservice"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
 )
 
 var ErrNotEnabled = Error{errors.New("imageproxy.ImageProxy: image proxy not enabled")}

@@ -7161,7 +7161,7 @@
   },
   {
     "id": "api.templates.email_footer_v2",
-    "translation": " "
+    "translation": "© 2024 BigGo"
   },
   {
     "id": "api.system.update_notices.validating_failed",

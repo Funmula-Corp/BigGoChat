@@ -7,7 +7,7 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/mattermost/mattermost/server/v8/channels/store"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
 )
 
 const (

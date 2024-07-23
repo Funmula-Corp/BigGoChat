@@ -7,6 +7,7 @@ import type {UserProfile} from '@mattermost/types/users';
 
 import {createSelector} from 'mattermost-redux/selectors/create_selector';
 import {getCurrentUser} from 'mattermost-redux/selectors/entities/common';
+import { General } from 'mattermost-redux/constants';
 
 export type PermissionsOptions = {
     channel?: string;
@@ -34,7 +35,7 @@ export const getMySystemPermissions: (state: GlobalState) => Set<string> = creat
     'getMySystemPermissions',
     getMySystemRoles,
     getRoles,
-    (mySystemRoles: Set<string>, allRoles) => {
+    (mySystemRoles: Set<string>, allRoles: any) => {
         return getPermissionsForRoles(allRoles, mySystemRoles);
     },
 );
@@ -59,4 +60,11 @@ export function getPermissionsForRoles(allRoles: Record<string, Role>, roleSet: 
     }
 
     return permissions;
+}
+
+export function haveIVerified(state: GlobalState) {
+    return getCurrentUser(state)
+        .roles
+        .split(' ')
+        .some(role => role == General.SYSTEM_ADMIN_ROLE || role == General.SYSTEM_VERIFIED_ROLE);
 }

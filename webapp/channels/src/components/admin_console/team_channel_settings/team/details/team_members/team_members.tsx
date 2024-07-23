@@ -39,7 +39,7 @@ type Props = {
 
     onAddCallback: (users: UserProfile[]) => void;
     onRemoveCallback: (user: UserProfile) => void;
-    updateRole: (userId: string, schemeUser: boolean, schemeAdmin: boolean) => void;
+    updateRole: (userId: string, schemeUser: boolean, schemeAdmin: boolean, schemeModerator: boolean) => void;
 
     actions: {
         getTeamStats: (teamId: string) => Promise<ActionResult>;
@@ -171,7 +171,7 @@ export default class TeamMembers extends React.PureComponent<Props, State> {
     };
 
     private updateMembership = (membership: BaseMembership) => {
-        this.props.updateRole(membership.user_id, membership.scheme_user, membership.scheme_admin);
+        this.props.updateRole(membership.user_id, membership.scheme_user, membership.scheme_admin, membership.scheme_moderator);
     };
 
     public render = () => {
