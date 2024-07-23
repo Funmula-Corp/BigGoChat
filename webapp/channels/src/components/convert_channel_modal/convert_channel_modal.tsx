@@ -89,7 +89,7 @@ export default class ConvertChannelModal extends React.PureComponent<Props, Stat
                     >
                         <FormattedMessage
                             id='convert_channel.title'
-                            defaultMessage='Convert {display_name} to a Private Channel?'
+                            defaultMessage='Confirm changing {display_name} to a private channel?'
                             values={{
                                 display_name: channelDisplayName,
                             }}
@@ -101,15 +101,6 @@ export default class ConvertChannelModal extends React.PureComponent<Props, Stat
                         <FormattedMarkdownMessage
                             id='convert_channel.question1'
                             defaultMessage='When you convert **{display_name}** to a private channel, history and membership are preserved. Publicly shared files remain accessible to anyone with the link. Membership in a private channel is by invitation only.'
-                            values={{
-                                display_name: channelDisplayName,
-                            }}
-                        />
-                    </p>
-                    <p>
-                        <FormattedMessage
-                            id='convert_channel.question2'
-                            defaultMessage='The change is permanent and cannot be undone.'
                         />
                     </p>
                     {/* todo i18n */}
@@ -117,14 +108,14 @@ export default class ConvertChannelModal extends React.PureComponent<Props, Stat
                         <div className='Input_wrapper'>
                             <input
                                 className='Input form-control medium new-channel-modal-name-input channel-name-input-field'
-                                placeholder='輸入頻道名稱'
+                                placeholder='Enter channel name'
                                 onChange={this.onUpdateConfirmName}
                                 autoFocus
                             />
                         </div>
                     </p>
                     <p style={{ fontSize: '12px', color: 'rgba(63, 67 89, 0.75)' }}>
-                        請輸入此頻道名稱已確認變更
+                        Please enter this channel's name to confirm the change
                     </p>
                 </Modal.Body>
                 <Modal.Footer>
