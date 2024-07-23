@@ -636,6 +636,7 @@ type AppIface interface {
 	GetAllRemoteClusters(filter model.RemoteClusterQueryFilter) ([]*model.RemoteCluster, *model.AppError)
 	GetAllRoles() ([]*model.Role, *model.AppError)
 	GetAllTeams() ([]*model.Team, *model.AppError)
+	GetAllTeamsByEmail(email string) ([]*model.Team, *model.AppError)
 	GetAllTeamsPage(offset int, limit int, opts *model.TeamSearch) ([]*model.Team, *model.AppError)
 	GetAllTeamsPageWithCount(offset int, limit int, opts *model.TeamSearch) (*model.TeamsWithCount, *model.AppError)
 	GetAnalytics(rctx request.CTX, name string, teamID string) (model.AnalyticsRows, *model.AppError)

@@ -302,6 +302,36 @@ func (_m *TeamStore) GetAllTeamListing() ([]*model.Team, error) {
 	return r0, r1
 }
 
+// GetAllTeamsByEmail provides a mock function with given fields: email
+func (_m *TeamStore) GetAllTeamsByEmail(email string) ([]*model.Team, error) {
+	ret := _m.Called(email)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetAllTeamsByEmail")
+	}
+
+	var r0 []*model.Team
+	var r1 error
+	if rf, ok := ret.Get(0).(func(string) ([]*model.Team, error)); ok {
+		return rf(email)
+	}
+	if rf, ok := ret.Get(0).(func(string) []*model.Team); ok {
+		r0 = rf(email)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*model.Team)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(string) error); ok {
+		r1 = rf(email)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // GetByEmptyInviteID provides a mock function with given fields:
 func (_m *TeamStore) GetByEmptyInviteID() ([]*model.Team, error) {
 	ret := _m.Called()

@@ -976,6 +976,28 @@ func TestUpdateTeamPrivacy(t *testing.T) {
 	})
 }
 
+func TestMaxTeamCreation(t *testing.T) {
+	th := Setup(t)
+	defer th.TearDown()
+	client := th.Client
+
+	for i := 1; i <= MaxTeamCreationLimit+1; i++ {
+		team := &model.Team{
+			Name:        GenerateTestUsername(),
+			DisplayName: fmt.Sprintf("limit test %d", i),
+			Description: fmt.Sprintf("team creation limit test team number: %d", i),
+			CompanyName: "",
+			Type:        model.TeamOpen}
+		_, _, err := client.CreateTeam(context.Background(), team)
+
+		if i <= MaxTeamCreationLimit {
+			require.NoError(t, err)
+		} else {
+			require.Error(t, err)
+		}
+	}
+}
+
 func TestTeamUnicodeNames(t *testing.T) {
 	th := Setup(t)
 	defer th.TearDown()
