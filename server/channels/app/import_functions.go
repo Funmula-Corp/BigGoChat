@@ -16,14 +16,14 @@ import (
 	"strings"
 	"sync"
 
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app/imports"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app/teams"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app/users"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/utils"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
 )
 
 // -- Bulk Import Functions --
@@ -83,6 +83,17 @@ func (a *App) importScheme(rctx request.CTX, data *imports.SchemeImportData, dry
 			return err
 		}
 
+		if data.DefaultTeamVerifiedRole == nil {
+			data.DefaultTeamVerifiedRole = &imports.RoleImportData{
+				DisplayName:   model.NewString("Team Verified Role for Scheme"),
+				SchemeManaged: model.NewBool(true),
+			}
+		}
+		data.DefaultTeamVerifiedRole.Name = &scheme.DefaultTeamVerifiedRole
+		if err := a.importRole(rctx, data.DefaultTeamVerifiedRole, dryRun); err != nil {
+			return err
+		}
+
 		if data.DefaultTeamGuestRole == nil {
 			data.DefaultTeamGuestRole = &imports.RoleImportData{
 				DisplayName:   model.NewString("Team Guest Role for Scheme"),
@@ -103,6 +114,17 @@ func (a *App) importScheme(rctx request.CTX, data *imports.SchemeImportData, dry
 
 		data.DefaultChannelUserRole.Name = &scheme.DefaultChannelUserRole
 		if err := a.importRole(rctx, data.DefaultChannelUserRole, dryRun); err != nil {
+			return err
+		}
+
+		if data.DefaultChannelVerifiedRole == nil {
+			data.DefaultChannelVerifiedRole = &imports.RoleImportData{
+				DisplayName:   model.NewString("Channel Verified User Role for Scheme"),
+				SchemeManaged: model.NewBool(true),
+			}
+		}
+		data.DefaultChannelVerifiedRole.Name = &scheme.DefaultChannelVerifiedRole
+		if err := a.importRole(rctx, data.DefaultChannelVerifiedRole, dryRun); err != nil {
 			return err
 		}
 
@@ -814,6 +836,8 @@ func (a *App) importUserTeams(rctx request.CTX, user *model.User, data *[]import
 		rolesByTeamID            = map[string]string{}
 		isGuestByTeamID          = map[string]bool{}
 		isUserByTeamId           = map[string]bool{}
+		isVerifiedByTeamId       = map[string]bool{}
+		isModeratorByTeamId      = map[string]bool{}
 		isAdminByTeamID          = map[string]bool{}
 	)
 
@@ -840,6 +864,8 @@ func (a *App) importUserTeams(rctx request.CTX, user *model.User, data *[]import
 
 		isGuestByTeamID[team.Id] = false
 		isUserByTeamId[team.Id] = true
+		isModeratorByTeamId[team.Id] = false
+		isVerifiedByTeamId[team.Id] = false
 		isAdminByTeamID[team.Id] = false
 
 		if tdata.Roles == nil {
@@ -853,6 +879,10 @@ func (a *App) importUserTeams(rctx request.CTX, user *model.User, data *[]import
 					isUserByTeamId[team.Id] = false
 				} else if role == model.TeamUserRoleId {
 					isUserByTeamId[team.Id] = true
+				} else if role == model.TeamVerifiedRoleId {
+					isVerifiedByTeamId[team.Id] = true
+				} else if role == model.TeamModeratorRoleId {
+					isModeratorByTeamId[team.Id] = true
 				} else if role == model.TeamAdminRoleId {
 					isAdminByTeamID[team.Id] = true
 				} else {
@@ -863,12 +893,14 @@ func (a *App) importUserTeams(rctx request.CTX, user *model.User, data *[]import
 		}
 
 		member := &model.TeamMember{
-			TeamId:      team.Id,
-			UserId:      user.Id,
-			SchemeGuest: user.IsGuest(),
-			SchemeUser:  !user.IsGuest(),
-			SchemeAdmin: team.Email == user.Email && !user.IsGuest(),
-			CreateAt:    model.GetMillis(),
+			TeamId:          team.Id,
+			UserId:          user.Id,
+			SchemeGuest:     user.IsGuest(),
+			SchemeUser:      !user.IsGuest(),
+			SchemeVerified:  user.IsVerified(),
+			SchemeModerator: false,
+			SchemeAdmin:     team.Email == user.Email && !user.IsGuest(),
+			CreateAt:        model.GetMillis(),
 		}
 		if !user.IsGuest() {
 			var userShouldBeAdmin bool
@@ -934,7 +966,7 @@ func (a *App) importUserTeams(rctx request.CTX, user *model.User, data *[]import
 			}
 		}
 
-		a.UpdateTeamMemberSchemeRoles(rctx, member.TeamId, user.Id, isGuestByTeamID[member.TeamId], isUserByTeamId[member.TeamId], isAdminByTeamID[member.TeamId])
+		a.UpdateTeamMemberSchemeRoles(rctx, member.TeamId, user.Id, isGuestByTeamID[member.TeamId], isUserByTeamId[member.TeamId], isVerifiedByTeamId[member.TeamId], isModeratorByTeamId[member.TeamId], isAdminByTeamID[member.TeamId])
 	}
 
 	for _, team := range allTeams {
@@ -976,6 +1008,7 @@ func (a *App) importUserChannels(rctx request.CTX, user *model.User, team *model
 		channelPreferencesByID   = map[string]model.Preferences{}
 		isGuestByChannelId       = map[string]bool{}
 		isUserByChannelId        = map[string]bool{}
+		isVerifiedByChannelId        = map[string]bool{}
 		isAdminByChannelId       = map[string]bool{}
 	)
 
@@ -999,6 +1032,7 @@ func (a *App) importUserChannels(rctx request.CTX, user *model.User, team *model
 
 		isGuestByChannelId[channel.Id] = false
 		isUserByChannelId[channel.Id] = true
+		isVerifiedByChannelId[channel.Id] = false
 		isAdminByChannelId[channel.Id] = false
 
 		if cdata.Roles != nil {
@@ -1010,6 +1044,8 @@ func (a *App) importUserChannels(rctx request.CTX, user *model.User, team *model
 					isUserByChannelId[channel.Id] = false
 				} else if role == model.ChannelUserRoleId {
 					isUserByChannelId[channel.Id] = true
+				} else if role == model.ChannelVerifiedRoleId {
+					isVerifiedByChannelId[channel.Id] = true
 				} else if role == model.ChannelAdminRoleId {
 					isAdminByChannelId[channel.Id] = true
 				} else {
@@ -1029,12 +1065,13 @@ func (a *App) importUserChannels(rctx request.CTX, user *model.User, team *model
 		}
 
 		member := &model.ChannelMember{
-			ChannelId:   channel.Id,
-			UserId:      user.Id,
-			NotifyProps: model.GetDefaultChannelNotifyProps(),
-			SchemeGuest: user.IsGuest(),
-			SchemeUser:  !user.IsGuest(),
-			SchemeAdmin: false,
+			ChannelId:      channel.Id,
+			UserId:         user.Id,
+			NotifyProps:    model.GetDefaultChannelNotifyProps(),
+			SchemeGuest:    user.IsGuest(),
+			SchemeUser:     !user.IsGuest(),
+			SchemeVerified: user.IsVerified(),
+			SchemeAdmin:    false,
 		}
 		if !user.IsGuest() {
 			var userShouldBeAdmin bool
@@ -1124,7 +1161,7 @@ func (a *App) importUserChannels(rctx request.CTX, user *model.User, team *model
 			}
 		}
 
-		a.UpdateChannelMemberSchemeRoles(rctx, member.ChannelId, user.Id, isGuestByChannelId[member.ChannelId], isUserByChannelId[member.ChannelId], isAdminByChannelId[member.ChannelId])
+		a.UpdateChannelMemberSchemeRoles(rctx, member.ChannelId, user.Id, isGuestByChannelId[member.ChannelId], isUserByChannelId[member.ChannelId], isVerifiedByChannelId[member.ChannelId], isAdminByChannelId[member.ChannelId])
 	}
 
 	for _, channel := range allChannels {

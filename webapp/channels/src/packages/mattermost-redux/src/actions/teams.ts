@@ -696,10 +696,11 @@ export function updateTeamMemberSchemeRoles(
     userId: string,
     isSchemeUser: boolean,
     isSchemeAdmin: boolean,
+    isSchemeModerator: boolean,
 ): ActionFuncAsync {
     return bindClientFunc({
         clientFunc: async () => {
-            await Client4.updateTeamMemberSchemeRoles(teamId, userId, isSchemeUser, isSchemeAdmin);
+            await Client4.updateTeamMemberSchemeRoles(teamId, userId, isSchemeUser, isSchemeAdmin, isSchemeModerator);
             return {teamId, userId, isSchemeUser, isSchemeAdmin};
         },
         onSuccess: TeamTypes.UPDATED_TEAM_MEMBER_SCHEME_ROLES,

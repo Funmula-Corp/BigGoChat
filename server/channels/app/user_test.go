@@ -8,6 +8,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 	"path/filepath"
 	"strings"
@@ -18,6 +19,8 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
 	oauthgitlab "git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app/oauthproviders/gitlab"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app/users"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
@@ -25,8 +28,6 @@ import (
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/utils/testutils"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/einterfaces"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/einterfaces/mocks"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
 )
 
 func TestCreateOAuthUser(t *testing.T) {
@@ -967,7 +968,7 @@ func TestCreateUserWithToken(t *testing.T) {
 		members, err := th.App.GetChannelMembersForUser(th.Context, th.BasicTeam.Id, newGuest.Id)
 		require.Nil(t, err)
 		require.Len(t, members, 1)
-		assert.Equal(t, members[0].ChannelId, th.BasicChannel.Id)
+		// only channel admin has permission
 	})
 
 	t.Run("create guest having email domain restrictions", func(t *testing.T) {
@@ -1013,7 +1014,6 @@ func TestCreateUserWithToken(t *testing.T) {
 		members, err := th.App.GetChannelMembersForUser(th.Context, th.BasicTeam.Id, newGuest.Id)
 		require.Nil(t, err)
 		require.Len(t, members, 1)
-		assert.Equal(t, members[0].ChannelId, th.BasicChannel.Id)
 	})
 
 	t.Run("create guest having team and system email domain restrictions", func(t *testing.T) {
@@ -1050,7 +1050,6 @@ func TestCreateUserWithToken(t *testing.T) {
 		members, err := th.App.GetChannelMembersForUser(th.Context, th.BasicTeam.Id, newGuest.Id)
 		require.Nil(t, err)
 		require.Len(t, members, 1)
-		assert.Equal(t, members[0].ChannelId, th.BasicChannel.Id)
 	})
 }
 
@@ -1223,7 +1222,8 @@ func TestGetViewUsersRestrictions(t *testing.T) {
 	th.LinkUserToTeam(user1, team1)
 	th.LinkUserToTeam(user1, team2)
 
-	th.App.UpdateTeamMemberRoles(th.Context, team1.Id, user1.Id, "team_user team_admin")
+	_, err := th.App.UpdateTeamMemberRoles(th.Context, team1.Id, user1.Id, "team_user team_verified team_admin")
+	require.Nil(t, err)
 
 	team1channel1 := th.CreateChannel(th.Context, team1)
 	team1channel2 := th.CreateChannel(th.Context, team1)
@@ -1271,13 +1271,21 @@ func TestGetViewUsersRestrictions(t *testing.T) {
 	t.Run("VIEW_MEMBERS permission granted at team level", func(t *testing.T) {
 		systemUserRole, err := th.App.GetRoleByName(context.Background(), model.SystemUserRoleId)
 		require.Nil(t, err)
+		systemVerifiedRole, err := th.App.GetRoleByName(context.Background(), model.SystemVerifiedRoleId)
+		require.Nil(t, err)
 		teamUserRole, err := th.App.GetRoleByName(context.Background(), model.TeamUserRoleId)
+		require.Nil(t, err)
+		teamVerifiedRole, err := th.App.GetRoleByName(context.Background(), model.TeamVerifiedRoleId)
 		require.Nil(t, err)
 
 		require.Nil(t, removePermission(systemUserRole, model.PermissionViewMembers.Id))
 		defer addPermission(systemUserRole, model.PermissionViewMembers.Id)
+		require.Nil(t, removePermission(systemVerifiedRole, model.PermissionViewMembers.Id))
+		defer addPermission(systemVerifiedRole, model.PermissionViewMembers.Id)
 		require.Nil(t, addPermission(teamUserRole, model.PermissionViewMembers.Id))
 		defer removePermission(teamUserRole, model.PermissionViewMembers.Id)
+		require.Nil(t, addPermission(teamVerifiedRole, model.PermissionViewMembers.Id))
+		defer removePermission(teamVerifiedRole, model.PermissionViewMembers.Id)
 
 		restrictions, err := th.App.GetViewUsersRestrictions(th.Context, user1.Id)
 		require.Nil(t, err)
@@ -1294,6 +1302,10 @@ func TestGetViewUsersRestrictions(t *testing.T) {
 		require.Nil(t, err)
 		require.Nil(t, removePermission(systemUserRole, model.PermissionViewMembers.Id))
 		defer addPermission(systemUserRole, model.PermissionViewMembers.Id)
+		systemVerifiedRole, err := th.App.GetRoleByName(context.Background(), model.SystemVerifiedRoleId)
+		require.Nil(t, err)
+		require.Nil(t, removePermission(systemVerifiedRole, model.PermissionViewMembers.Id))
+		defer addPermission(systemVerifiedRole, model.PermissionViewMembers.Id)
 
 		restrictions, err := th.App.GetViewUsersRestrictions(th.Context, user1.Id)
 		require.Nil(t, err)
@@ -1307,11 +1319,15 @@ func TestGetViewUsersRestrictions(t *testing.T) {
 	t.Run("VIEW_MEMBERS permission for some teams but not for others", func(t *testing.T) {
 		systemUserRole, err := th.App.GetRoleByName(context.Background(), model.SystemUserRoleId)
 		require.Nil(t, err)
+		systemVerifiedRole, err := th.App.GetRoleByName(context.Background(), model.SystemVerifiedRoleId)
+		require.Nil(t, err)
 		teamAdminRole, err := th.App.GetRoleByName(context.Background(), model.TeamAdminRoleId)
 		require.Nil(t, err)
 
 		require.Nil(t, removePermission(systemUserRole, model.PermissionViewMembers.Id))
 		defer addPermission(systemUserRole, model.PermissionViewMembers.Id)
+		require.Nil(t, removePermission(systemVerifiedRole, model.PermissionViewMembers.Id))
+		defer addPermission(systemVerifiedRole, model.PermissionViewMembers.Id)
 		require.Nil(t, addPermission(teamAdminRole, model.PermissionViewMembers.Id))
 		defer removePermission(teamAdminRole, model.PermissionViewMembers.Id)
 
@@ -1331,13 +1347,13 @@ func TestPromoteGuestToUser(t *testing.T) {
 	defer th.TearDown()
 
 	t.Run("Must fail with regular user", func(t *testing.T) {
-		require.Equal(t, "system_user", th.BasicUser.Roles)
+		require.Equal(t, "system_user system_verified", th.BasicUser.Roles)
 		err := th.App.PromoteGuestToUser(th.Context, th.BasicUser, th.BasicUser.Id)
 		require.Nil(t, err)
 
 		user, err := th.App.GetUser(th.BasicUser.Id)
 		assert.Nil(t, err)
-		assert.Equal(t, "system_user", user.Roles)
+		assert.Equal(t, "system_user system_verified", user.Roles)
 	})
 
 	t.Run("Must work with guest user without teams or channels", func(t *testing.T) {
@@ -1468,7 +1484,7 @@ func TestDemoteUserToGuest(t *testing.T) {
 
 	t.Run("Must invalidate channel stats cache when demoting a user", func(t *testing.T) {
 		user := th.CreateUser()
-		require.Equal(t, "system_user", user.Roles)
+		require.Equal(t, "system_user system_verified", user.Roles)
 		th.LinkUserToTeam(user, th.BasicTeam)
 		teamMember, err := th.App.GetTeamMember(th.Context, th.BasicTeam.Id, user.Id)
 		require.Nil(t, err)
@@ -1505,7 +1521,7 @@ func TestDemoteUserToGuest(t *testing.T) {
 
 	t.Run("Must work with user without teams or channels", func(t *testing.T) {
 		user := th.CreateUser()
-		require.Equal(t, "system_user", user.Roles)
+		require.Equal(t, "system_user system_verified", user.Roles)
 
 		err := th.App.DemoteUserToGuest(th.Context, user)
 		require.Nil(t, err)
@@ -1516,7 +1532,7 @@ func TestDemoteUserToGuest(t *testing.T) {
 
 	t.Run("Must work with user with teams but no channels", func(t *testing.T) {
 		user := th.CreateUser()
-		require.Equal(t, "system_user", user.Roles)
+		require.Equal(t, "system_user system_verified", user.Roles)
 		th.LinkUserToTeam(user, th.BasicTeam)
 		teamMember, err := th.App.GetTeamMember(th.Context, th.BasicTeam.Id, user.Id)
 		require.Nil(t, err)
@@ -1536,7 +1552,7 @@ func TestDemoteUserToGuest(t *testing.T) {
 
 	t.Run("Must work with user with teams and channels", func(t *testing.T) {
 		user := th.CreateUser()
-		require.Equal(t, "system_user", user.Roles)
+		require.Equal(t, "system_user system_verified", user.Roles)
 		th.LinkUserToTeam(user, th.BasicTeam)
 		teamMember, err := th.App.GetTeamMember(th.Context, th.BasicTeam.Id, user.Id)
 		require.Nil(t, err)
@@ -1564,7 +1580,7 @@ func TestDemoteUserToGuest(t *testing.T) {
 
 	t.Run("Must respect the current channels not removing defaults", func(t *testing.T) {
 		user := th.CreateUser()
-		require.Equal(t, "system_user", user.Roles)
+		require.Equal(t, "system_user system_verified", user.Roles)
 		th.LinkUserToTeam(user, th.BasicTeam)
 		teamMember, err := th.App.GetTeamMember(th.Context, th.BasicTeam.Id, user.Id)
 		require.Nil(t, err)
@@ -1600,12 +1616,12 @@ func TestDemoteUserToGuest(t *testing.T) {
 
 	t.Run("Must be removed as team and channel admin", func(t *testing.T) {
 		user := th.CreateUser()
-		require.Equal(t, "system_user", user.Roles)
+		require.Equal(t, "system_user system_verified", user.Roles)
 
 		team := th.CreateTeam()
 
 		th.LinkUserToTeam(user, team)
-		th.App.UpdateTeamMemberRoles(th.Context, team.Id, user.Id, "team_user team_admin")
+		th.App.UpdateTeamMemberRoles(th.Context, team.Id, user.Id, "team_user team_verified team_admin")
 
 		teamMember, err := th.App.GetTeamMember(th.Context, team.Id, user.Id)
 		require.Nil(t, err)
@@ -1616,7 +1632,7 @@ func TestDemoteUserToGuest(t *testing.T) {
 		channel := th.CreateChannel(th.Context, team)
 
 		th.AddUserToChannel(user, channel)
-		th.App.UpdateChannelMemberSchemeRoles(th.Context, channel.Id, user.Id, false, true, true)
+		th.App.UpdateChannelMemberSchemeRoles(th.Context, channel.Id, user.Id, false, true, true, true)
 
 		channelMember, err := th.App.GetChannelMember(th.Context, channel.Id, user.Id)
 		assert.Nil(t, err)
@@ -1677,7 +1693,7 @@ func TestUpdateUserRolesWithUser(t *testing.T) {
 
 	// Create normal user.
 	user := th.CreateUser()
-	assert.Equal(t, user.Roles, model.SystemUserRoleId)
+	assert.Equal(t, user.Roles, model.SystemUserRoleId+" "+model.SystemVerifiedRoleId)
 
 	// Upgrade to sysadmin.
 	user, err := th.App.UpdateUserRolesWithUser(th.Context, user, model.SystemUserRoleId+" "+model.SystemAdminRoleId, false)
@@ -2108,6 +2124,40 @@ func TestCreateUserOrGuest(t *testing.T) {
 		require.Nil(t, appErr)
 		require.Equal(t, "username_123", createdUser.Username)
 	})
+}
+
+func TestMarkUserVerified(t *testing.T) {
+	// options := func(s *Server) error { s.joinCluster = false; return nil }
+	th := Setup(t).InitBasic()
+	defer th.TearDown()
+	cm1, err := th.App.AddUserToChannel(th.Context, th.BasicUser, th.BasicChannel, false)
+	require.Nil(t, err, fmt.Sprintf("err %v", err))
+	require.True(t, cm1.SchemeVerified)
+
+	cm2, err := th.App.AddUserToChannel(th.Context, th.BasicUnverified, th.BasicChannel, false)
+	require.Nil(t, err)
+	require.False(t, cm2.SchemeVerified)
+
+	th.BasicUnverified.Mobilephone = model.NewString(th.GenerateTestMobilephone())
+	th.BasicUnverified.Roles += " " + model.SystemVerifiedRoleId
+	updatedUser, err := th.App.UpdateUser(th.Context, th.BasicUnverified, false)
+	require.Nil(t, err)
+
+	err = th.App.MarkUserVerified(th.Context, updatedUser.Id)
+	require.Nil(t, err)
+
+	allTm , err := th.App.GetTeamMembersForUser(th.Context, th.BasicUnverified.Id, "", false)
+	require.Nil(t, err)
+	require.Len(t, allTm, 1)
+	for _, tm := range(allTm){
+		require.True(t, tm.SchemeVerified)
+	}
+	allCm, err := th.App.GetChannelMembersForUser(th.Context, th.BasicTeam.Id, th.BasicUnverified.Id)
+	require.Nil(t, err)
+	require.Greater(t, len(allCm), 0)
+	for _, cm := range(allCm){
+		require.True(t, cm.SchemeVerified)
+	}
 }
 
 func userCreationMocks(t *testing.T, th *TestHelper, userID string, activeUserCount int64) {

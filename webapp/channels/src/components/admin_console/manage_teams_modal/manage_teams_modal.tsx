@@ -28,7 +28,7 @@ export type Props = {
     actions: {
         getTeamMembersForUser: (userId: string) => Promise<ActionResult>;
         getTeamsForUser: (userId: string) => Promise<ActionResult>;
-        updateTeamMemberSchemeRoles: (teamId: string, userId: string, isSchemeUser: boolean, isSchemeAdmin: boolean) => Promise<ActionResult>;
+        updateTeamMemberSchemeRoles: (teamId: string, userId: string, isSchemeUser: boolean, isSchemeAdmin: boolean, isSchemeModerator: boolean) => Promise<ActionResult>;
         removeUserFromTeam: (teamId: string, userId: string) => Promise<ActionResult>;
     };
 }

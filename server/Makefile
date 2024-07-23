@@ -1,4 +1,4 @@
-.PHONY: build package run stop run-client run-server run-haserver stop-haserver stop-client stop-server restart restart-server restart-client restart-haserver start-docker update-docker clean-dist clean nuke check-style check-client-style check-server-style check-unit-tests test dist run-client-tests setup-run-client-tests cleanup-run-client-tests test-client build-linux build-osx build-windows package-prep package-linux package-osx package-windows internal-test-web-client vet run-server-for-web-client-tests diff-config prepackaged-plugins prepackaged-binaries test-server test-server-ee test-server-quick test-server-race test-mmctl-unit test-mmctl-e2e test-mmctl test-mmctl-coverage mmctl-build mmctl-docs new-migration migrations-extract test-public mocks-public
+.PHONY: build install-msgp package run stop run-client run-server run-haserver stop-haserver stop-client stop-server restart restart-server restart-client restart-haserver start-docker update-docker clean-dist clean nuke check-style check-client-style check-server-style check-unit-tests test dist run-client-tests setup-run-client-tests cleanup-run-client-tests test-client build-linux build-osx build-windows package-prep package-linux package-osx package-windows internal-test-web-client vet run-server-for-web-client-tests diff-config prepackaged-plugins prepackaged-binaries test-server test-server-ee test-server-quick test-server-race test-mmctl-unit test-mmctl-e2e test-mmctl test-mmctl-coverage mmctl-build mmctl-docs new-migration migrations-extract test-public mocks-public
 
 ROOT := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 
@@ -192,6 +192,7 @@ ifneq ($(DOCKER_SERVICES_OVERRIDE),true)
   ENABLED_DOCKER_SERVICES:=$(ENABLED_DOCKER_SERVICES) $(TEMP_DOCKER_SERVICES)
 endif
 
+MC_HOST="http://minioaccesskey:miniosecretkey@minio:9000"
 start-docker: ## Starts the docker containers for local development.
 ifneq ($(IS_CI),false)
 	@echo CI Build: skipping docker start
@@ -208,6 +209,7 @@ else
   ifneq (,$(findstring mysql-read-replica,$(ENABLED_DOCKER_SERVICES)))
 	./scripts/replica-mysql-config.sh
   endif
+	docker run --network mattermost-server_mm-test -e MC_HOST_A=$(MC_HOST) minio/mc mb A/mattermost-test || true
 endif
 
 update-docker: stop-docker ## Updates the docker containers for local development.
@@ -358,7 +360,7 @@ mocks: store-mocks telemetry-mocks filestore-mocks ldap-mocks plugin-mocks einte
 
 layers: app-layers store-layers pluginapi
 
-generated: mocks layers
+generated: mocks layers gen-serialized
 
 
 setup-go-work: export BUILD_ENTERPRISE_READY := $(BUILD_ENTERPRISE_READY)
@@ -390,7 +392,7 @@ modules-tidy:
 	-cd public && $(GO) mod tidy
 	mv enterprise/external_imports.go.orig enterprise/external_imports.go
 
-test-server-pre: start-docker gotestsum ## Runs tests.
+test-server-pre: gen-serialized start-docker gotestsum ## Runs tests.
 ifeq ($(BUILD_ENTERPRISE_READY),true)
 	@echo Running all tests
 else
@@ -435,7 +437,7 @@ test-server-quick: export MM_SERVER_PATH := $(MM_SERVER_PATH)
 test-server-quick: export GOTESTSUM_FORMAT := $(GOTESTSUM_FORMAT)
 test-server-quick: export GOTESTSUM_JUNITFILE := $(GOTESTSUM_JUNITFILE)
 test-server-quick: export GOTESTSUM_JSONFILE := $(GOTESTSUM_JSONFILE)
-test-server-quick:
+test-server-quick: generated
 	@echo Running only TE tests
 	$(GOBIN)/gotestsum --packages="$(TE_PACKAGES)" -- $(GOFLAGS) -short
 
@@ -445,7 +447,7 @@ internal-test-web-client: ## Runs web client tests.
 run-server-for-web-client-tests: ## Tests the server for web client.
 	$(GO) run $(GOFLAGS) $(PLATFORM_FILES) test web_client_tests_server
 
-test-client: ## Test client app.
+test-client: generated ## Test client app.
 	@echo Running client tests
 
 	cd $(BUILD_WEBAPP_DIR) && $(MAKE) test
@@ -459,7 +461,7 @@ cover: ## Runs the golang coverage tool. You must run the unit tests first.
 	$(GO) tool cover -html=ecover.out
 
 test-data: export MM_SERVICESETTINGS_ENABLELOCALMODE := true
-test-data: run-server inject-test-data stop-server ## start a local instance and add test data to it.
+test-data: generated run-server inject-test-data stop-server ## start a local instance and add test data to it.
 
 inject-test-data: # add test data to the local instance.
 	@if ! ./scripts/wait-for-system-start.sh; then \
@@ -479,7 +481,7 @@ test-mmctl-unit: export MM_SERVER_PATH := $(MM_SERVER_PATH)
 test-mmctl-unit: export GOTESTSUM_FORMAT := $(GOTESTSUM_FORMAT)
 test-mmctl-unit: export GOTESTSUM_JUNITFILE := $(GOTESTSUM_JUNITFILE)
 test-mmctl-unit: export GOTESTSUM_JSONFILE := $(GOTESTSUM_JSONFILE)
-test-mmctl-unit: gotestsum
+test-mmctl-unit: gotestsum generated
 	@echo Running mmctl unit tests
 	$(GOBIN)/gotestsum --packages="$(MMCTL_PACKAGES)" -- -tags 'unit $(MMCTL_BUILD_TAGS)' $(MMCTL_TESTFLAGS)
 
@@ -487,7 +489,7 @@ test-mmctl-e2e: export MM_SERVER_PATH := $(MM_SERVER_PATH)
 test-mmctl-e2e: export GOTESTSUM_FORMAT := $(GOTESTSUM_FORMAT)
 test-mmctl-e2e: export GOTESTSUM_JUNITFILE := $(GOTESTSUM_JUNITFILE)
 test-mmctl-e2e: export GOTESTSUM_JSONFILE := $(GOTESTSUM_JSONFILE)
-test-mmctl-e2e: gotestsum start-docker
+test-mmctl-e2e: gotestsum start-docker generated
 	@echo Running mmctl e2e tests
 	$(GOBIN)/gotestsum --packages="$(MMCTL_PACKAGES)" -- -tags 'e2e $(MMCTL_BUILD_TAGS)' $(MMCTL_TESTFLAGS)
 
@@ -495,7 +497,7 @@ test-mmctl: export MM_SERVER_PATH := $(MM_SERVER_PATH)
 test-mmctl: export GOTESTSUM_FORMAT := $(GOTESTSUM_FORMAT)
 test-mmctl: export GOTESTSUM_JUNITFILE := $(GOTESTSUM_JUNITFILE)
 test-mmctl: export GOTESTSUM_JSONFILE := $(GOTESTSUM_JSONFILE)
-test-mmctl: gotestsum start-docker
+test-mmctl: gotestsum start-docker generated
 	@echo Running all mmctl tests
 	$(GOBIN)/gotestsum --packages="$(MMCTL_PACKAGES)" -- -tags 'unit e2e $(MMCTL_BUILD_TAGS)' $(MMCTL_TESTFLAGS)
 
@@ -503,12 +505,12 @@ test-mmctl-coverage: export MM_SERVER_PATH := $(MM_SERVER_PATH)
 test-mmctl-coverage: export GOTESTSUM_FORMAT := $(GOTESTSUM_FORMAT)
 test-mmctl-coverage: export GOTESTSUM_JUNITFILE := $(GOTESTSUM_JUNITFILE)
 test-mmctl-coverage: export GOTESTSUM_JSONFILE := $(GOTESTSUM_JSONFILE)
-test-mmctl-coverage: gotestsum start-docker
+test-mmctl-coverage: gotestsum start-docker generated
 	@echo Running all mmctl tests with coverage
 	$(GOBIN)/gotestsum --packages="$(MMCTL_PACKAGES)" -- -tags 'unit e2e $(MMCTL_BUILD_TAGS)' -coverprofile=mmctlcover.out $(MMCTL_TESTFLAGS)
 	$(GO) tool cover -html=mmctlcover.out
 
-validate-go-version: ## Validates the installed version of go against Mattermost's minimum requirement.
+validate-go-version: gen-serialized ## Validates the installed version of go against Mattermost's minimum requirement.
 	@if [ $(GO_MAJOR_VERSION) -gt $(MINIMUM_SUPPORTED_GO_MAJOR_VERSION) ]; then \
 		exit 0 ;\
 	elif [ $(GO_MAJOR_VERSION) -lt $(MINIMUM_SUPPORTED_GO_MAJOR_VERSION) ]; then \
@@ -724,8 +726,19 @@ vet-api: ## Run mattermost go vet to verify api4 documentation, currently not pa
 	make -C ../api build
 	./scripts/vet-api-check.sh
 
+SERIAL_GEN=public/model/session_serial_gen.go public/model/user_serial_gen.go public/model/team_member_serial_gen.go
+public/model/%_serial_gen.go: public/model/%.go
+	$(GOBIN)/msgp -file=$< -tests=false -o=$@
+	@echo "$$LICENSE_HEADER" > tmp.go
+	@cat $@ >> tmp.go
+	@mv tmp.go $@
+
+install-msgp:
+	$(GO) install github.com/tinylib/msgp@v1.1.6
+
 gen-serialized:	export LICENSE_HEADER:=$(LICENSE_HEADER)
-gen-serialized: ## Generates serialization methods for hot structs
+gen-serialized:	install-msgp
+gen-serialized: $(SERIAL_GEN)## Generates serialization methods for hot structs
 	# This tool only works at a file level, not at a package level.
 	# There will be some warnings about "unresolved identifiers",
 	# but that is because of the above problem. Since we are generating
@@ -733,19 +746,6 @@ gen-serialized: ## Generates serialization methods for hot structs
 	# identifiers will be resolved. An alternative to remove the warnings
 	# would be to temporarily move all the structs to the same file,
 	# but that involves a lot of manual work.
-	$(GO) install github.com/tinylib/msgp@v1.1.6
-	$(GOBIN)/msgp -file=./public/model/session.go -tests=false -o=./public/model/session_serial_gen.go
-	@echo "$$LICENSE_HEADER" > tmp.go
-	@cat ./public/model/session_serial_gen.go >> tmp.go
-	@mv tmp.go ./public/model/session_serial_gen.go
-	$(GOBIN)/msgp -file=./public/model/user.go -tests=false -o=./public/model/user_serial_gen.go
-	@echo "$$LICENSE_HEADER" > tmp.go
-	@cat ./public/model/user_serial_gen.go >> tmp.go
-	@mv tmp.go ./public/model/user_serial_gen.go
-	$(GOBIN)/msgp -file=./public/model/team_member.go -tests=false -o=./public/model/team_member_serial_gen.go
-	@echo "$$LICENSE_HEADER" > tmp.go
-	@cat ./public/model/team_member_serial_gen.go >> tmp.go
-	@mv tmp.go ./public/model/team_member_serial_gen.go
 
 todo: ## Display TODO and FIXME items in the source code.
 	@! ag --ignore Makefile --ignore-dir runtime '(TODO|XXX|FIXME|"FIX ME")[: ]+'
@@ -800,3 +800,11 @@ test-migration:
 	# for now we exclude plugins such as playbooks and focalboard
 	# we also exlude systems table temporarily due to adding some keys while running the initial migration
 	bin/dbcmp --source "${MYSQL_DSN}" --target "${POSTGRES_DSN}" --exclude="db_migrations","ir_","focalboard","systems"
+
+# to test specific module.
+# test-it: export MM_SERVER_PATH := $(MM_SERVER_PATH)
+# test-it: export GOTESTSUM_FORMAT := $(GOTESTSUM_FORMAT)
+# test-it: export GOTESTSUM_JUNITFILE := $(GOTESTSUM_JUNITFILE)
+# test-it: export GOTESTSUM_JSONFILE := $(GOTESTSUM_JSONFILE)
+# test-it: test-server-pre
+# 	$(GOBIN)/gotestsum  --rerun-fails=0 --packages="git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/api4" -- $(GOFLAGS)-timeout=90m -run TestCreateBot/create_bot_with_permissions

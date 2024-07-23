@@ -22,13 +22,13 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin/plugintest/mock"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store/storetest/mocks"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/utils"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/utils/testutils"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin/plugintest/mock"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
 )
 
 func TestCreatePost(t *testing.T) {
@@ -123,6 +123,7 @@ func TestCreatePost(t *testing.T) {
 
 		defer th.RestoreDefaultRolePermissions(th.SaveDefaultRolePermissions())
 
+		th.RemovePermissionFromRole(model.PermissionUseChannelMentions.Id, model.ChannelVerifiedRoleId)
 		th.RemovePermissionFromRole(model.PermissionUseChannelMentions.Id, model.ChannelUserRoleId)
 
 		post.RootId = rpost.Id
@@ -2798,6 +2799,23 @@ func TestDeletePost(t *testing.T) {
 
 	_, err = th.SystemAdminClient.DeletePost(context.Background(), post.Id)
 	require.NoError(t, err)
+
+	client.Logout(context.Background())
+	th.LoginBasic2()
+	post2 := th.CreatePost()
+	
+	client.Logout(context.Background())
+	th.LoginBasic()
+
+	resp, err = client.DeletePost(context.Background(), post2.Id)
+	require.Error(t, err)
+	CheckForbiddenStatus(t, resp)
+
+	th.MakeUserChannelAdmin(th.BasicUser, th.BasicChannel)
+	th.App.Srv().InvalidateAllCaches()
+
+	_, err = client.DeletePost(context.Background(), post2.Id)
+	require.NoError(t, err)
 }
 
 func TestDeletePostEvent(t *testing.T) {
@@ -3196,6 +3214,8 @@ func TestSearchPostsFromUser(t *testing.T) {
 	th.LinkUserToTeam(user, th.BasicTeam)
 	th.App.AddUserToChannel(th.Context, user, th.BasicChannel, false)
 	th.App.AddUserToChannel(th.Context, user, th.BasicChannel2, false)
+	appErr := th.App.MarkUserVerified(th.Context, user.Id)
+	require.Nil(t, appErr)
 
 	message := "sgtitlereview with space"
 	_ = th.CreateMessagePost(message)
@@ -4365,4 +4385,38 @@ func TestUnacknowledgePost(t *testing.T) {
 	resp, err = client.UnacknowledgePost(context.Background(), post.Id, th.BasicUser.Id)
 	require.Error(t, err)
 	CheckUnauthorizedStatus(t, resp)
+}
+
+func TestDirectChannelDeletePost(t *testing.T) {
+	th := Setup(t).InitBasic()
+	defer th.TearDown()
+	client := th.Client
+	
+	channel, _, err := client.CreateDirectChannel(context.Background(), th.BasicUser.Id, th.BasicUser2.Id)
+	require.NoError(t, err)
+
+	post := &model.Post{
+		ChannelId: channel.Id,
+		Message:   "should not delete this message",
+		UserId:    th.BasicUser.Id,
+	}
+
+	rpost, _, err := client.CreatePost(context.Background(), post)
+	require.NoError(t, err)
+
+	client.Logout(context.Background())
+	th.LoginBasic2()
+
+	// user
+	resp, err := client.DeletePost(context.Background(), rpost.Id)
+	require.Error(t, err)
+	CheckForbiddenStatus(t, resp)
+
+	_, appErr := th.App.UpdateUserRoles(th.Context, th.BasicUser2.Id, model.SystemAdminRoleId, false)
+	require.Nil(t, appErr)
+
+	// system_admin 
+	resp, err = client.DeletePost(context.Background(), rpost.Id)
+	require.Error(t, err)
+	CheckForbiddenStatus(t, resp)
 }

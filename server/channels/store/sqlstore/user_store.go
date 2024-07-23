@@ -8,6 +8,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"slices"
 	"sort"
 	"strings"
 	"time"
@@ -1616,12 +1617,25 @@ func generateSearchQuery(query sq.SelectBuilder, terms []string, fields []string
 		searchFields := []string{}
 		termArgs := []any{}
 		for _, field := range fields {
-			if isPostgreSQL {
-				searchFields = append(searchFields, fmt.Sprintf("lower(%s) LIKE lower(?) escape '*' ", field))
+			// only allow for exact match searches on the predefiend fields
+			if slices.Contains([]string{"email", "mobilephone"}, strings.ToLower(field)) {
+				if isPostgreSQL {
+					searchFields = append(searchFields, fmt.Sprintf("lower(%s) = lower(?) ", field))
+				} else {
+					searchFields = append(searchFields, fmt.Sprintf("%s = ? ", field))
+				}
+				// trim '+' first to ensure we are preventing a leading '@' which
+				// would introduce a SQL injection vulnerability
+				// (order of operation is from the inside outwards)
+				termArgs = append(termArgs, strings.TrimLeft(strings.TrimLeft(term, "+"), "@"))
 			} else {
-				searchFields = append(searchFields, fmt.Sprintf("%s LIKE ? escape '*' ", field))
+				if isPostgreSQL {
+					searchFields = append(searchFields, fmt.Sprintf("lower(%s) LIKE lower(?) escape '*' ", field))
+				} else {
+					searchFields = append(searchFields, fmt.Sprintf("%s LIKE ? escape '*' ", field))
+				}
+				termArgs = append(termArgs, fmt.Sprintf("%%%s%%", strings.TrimLeft(term, "@")))
 			}
-			termArgs = append(termArgs, fmt.Sprintf("%%%s%%", strings.TrimLeft(term, "@")))
 		}
 		searchFields = append(searchFields, "Id = ?")
 		termArgs = append(termArgs, strings.TrimLeft(term, "@"))
@@ -2434,4 +2448,26 @@ func (us SqlUserStore) GetUserReport(filter *model.UserReportOptions) ([]*model.
 	}
 
 	return userResults, nil
+}
+
+func (s SqlUserStore) UpdateMemberVerifiedStatus(rctx request.CTX, user *model.User) (err error) {
+	var transaction *sqlxTxWrapper
+
+	if transaction, err = s.GetMasterX().Beginx(); err != nil {
+		return errors.Wrap(err, "begin_transaction")
+	}
+	defer finalizeTransactionX(transaction, &err)
+	verified := user.IsVerified()
+	if _, err := transaction.Exec(`UPDATE TeamMembers
+		SET SchemeVerified= ? WHERE UserId= ?`, verified, user.Id); err != nil {
+		return errors.Wrap(err, "failed to update TeamMember")
+	}
+	if _, err := transaction.Exec(`UPDATE ChannelMembers
+		SET SchemeVerified= ? WHERE UserId= ?`, verified, user.Id); err != nil {
+		return errors.Wrap(err, "failed to update ChannelMember")
+	}
+	if err := transaction.Commit(); err != nil {
+		return errors.Wrap(err, "commit_transaction")
+	}
+	return nil
 }

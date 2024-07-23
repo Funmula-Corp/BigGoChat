@@ -8,7 +8,7 @@ import type {Team, TeamMembership} from '@mattermost/types/teams';
 import type {UserProfile} from '@mattermost/types/users';
 
 import type {ActionResult} from 'mattermost-redux/types/actions';
-import {isAdmin, isSystemAdmin, isGuest} from 'mattermost-redux/utils/user_utils';
+import {isAdmin, isSystemAdmin, isModerator, isGuest} from 'mattermost-redux/utils/user_utils';
 
 import Menu from 'components/widgets/menu/menu';
 import MenuWrapper from 'components/widgets/menu/menu_wrapper';
@@ -21,13 +21,13 @@ type Props = {
     teamMember: TeamMembership;
     onError: (error: JSX.Element) => void;
     onMemberChange: (teamId: string) => void;
-    updateTeamMemberSchemeRoles: (teamId: string, userId: string, isSchemeUser: boolean, isSchemeAdmin: boolean,) => Promise<ActionResult>;
+    updateTeamMemberSchemeRoles: (teamId: string, userId: string, isSchemeUser: boolean, isSchemeAdmin: boolean, isSchemeModerator: boolean) => Promise<ActionResult>;
     handleRemoveUserFromTeam: (teamId: string) => void;
 }
 
 const ManageTeamsDropdown = (props: Props) => {
     const makeTeamAdmin = async () => {
-        const {error} = await props.updateTeamMemberSchemeRoles(props.teamMember.team_id, props.user.id, true, true);
+        const {error} = await props.updateTeamMemberSchemeRoles(props.teamMember.team_id, props.user.id, true, true, false);
         if (error) {
             props.onError(
                 <FormattedMessage
@@ -39,8 +39,21 @@ const ManageTeamsDropdown = (props: Props) => {
         }
     };
 
+    const makeTeamModerator = async () => {
+        const {error} = await props.updateTeamMemberSchemeRoles(props.teamMember.team_id, props.user.id, true, false, true);
+        if (error) {
+            props.onError(
+                <FormattedMessage
+                    id='admin.manage_teams.makeModeratorError'
+                    defaultMessage='Unable to make user a team moderator.'
+                />);
+        } else {
+            props.onMemberChange(props.teamMember.team_id);
+        }
+    };
+
     const makeMember = async () => {
-        const {error} = await props.updateTeamMemberSchemeRoles(props.teamMember.team_id, props.user.id, true, false);
+        const {error} = await props.updateTeamMemberSchemeRoles(props.teamMember.team_id, props.user.id, true, false, false);
         if (error) {
             props.onError(
                 <FormattedMessage
@@ -57,6 +70,7 @@ const ManageTeamsDropdown = (props: Props) => {
 
     const isTeamAdmin = isAdmin(props.teamMember.roles) || props.teamMember.scheme_admin;
     const isSysAdmin = isSystemAdmin(props.user.roles);
+    const isModeratorUser = isModerator(props.user.roles);
     const isGuestUser = isGuest(props.user.roles);
 
     const {team} = props;
@@ -65,6 +79,8 @@ const ManageTeamsDropdown = (props: Props) => {
         title = localizeMessage('admin.user_item.sysAdmin', 'System Admin');
     } else if (isTeamAdmin) {
         title = localizeMessage('admin.user_item.teamAdmin', 'Team Admin');
+    } else if (isModeratorUser) {
+        title = localizeMessage('admin.user_item.teamModerator', 'Team Moderator');
     } else if (isGuestUser) {
         title = localizeMessage('admin.user_item.guest', 'Guest');
     } else {
@@ -85,6 +101,11 @@ const ManageTeamsDropdown = (props: Props) => {
                     show={!isTeamAdmin && !isGuestUser}
                     onClick={makeTeamAdmin}
                     text={localizeMessage('admin.user_item.makeTeamAdmin', 'Make Team Admin')}
+                />
+                <Menu.ItemAction
+                    show={!isModeratorUser && !isGuestUser}
+                    onClick={makeTeamModerator}
+                    text={localizeMessage('admin.user_item.makeTeamModerator', 'Make Team Moderator')}
                 />
                 <Menu.ItemAction
                     show={isTeamAdmin}

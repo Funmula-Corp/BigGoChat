@@ -39,6 +39,7 @@ type TestHelper struct {
 	BasicTeam    *model.Team
 	BasicUser    *model.User
 	BasicUser2   *model.User
+	BasicUnverified *model.User
 	BasicChannel *model.Channel
 	BasicPost    *model.Post
 
@@ -243,6 +244,7 @@ var userCache struct {
 	SystemAdminUser *model.User
 	BasicUser       *model.User
 	BasicUser2      *model.User
+	BasicUnverified *model.User
 }
 
 func (th *TestHelper) InitBasic() *TestHelper {
@@ -260,19 +262,25 @@ func (th *TestHelper) InitBasic() *TestHelper {
 		th.BasicUser2 = th.CreateUser()
 		th.BasicUser2, _ = th.App.GetUser(th.BasicUser2.Id)
 		userCache.BasicUser2 = th.BasicUser2.DeepCopy()
+
+		th.BasicUnverified = th.CreateUnverified()
+		th.BasicUnverified, _ = th.App.GetUser(th.BasicUnverified.Id)
+		userCache.BasicUnverified = th.BasicUnverified.DeepCopy()
 	})
 	// restore cached users
 	th.SystemAdminUser = userCache.SystemAdminUser.DeepCopy()
 	th.BasicUser = userCache.BasicUser.DeepCopy()
 	th.BasicUser2 = userCache.BasicUser2.DeepCopy()
+	th.BasicUnverified = userCache.BasicUnverified.DeepCopy()
 
-	users := []*model.User{th.SystemAdminUser, th.BasicUser, th.BasicUser2}
+	users := []*model.User{th.SystemAdminUser, th.BasicUser, th.BasicUser2, th.BasicUnverified}
 	mainHelper.GetSQLStore().User().InsertUsers(users)
 
 	th.BasicTeam = th.CreateTeam()
 
 	th.LinkUserToTeam(th.BasicUser, th.BasicTeam)
 	th.LinkUserToTeam(th.BasicUser2, th.BasicTeam)
+	th.LinkUserToTeam(th.BasicUnverified, th.BasicTeam)
 	th.BasicChannel = th.CreateChannel(th.Context, th.BasicTeam)
 	th.BasicPost = th.CreatePost(th.BasicChannel)
 	return th
@@ -307,14 +315,18 @@ func (th *TestHelper) CreateTeam() *model.Team {
 }
 
 func (th *TestHelper) CreateUser() *model.User {
-	return th.CreateUserOrGuest(false)
+	return th.CreateUserOrGuest(false, true)
 }
 
 func (th *TestHelper) CreateGuest() *model.User {
-	return th.CreateUserOrGuest(true)
+	return th.CreateUserOrGuest(true, false)
 }
 
-func (th *TestHelper) CreateUserOrGuest(guest bool) *model.User {
+func (th *TestHelper) CreateUnverified() *model.User {
+	return th.CreateUserOrGuest(false, false)
+}
+
+func (th *TestHelper) CreateUserOrGuest(guest, verified bool) *model.User {
 	id := model.NewId()
 
 	user := &model.User{
@@ -325,6 +337,9 @@ func (th *TestHelper) CreateUserOrGuest(guest bool) *model.User {
 		EmailVerified: true,
 		Mobilephone:   model.NewString(th.GenerateTestMobilephone()),
 	}
+	if verified {
+		user.Mobilephone = model.NewString(th.GenerateTestMobilephone())
+	}
 
 	var err *model.AppError
 	if guest {
@@ -333,6 +348,12 @@ func (th *TestHelper) CreateUserOrGuest(guest bool) *model.User {
 		}
 	} else {
 		if user, err = th.App.CreateUser(th.Context, user); err != nil {
+			panic(err)
+		}
+	}
+	if verified {
+		user.Roles += " " + model.SystemVerifiedRoleId
+		if user, err = th.App.UpdateUserRoles(th.Context, user.Id, user.Roles, false); err != nil {
 			panic(err)
 		}
 	}
@@ -516,9 +537,11 @@ func (th *TestHelper) CreateScheme() (*model.Scheme, []*model.Role) {
 
 	roleNames := []string{
 		scheme.DefaultTeamAdminRole,
+		scheme.DefaultTeamVerifiedRole,
 		scheme.DefaultTeamUserRole,
 		scheme.DefaultTeamGuestRole,
 		scheme.DefaultChannelAdminRole,
+		scheme.DefaultChannelVerifiedRole,
 		scheme.DefaultChannelUserRole,
 		scheme.DefaultChannelGuestRole,
 	}

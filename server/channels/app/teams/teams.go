@@ -146,6 +146,7 @@ func (ts *TeamService) JoinUserToTeam(rctx request.CTX, team *model.Team, user *
 		UserId:      user.Id,
 		SchemeGuest: user.IsGuest(),
 		SchemeUser:  !user.IsGuest(),
+		SchemeVerified: user.IsVerified(),
 		CreateAt:    model.GetMillis(),
 	}
 

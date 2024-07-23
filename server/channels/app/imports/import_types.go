@@ -72,6 +72,7 @@ type UserImportData struct {
 	UseFormatting      *string   `json:"formatting,omitempty"`
 	ShowUnreadSection  *string   `json:"show_unread_section,omitempty"`
 	DeleteAt           *int64    `json:"delete_at,omitempty"`
+	Mobilephone        *string   `json:"mobilephone,omitempty"`
 
 	Teams *[]UserTeamImportData `json:"teams,omitempty"`
 
@@ -201,8 +202,11 @@ type SchemeImportData struct {
 	Description             *string         `json:"description"`
 	Scope                   *string         `json:"scope"`
 	DefaultTeamAdminRole    *RoleImportData `json:"default_team_admin_role"`
+	DefaultTeamModeratorRole    *RoleImportData `json:"default_team_moderator_role"`
+	DefaultTeamVerifiedRole    *RoleImportData `json:"default_team_verified_role"`
 	DefaultTeamUserRole     *RoleImportData `json:"default_team_user_role"`
 	DefaultChannelAdminRole *RoleImportData `json:"default_channel_admin_role"`
+	DefaultChannelVerifiedRole    *RoleImportData `json:"default_channel_verified_role"`
 	DefaultChannelUserRole  *RoleImportData `json:"default_channel_user_role"`
 	DefaultTeamGuestRole    *RoleImportData `json:"default_team_guest_role"`
 	DefaultChannelGuestRole *RoleImportData `json:"default_channel_guest_role"`

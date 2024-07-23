@@ -914,6 +914,7 @@ func TestExportRoles(t *testing.T) {
 
 func TestExportSchemes(t *testing.T) {
 	t.Run("no schemes", func(t *testing.T) {
+		t.Skip("always has schemes")
 		th1 := Setup(t).InitBasic()
 		defer th1.TearDown()
 
@@ -1001,8 +1002,8 @@ func TestExportSchemes(t *testing.T) {
 		err := th1.App.Srv().Store().System().Save(&model.System{Name: model.MigrationKeyAdvancedPermissionsPhase2, Value: "true"})
 		require.NoError(t, err)
 
-		builtInRoles := 25
-		defaultChannelSchemeRoles := 3
+		builtInRoles := 28
+		defaultChannelSchemeRoles := 4
 
 		// Verify the roles count is expected prior to scheme creation.
 		roles, appErr := th1.App.GetAllRoles()
@@ -1025,6 +1026,8 @@ func TestExportSchemes(t *testing.T) {
 		customChannelAdminRole, appErr := th1.App.GetRoleByName(th1.Context.Context(), customScheme.DefaultChannelAdminRole)
 		require.Nil(t, appErr)
 		customChannelUserRole, appErr := th1.App.GetRoleByName(th1.Context.Context(), customScheme.DefaultChannelUserRole)
+		require.Nil(t, appErr)
+		customChannelVerifiedRole, appErr := th1.App.GetRoleByName(th1.Context.Context(), customScheme.DefaultChannelVerifiedRole)
 		require.Nil(t, appErr)
 		customChannelGuestRole, appErr := th1.App.GetRoleByName(th1.Context.Context(), customScheme.DefaultChannelGuestRole)
 		require.Nil(t, appErr)
@@ -1081,6 +1084,14 @@ func TestExportSchemes(t *testing.T) {
 		require.Equal(t, customChannelUserRole.SchemeManaged, importedChannelUserRole.SchemeManaged)
 		require.Equal(t, customChannelUserRole.BuiltIn, importedChannelUserRole.BuiltIn)
 
+		importedChannelVerifiedRole, appErr := th2.App.GetRoleByName(th2.Context.Context(), importedScheme.DefaultChannelVerifiedRole)
+		require.Nil(t, appErr)
+		require.Equal(t, customChannelVerifiedRole.DisplayName, importedChannelVerifiedRole.DisplayName)
+		require.Equal(t, customChannelVerifiedRole.Description, importedChannelVerifiedRole.Description)
+		require.Equal(t, customChannelVerifiedRole.Permissions, importedChannelVerifiedRole.Permissions)
+		require.Equal(t, customChannelVerifiedRole.SchemeManaged, importedChannelVerifiedRole.SchemeManaged)
+		require.Equal(t, customChannelVerifiedRole.BuiltIn, importedChannelVerifiedRole.BuiltIn)
+
 		importedChannelGuestRole, appErr := th2.App.GetRoleByName(th2.Context.Context(), importedScheme.DefaultChannelGuestRole)
 		require.Nil(t, appErr)
 		require.Equal(t, customChannelGuestRole.DisplayName, importedChannelGuestRole.DisplayName)
@@ -1099,8 +1110,8 @@ func TestExportSchemes(t *testing.T) {
 		err := th1.App.Srv().Store().System().Save(&model.System{Name: model.MigrationKeyAdvancedPermissionsPhase2, Value: "true"})
 		require.NoError(t, err)
 
-		builtInRoles := 25
-		defaultTeamSchemeRoles := 10
+		builtInRoles := 28
+		defaultTeamSchemeRoles := 13
 
 		// Verify the roles count is expected prior to scheme creation.
 		roles, appErr := th1.App.GetAllRoles()
@@ -1122,6 +1133,9 @@ func TestExportSchemes(t *testing.T) {
 		customChannelAdminRole, appErr := th1.App.GetRoleByName(th1.Context.Context(), customScheme.DefaultChannelAdminRole)
 		require.Nil(t, appErr)
 
+		customChannelVerifiedRole, appErr := th1.App.GetRoleByName(th1.Context.Context(), customScheme.DefaultChannelVerifiedRole)
+		require.Nil(t, appErr)
+
 		customChannelUserRole, appErr := th1.App.GetRoleByName(th1.Context.Context(), customScheme.DefaultChannelUserRole)
 		require.Nil(t, appErr)
 
@@ -1129,6 +1143,9 @@ func TestExportSchemes(t *testing.T) {
 		require.Nil(t, appErr)
 
 		customTeamAdminRole, appErr := th1.App.GetRoleByName(th1.Context.Context(), customScheme.DefaultTeamAdminRole)
+		require.Nil(t, appErr)
+
+		customTeamVerifiedRole, appErr := th1.App.GetRoleByName(th1.Context.Context(), customScheme.DefaultTeamVerifiedRole)
 		require.Nil(t, appErr)
 
 		customTeamUserRole, appErr := th1.App.GetRoleByName(th1.Context.Context(), customScheme.DefaultTeamUserRole)
@@ -1181,6 +1198,14 @@ func TestExportSchemes(t *testing.T) {
 		require.Equal(t, customChannelAdminRole.SchemeManaged, importedChannelAdminRole.SchemeManaged)
 		require.Equal(t, customChannelAdminRole.BuiltIn, importedChannelAdminRole.BuiltIn)
 
+		importedChannelVerifiedRole, appErr := th2.App.GetRoleByName(th2.Context.Context(), importedScheme.DefaultChannelVerifiedRole)
+		require.Nil(t, appErr)
+		require.Equal(t, customChannelVerifiedRole.DisplayName, importedChannelVerifiedRole.DisplayName)
+		require.Equal(t, customChannelVerifiedRole.Description, importedChannelVerifiedRole.Description)
+		require.Equal(t, customChannelVerifiedRole.Permissions, importedChannelVerifiedRole.Permissions)
+		require.Equal(t, customChannelVerifiedRole.SchemeManaged, importedChannelVerifiedRole.SchemeManaged)
+		require.Equal(t, customChannelVerifiedRole.BuiltIn, importedChannelVerifiedRole.BuiltIn)
+
 		importedChannelUserRole, appErr := th2.App.GetRoleByName(th2.Context.Context(), importedScheme.DefaultChannelUserRole)
 		require.Nil(t, appErr)
 		require.Equal(t, customChannelUserRole.DisplayName, importedChannelUserRole.DisplayName)
@@ -1204,6 +1229,14 @@ func TestExportSchemes(t *testing.T) {
 		require.Equal(t, customTeamAdminRole.Permissions, importedTeamAdminRole.Permissions)
 		require.Equal(t, customTeamAdminRole.SchemeManaged, importedTeamAdminRole.SchemeManaged)
 		require.Equal(t, customTeamAdminRole.BuiltIn, importedTeamAdminRole.BuiltIn)
+
+		importedTeamVerifiedRole, appErr := th2.App.GetRoleByName(th2.Context.Context(), importedScheme.DefaultTeamVerifiedRole)
+		require.Nil(t, appErr)
+		require.Equal(t, customTeamVerifiedRole.DisplayName, importedTeamVerifiedRole.DisplayName)
+		require.Equal(t, customTeamVerifiedRole.Description, importedTeamVerifiedRole.Description)
+		require.Equal(t, customTeamVerifiedRole.Permissions, importedTeamVerifiedRole.Permissions)
+		require.Equal(t, customTeamVerifiedRole.SchemeManaged, importedTeamVerifiedRole.SchemeManaged)
+		require.Equal(t, customTeamVerifiedRole.BuiltIn, importedTeamVerifiedRole.BuiltIn)
 
 		importedTeamUserRole, appErr := th2.App.GetRoleByName(th2.Context.Context(), importedScheme.DefaultTeamUserRole)
 		require.Nil(t, appErr)

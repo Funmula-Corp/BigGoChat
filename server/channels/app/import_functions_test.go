@@ -15,14 +15,14 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app/imports"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/testlib"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/utils"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/utils/fileutils"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/shared/filestore"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
 )
 
 func TestImportImportScheme(t *testing.T) {
@@ -1731,7 +1731,7 @@ func TestImportUserTeams(t *testing.T) {
 
 	for _, tc := range tt {
 		t.Run(tc.name, func(t *testing.T) {
-			user := th.CreateUser()
+			user := th.CreateUnverified()
 
 			// Two times import must end with the same results
 			for x := 0; x < 2; x++ {
@@ -1883,7 +1883,7 @@ func TestImportUserChannels(t *testing.T) {
 
 	for _, tc := range tt {
 		t.Run(tc.name, func(t *testing.T) {
-			user := th.CreateUser()
+			user := th.CreateUnverified()
 			_, _, err := th.App.ch.srv.teamService.JoinUserToTeam(th.Context, th.BasicTeam, user)
 			require.NoError(t, err)
 
