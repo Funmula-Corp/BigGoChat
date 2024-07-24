@@ -535,23 +535,23 @@ func (_m *ChannelStore) GetAllChannelMemberIdsByChannelId(id string) ([]string, 
 }
 
 // GetAllChannelMembersForUser provides a mock function with given fields: userID, allowFromCache, includeDeleted
-func (_m *ChannelStore) GetAllChannelMembersForUser(userID string, allowFromCache bool, includeDeleted bool) (map[string]string, error) {
+func (_m *ChannelStore) GetAllChannelMembersForUser(userID string, allowFromCache bool, includeDeleted bool) (map[string]*model.ChannelMemberRolesAndExcludePermissions, error) {
 	ret := _m.Called(userID, allowFromCache, includeDeleted)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetAllChannelMembersForUser")
 	}
 
-	var r0 map[string]string
+	var r0 map[string]*model.ChannelMemberRolesAndExcludePermissions
 	var r1 error
-	if rf, ok := ret.Get(0).(func(string, bool, bool) (map[string]string, error)); ok {
+	if rf, ok := ret.Get(0).(func(string, bool, bool) (map[string]*model.ChannelMemberRolesAndExcludePermissions, error)); ok {
 		return rf(userID, allowFromCache, includeDeleted)
 	}
-	if rf, ok := ret.Get(0).(func(string, bool, bool) map[string]string); ok {
+	if rf, ok := ret.Get(0).(func(string, bool, bool) map[string]*model.ChannelMemberRolesAndExcludePermissions); ok {
 		r0 = rf(userID, allowFromCache, includeDeleted)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(map[string]string)
+			r0 = ret.Get(0).(map[string]*model.ChannelMemberRolesAndExcludePermissions)
 		}
 	}
 

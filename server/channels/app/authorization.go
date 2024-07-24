@@ -86,7 +86,7 @@ func (a *App) SessionHasPermissionToChannel(c request.CTX, session model.Session
 	var channelRoles []string
 	if err == nil {
 		if roles, ok := ids[channelID]; ok {
-			channelRoles = strings.Fields(roles)
+			channelRoles = strings.Fields(roles.Roles)
 			if a.RolesGrantPermission(channelRoles, permission.Id) {
 				return true
 			}
@@ -140,7 +140,7 @@ func (a *App) SessionHasPermissionToChannels(c request.CTX, session model.Sessio
 		if err == nil {
 			// If a channel member has permission, then no need to check further.
 			if roles, ok := ids[channelID]; ok {
-				channelRoles = strings.Fields(roles)
+				channelRoles = strings.Fields(roles.Roles)
 				if a.RolesGrantPermission(channelRoles, permission.Id) {
 					continue
 				}
@@ -270,7 +270,7 @@ func (a *App) HasPermissionToChannel(c request.CTX, askingUserId string, channel
 	var channelRoles []string
 	if err == nil {
 		if roles, ok := ids[channelID]; ok {
-			channelRoles = strings.Fields(roles)
+			channelRoles = strings.Fields(roles.Roles)
 			if a.RolesGrantPermission(channelRoles, permission.Id) {
 				return true
 			}

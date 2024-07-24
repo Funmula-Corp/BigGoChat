@@ -63,7 +63,7 @@ func NewMapFromChannelMemberModel(cm *model.ChannelMember) map[string]any {
 		"LastUpdateAt":       cm.LastUpdateAt,
 		"SchemeGuest":        sql.NullBool{Valid: true, Bool: cm.SchemeGuest},
 		"SchemeUser":         sql.NullBool{Valid: true, Bool: cm.SchemeUser},
-		"SchemeVerified":        sql.NullBool{Valid: true, Bool: cm.SchemeVerified},
+		"SchemeVerified":     sql.NullBool{Valid: true, Bool: cm.SchemeVerified},
 		"SchemeAdmin":        sql.NullBool{Valid: true, Bool: cm.SchemeAdmin},
 		"ExcludePermissions": cm.ExcludePermissions,
 	}
@@ -468,12 +468,15 @@ func (db allChannelMember) Process() (string, string) {
 	return db.ChannelId, strings.Join(roles, " ")
 }
 
-func (db allChannelMembers) ToMapStringString() map[string]string {
-	result := make(map[string]string)
+func (db allChannelMembers) ToMapRoleAndExclude() map[string]*model.ChannelMemberRolesAndExcludePermissions {
+	result := make(map[string]*model.ChannelMemberRolesAndExcludePermissions)
 
 	for _, item := range db {
 		key, value := item.Process()
-		result[key] = value
+		result[key] = &model.ChannelMemberRolesAndExcludePermissions{
+			Roles:              value,
+			ExcludePermissions: item.ExcludePermissions.String,
+		}
 	}
 
 	return result
@@ -2206,7 +2209,7 @@ func (s SqlChannelStore) GetMemberForPost(postId string, userId string, includeA
 	return dbMember.ToModel(), nil
 }
 
-func (s SqlChannelStore) GetAllChannelMembersForUser(userId string, allowFromCache bool, includeDeleted bool) (_ map[string]string, err error) {
+func (s SqlChannelStore) GetAllChannelMembersForUser(userId string, allowFromCache bool, includeDeleted bool) (_ map[string]*model.ChannelMemberRolesAndExcludePermissions, err error) {
 	query := s.getQueryBuilder().
 		Select(`
 				ChannelMembers.ChannelId, ChannelMembers.Roles, ChannelMembers.SchemeGuest,
@@ -2259,7 +2262,7 @@ func (s SqlChannelStore) GetAllChannelMembersForUser(userId string, allowFromCac
 	if err = rows.Err(); err != nil {
 		return nil, errors.Wrap(err, "error while iterating over rows")
 	}
-	ids := data.ToMapStringString()
+	ids := data.ToMapRoleAndExclude()
 
 	return ids, nil
 }
@@ -2348,12 +2351,12 @@ func (s SqlChannelStore) GetFileCount(channelId string) (int64, error) {
 	var count int64
 	err := s.GetReplicaX().Get(&count, `
 		SELECT
-		    COUNT(*)
+			COUNT(*)
 		FROM
-		    FileInfo
+			FileInfo
 		WHERE
-		    FileInfo.DeleteAt = 0
-            AND FileInfo.ChannelId = ?`,
+			FileInfo.DeleteAt = 0
+			AND FileInfo.ChannelId = ?`,
 		channelId)
 	if err != nil {
 		return 0, errors.Wrapf(err, "failed to count files with channelId=%s", channelId)

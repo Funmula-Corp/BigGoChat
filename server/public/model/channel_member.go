@@ -243,3 +243,8 @@ type ChannelMemberIdentifier struct {
 	ChannelId string `json:"channel_id"`
 	UserId    string `json:"user_id"`
 }
+
+type ChannelMemberRolesAndExcludePermissions struct {
+	Roles              string `json:"roles"`
+	ExcludePermissions string `json:"exclude_permissions"`
+}

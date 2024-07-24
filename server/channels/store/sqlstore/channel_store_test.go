@@ -102,6 +102,7 @@ func testChannelMemberWithSchemeRolesToModel(t *testing.T) {
 			ChannelSchemeDefaultUserRole:  sql.NullString{Valid: false},
 			ChannelSchemeDefaultVerifiedRole:  sql.NullString{Valid: false},
 			ChannelSchemeDefaultAdminRole: sql.NullString{Valid: false},
+			ExcludePermissions:            "custom_permission",
 		}
 
 		m := db.ToModel()
@@ -120,6 +121,7 @@ func testChannelMemberWithSchemeRolesToModel(t *testing.T) {
 		assert.Equal(t, db.SchemeVerified.Bool, m.SchemeVerified)
 		assert.Equal(t, db.SchemeAdmin.Bool, m.SchemeAdmin)
 		assert.Equal(t, db.Roles, m.ExplicitRoles)
+		assert.Equal(t, db.ExcludePermissions, m.ExcludePermissions)
 	})
 
 	// Example data *before* the Phase 2 migration has taken place.
