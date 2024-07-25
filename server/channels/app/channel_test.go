@@ -2831,3 +2831,37 @@ func TestPatchChannelMembersNotifyProps(t *testing.T) {
 		assert.NotNil(t, appErr)
 	})
 }
+
+func TestGetChannelMembersForUserWithPagination(t *testing.T) {
+	th := Setup(t).InitBasic()
+	defer th.TearDown()
+	user := th.CreateUnverified()
+	th.LinkUserToTeam(user, th.BasicTeam)
+	members, err := th.App.GetChannelMembersForUserWithPagination(th.Context, user.Id, 0, 100)
+	require.Nil(t, err)
+	require.Equal(t, "channel_user", members[0].Roles)
+	phone := th.GenerateTestMobilephone()
+	user.Mobilephone = &phone
+	user, err = th.App.UpdateUser(th.Context, user, true)
+	require.Nil(t, err)
+	err = th.App.MarkUserVerified(th.Context, user.Id)
+	require.Nil(t, err)
+	members, err  = th.App.GetChannelMembersForUserWithPagination(th.Context, user.Id, 0, 100)
+	require.Nil(t, err)
+	for _, member := range(members){
+		require.Equal(t, model.ChannelUserRoleId + " " + model.ChannelVerifiedRoleId, member.Roles)
+	}
+	require.Nil(t, err)
+	cm, err := th.App.UpdateChannelMemberSchemeRoles(th.Context, members[0].ChannelId, user.Id, false, true, true, true)
+	require.Nil(t, err)
+	require.True(t, cm.SchemeVerified)
+	members, err  = th.App.GetChannelMembersForUserWithPagination(th.Context, user.Id, 0, 100)
+	require.Nil(t, err)
+	for _, member := range(members){
+		if member.ChannelId == cm.ChannelId {
+			require.Equal(t, model.ChannelUserRoleId + " " + model.ChannelVerifiedRoleId + " " + model.ChannelAdminRoleId, member.Roles)
+		} else {
+			require.Equal(t, model.ChannelUserRoleId + " " + model.ChannelVerifiedRoleId, member.Roles)
+		}
+	}
+}
