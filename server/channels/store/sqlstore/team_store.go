@@ -1398,6 +1398,9 @@ func (s SqlTeamStore) MigrateTeamMembers(fromTeamId string, fromUserId string) (
 		if !member.SchemeAdmin.Valid {
 			member.SchemeAdmin = sql.NullBool{Bool: false, Valid: true}
 		}
+		if !member.SchemeModerator.Valid {
+			member.SchemeModerator = sql.NullBool{Bool: false, Valid: true}
+		}
 		if !member.SchemeVerified.Valid {
 			member.SchemeVerified = sql.NullBool{Bool: false, Valid: true}
 		}
@@ -1410,8 +1413,10 @@ func (s SqlTeamStore) MigrateTeamMembers(fromTeamId string, fromUserId string) (
 		for _, role := range roles {
 			if role == model.TeamAdminRoleId {
 				member.SchemeAdmin = sql.NullBool{Bool: true, Valid: true}
+			} else if role == model.TeamModeratorRoleId {
+				member.SchemeModerator = sql.NullBool{Bool: true, Valid: true}
 			} else if role == model.TeamVerifiedRoleId {
-				member.SchemeUser = sql.NullBool{Bool: true, Valid: true}
+				member.SchemeVerified = sql.NullBool{Bool: true, Valid: true}
 			} else if role == model.TeamUserRoleId {
 				member.SchemeUser = sql.NullBool{Bool: true, Valid: true}
 			} else if role == model.TeamGuestRoleId {
@@ -1429,6 +1434,7 @@ func (s SqlTeamStore) MigrateTeamMembers(fromTeamId string, fromUserId string) (
 				DeleteAt=:DeleteAt,
 				SchemeUser=:SchemeUser,
 				SchemeVerified=:SchemeVerified,
+				SchemeModerator=:SchemeModerator,
 				SchemeAdmin=:SchemeAdmin,
 				SchemeGuest=:SchemeGuest
 			WHERE TeamId=:TeamId AND UserId=:UserId`, &member); err != nil {
@@ -1654,7 +1660,7 @@ func (s SqlTeamStore) GetTeamMembersForExport(userId string) ([]*model.TeamMembe
 	query, args, err := s.getQueryBuilder().
 		Select("TeamMembers.TeamId", "TeamMembers.UserId", "TeamMembers.Roles", "TeamMembers.DeleteAt",
 			"(TeamMembers.SchemeGuest IS NOT NULL AND TeamMembers.SchemeGuest) as SchemeGuest",
-			"TeamMembers.SchemeUser", "TeamMembers.SchemeVerified", "TeamMembers.SchemeAdmin", "Teams.Name as TeamName").
+			"TeamMembers.SchemeUser", "TeamMembers.SchemeVerified", "TeamMembers.SchemeModerator", "TeamMembers.SchemeAdmin", "Teams.Name as TeamName").
 		From("TeamMembers").
 		Join("Teams ON TeamMembers.TeamId = Teams.Id").
 		Where(sq.Eq{"TeamMembers.UserId": userId, "Teams.DeleteAt": 0}).ToSql()
