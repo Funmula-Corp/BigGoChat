@@ -1346,6 +1346,23 @@ func TestUpdateChannelMemberRolesChangingGuest(t *testing.T) {
 	})
 }
 
+func TestUpdateChannelMemberExcludePermissions(t *testing.T) {
+	th := Setup(t).InitBasic()
+	defer th.TearDown()
+
+	t.Run("basic test", func(t *testing.T) {
+		_, err := th.App.AddUserToChannel(th.Context, th.BasicUser2, th.BasicChannel, false)
+		require.Nil(t, err)
+
+		member, err := th.App.UpdateChannelMemberExcludePermissions(th.Context, th.BasicChannel.Id, th.BasicUser2.Id, model.PermissionCreatePost.Id)
+		require.Nil(t, err)
+
+		ok := th.App.HasPermissionToChannel(th.Context, th.BasicUser2.Id, th.BasicChannel.Id, model.PermissionCreatePost)
+		require.False(t, ok, member)
+	})
+
+}
+
 func TestDefaultChannelNames(t *testing.T) {
 	th := Setup(t)
 	defer th.TearDown()

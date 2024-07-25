@@ -7,6 +7,7 @@ import (
 	"database/sql"
 	"errors"
 	"net/http"
+	"slices"
 	"strings"
 
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
@@ -87,7 +88,9 @@ func (a *App) SessionHasPermissionToChannel(c request.CTX, session model.Session
 	if err == nil {
 		if roles, ok := ids[channelID]; ok {
 			channelRoles = strings.Fields(roles.Roles)
-			if a.RolesGrantPermission(channelRoles, permission.Id) {
+			if slices.Contains(strings.Fields(roles.ExcludePermissions), permission.Id) {
+				// do nothing
+			} else if a.RolesGrantPermission(channelRoles, permission.Id) {
 				return true
 			}
 		}
@@ -271,7 +274,9 @@ func (a *App) HasPermissionToChannel(c request.CTX, askingUserId string, channel
 	if err == nil {
 		if roles, ok := ids[channelID]; ok {
 			channelRoles = strings.Fields(roles.Roles)
-			if a.RolesGrantPermission(channelRoles, permission.Id) {
+			if slices.Contains(strings.Fields(roles.ExcludePermissions), permission.Id){
+				// do nothing
+			} else if a.RolesGrantPermission(channelRoles, permission.Id) {
 				return true
 			}
 		}

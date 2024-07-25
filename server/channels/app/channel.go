@@ -1309,6 +1309,30 @@ func (a *App) UpdateChannelMemberSchemeRoles(c request.CTX, channelID string, us
 	return a.updateChannelMember(c, member)
 }
 
+func (a *App) UpdateChannelMemberExcludePermissions(c request.CTX, channelID string, userID string, excludePermissions string) (*model.ChannelMember, *model.AppError) {
+	var member *model.ChannelMember
+	var err *model.AppError
+	if member, err = a.GetChannelMember(c, channelID, userID); err != nil {
+		return nil, err
+	}
+
+	// validation channel permission
+	newExcludes := []string{}
+	for _, permissionName := range strings.Fields(excludePermissions) {
+		for key, value := range model.ChannelModeratedPermissionsMap {
+			if (key == permissionName || value == permissionName) &&
+			   !slices.Contains(newExcludes, permissionName) {
+				newExcludes = append(newExcludes, permissionName)
+				break
+			}
+		}
+	}
+
+	member.ExcludePermissions = strings.Join(newExcludes, " ")
+
+	return a.updateChannelMember(c, member)
+}
+
 func (a *App) UpdateChannelMemberNotifyProps(c request.CTX, data map[string]string, channelID string, userID string) (*model.ChannelMember, *model.AppError) {
 	filteredProps := make(map[string]string)
 
