@@ -1694,6 +1694,9 @@ func (a *App) UpdateUserRolesWithUser(c request.CTX, user *model.User, newRoles 
 	uchan := make(chan store.StoreResult[*model.UserUpdate], 1)
 	go func() {
 		userUpdate, err := a.Srv().Store().User().Update(c, user, true)
+		if userUpdate.New.IsVerified() != userUpdate.Old.IsVerified() {
+			a.Srv().Store().User().UpdateMemberVerifiedStatus(c, userUpdate.New)
+		}
 		uchan <- store.StoreResult[*model.UserUpdate]{Data: userUpdate, NErr: err}
 		close(uchan)
 	}()

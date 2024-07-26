@@ -1662,3 +1662,73 @@ func TestTeamSendEvents(t *testing.T) {
 		require.Equal(t, "", teamFromEvent.InviteId)
 	}
 }
+
+func TestGetTeamsForUser(t *testing.T) {
+	th := Setup(t).InitBasic()
+	defer th.TearDown()
+
+	t.Run("test basic user", func(t *testing.T) {
+		teams, err := th.App.GetTeamMembersForUser(th.Context, th.BasicUser.Id, "", false)
+		require.Nil(t, err)
+		require.Greater(t, len(teams), 0)
+		for _, team := range teams {
+			require.Equal(t, model.TeamUserRoleId+" "+model.TeamVerifiedRoleId, team.Roles)
+		}
+
+		teams, err = th.App.GetTeamMembersForUserWithPagination(th.BasicUser.Id, 0, 100)
+		require.Nil(t, err)
+		require.Greater(t, len(teams), 0)
+		for _, team := range teams {
+			require.Equal(t, model.TeamUserRoleId+" "+model.TeamVerifiedRoleId, team.Roles)
+		}
+	})
+	t.Run("test unverified user", func(t *testing.T) {
+		teams, err := th.App.GetTeamMembersForUser(th.Context, th.BasicUnverified.Id, "", false)
+		require.Nil(t, err)
+		require.Greater(t, len(teams), 0)
+		for _, team := range teams {
+			require.Equal(t, model.TeamUserRoleId, team.Roles)
+		}
+
+		teams, err = th.App.GetTeamMembersForUserWithPagination(th.BasicUnverified.Id, 0, 100)
+		require.Nil(t, err)
+		require.Greater(t, len(teams), 0)
+		for _, team := range teams {
+			require.Equal(t, model.TeamUserRoleId, team.Roles)
+		}
+	})
+
+	t.Run("test moderator admin user", func(t *testing.T) {
+		user := th.CreateUser()
+		th.LinkUserToTeam(user, th.BasicTeam)
+		th.App.UpdateTeamMemberSchemeRoles(th.Context, th.BasicTeam.Id, user.Id, false, true, true, true, false)
+		teams, err := th.App.GetTeamMembersForUser(th.Context, user.Id, "", false)
+		require.Nil(t, err)
+		require.Greater(t, len(teams), 0)
+		for _, team := range teams {
+			require.Equal(t, model.TeamUserRoleId+" "+model.TeamVerifiedRoleId + " " + model.TeamModeratorRoleId, team.Roles)
+		}
+
+		teams, err = th.App.GetTeamMembersForUserWithPagination(user.Id, 0, 100)
+		require.Nil(t, err)
+		require.Greater(t, len(teams), 0)
+		for _, team := range teams {
+			require.Equal(t, model.TeamUserRoleId+" "+model.TeamVerifiedRoleId + " " + model.TeamModeratorRoleId, team.Roles)
+		}
+
+		th.App.UpdateTeamMemberSchemeRoles(th.Context, th.BasicTeam.Id, user.Id, false, true, true, false, true)
+		teams, err = th.App.GetTeamMembersForUser(th.Context, user.Id, "", false)
+		require.Nil(t, err)
+		require.Greater(t, len(teams), 0)
+		for _, team := range teams {
+			require.Equal(t, model.TeamUserRoleId+" "+model.TeamVerifiedRoleId + " " + model.TeamAdminRoleId, team.Roles)
+		}
+
+		teams, err = th.App.GetTeamMembersForUserWithPagination(user.Id, 0, 100)
+		require.Nil(t, err)
+		require.Greater(t, len(teams), 0)
+		for _, team := range teams {
+			require.Equal(t, model.TeamUserRoleId+" "+model.TeamVerifiedRoleId + " " + model.TeamAdminRoleId, team.Roles)
+		}
+	})
+}

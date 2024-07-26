@@ -512,7 +512,20 @@ func (b *BleveEngine) SearchUsersInTeam(teamId string, restrictedToChannels []st
 			} else {
 				termQ.SetField("SuggestionsWithoutFullname")
 			}
-			boolQ.AddMust(termQ)
+			if options.AllowMobilephones {
+				var phoneTerm string
+				if strings.HasPrefix(term, "+") {
+					phoneTerm = term
+				}else{
+					phoneTerm = "+" + term
+				}
+				phoneQ := bleve.NewTermQuery(phoneTerm)
+				phoneQ.SetField("Mobilephone")
+				boolQ.AddShould(termQ, phoneQ)
+				boolQ.SetMinShould(1)
+			} else {
+				boolQ.AddMust(termQ)
+			}
 		}
 
 		if len(restrictedToChannels) > 0 {

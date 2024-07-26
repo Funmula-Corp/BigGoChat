@@ -112,6 +112,7 @@ func getUserIndexMapping() *mapping.IndexMappingImpl {
 	userMapping.AddFieldMappingsAt("SuggestionsWithoutFullname", keywordMapping)
 	userMapping.AddFieldMappingsAt("TeamsIds", keywordMapping)
 	userMapping.AddFieldMappingsAt("ChannelsIds", keywordMapping)
+	userMapping.AddFieldMappingsAt("Mobilephone", keywordMapping)
 
 	indexMapping := bleve.NewIndexMapping()
 	indexMapping.AddDocumentMapping("_default", userMapping)

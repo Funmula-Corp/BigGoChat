@@ -23,6 +23,7 @@ const (
 	MaxAddMembersBatch    = 256
 	MaximumBulkImportSize = 10 * 1024 * 1024
 	groupIDsParamPattern  = "[^a-zA-Z0-9,]*"
+	MaxTeamCreationLimit  = 10
 )
 
 var groupIDsQueryParamRegex *regexp.Regexp
@@ -91,6 +92,23 @@ func createTeam(c *Context, w http.ResponseWriter, r *http.Request) {
 	if !c.App.SessionHasPermissionTo(*c.AppContext.Session(), model.PermissionCreateTeam) {
 		c.Err = model.NewAppError("createTeam", "api.team.is_team_creation_allowed.disabled.app_error", nil, "", http.StatusForbidden)
 		return
+	}
+
+	if !c.IsSystemAdmin() {
+		user, err := c.App.Srv().Store().User().Get(r.Context(), c.AppContext.Session().UserId)
+		if err != nil {
+			c.Err = model.NewAppError("createTeam", "api.team.is_team_creation_allowed.user_info.app_error", nil, "", http.StatusInternalServerError)
+			return
+		}
+		if existingTeams, appErr := c.App.GetAllTeamsByEmail(user.Email); appErr != nil {
+			c.Err = appErr
+			return
+		} else if len(existingTeams) >= MaxTeamCreationLimit {
+			c.Err = model.NewAppError("createTeam", "api.team.is_team_creation_allowed.limit_exceeded.app_error", nil, "", http.StatusForbidden)
+			return
+		} else {
+			mlog.Info("EXISTING TEAM COUNT", mlog.Int("count", len(existingTeams)))
+		}
 	}
 
 	// On a cloud license, we must check limits before allowing to create
@@ -754,11 +772,11 @@ func addTeamMember(c *Context, w http.ResponseWriter, r *http.Request) {
 	if blocked, err := c.App.GetTeamBlockUser(c.AppContext, member.TeamId, member.UserId); err != nil {
 		c.Err = model.NewAppError("addTeamMeber", "api.team.add_member.get_block_user.error", nil, "", http.StatusInternalServerError).Wrap(err)
 		return
-	}else if blocked != nil {
+	} else if blocked != nil {
 		var retCode int
 		if c.AppContext.Session().UserId == member.UserId {
 			retCode = http.StatusForbidden
-		}else {
+		} else {
 			retCode = http.StatusBadRequest
 		}
 		c.Err = model.NewAppError("addTeamMember", "api.team.add_member.blocked_user.app_err", nil, "", retCode)
@@ -914,7 +932,7 @@ func addTeamMembers(c *Context, w http.ResponseWriter, r *http.Request) {
 		if blocked, err := c.App.GetTeamBlockUser(c.AppContext, member.TeamId, member.UserId); err != nil {
 			c.Err = model.NewAppError("addTeamMeber", "api.team.add_member.get_block_user.error", nil, "", http.StatusInternalServerError).Wrap(err)
 			return
-		}else if blocked != nil {
+		} else if blocked != nil {
 			c.Err = model.NewAppError("addTeamMember", "api.team.add_member.blocked_user.app_err", nil, "", http.StatusBadRequest)
 			return
 		}
@@ -1088,7 +1106,7 @@ func updateTeamMemberRoles(c *Context, w http.ResponseWriter, r *http.Request) {
 		return
 	} else if user.IsVerified() {
 		hasVerified := false
-		for _, role := range(strings.Fields(newRoles)){
+		for _, role := range strings.Fields(newRoles) {
 			if role == model.TeamVerifiedRoleId {
 				hasVerified = true
 				break
@@ -1136,7 +1154,7 @@ func updateTeamMemberSchemeRoles(c *Context, w http.ResponseWriter, r *http.Requ
 	if user, err := c.App.GetUser(c.Params.UserId); err != nil {
 		c.Err = err
 		return
-	}else{
+	} else {
 		schemeRoles.SchemeVerified = user.IsVerified()
 	}
 
