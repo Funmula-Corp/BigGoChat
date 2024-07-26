@@ -1693,16 +1693,101 @@ func TestUpdateUserRolesWithUser(t *testing.T) {
 
 	// Create normal user.
 	user := th.CreateUser()
-	assert.Equal(t, user.Roles, model.SystemUserRoleId+" "+model.SystemVerifiedRoleId)
+	require.Equal(t, user.Roles, model.SystemUserRoleId+" "+model.SystemVerifiedRoleId)
 
 	// Upgrade to sysadmin.
 	user, err := th.App.UpdateUserRolesWithUser(th.Context, user, model.SystemUserRoleId+" "+model.SystemAdminRoleId, false)
 	require.Nil(t, err)
-	assert.Equal(t, user.Roles, model.SystemUserRoleId+" "+model.SystemAdminRoleId)
+	require.Equal(t, user.Roles, model.SystemUserRoleId+" "+model.SystemAdminRoleId)
 
 	// Test bad role.
 	_, err = th.App.UpdateUserRolesWithUser(th.Context, user, "does not exist", false)
 	require.NotNil(t, err)
+
+}
+
+func TestUpdateUserRolesWithUserAndVerifiedStatus(t *testing.T) {
+	// InitBasic is used to let the first CreateUser call not be
+	// a system_admin
+	th := Setup(t).InitBasic()
+	defer th.TearDown()
+
+	// it should update verified status too
+	user := th.CreateUnverified()
+	require.Equal(t, user.Roles, model.SystemUserRoleId)
+	require.False(t, user.IsVerified())
+	th.LinkUserToTeam(user, th.BasicTeam)
+	cm := th.AddUserToChannel(user, th.BasicChannel)
+	require.NotNil(t, cm)
+	tms, err := th.App.GetTeamMembersForUser(th.Context, user.Id, "", true)
+	require.Nil(t, err)
+	require.Greater(t, len(tms), 0)
+	for _, tm := range(tms) {
+		require.False(t, tm.SchemeVerified)
+		require.True(t, tm.SchemeUser)
+	}
+	cms, err := th.App.GetChannelMembersForUser(th.Context, th.BasicTeam.Id, user.Id)
+	require.Nil(t, err)
+	for _, cm := range(cms) {
+		require.False(t, cm.SchemeVerified)
+		require.True(t, cm.SchemeUser)
+	}
+
+	// make it verified
+	user, err = th.App.UpdateUserRolesWithUser(th.Context, user, model.SystemUserRoleId+" "+model.SystemVerifiedRoleId, false)
+	require.Nil(t, err)
+	require.Equal(t, user.Roles, model.SystemUserRoleId+" "+model.SystemVerifiedRoleId)
+	require.True(t, user.IsVerified())
+	tms, err = th.App.GetTeamMembersForUser(th.Context, user.Id, "", true)
+	require.Nil(t, err)
+	require.Greater(t, len(tms), 0)
+	for _, tm := range(tms) {
+		require.True(t, tm.SchemeVerified)
+		require.True(t, tm.SchemeUser)
+	}
+	cms, err = th.App.GetChannelMembersForUser(th.Context, th.BasicTeam.Id, user.Id)
+	require.Nil(t, err)
+	for _, cm := range(cms) {
+		require.True(t, cm.SchemeVerified)
+		require.True(t, cm.SchemeUser)
+	}
+	// remove verified roles
+	user, err = th.App.UpdateUserRolesWithUser(th.Context, user, model.SystemUserRoleId, false)
+	require.Nil(t, err)
+	require.Equal(t, user.Roles, model.SystemUserRoleId)
+	require.False(t, user.IsVerified())
+	tms, err = th.App.GetTeamMembersForUser(th.Context, user.Id, "", true)
+	require.Nil(t, err)
+	require.Greater(t, len(tms), 0)
+	for _, tm := range(tms) {
+		require.False(t, tm.SchemeVerified)
+		require.True(t, tm.SchemeUser)
+	}
+	cms, err = th.App.GetChannelMembersForUser(th.Context, th.BasicTeam.Id, user.Id)
+	require.Nil(t, err)
+	for _, cm := range(cms) {
+		require.False(t, cm.SchemeVerified)
+		require.True(t, cm.SchemeUser)
+	}
+
+	// verified status dosen't change.
+	user, err = th.App.UpdateUserRolesWithUser(th.Context, user, model.SystemUserRoleId + " " + model.SystemPostAllPublicRoleId, false)
+	require.Nil(t, err)
+	require.Equal(t, user.Roles, model.SystemUserRoleId + " " + model.SystemPostAllPublicRoleId)
+	require.False(t, user.IsVerified())
+	tms, err = th.App.GetTeamMembersForUser(th.Context, user.Id, "", true)
+	require.Nil(t, err)
+	require.Greater(t, len(tms), 0)
+	for _, tm := range(tms) {
+		require.False(t, tm.SchemeVerified)
+		require.True(t, tm.SchemeUser)
+	}
+	cms, err = th.App.GetChannelMembersForUser(th.Context, th.BasicTeam.Id, user.Id)
+	require.Nil(t, err)
+	for _, cm := range(cms) {
+		require.False(t, cm.SchemeVerified)
+		require.True(t, cm.SchemeUser)
+	}
 }
 
 func TestDeactivateMfa(t *testing.T) {
