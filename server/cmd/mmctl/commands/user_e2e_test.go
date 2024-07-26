@@ -1604,3 +1604,12 @@ func (s *MmctlE2ETestSuite) TestPreferenceDeleteCmd() {
 		s.Require().Error(err)
 	})
 }
+
+func (s *MmctlE2ETestSuite) TestRefreshScheme() {
+	s.SetupTestHelper().InitBasic()
+	printer.Clean()
+	cmd := &cobra.Command{}
+
+	err := refreshSchemeCmdF(s.th.Client, cmd, []string{s.th.BasicUser.Email})
+	s.Require().NoError(err)
+}
