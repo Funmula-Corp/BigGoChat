@@ -1354,11 +1354,28 @@ func TestUpdateChannelMemberExcludePermissions(t *testing.T) {
 		_, err := th.App.AddUserToChannel(th.Context, th.BasicUser2, th.BasicChannel, false)
 		require.Nil(t, err)
 
-		member, err := th.App.UpdateChannelMemberExcludePermissions(th.Context, th.BasicChannel.Id, th.BasicUser2.Id, model.PermissionCreatePost.Id)
+		_, err = th.App.UpdateChannelMemberExcludePermissions(th.Context, th.BasicChannel.Id, th.BasicUser2.Id, model.PermissionCreatePost.Id)
 		require.Nil(t, err)
 
 		ok := th.App.HasPermissionToChannel(th.Context, th.BasicUser2.Id, th.BasicChannel.Id, model.PermissionCreatePost)
-		require.False(t, ok, member)
+		require.False(t, ok)
+	})
+
+	// this also test multi permission bans
+	t.Run("moderate test", func(t *testing.T) {
+		_, err := th.App.AddUserToChannel(th.Context, th.BasicUser2, th.BasicChannel, false)
+		require.Nil(t, err)
+
+		banPermissions := []string{model.PermissionCreatePost.Id, "add_members"}
+		_, err = th.App.UpdateChannelMemberExcludePermissions(th.Context, th.BasicChannel.Id, th.BasicUser2.Id, strings.Join(banPermissions, " "))
+		require.Nil(t, err)
+		
+		ok := th.App.HasPermissionToChannel(th.Context, th.BasicUser2.Id, th.BasicChannel.Id, model.PermissionCreatePost)
+		require.False(t, ok)
+		ok = th.App.HasPermissionToChannel(th.Context, th.BasicUser2.Id, th.BasicChannel.Id, model.PermissionAddPublicChannelMembers)
+		require.False(t, ok)
+		ok = th.App.HasPermissionToChannel(th.Context, th.BasicUser2.Id, th.BasicChannel.Id, model.PermissionAddPrivateChannelMembers)
+		require.False(t, ok)
 	})
 
 }

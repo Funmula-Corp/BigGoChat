@@ -1319,11 +1319,14 @@ func (a *App) UpdateChannelMemberExcludePermissions(c request.CTX, channelID str
 	// validation channel permission
 	newExcludes := []string{}
 	for _, permissionName := range strings.Fields(excludePermissions) {
-		for key, value := range model.ChannelModeratedPermissionsMap {
-			if (key == permissionName || value == permissionName) &&
-			   !slices.Contains(newExcludes, permissionName) {
-				newExcludes = append(newExcludes, permissionName)
+		for permissionId, moderate := range model.ChannelModeratedPermissionsMap {
+			if slices.Contains(newExcludes, permissionId) {
 				break
+			} else if (permissionId == permissionName) {
+				newExcludes = append(newExcludes, permissionId)
+				break
+			} else if (moderate == permissionName) {
+				newExcludes = append(newExcludes, permissionId)
 			}
 		}
 	}
