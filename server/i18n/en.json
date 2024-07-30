@@ -3111,6 +3111,10 @@
     "translation": "Unable to remove a user from a group-constrained team."
   },
   {
+    "id": "api.team.remove_member.is_team_owner.app_error",
+    "translation": "Unable to remove the team owner from a team."
+  },
+  {
     "id": "api.team.remove_team_icon.get_team.app_error",
     "translation": "An error occurred getting the team."
   },
