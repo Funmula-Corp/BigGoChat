@@ -4967,9 +4967,12 @@ func TestMoveChannel(t *testing.T) {
 
 	th.TestForSystemAdminAndLocal(t, func(t *testing.T, client *model.Client4) {
 		publicChannel := th.CreatePublicChannel()
-		user := th.BasicUser
+		user := th.BasicUser2
 
-		_, err := client.RemoveTeamMember(context.Background(), team2.Id, user.Id)
+		_, _, err := client.AddTeamMember(context.Background(), team2.Id, user.Id)
+		require.NoError(t, err)
+
+		_, err = client.RemoveTeamMember(context.Background(), team2.Id, user.Id)
 		require.NoError(t, err)
 
 		_, _, err = client.AddChannelMember(context.Background(), publicChannel.Id, user.Id)
@@ -4982,9 +4985,12 @@ func TestMoveChannel(t *testing.T) {
 
 	th.TestForSystemAdminAndLocal(t, func(t *testing.T, client *model.Client4) {
 		privateChannel := th.CreatePrivateChannel()
-		user := th.BasicUser
+		user := th.BasicUser2
 
-		_, err := client.RemoveTeamMember(context.Background(), team2.Id, user.Id)
+		_, _, err := client.AddTeamMember(context.Background(), team2.Id, user.Id)
+		require.NoError(t, err)
+
+		_, err = client.RemoveTeamMember(context.Background(), team2.Id, user.Id)
 		require.NoError(t, err)
 
 		_, _, err = client.AddChannelMember(context.Background(), privateChannel.Id, user.Id)
@@ -4997,9 +5003,12 @@ func TestMoveChannel(t *testing.T) {
 
 	th.TestForSystemAdminAndLocal(t, func(t *testing.T, client *model.Client4) {
 		publicChannel := th.CreatePublicChannel()
-		user := th.BasicUser
+		user := th.BasicUser2
 
-		_, err := client.RemoveTeamMember(context.Background(), team2.Id, user.Id)
+		_, _, err := client.AddTeamMember(context.Background(), team2.Id, user.Id)
+		require.NoError(t, err)
+
+		_, err = client.RemoveTeamMember(context.Background(), team2.Id, user.Id)
 		require.NoError(t, err)
 
 		_, _, err = client.AddChannelMember(context.Background(), publicChannel.Id, user.Id)
@@ -5012,9 +5021,12 @@ func TestMoveChannel(t *testing.T) {
 
 	th.TestForSystemAdminAndLocal(t, func(t *testing.T, client *model.Client4) {
 		privateChannel := th.CreatePrivateChannel()
-		user := th.BasicUser
+		user := th.BasicUser2
 
-		_, err := client.RemoveTeamMember(context.Background(), team2.Id, user.Id)
+		_, _, err := client.AddTeamMember(context.Background(), team2.Id, user.Id)
+		require.NoError(t, err)
+
+		_, err = client.RemoveTeamMember(context.Background(), team2.Id, user.Id)
 		require.NoError(t, err)
 
 		_, _, err = client.AddChannelMember(context.Background(), privateChannel.Id, user.Id)

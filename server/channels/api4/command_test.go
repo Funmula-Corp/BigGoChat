@@ -1032,7 +1032,7 @@ func TestExecuteCommandInTeamUserIsNotOn(t *testing.T) {
 
 	// create a slash command on that team
 	postCmd := &model.Command{
-		CreatorId: th.BasicUser.Id,
+		CreatorId: th.BasicUser2.Id,
 		TeamId:    team2.Id,
 		URL:       ts.URL,
 		Method:    model.CommandMethodPost,
@@ -1041,8 +1041,16 @@ func TestExecuteCommandInTeamUserIsNotOn(t *testing.T) {
 	_, appErr := th.App.CreateCommand(postCmd)
 	require.Nil(t, appErr, "failed to create post command")
 
+	// add the second user to the team and use it for testing
+	_, _, err := client.AddTeamMember(context.Background(), team2.Id, th.BasicUser2.Id)
+	require.NoError(t, err)
+
+	// switch client user to the second user
+	_, _, err = client.LoginById(context.Background(), th.BasicUser2.Id, "Pa$$word11")
+	require.NoError(t, err)
+
 	// make a direct message channel
-	dmChannel, response, err := client.CreateDirectChannel(context.Background(), th.BasicUser.Id, th.BasicUser2.Id)
+	dmChannel, response, err := client.CreateDirectChannel(context.Background(), th.BasicUser2.Id, th.BasicUser.Id)
 	require.NoError(t, err)
 	CheckCreatedStatus(t, response)
 
@@ -1052,7 +1060,7 @@ func TestExecuteCommandInTeamUserIsNotOn(t *testing.T) {
 	CheckOKStatus(t, resp)
 
 	// if the user is removed from the team, they should NOT be able to run the slash command in the DM channel
-	_, err = th.Client.RemoveTeamMember(context.Background(), team2.Id, th.BasicUser.Id)
+	_, err = th.Client.RemoveTeamMember(context.Background(), team2.Id, th.BasicUser2.Id)
 	require.NoError(t, err, "Failed to remove user from team")
 
 	_, resp, err = client.ExecuteCommandWithTeam(context.Background(), dmChannel.Id, team2.Id, "/postcommand")
