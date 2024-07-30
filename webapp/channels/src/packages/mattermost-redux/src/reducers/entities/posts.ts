@@ -137,6 +137,10 @@ export function nextPostsReplies(state: {[x in Post['id']]: number} = {}, action
     case PostTypes.POST_DELETED: {
         const post: Post = action.data;
 
+        if (post.reply_count && !post.root_id) {
+            return state;
+        }
+
         if (!state[post.root_id] && !state[post.id]) {
             return state;
         }
@@ -188,6 +192,10 @@ export function handlePosts(state: IDMappedObjects<Post> = {}, action: AnyAction
             return state;
         }
 
+        if (state.reply_count && !state.root_id) {
+            return state;
+        }
+
         // Mark the post as deleted
         const nextState = {
             ...state,
@@ -205,7 +213,7 @@ export function handlePosts(state: IDMappedObjects<Post> = {}, action: AnyAction
 
         for (const otherPost of Object.values(state)) {
             // Remove any of its comments
-            if (otherPost.root_id === post.id) {
+            if (otherPost.root_id === post.id && (!otherPost.reply_count && !otherPost.root_id)) {
                 Reflect.deleteProperty(nextState, otherPost.id);
             }
 
@@ -250,6 +258,11 @@ export function handlePosts(state: IDMappedObjects<Post> = {}, action: AnyAction
         const post = action.data;
 
         if (!state[post.id]) {
+            return state;
+        }
+
+        // don't remove if post has reply
+        if (post.reply_count && !post.root_id) {
             return state;
         }
 
@@ -425,6 +438,10 @@ export function handlePendingPosts(state: string[] = [], action: AnyAction) {
     }
     case PostTypes.POST_REMOVED: {
         const post = action.data;
+
+        if (post.reply_count && !post.root_id) {
+            return state;
+        }
 
         const index = state.indexOf(post.id);
 
@@ -762,6 +779,10 @@ export function postsInChannel(state: Record<string, PostOrderBlock[]> = {}, act
     case PostTypes.POST_DELETED: {
         const post = action.data;
 
+        if (post.reply_count && !post.root_id) {
+            return state;
+        }
+
         // Deleting a post removes its comments from the order, but does not remove the post itself
 
         const postsForChannel = state[post.channel_id] || [];
@@ -795,6 +816,11 @@ export function postsInChannel(state: Record<string, PostOrderBlock[]> = {}, act
 
     case PostTypes.POST_REMOVED: {
         const post = action.data;
+
+        // don't remove if post has reply
+        if (post.reply_count && !post.root_id) {
+            return state;
+        }
 
         // Removing a post removes it as well as its comments
 
@@ -1091,6 +1117,10 @@ export function postsInThread(state: RelationOneToMany<Post, Post> = {}, action:
     case PostTypes.POST_DELETED: {
         const post = action.data;
 
+        if (post.reply_count && !post.root_id) {
+            return state;
+        }
+
         const postsForThread = state[post.id];
         if (!postsForThread) {
             // Nothing to remove
@@ -1105,6 +1135,10 @@ export function postsInThread(state: RelationOneToMany<Post, Post> = {}, action:
 
     case PostTypes.POST_REMOVED: {
         const post = action.data;
+
+        if (post.reply_count && !post.root_id) {
+            return state;
+        }
 
         if (post.root_id) {
             // This is a comment, so remove it from the thread
@@ -1243,6 +1277,10 @@ export function reactions(state: RelationOneToOne<Post, Record<string, Reaction>
     case PostTypes.POST_REMOVED: {
         const post = action.data;
 
+        if (post.reply_count && !post.root_id) {
+            return state;
+        }
+
         if (post && state[post.id]) {
             const nextState = {...state};
             Reflect.deleteProperty(nextState, post.id);
@@ -1313,6 +1351,10 @@ export function acknowledgements(state: RelationOneToOne<Post, Record<UserProfil
     case PostTypes.POST_DELETED:
     case PostTypes.POST_REMOVED: {
         const post = action.data;
+
+        if (post.reply_count && !post.root_id) {
+            return state;
+        }
 
         if (post && state[post.id]) {
             const nextState = {...state};
