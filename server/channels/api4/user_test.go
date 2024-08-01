@@ -472,7 +472,7 @@ func TestCreateUserWithToken(t *testing.T) {
 		user := model.User{Email: th.GenerateTestEmail(), Nickname: "Corey Hulen", Password: "hello1", Username: GenerateTestUsername(), Roles: model.SystemUserRoleId}
 		channelIdWithoutPermissions := th.BasicPrivateChannel2.Id
 		tVar := true
-		th.UpdateChannelMemberRole(th.BasicChannel.Id, th.BasicUser.Id, model.SchemeRolesPatch{SchemeAdmin: &tVar,})
+		th.UpdateChannelMemberRole(th.BasicChannel.Id, th.BasicUser.Id, model.SchemeRolesPatch{SchemeAdmin: &tVar})
 		channelIds := th.BasicChannel.Id + " " + channelIdWithoutPermissions + " " + th.BasicChannel2.Id
 		token := model.NewToken(
 			app.TokenTypeTeamInvitation,
@@ -513,7 +513,7 @@ func TestCreateUserWithToken(t *testing.T) {
 		channelIdWithoutPermissions := th.BasicPrivateChannel2.Id
 		channelIds := th.BasicChannel.Id + " " + channelIdWithoutPermissions + " " + th.BasicChannel2.Id
 		tVar := true
-		th.UpdateChannelMemberRole(th.BasicChannel.Id, th.BasicUser.Id, model.SchemeRolesPatch{SchemeAdmin: &tVar,})
+		th.UpdateChannelMemberRole(th.BasicChannel.Id, th.BasicUser.Id, model.SchemeRolesPatch{SchemeAdmin: &tVar})
 		token := model.NewToken(
 			app.TokenTypeTeamInvitation,
 			model.MapToJSON(map[string]string{"guest": "true", "teamId": th.BasicTeam.Id, "email": user.Email, "senderId": th.BasicUser.Id, "channels": channelIds}),
@@ -7751,4 +7751,58 @@ func TestUserUpdateEvents(t *testing.T) {
 			require.Empty(t, eventUser.NotifyProps, "user event for non-source users should be sanitized")
 		})
 	})
+}
+
+func TestRefreshScheme(t *testing.T) {
+	th := Setup(t).InitBasic()
+	defer th.TearDown()
+
+	user := th.BasicUser.DeepCopy()
+	user.Roles = model.SystemUserRoleId
+
+	userUpdate, err := th.App.Srv().Store().User().Update(th.Context, user, true)
+	require.NoError(t, err)
+	require.Equal(t, user.Roles, userUpdate.New.Roles)
+	_, appErr := th.LocalClient.RefreshScheme(context.Background(), th.BasicUser.Id)
+	require.NoError(t, appErr)
+	tms, _, appErr := th.Client.GetTeamMembersForUser(context.Background(), user.Id, "")
+	require.NoError(t, appErr)
+	require.Greater(t, len(tms), 0)
+	for _, tm := range tms {
+		require.False(t, tm.SchemeVerified)
+		require.True(t, tm.SchemeUser)
+	}
+	cms, _, appErr := th.Client.GetChannelMembersForUser(context.Background(), user.Id, th.BasicTeam.Id, "")
+	require.NoError(t, appErr)
+	require.Greater(t, len(cms), 0)
+	for _, cm := range cms {
+		require.False(t, cm.SchemeVerified)
+		require.True(t, cm.SchemeUser)
+	}
+
+	user.Roles = model.SystemUserRoleId + " " + model.SystemVerifiedRoleId
+	userUpdate, err = th.App.Srv().Store().User().Update(th.Context, user, true)
+	require.NoError(t, err)
+	require.Equal(t, user.Roles, userUpdate.New.Roles)
+	_, appErr = th.LocalClient.RefreshScheme(context.Background(), th.BasicUser.Id)
+	require.NoError(t, appErr)
+	tms, _, appErr = th.Client.GetTeamMembersForUser(context.Background(), user.Id, "")
+	require.NoError(t, appErr)
+	require.Greater(t, len(tms), 0)
+	for _, tm := range tms {
+		require.True(t, tm.SchemeVerified)
+		require.True(t, tm.SchemeUser)
+	}
+	cms, _, appErr = th.Client.GetChannelMembersForUser(context.Background(), user.Id, th.BasicTeam.Id, "")
+	require.NoError(t, appErr)
+	require.Greater(t, len(cms), 0)
+	for _, cm := range cms {
+		require.True(t, cm.SchemeVerified)
+		require.True(t, cm.SchemeUser)
+	}
+
+	// refresh scheme is local only
+	resp, appErr := th.Client.RefreshScheme(context.Background(), th.BasicUser.Id)
+	require.Error(t, appErr)
+	CheckNotFoundStatus(t, resp)
 }

@@ -2936,3 +2936,13 @@ func (a *App) getAllSystemAdmins() ([]*model.User, *model.AppError) {
 	}
 	return a.GetUsersFromProfiles(userOptions)
 }
+
+
+func (a * App) RefreshScheme(rctx request.CTX, user *model.User) *model.AppError {
+	err := a.Srv().Store().User().UpdateMemberVerifiedStatus(rctx, user)
+	if err != nil {
+		return model.NewAppError("RefreshScheme", "app.user.refresh_scheme.app_error", nil, "", http.StatusInternalServerError).Wrap(err)
+	}
+	a.InvalidateCacheForUser(user.Id)
+	return nil
+}

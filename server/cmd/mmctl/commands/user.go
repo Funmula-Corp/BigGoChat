@@ -296,6 +296,14 @@ var PreferenceDeleteCmd = &cobra.Command{
 	RunE:    withClient(preferencesDeleteCmdF),
 }
 
+var RefreshSchemeCmd = &cobra.Command{
+	Use:     "refresh-scheme [users]",
+	Short:   "refresh-scheme",
+	Example: "refresh-scheme user@example.com",
+	Args:    cobra.MinimumNArgs(1),
+	RunE:    withClient(refreshSchemeCmdF),
+}
+
 func init() {
 	UserCreateCmd.Flags().String("username", "", "Required. Username for the new user account")
 	_ = UserCreateCmd.MarkFlagRequired("username")
@@ -418,6 +426,7 @@ Global Flags:
 		PromoteGuestToUserCmd,
 		DemoteUserToGuestCmd,
 		PreferenceCmd,
+		RefreshSchemeCmd,
 	)
 	PreferenceCmd.AddCommand(
 		PreferenceListCmd,
@@ -1281,5 +1290,24 @@ func preferencesDeleteCmdF(c client.Client, cmd *cobra.Command, userArgs []strin
 		printer.Print(fmt.Sprintf("Preference %s %s for %s deleted successfully", category, preferenceName, userArgs[i]))
 	}
 
+	return errs.ErrorOrNil()
+}
+
+func refreshSchemeCmdF(c client.Client, cmd *cobra.Command, userArgs []string) error {
+	var errs *multierror.Error
+	for i, user := range getUsersFromUserArgs(c, userArgs) {
+		if user == nil {
+			err := fmt.Errorf("can't find user '%s'", userArgs[i])
+			errs = multierror.Append(errs, err)
+			printer.PrintError(err.Error())
+			continue
+		}
+		_, err := c.RefreshScheme(context.TODO(), user.Id)
+		if err != nil {
+			errs = multierror.Append(errs, err)
+			printer.PrintError(err.Error())
+			continue
+		}
+	}
 	return errs.ErrorOrNil()
 }
