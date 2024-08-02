@@ -144,7 +144,9 @@ func (a *App) SessionHasPermissionToChannels(c request.CTX, session model.Sessio
 			// If a channel member has permission, then no need to check further.
 			if roles, ok := ids[channelID]; ok {
 				channelRoles = strings.Fields(roles.Roles)
-				if a.RolesGrantPermission(channelRoles, permission.Id) {
+				if slices.Contains(strings.Fields(roles.ExcludePermissions), permission.Id) {
+					// do nothing
+				} else if a.RolesGrantPermission(channelRoles, permission.Id) {
 					continue
 				}
 			}
