@@ -2463,13 +2463,15 @@ func (s SqlUserStore) UpdateMemberVerifiedStatus(rctx request.CTX, user *model.U
 		return errors.Wrap(err, "begin_transaction")
 	}
 	defer finalizeTransactionX(transaction, &err)
-	verified := user.IsVerified()
+	schemeVerified := user.IsVerified()
+	schemeUser := !user.IsGuest()
+	schemeGuest := !schemeUser
 	if _, err := transaction.Exec(`UPDATE TeamMembers
-		SET SchemeVerified= ? WHERE UserId= ?`, verified, user.Id); err != nil {
+		SET SchemeGuest= ?, SchemeUser= ?, SchemeVerified= ? WHERE UserId= ?`, schemeGuest, schemeUser, schemeVerified, user.Id); err != nil {
 		return errors.Wrap(err, "failed to update TeamMember")
 	}
 	if _, err := transaction.Exec(`UPDATE ChannelMembers
-		SET SchemeVerified= ? WHERE UserId= ?`, verified, user.Id); err != nil {
+		SET SchemeGuest= ?, SchemeUser= ?, SchemeVerified= ? WHERE UserId= ?`, schemeGuest, schemeUser, schemeVerified, user.Id); err != nil {
 		return errors.Wrap(err, "failed to update ChannelMember")
 	}
 	if err := transaction.Commit(); err != nil {

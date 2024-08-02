@@ -1014,6 +1014,11 @@ func removeTeamMember(c *Context, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if team.Email == user.Email && !user.IsBot {
+		c.Err = model.NewAppError("removeTeamMember", "api.team.remove_member.is_team_owner.app_error", nil, "", http.StatusBadRequest)
+		return
+	}
+
 	if err := c.App.RemoveUserFromTeam(c.AppContext, c.Params.TeamId, c.Params.UserId, c.AppContext.Session().UserId); err != nil {
 		c.Err = err
 		return

@@ -211,6 +211,10 @@ func (c *Client4) userByEmailRoute(email string) string {
 	return fmt.Sprintf(c.usersRoute()+"/email/%v", email)
 }
 
+func (c *Client4) userRereshSchemeRoute(userId string) string {
+	return c.userRoute(userId) + "/refreshscheme"
+}
+
 func (c *Client4) botsRoute() string {
 	return "/bots"
 }
@@ -9008,5 +9012,13 @@ func (c *Client4) SubmitClientMetrics(ctx context.Context, report *PerformanceRe
 		return BuildResponse(res), err
 	}
 
+	return BuildResponse(res), nil
+}
+
+func (c *Client4) RefreshScheme(ctx context.Context, userId string) (*Response, error) {
+	res, err := c.DoAPIPost(ctx, c.userRereshSchemeRoute(userId), "")
+	if err != nil {
+		return BuildResponse(res), err
+	}
 	return BuildResponse(res), nil
 }

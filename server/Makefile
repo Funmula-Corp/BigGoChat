@@ -209,7 +209,7 @@ else
   ifneq (,$(findstring mysql-read-replica,$(ENABLED_DOCKER_SERVICES)))
 	./scripts/replica-mysql-config.sh
   endif
-	docker run -rm --network mattermost-server_mm-test -e MC_HOST_A=$(MC_HOST) minio/mc mb A/mattermost-test || true
+	docker run --rm --network mattermost-server_mm-test -e MC_HOST_A=$(MC_HOST) minio/mc mb A/mattermost-test || true
 endif
 
 update-docker: stop-docker ## Updates the docker containers for local development.

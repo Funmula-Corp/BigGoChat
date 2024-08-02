@@ -48,6 +48,7 @@ func (api *API) InitUserLocal() {
 	api.BaseRoutes.Users.Handle("/migrate_auth/saml", api.APILocal(migrateAuthToSaml)).Methods("POST")
 
 	api.BaseRoutes.User.Handle("/uploads", api.APILocal(localGetUploadsForUser)).Methods("GET")
+	api.BaseRoutes.User.Handle("/refreshscheme", api.APILocal(localRefreshSchemeForUser)).Methods("POST")
 }
 
 func localGetUsers(c *Context, w http.ResponseWriter, r *http.Request) {
@@ -436,4 +437,22 @@ func localGetUploadsForUser(c *Context, w http.ResponseWriter, r *http.Request) 
 	}
 
 	w.Write(js)
+}
+
+func localRefreshSchemeForUser(c *Context, w http.ResponseWriter, r *http.Request) {
+	c.RequireUserId()
+	if c.Err != nil {
+		return
+	}
+	c.App.InvalidateCacheForUser(c.Params.UserId)
+	user, appErr := c.App.GetUser(c.Params.UserId)
+	if appErr != nil {
+		c.Err = appErr
+		return
+	}
+	appErr = c.App.RefreshScheme(c.AppContext, user)
+	if appErr != nil {
+		c.Err = appErr
+		return
+	}
 }
