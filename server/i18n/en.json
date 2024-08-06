@@ -1867,7 +1867,7 @@
   },
   {
     "id": "api.email_batching.send_batched_email_notification.button",
-    "translation": "Open Mattermost"
+    "translation": "Open BigGo Chat"
   },
   {
     "id": "api.email_batching.send_batched_email_notification.messageButton",
@@ -3228,11 +3228,11 @@
   },
   {
     "id": "api.templates.cloud_welcome_email.button",
-    "translation": "Open Mattermost"
+    "translation": "Open BigGo Chat"
   },
   {
     "id": "api.templates.cloud_welcome_email.download_mm_info",
-    "translation": "Download the Mattermost App"
+    "translation": "Download the BigGo Chat App"
   },
   {
     "id": "api.templates.cloud_welcome_email.info",
@@ -3496,7 +3496,7 @@
   },
   {
     "id": "api.templates.post_body.button",
-    "translation": "Reply in BigGo"
+    "translation": "Reply in BigGo Chat"
   },
   {
     "id": "api.templates.questions_footer.info",
@@ -5748,7 +5748,7 @@
   },
   {
     "id": "app.notification.footer.infoLogin",
-    "translation": "Login to Mattermost"
+    "translation": "Login to BigGo Chat"
   },
   {
     "id": "app.notification.footer.title",
