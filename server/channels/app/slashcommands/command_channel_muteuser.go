@@ -15,7 +15,6 @@ type MuteuserProvider struct {
 }
 
 type UnMuteuserProvider struct {
-	MuteuserProvider
 }
 
 const (
@@ -42,7 +41,29 @@ func (*MuteuserProvider) GetCommand(a *app.App, T i18n.TranslateFunc) *model.Com
 	}
 }
 
-func (m *MuteuserProvider) DoCommand(a *app.App, c request.CTX, args *model.CommandArgs, message string) *model.CommandResponse {
+func (*MuteuserProvider) DoCommand(a *app.App, c request.CTX, args *model.CommandArgs, message string) *model.CommandResponse {
+	return muteUserCommandHandler(a, c, args, message, true)
+}
+
+func (*UnMuteuserProvider) GetCommand(a *app.App, T i18n.TranslateFunc) *model.Command {
+	return &model.Command{
+		Trigger:          CmdUnMuteuser,
+		AutoComplete:     true,
+		AutoCompleteDesc: T("api.command_channel_unmuteuser.desc"),
+		AutoCompleteHint: T("api.command_channel_unmuteuser.hint"),
+		DisplayName:      T("api.command_channel_unmuteuser.name"),
+	}
+}
+
+func (*UnMuteuserProvider) GetTrigger() string {
+	return CmdUnMuteuser
+}
+
+func (*UnMuteuserProvider) DoCommand(a *app.App, c request.CTX, args *model.CommandArgs, message string) *model.CommandResponse {
+	return muteUserCommandHandler(a, c, args, message, false)
+}
+
+func muteUserCommandHandler(a *app.App, c request.CTX, args *model.CommandArgs, message string, mute bool) *model.CommandResponse {
 	channel, err := a.GetChannel(c, args.ChannelId)
 	if err != nil {
 		return &model.CommandResponse{
@@ -74,7 +95,7 @@ func (m *MuteuserProvider) DoCommand(a *app.App, c request.CTX, args *model.Comm
 	for _, msg := range splitMessage {
 		if len(msg) != 0 && msg[0] == '@' {
 			mentionName := strings.TrimPrefix(msg, "@")
-			if member, err := m.getChannelMemberByMentionName(a, c, args.ChannelId, mentionName); err == nil {
+			if member, err := getChannelMemberByMentionName(a, c, args.ChannelId, mentionName); err == nil {
 				channelMembers = append(channelMembers, *member)
 			}
 		}
@@ -87,15 +108,14 @@ func (m *MuteuserProvider) DoCommand(a *app.App, c request.CTX, args *model.Comm
 		}
 	}
 
-	mute := strings.HasPrefix(args.Command, "/" + CmdMuteuser)
 	for _, member := range channelMembers {
-		m.muteChannelMember(a, c, &member, mute)
+		muteChannelMember(a, c, &member, mute)
 	}
 
 	return &model.CommandResponse{}
 }
 
-func (*MuteuserProvider) getChannelMemberByMentionName(a *app.App, c request.CTX, channelId, mentionName string) (*model.ChannelMember, *model.AppError) {
+func getChannelMemberByMentionName(a *app.App, c request.CTX, channelId, mentionName string) (*model.ChannelMember, *model.AppError) {
 	user, err := a.GetUserByUsername(mentionName)
 	if err != nil {
 		return nil, err
@@ -104,8 +124,8 @@ func (*MuteuserProvider) getChannelMemberByMentionName(a *app.App, c request.CTX
 	return a.GetChannelMember(c, channelId, user.Id)
 }
 
-func (*MuteuserProvider) muteChannelMember(a *app.App, c request.CTX, member *model.ChannelMember, mute bool) *model.AppError {
-	excludePermissions := strings.Fields(member.ExcludePermissions)
+func muteChannelMember(a *app.App, c request.CTX, member *model.ChannelMember, mute bool) *model.AppError {
+	excludePermissions := member.GetExcludePermissions()
 	muted := slices.Contains(excludePermissions, model.PermissionCreatePost.Id)
 	if mute && !muted {
 		excludePermissions = append(excludePermissions, model.PermissionCreatePost.Id)
@@ -131,18 +151,4 @@ func (*MuteuserProvider) muteChannelMember(a *app.App, c request.CTX, member *mo
 	}
 
 	return nil
-}
-
-func (*UnMuteuserProvider) GetCommand(a *app.App, T i18n.TranslateFunc) *model.Command {
-	return &model.Command{
-		Trigger:          CmdUnMuteuser,
-		AutoComplete:     true,
-		AutoCompleteDesc: T("api.command_channel_muteuser.desc"),
-		AutoCompleteHint: T("api.command_channel_muteuser.hint"),
-		DisplayName:      T("api.command_channel_muteuser.name"),
-	}
-}
-
-func (*UnMuteuserProvider) GetTrigger() string {
-	return CmdUnMuteuser
 }

@@ -61,7 +61,14 @@ func (*AnnouncProvider) DoCommand(a *app.App, c request.CTX, args *model.Command
 		}
 	}
 
-	params := strings.Fields(args.Command)[1:]
+	if message == "" {
+		return &model.CommandResponse{
+			Text:         args.T("api.command_channel_announc.message.app_error"),
+			ResponseType: model.CommandResponseTypeEphemeral,
+		}
+	}
+
+	params := strings.Fields(message)
 	active := false
 
 	if len(params) == 0 {
@@ -87,15 +94,6 @@ func (*AnnouncProvider) DoCommand(a *app.App, c request.CTX, args *model.Command
 		channel.SchemeId = model.NewString("")
 		_, err = a.UpdateChannel(c, channel)
 	}
-
-	// plan B, use channel moderation
-	// createPost := model.PermissionCreatePost.Id
-	// _, err = a.PatchChannelModerationsForChannel(c, channel, []*model.ChannelModerationPatch{
-	// 	{
-	// 		Name: &createPost,
-	// 		Roles: &model.ChannelModeratedRolesPatch{Members: model.NewBool(false), Guests: model.NewBool(false), Verified: model.NewBool(false)},
-	// 	},
-	// })
 
 	if err != nil {
 		text := args.T("api.command_channel_announc.update_channel.app_error")
