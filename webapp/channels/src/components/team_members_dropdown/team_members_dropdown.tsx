@@ -181,7 +181,7 @@ export default class TeamMembersDropdown extends React.PureComponent<Props, Stat
                     defaultMessage='Team Admin'
                 />
             );
-        } else if ((teamMember.roles.length > 0 && isModerator(teamMember.roles))) {
+        } else if ((teamMember.roles.length > 0 && isModerator(teamMember.roles)) || teamMember.scheme_moderator) {
             currentRoles = (
                 <FormattedMessage
                     id='team_members_dropdown.teamModerator'
@@ -198,9 +198,9 @@ export default class TeamMembersDropdown extends React.PureComponent<Props, Stat
         }
 
         const me = this.props.currentUser;
-        let showMakeMember = !isGuest(user.roles) && (isAdmin(teamMember.roles) || isModerator(teamMember.roles) || teamMember.scheme_admin) && !isSystemAdmin(user.roles);
+        let showMakeMember = !isGuest(user.roles) && (isAdmin(teamMember.roles) || (isModerator(teamMember.roles) || teamMember.scheme_moderator) || teamMember.scheme_admin) && !isSystemAdmin(user.roles);
         let showMakeAdmin = !isGuest(user.roles) && !isAdmin(teamMember.roles) && !isSystemAdmin(user.roles) && !teamMember.scheme_admin;
-        let showMakeModerator = !isGuest(user.roles) && !isModerator(teamMember.roles) && !isSystemAdmin(user.roles);
+        let showMakeModerator = !isGuest(user.roles) && !isModerator(teamMember.roles) && !teamMember.scheme_moderator && !isSystemAdmin(user.roles);
 
         if (user.delete_at > 0) {
             currentRoles = (
