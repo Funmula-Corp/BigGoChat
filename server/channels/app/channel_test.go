@@ -1354,11 +1354,19 @@ func TestUpdateChannelMemberExcludePermissions(t *testing.T) {
 		_, err := th.App.AddUserToChannel(th.Context, th.BasicUser2, th.BasicChannel, false)
 		require.Nil(t, err)
 
-		_, err = th.App.UpdateChannelMemberExcludePermissions(th.Context, th.BasicChannel.Id, th.BasicUser2.Id, model.PermissionCreatePost.Id)
+		member, err := th.App.UpdateChannelMemberExcludePermissions(th.Context, th.BasicChannel.Id, th.BasicUser2.Id, model.PermissionCreatePost.Id)
 		require.Nil(t, err)
 
 		ok := th.App.HasPermissionToChannel(th.Context, th.BasicUser2.Id, th.BasicChannel.Id, model.PermissionCreatePost)
 		require.False(t, ok)
+
+		roles := member.GetRoles()
+		roles = append(roles, model.ChannelAdminRoleId)
+		member, err = th.App.UpdateChannelMemberRoles(th.Context, th.BasicChannel.Id, th.BasicUser2.Id, strings.Join(roles, " "))
+		require.Nil(t, err)
+
+		ok = th.App.HasPermissionToChannel(th.Context, th.BasicUser2.Id, th.BasicChannel.Id, model.PermissionCreatePost)
+		require.True(t, ok, member)
 	})
 
 	// this also test multi permission bans

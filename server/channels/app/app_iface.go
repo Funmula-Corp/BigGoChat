@@ -1176,6 +1176,7 @@ type AppIface interface {
 	UpdateActive(c request.CTX, user *model.User, active bool) (*model.User, *model.AppError)
 	UpdateChannelBookmark(c request.CTX, updateBookmark *model.ChannelBookmarkWithFileInfo, connectionId string) (*model.UpdateChannelBookmarkResponse, *model.AppError)
 	UpdateChannelBookmarkSortOrder(bookmarkId, channelId string, newIndex int64, connectionId string) ([]*model.ChannelBookmarkWithFileInfo, *model.AppError)
+	UpdateChannelMemberExcludePermissions(c request.CTX, channelID string, userID string, excludePermissions string) (*model.ChannelMember, *model.AppError)
 	UpdateChannelMemberNotifyProps(c request.CTX, data map[string]string, channelID string, userID string) (*model.ChannelMember, *model.AppError)
 	UpdateChannelMemberRoles(c request.CTX, channelID string, userID string, newRoles string) (*model.ChannelMember, *model.AppError)
 	UpdateChannelMemberSchemeRoles(c request.CTX, channelID string, userID string, isSchemeGuest bool, isSchemeUser bool, isSchemeVerified bool, isSchemeAdmin bool) (*model.ChannelMember, *model.AppError)

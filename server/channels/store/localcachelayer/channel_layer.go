@@ -268,13 +268,13 @@ func (s LocalCacheChannelStore) GetMany(ids []string, allowFromCache bool) (mode
 	return append(foundChannels, channels...), nil
 }
 
-func (s LocalCacheChannelStore) GetAllChannelMembersForUser(userId string, allowFromCache bool, includeDeleted bool) (map[string]*model.ChannelMemberRolesAndExcludePermissions, error) {
+func (s LocalCacheChannelStore) GetAllChannelMembersForUser(userId string, allowFromCache bool, includeDeleted bool) (map[string]*model.AllChannelMember, error) {
 	cache_key := userId
 	if includeDeleted {
 		cache_key += "_deleted"
 	}
 	if allowFromCache {
-		ids := make(map[string]*model.ChannelMemberRolesAndExcludePermissions)
+		ids := make(map[string]*model.AllChannelMember)
 		if err := s.rootStore.doStandardReadCache(s.rootStore.channelMembersForUserCache, cache_key, &ids); err == nil {
 			return ids, nil
 		}

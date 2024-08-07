@@ -469,14 +469,15 @@ func (db allChannelMember) Process() (string, string) {
 	return db.ChannelId, strings.Join(roles, " ")
 }
 
-func (db allChannelMembers) ToMapRoleAndExclude() map[string]*model.ChannelMemberRolesAndExcludePermissions {
-	result := make(map[string]*model.ChannelMemberRolesAndExcludePermissions)
+func (db allChannelMembers) ToAllChannelMembers() map[string]*model.AllChannelMember {
+	result := make(map[string]*model.AllChannelMember)
 
 	for _, item := range db {
 		key, value := item.Process()
-		result[key] = &model.ChannelMemberRolesAndExcludePermissions{
+		result[key] = &model.AllChannelMember{
 			Roles:              value,
 			ExcludePermissions: item.ExcludePermissions.String,
+			IgnoreExclude:      item.SchemeAdmin.Bool,
 		}
 	}
 
@@ -2211,7 +2212,7 @@ func (s SqlChannelStore) GetMemberForPost(postId string, userId string, includeA
 	return dbMember.ToModel(), nil
 }
 
-func (s SqlChannelStore) GetAllChannelMembersForUser(userId string, allowFromCache bool, includeDeleted bool) (_ map[string]*model.ChannelMemberRolesAndExcludePermissions, err error) {
+func (s SqlChannelStore) GetAllChannelMembersForUser(userId string, allowFromCache bool, includeDeleted bool) (_ map[string]*model.AllChannelMember, err error) {
 	query := s.getQueryBuilder().
 		Select(`
 				ChannelMembers.ChannelId, ChannelMembers.Roles, ChannelMembers.SchemeGuest,
@@ -2264,7 +2265,7 @@ func (s SqlChannelStore) GetAllChannelMembersForUser(userId string, allowFromCac
 	if err = rows.Err(); err != nil {
 		return nil, errors.Wrap(err, "error while iterating over rows")
 	}
-	ids := data.ToMapRoleAndExclude()
+	ids := data.ToAllChannelMembers()
 
 	return ids, nil
 }
