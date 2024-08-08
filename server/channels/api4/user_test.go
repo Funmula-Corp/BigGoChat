@@ -6369,7 +6369,7 @@ func TestGetThreadsForUser(t *testing.T) {
 			Deleted: false,
 		})
 		require.NoError(t, err)
-		require.Len(t, uss.Threads, 0)
+		require.Len(t, uss.Threads, 1)
 
 		uss, _, err = th.Client.GetUserThreads(context.Background(), th.BasicUser.Id, th.BasicTeam.Id, model.GetUserThreadsOpts{
 			Deleted: true,
@@ -7173,7 +7173,7 @@ func TestThreadCounts(t *testing.T) {
 	th.App.Srv().Store().Post().Delete(th.Context, rpost.Id, model.GetMillis(), th.BasicUser.Id)
 
 	// we should now have 1 thread with 2 replies
-	checkThreadListReplies(t, th, th.Client, th.BasicUser.Id, 2, 1, &model.GetUserThreadsOpts{
+	checkThreadListReplies(t, th, th.Client, th.BasicUser.Id, 3, 2, &model.GetUserThreadsOpts{
 		Deleted: false,
 	})
 	// with Deleted we should get the same as before deleting

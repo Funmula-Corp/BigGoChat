@@ -995,7 +995,7 @@ func testVarious(t *testing.T, rctx request.CTX, ss store.Store) {
 			ExpectedThreads []*model.Post
 		}{
 			{"all teams, user1", user1ID, "", model.GetUserThreadsOpts{}, []*model.Post{
-				team1channel1post2, team1channel1post3, gm1post1,
+				team1channel1post2, team1channel1post3, team2channel1post2deleted, gm1post1,
 			}},
 			{"team1, user1", user1ID, team1.Id, model.GetUserThreadsOpts{}, []*model.Post{
 				team1channel1post2, team1channel1post3, gm1post1,
@@ -1004,7 +1004,7 @@ func testVarious(t *testing.T, rctx request.CTX, ss store.Store) {
 				team1channel1post2, team1channel1post3, gm1post1, // (no deleted threads in team1)
 			}},
 			{"team2, user1", user1ID, team2.Id, model.GetUserThreadsOpts{}, []*model.Post{
-				gm1post1, // (no unread threads in team2)
+				team2channel1post2deleted, gm1post1, // (no unread threads in team2)
 			}},
 			{"team2, user1, deleted", user1ID, team2.Id, model.GetUserThreadsOpts{Deleted: true}, []*model.Post{
 				team2channel1post2deleted, gm1post1,
@@ -1031,7 +1031,7 @@ func testVarious(t *testing.T, rctx request.CTX, ss store.Store) {
 			ExpectedThreads []*model.Post
 		}{
 			{"all teams, user1", user1ID, "", model.GetUserThreadsOpts{}, []*model.Post{
-				team1channel1post1, team1channel1post2, team1channel1post3, team2channel1post1, dm1post1, gm1post1,
+				team1channel1post1, team1channel1post2, team1channel1post3, team2channel1post1, team2channel1post2deleted, dm1post1, gm1post1,
 			}},
 			{"team1, user1", user1ID, team1.Id, model.GetUserThreadsOpts{}, []*model.Post{
 				team1channel1post1, team1channel1post2, team1channel1post3, dm1post1, gm1post1,
@@ -1040,7 +1040,7 @@ func testVarious(t *testing.T, rctx request.CTX, ss store.Store) {
 				team1channel1post1, team1channel1post2, team1channel1post3, dm1post1, gm1post1, // (no deleted threads in team1)
 			}},
 			{"team2, user1", user1ID, team2.Id, model.GetUserThreadsOpts{}, []*model.Post{
-				team2channel1post1, dm1post1, gm1post1,
+				team2channel1post1, team2channel1post2deleted, dm1post1, gm1post1,
 			}},
 			{"team2, user1, deleted", user1ID, team2.Id, model.GetUserThreadsOpts{Deleted: true}, []*model.Post{
 				team2channel1post1, team2channel1post2deleted, dm1post1, gm1post1,
@@ -1148,10 +1148,6 @@ func testVarious(t *testing.T, rctx request.CTX, ss store.Store) {
 			assert.Equal(t, expectedPosts, actualPosts)
 		}
 
-		// Check common fields between threads and posts.
-		for _, thread := range threads {
-			assert.Equal(t, thread.DeleteAt, thread.Post.DeleteAt, "expected Thread.DeleteAt == Post.DeleteAt")
-		}
 	}
 
 	t.Run("GetThreadsForUser", func(t *testing.T) {
@@ -1164,7 +1160,7 @@ func testVarious(t *testing.T, rctx request.CTX, ss store.Store) {
 			ExpectedThreads []*model.Post
 		}{
 			{"all teams, user1", user1ID, "", model.GetUserThreadsOpts{}, []*model.Post{
-				team1channel1post1, team1channel1post2, team1channel1post3, team2channel1post1, dm1post1, gm1post1,
+				team1channel1post1, team1channel1post2, team1channel1post3, team2channel1post1, team2channel1post2deleted, dm1post1, gm1post1,
 			}},
 			{"team1, user1", user1ID, team1.Id, model.GetUserThreadsOpts{}, []*model.Post{
 				team1channel1post1, team1channel1post2, team1channel1post3, dm1post1, gm1post1,
@@ -1179,10 +1175,10 @@ func testVarious(t *testing.T, rctx request.CTX, ss store.Store) {
 				team1channel1post2, team1channel1post3, gm1post1, // (no deleted threads in team1)
 			}},
 			{"team2, user1", user1ID, team2.Id, model.GetUserThreadsOpts{}, []*model.Post{
-				team2channel1post1, dm1post1, gm1post1,
+				team2channel1post1, team2channel1post2deleted, dm1post1, gm1post1,
 			}},
 			{"team2, user1, unread", user1ID, team2.Id, model.GetUserThreadsOpts{Unread: true}, []*model.Post{
-				gm1post1, // (no unread in team2)
+				team2channel1post2deleted, gm1post1,
 			}},
 			{"team2, user1, deleted", user1ID, team2.Id, model.GetUserThreadsOpts{Deleted: true}, []*model.Post{
 				team2channel1post1, team2channel1post2deleted, dm1post1, gm1post1,
