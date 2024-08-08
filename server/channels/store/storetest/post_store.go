@@ -1166,9 +1166,9 @@ func testPostStoreDelete(t *testing.T, rctx request.CTX, ss store.Store) {
 		require.IsType(t, &store.ErrNotFound{}, err)
 
 		// Verify the reply post deleted
-		_, err = ss.Post().Get(context.Background(), replyPost.Id, model.GetPostsOptions{}, "", map[string]bool{})
-		require.Error(t, err, "Deleted id should have failed")
-		require.IsType(t, &store.ErrNotFound{}, err)
+		postList, err := ss.Post().Get(context.Background(), replyPost.Id, model.GetPostsOptions{}, "", map[string]bool{})
+		require.NoError(t, err, "reply should not deleted")
+		require.Len(t, postList.Posts, 1)
 	})
 
 	t.Run("thread with multiple replies", func(t *testing.T) {
@@ -1232,10 +1232,10 @@ func testPostStoreDelete(t *testing.T, rctx request.CTX, ss store.Store) {
 		require.Error(t, err, "Deleted id should have failed")
 
 		_, err = ss.Post().Get(context.Background(), replyPost1.Id, model.GetPostsOptions{}, "", map[string]bool{})
-		require.Error(t, err, "Deleted id should have failed")
+		require.NoError(t, err, "reply should not deleted")
 
 		_, err = ss.Post().Get(context.Background(), replyPost2.Id, model.GetPostsOptions{}, "", map[string]bool{})
-		require.Error(t, err, "Deleted id should have failed")
+		require.NoError(t, err, "reply should not deleted")
 
 		// Verify other root posts remain undeleted.
 		_, err = ss.Post().Get(context.Background(), rootPost2.Id, model.GetPostsOptions{}, "", map[string]bool{})
@@ -1389,12 +1389,12 @@ func testPostStoreDelete(t *testing.T, rctx request.CTX, ss store.Store) {
 		require.NoError(t, err)
 
 		// Verify the reply post's files are deleted
-		_, err = ss.FileInfo().Get(file11.Id)
-		require.Error(t, err, "Deleted id should have failed")
-		require.IsType(t, &store.ErrNotFound{}, err)
-		_, err = ss.FileInfo().Get(file12.Id)
-		require.Error(t, err, "Deleted id should have failed")
-		require.IsType(t, &store.ErrNotFound{}, err)
+		fileInfo, err := ss.FileInfo().Get(file11.Id)
+		require.NoError(t, err, "reply should not deleted")
+		require.Equal(t, fileInfo, file11)
+		fileInfo, err = ss.FileInfo().Get(file12.Id)
+		require.NoError(t, err, "reply should not deleted")
+		require.Equal(t, fileInfo, file12)
 
 		// Verify the other reply post's files are NOT deleted
 		_, err = ss.FileInfo().Get(file21.Id)
