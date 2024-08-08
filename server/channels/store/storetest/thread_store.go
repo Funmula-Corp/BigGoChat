@@ -1148,10 +1148,6 @@ func testVarious(t *testing.T, rctx request.CTX, ss store.Store) {
 			assert.Equal(t, expectedPosts, actualPosts)
 		}
 
-		// Check common fields between threads and posts.
-		// for _, thread := range threads {
-		// 	assert.Equal(t, thread.DeleteAt, thread.Post.DeleteAt, "expected Thread.DeleteAt == Post.DeleteAt")
-		// }
 	}
 
 	t.Run("GetThreadsForUser", func(t *testing.T) {
