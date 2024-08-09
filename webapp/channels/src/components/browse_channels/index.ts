@@ -14,6 +14,7 @@ import {getChannelsInCurrentTeam, getMyChannelMemberships, getChannelsMemberCoun
 import {getConfig} from 'mattermost-redux/selectors/entities/general';
 import {getCurrentTeam, getCurrentTeamId} from 'mattermost-redux/selectors/entities/teams';
 import {getCurrentUserId} from 'mattermost-redux/selectors/entities/users';
+import {Permissions} from 'mattermost-redux/constants';
 
 import {setGlobalItem} from 'actions/storage';
 import {openModal, closeModal} from 'actions/views/modals';
@@ -26,6 +27,7 @@ import Constants, {StoragePrefixes} from 'utils/constants';
 import type {GlobalState} from 'types/store';
 
 import BrowseChannels from './browse_channels';
+import { haveICurrentChannelPermission } from 'mattermost-redux/selectors/entities/roles';
 
 const getChannelsWithoutArchived = createSelector(
     'getChannelsWithoutArchived',
@@ -57,7 +59,7 @@ function mapStateToProps(state: GlobalState) {
         teamId: getCurrentTeamId(state),
         teamName: team?.name,
         channelsRequestStarted: state.requests.channels.getChannels.status === RequestStatus.STARTED,
-        canShowArchivedChannels: (getConfig(state).ExperimentalViewArchivedChannels === 'true'),
+        canShowArchivedChannels: haveICurrentChannelPermission(state, Permissions.MANAGE_TEAM),
         myChannelMemberships: getMyChannelMemberships(state) || {},
         shouldHideJoinedChannels: getGlobalItem(state) === 'true',
         rhsState: getRhsState(state),
