@@ -11,7 +11,6 @@ import {getChannels, getArchivedChannels, joinChannel, getChannelsMemberCount, s
 import {RequestStatus} from 'mattermost-redux/constants';
 import {createSelector} from 'mattermost-redux/selectors/create_selector';
 import {getChannelsInCurrentTeam, getMyChannelMemberships, getChannelsMemberCount as getChannelsMemberCountSelector} from 'mattermost-redux/selectors/entities/channels';
-import {getConfig} from 'mattermost-redux/selectors/entities/general';
 import {getCurrentTeam, getCurrentTeamId} from 'mattermost-redux/selectors/entities/teams';
 import {getCurrentUserId} from 'mattermost-redux/selectors/entities/users';
 import {Permissions} from 'mattermost-redux/constants';
@@ -27,7 +26,7 @@ import Constants, {StoragePrefixes} from 'utils/constants';
 import type {GlobalState} from 'types/store';
 
 import BrowseChannels from './browse_channels';
-import { haveICurrentChannelPermission } from 'mattermost-redux/selectors/entities/roles';
+import {haveICurrentChannelPermission} from 'mattermost-redux/selectors/entities/roles';
 
 const getChannelsWithoutArchived = createSelector(
     'getChannelsWithoutArchived',
