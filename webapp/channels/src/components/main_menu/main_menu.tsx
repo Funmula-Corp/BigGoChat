@@ -67,6 +67,7 @@ export type Props = {
     usageDeltaTeams: number;
     guestAccessEnabled: boolean;
     canInviteTeamMember: boolean;
+    canLeaveTeam: boolean;
     actions: {
         openModal: <P>(modalData: ModalData<P>) => void;
         showMentions: () => void;
@@ -326,14 +327,16 @@ export class MainMenu extends React.PureComponent<Props> {
                         text={formatMessage({id: 'navbar_dropdown.join', defaultMessage: 'Join Another Team'})}
                         icon={<i className='fa fa-plus-square'/>}
                     />
-                    <Menu.ItemToggleModalRedux
-                        id='leaveTeam'
-                        show={!teamIsGroupConstrained && this.props.experimentalPrimaryTeam !== this.props.teamName}
-                        modalId={ModalIdentifiers.LEAVE_TEAM}
-                        dialogType={LeaveTeamModal}
-                        text={formatMessage({id: 'navbar_dropdown.leave', defaultMessage: 'Leave Team'})}
-                        icon={<LeaveTeamIcon/>}
-                    />
+                    {this.props.canLeaveTeam &&
+                        <Menu.ItemToggleModalRedux
+                            id='leaveTeam'
+                            show={!teamIsGroupConstrained && this.props.experimentalPrimaryTeam !== this.props.teamName}
+                            modalId={ModalIdentifiers.LEAVE_TEAM}
+                            dialogType={LeaveTeamModal}
+                            text={formatMessage({id: 'navbar_dropdown.leave', defaultMessage: 'Leave Team'})}
+                            icon={<LeaveTeamIcon/>}
+                        />
+                    }
                 </Menu.Group>
                 <Menu.Group>
                     {pluginItems}
@@ -462,14 +465,16 @@ export class MainMenu extends React.PureComponent<Props> {
                         to='/select_team'
                         text={formatMessage({id: 'navbar_dropdown.join', defaultMessage: 'Join Another Team'})}
                     />
-                    <Menu.ItemToggleModalRedux
-                        id='leaveTeam'
-                        className='destructive'
-                        show={!teamIsGroupConstrained && this.props.experimentalPrimaryTeam !== this.props.teamName}
-                        modalId={ModalIdentifiers.LEAVE_TEAM}
-                        dialogType={LeaveTeamModal}
-                        text={formatMessage({id: 'navbar_dropdown.leave', defaultMessage: 'Leave Team'})}
-                    />
+                    {this.props.canLeaveTeam &&
+                        <Menu.ItemToggleModalRedux
+                            id='leaveTeam'
+                            className='destructive'
+                            show={!teamIsGroupConstrained && this.props.experimentalPrimaryTeam !== this.props.teamName}
+                            modalId={ModalIdentifiers.LEAVE_TEAM}
+                            dialogType={LeaveTeamModal}
+                            text={formatMessage({id: 'navbar_dropdown.leave', defaultMessage: 'Leave Team'})}
+                        />
+                    }
                 </Menu.Group>
                 <Menu.Group>
                     <SystemPermissionGate permissions={[Permissions.CREATE_TEAM]}>
