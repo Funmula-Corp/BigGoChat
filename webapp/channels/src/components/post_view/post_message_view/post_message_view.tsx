@@ -87,7 +87,14 @@ export default class PostMessageView extends React.PureComponent<Props, State> {
 
         const isAdmin = !!deleteBy && deleteBy !== postUserId;
         if (!isAdmin) {
-            return (<></>)
+            return (
+                <em>
+                    <FormattedMessage
+                        id={'post_body.deleted'}
+                        defaultMessage={'(message deleted)'}
+                    />
+                </em>
+            )
         }
 
         return (
