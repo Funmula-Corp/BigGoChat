@@ -887,7 +887,7 @@ export function removeNonRecentEmptyPostBlocks(blocks: PostOrderBlock[]) {
 }
 
 export function isNotDeleteBySelf(post: Post) {
-    return !!post.props.deleteBy && post.props.deleteBy !== post.user_id;
+    return !!post.props.deleteBy && post.props.deleteBy !== post.user_id || post.reply_count > 0;
 }
 
 export function shouldShowPost(post: Post): boolean {
