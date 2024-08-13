@@ -1047,7 +1047,7 @@ export function postsInThread(state: RelationOneToMany<Post, Post> = {}, action:
     case PostTypes.RECEIVED_POSTS_BEFORE:
     case PostTypes.RECEIVED_POSTS_IN_CHANNEL:
     case PostTypes.RECEIVED_POSTS_SINCE: {
-        const newPosts: Post[] = (Object.values(action.data.posts) as Post[]).filter(doPostFilter);
+        const newPosts: Post[] = (Object.values(action.data.posts) as Post[]).filter(doPostFilter());
 
         if (newPosts.length === 0) {
             // Nothing to add
@@ -1084,7 +1084,7 @@ export function postsInThread(state: RelationOneToMany<Post, Post> = {}, action:
     }
 
     case PostTypes.RECEIVED_POSTS_IN_THREAD: {
-        const newPosts: Post[] = (Object.values(action.data.posts) as Post[]).filter(doPostFilter);
+        const newPosts: Post[] = (Object.values(action.data.posts) as Post[]).filter(doPostFilter());
 
         if (newPosts.length === 0) {
             // Nothing to add
@@ -1269,7 +1269,7 @@ export function reactions(state: RelationOneToOne<Post, Record<string, Reaction>
         const posts: Post[] = Object.values(action.data.posts);
 
         return posts
-            .filter(doPostFilter)
+            .filter(doPostFilter())
             .reduce(storeReactionsForPost, state);
     }
 
