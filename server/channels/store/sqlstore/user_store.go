@@ -1933,6 +1933,11 @@ func (us SqlUserStore) GetUsersBatchForIndexing(startTime int64, startFileID str
 
 	userMap := map[string]*model.UserForIndexing{}
 	for _, user := range users {
+		var mobilephone string
+		if user.Mobilephone != nil{
+			mobilephone = *user.Mobilephone
+		}
+
 		userMap[user.Id] = &model.UserForIndexing{
 			Id:          user.Id,
 			Username:    user.Username,
@@ -1944,6 +1949,7 @@ func (us SqlUserStore) GetUsersBatchForIndexing(startTime int64, startFileID str
 			DeleteAt:    user.DeleteAt,
 			TeamsIds:    []string{},
 			ChannelsIds: []string{},
+			Mobilephone: mobilephone,
 		}
 	}
 
@@ -2457,13 +2463,15 @@ func (s SqlUserStore) UpdateMemberVerifiedStatus(rctx request.CTX, user *model.U
 		return errors.Wrap(err, "begin_transaction")
 	}
 	defer finalizeTransactionX(transaction, &err)
-	verified := user.IsVerified()
+	schemeVerified := user.IsVerified()
+	schemeUser := !user.IsGuest()
+	schemeGuest := !schemeUser
 	if _, err := transaction.Exec(`UPDATE TeamMembers
-		SET SchemeVerified= ? WHERE UserId= ?`, verified, user.Id); err != nil {
+		SET SchemeGuest= ?, SchemeUser= ?, SchemeVerified= ? WHERE UserId= ?`, schemeGuest, schemeUser, schemeVerified, user.Id); err != nil {
 		return errors.Wrap(err, "failed to update TeamMember")
 	}
 	if _, err := transaction.Exec(`UPDATE ChannelMembers
-		SET SchemeVerified= ? WHERE UserId= ?`, verified, user.Id); err != nil {
+		SET SchemeGuest= ?, SchemeUser= ?, SchemeVerified= ? WHERE UserId= ?`, schemeGuest, schemeUser, schemeVerified, user.Id); err != nil {
 		return errors.Wrap(err, "failed to update ChannelMember")
 	}
 	if err := transaction.Commit(); err != nil {

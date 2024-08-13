@@ -946,7 +946,7 @@ func (s *SqlPostStore) Delete(rctx request.CTX, postID string, time int64, delet
 			SET DeleteAt = $1,
 				UpdateAt = $1,
 				Props = jsonb_set(Props, $2, $3)
-			WHERE Id = $4 OR RootId = $4`, time, jsonKeyPath(model.PostPropsDeleteBy), jsonStringVal(deleteByID), postID)
+			WHERE Id = $4`, time, jsonKeyPath(model.PostPropsDeleteBy), jsonStringVal(deleteByID), postID)
 	} else {
 		// We use ORDER BY clause for MySQL
 		// to trigger filesort optimization in the index_merge.
@@ -956,8 +956,8 @@ func (s *SqlPostStore) Delete(rctx request.CTX, postID string, time int64, delet
 			SET DeleteAt = ?,
 			UpdateAt = ?,
 			Props = JSON_SET(Props, ?, ?)
-			Where Id = ? OR RootId = ?
-			ORDER BY Id`, time, time, "$."+model.PostPropsDeleteBy, deleteByID, postID, postID)
+			Where Id = ?
+			ORDER BY Id`, time, time, "$."+model.PostPropsDeleteBy, deleteByID, postID)
 	}
 
 	if err != nil {
@@ -965,7 +965,8 @@ func (s *SqlPostStore) Delete(rctx request.CTX, postID string, time int64, delet
 	}
 
 	if id.RootId == "" {
-		err = s.deleteThread(transaction, postID, time)
+		// don't delete threads
+		// err = s.deleteThread(transaction, postID, time)
 	} else {
 		err = s.updateThreadAfterReplyDeletion(transaction, id.RootId, id.UserId)
 	}

@@ -1575,6 +1575,7 @@ var channelMembersWithSchemeSelectQuery = `
 		ChannelMembers.NotifyProps,
 		ChannelMembers.LastUpdateAt,
 		ChannelMembers.SchemeUser,
+		ChannelMembers.SchemeVerified,
 		ChannelMembers.SchemeAdmin,
 		ChannelMembers.SchemeGuest,
 		COALESCE(Teams.DisplayName, '') TeamDisplayName,
@@ -1582,9 +1583,11 @@ var channelMembersWithSchemeSelectQuery = `
 		COALESCE(Teams.UpdateAt, 0) TeamUpdateAt,
 		TeamScheme.DefaultChannelGuestRole TeamSchemeDefaultGuestRole,
 		TeamScheme.DefaultChannelUserRole TeamSchemeDefaultUserRole,
+		TeamScheme.DefaultChannelVerifiedRole TeamSchemeDefaultVerifiedRole,
 		TeamScheme.DefaultChannelAdminRole TeamSchemeDefaultAdminRole,
 		ChannelScheme.DefaultChannelGuestRole ChannelSchemeDefaultGuestRole,
 		ChannelScheme.DefaultChannelUserRole ChannelSchemeDefaultUserRole,
+		ChannelScheme.DefaultChannelVerifiedRole ChannelSchemeDefaultVerifiedRole,
 		ChannelScheme.DefaultChannelAdminRole ChannelSchemeDefaultAdminRole
 	FROM
 		ChannelMembers

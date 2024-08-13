@@ -1694,6 +1694,9 @@ func (a *App) UpdateUserRolesWithUser(c request.CTX, user *model.User, newRoles 
 	uchan := make(chan store.StoreResult[*model.UserUpdate], 1)
 	go func() {
 		userUpdate, err := a.Srv().Store().User().Update(c, user, true)
+		if userUpdate.New.IsVerified() != userUpdate.Old.IsVerified() {
+			a.Srv().Store().User().UpdateMemberVerifiedStatus(c, userUpdate.New)
+		}
 		uchan <- store.StoreResult[*model.UserUpdate]{Data: userUpdate, NErr: err}
 		close(uchan)
 	}()
@@ -2932,4 +2935,14 @@ func (a *App) getAllSystemAdmins() ([]*model.User, *model.AppError) {
 		Inactive: false,
 	}
 	return a.GetUsersFromProfiles(userOptions)
+}
+
+
+func (a * App) RefreshScheme(rctx request.CTX, user *model.User) *model.AppError {
+	err := a.Srv().Store().User().UpdateMemberVerifiedStatus(rctx, user)
+	if err != nil {
+		return model.NewAppError("RefreshScheme", "app.user.refresh_scheme.app_error", nil, "", http.StatusInternalServerError).Wrap(err)
+	}
+	a.InvalidateCacheForUser(user.Id)
+	return nil
 }

@@ -179,7 +179,7 @@ func (s *LocalCacheUserStore) GetProfileByIds(ctx context.Context, userIds []str
 			ctx = sqlstore.WithMaster(ctx)
 		}
 		remainingUsers, err := s.UserStore.GetProfileByIds(ctx, remainingUserIds, options, false)
-		mlog.Warn("DEBUGGING",
+		mlog.Debug("DEBUGGING",
 			mlog.Any("remainingUserIds", remainingUserIds),
 			mlog.Any("remainingUsers", remainingUsers),
 		)

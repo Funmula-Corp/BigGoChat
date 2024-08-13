@@ -227,7 +227,7 @@ export default function ChannelMembersDropdown({
                 </button>
                 <Menu
                     openLeft={true}
-                    openUp={totalUsers > ROWS_FROM_BOTTOM_TO_OPEN_UP && totalUsers - index <= ROWS_FROM_BOTTOM_TO_OPEN_UP}
+                    openUp={totalUsers > ROWS_FROM_BOTTOM_TO_OPEN_UP && totalUsers - index < ROWS_FROM_BOTTOM_TO_OPEN_UP}
                     ariaLabel={Utils.localizeMessage('channel_members_dropdown.menuAriaLabel', 'Change the role of channel member')}
                 >
                     {canMakeUserChannelMember ? makeMemberMenu : null}

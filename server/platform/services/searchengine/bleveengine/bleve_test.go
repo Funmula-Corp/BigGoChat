@@ -11,14 +11,14 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store/searchlayer"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store/searchtest"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store/sqlstore"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store/storetest"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/testlib"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/services/searchengine"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
 )
 
 type BleveEngineTestSuite struct {

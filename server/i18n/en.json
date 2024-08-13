@@ -1867,7 +1867,7 @@
   },
   {
     "id": "api.email_batching.send_batched_email_notification.button",
-    "translation": "Open Mattermost"
+    "translation": "Open BigGo Chat"
   },
   {
     "id": "api.email_batching.send_batched_email_notification.messageButton",
@@ -3111,6 +3111,10 @@
     "translation": "Unable to remove a user from a group-constrained team."
   },
   {
+    "id": "api.team.remove_member.is_team_owner.app_error",
+    "translation": "Unable to remove the team owner from a team."
+  },
+  {
     "id": "api.team.remove_team_icon.get_team.app_error",
     "translation": "An error occurred getting the team."
   },
@@ -3224,11 +3228,11 @@
   },
   {
     "id": "api.templates.cloud_welcome_email.button",
-    "translation": "Open Mattermost"
+    "translation": "Open BigGo Chat"
   },
   {
     "id": "api.templates.cloud_welcome_email.download_mm_info",
-    "translation": "Download the Mattermost App"
+    "translation": "Download the BigGo Chat App"
   },
   {
     "id": "api.templates.cloud_welcome_email.info",
@@ -3492,7 +3496,7 @@
   },
   {
     "id": "api.templates.post_body.button",
-    "translation": "Reply in BigGo"
+    "translation": "Reply in BigGo Chat"
   },
   {
     "id": "api.templates.questions_footer.info",
@@ -5744,7 +5748,7 @@
   },
   {
     "id": "app.notification.footer.infoLogin",
-    "translation": "Login to Mattermost"
+    "translation": "Login to BigGo Chat"
   },
   {
     "id": "app.notification.footer.title",

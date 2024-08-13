@@ -708,7 +708,7 @@ func getPostThread(c *Context, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if _, err = c.App.GetPostIfAuthorized(c.AppContext, post.Id, c.AppContext.Session(), false); err != nil {
+	if _, err = c.App.GetPostIfAuthorized(c.AppContext, post.Id, c.AppContext.Session(), opts.IncludeDeleted); err != nil {
 		c.Err = err
 		return
 	}

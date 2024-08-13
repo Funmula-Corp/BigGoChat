@@ -6,8 +6,8 @@ package bleveengine
 import (
 	"strings"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/services/searchengine"
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/services/searchengine"
 )
 
 type BLVChannel struct {
@@ -25,6 +25,7 @@ type BLVUser struct {
 	SuggestionsWithoutFullname []string
 	TeamsIds                   []string
 	ChannelsIds                []string
+	Mobilephone                string
 }
 
 type BLVPost struct {
@@ -86,6 +87,14 @@ func BLVUserFromUserAndTeams(user *model.User, teamsIds, channelsIds []string) *
 	}
 
 	usernameAndNicknameSuggestions := append(usernameSuggestions, nicknameSuggestions...)
+	mobilephone := ""
+	if user.Mobilephone != nil && len(*user.Mobilephone) > 0 {
+		if strings.HasPrefix(*user.Mobilephone, "+"){
+			mobilephone = *user.Mobilephone
+		}else{
+			mobilephone = "+" + *user.Mobilephone
+		}
+	}
 
 	return &BLVUser{
 		Id:                         user.Id,
@@ -93,6 +102,7 @@ func BLVUserFromUserAndTeams(user *model.User, teamsIds, channelsIds []string) *
 		SuggestionsWithoutFullname: usernameAndNicknameSuggestions,
 		TeamsIds:                   teamsIds,
 		ChannelsIds:                channelsIds,
+		Mobilephone:                mobilephone,
 	}
 }
 
@@ -105,6 +115,7 @@ func BLVUserFromUserForIndexing(userForIndexing *model.UserForIndexing) *BLVUser
 		LastName:  userForIndexing.LastName,
 		CreateAt:  userForIndexing.CreateAt,
 		DeleteAt:  userForIndexing.DeleteAt,
+		Mobilephone: &userForIndexing.Mobilephone,
 	}
 
 	return BLVUserFromUserAndTeams(user, userForIndexing.TeamsIds, userForIndexing.ChannelsIds)

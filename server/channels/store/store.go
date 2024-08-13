@@ -129,6 +129,7 @@ type TeamStore interface {
 	SearchOpen(opts *model.TeamSearch) ([]*model.Team, error)
 	SearchPrivate(opts *model.TeamSearch) ([]*model.Team, error)
 	GetAll() ([]*model.Team, error)
+	GetAllTeamsByEmail(email string) ([]*model.Team, error)
 	GetAllPage(offset int, limit int, opts *model.TeamSearch) ([]*model.Team, error)
 	GetAllPrivateTeamListing() ([]*model.Team, error)
 	GetAllTeamListing() ([]*model.Team, error)

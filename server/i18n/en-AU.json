@@ -1997,7 +1997,7 @@
   },
   {
     "id": "app.notification.footer.infoLogin",
-    "translation": "Log in to Mattermost"
+    "translation": "Log in to BigGo Chat"
   },
   {
     "id": "app.notification.footer.info",
@@ -5165,7 +5165,7 @@
   },
   {
     "id": "api.templates.cloud_welcome_email.button",
-    "translation": "Open Mattermost"
+    "translation": "Open BigGo Chat"
   },
   {
     "id": "api.templates.cloud_welcome_email.app_market_place",
@@ -6371,7 +6371,7 @@
   },
   {
     "id": "api.email_batching.send_batched_email_notification.button",
-    "translation": "Open Mattermost"
+    "translation": "Open BigGo Chat"
   },
   {
     "id": "api.email_batching.add_notification_email_to_batch.disabled.app_error",

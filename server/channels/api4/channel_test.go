@@ -2347,6 +2347,30 @@ func TestRestoreChannel(t *testing.T) {
 	require.Error(t, err)
 	CheckForbiddenStatus(t, resp)
 
+	// Make BasicUser, a User Manager
+	oldRoles := th.BasicUser.Roles
+
+	// Because the permissions get set on initialization,
+	// remove the manage_team permission from the User Management Role
+	th.RemovePermissionFromRole(model.PermissionManageTeam.Id, model.SystemUserManagerRoleId)
+	th.App.UpdateUserRoles(th.Context, th.BasicUser.Id, model.SystemUserManagerRoleId, false)
+	defer func() {
+		th.App.UpdateUserRoles(th.Context, th.BasicUser.Id, oldRoles, false)
+	}()
+	th.App.Srv().InvalidateAllCaches()
+	th.Client.Login(context.Background(), th.BasicUser.Email, th.BasicUser.Password)
+
+	_, resp, err = th.Client.RestoreChannel(context.Background(), publicChannel1.Id)
+	require.NoError(t, err)
+	CheckOKStatus(t, resp)
+
+	_, resp, err = th.Client.RestoreChannel(context.Background(), privateChannel1.Id)
+	require.NoError(t, err)
+	CheckOKStatus(t, resp)
+
+	th.Client.DeleteChannel(context.Background(), publicChannel1.Id)
+	th.Client.DeleteChannel(context.Background(), privateChannel1.Id)
+
 	th.TestForSystemAdminAndLocal(t, func(t *testing.T, client *model.Client4) {
 		defer func() {
 			client.DeleteChannel(context.Background(), publicChannel1.Id)
@@ -4943,9 +4967,12 @@ func TestMoveChannel(t *testing.T) {
 
 	th.TestForSystemAdminAndLocal(t, func(t *testing.T, client *model.Client4) {
 		publicChannel := th.CreatePublicChannel()
-		user := th.BasicUser
+		user := th.BasicUser2
 
-		_, err := client.RemoveTeamMember(context.Background(), team2.Id, user.Id)
+		_, _, err := client.AddTeamMember(context.Background(), team2.Id, user.Id)
+		require.NoError(t, err)
+
+		_, err = client.RemoveTeamMember(context.Background(), team2.Id, user.Id)
 		require.NoError(t, err)
 
 		_, _, err = client.AddChannelMember(context.Background(), publicChannel.Id, user.Id)
@@ -4958,9 +4985,12 @@ func TestMoveChannel(t *testing.T) {
 
 	th.TestForSystemAdminAndLocal(t, func(t *testing.T, client *model.Client4) {
 		privateChannel := th.CreatePrivateChannel()
-		user := th.BasicUser
+		user := th.BasicUser2
 
-		_, err := client.RemoveTeamMember(context.Background(), team2.Id, user.Id)
+		_, _, err := client.AddTeamMember(context.Background(), team2.Id, user.Id)
+		require.NoError(t, err)
+
+		_, err = client.RemoveTeamMember(context.Background(), team2.Id, user.Id)
 		require.NoError(t, err)
 
 		_, _, err = client.AddChannelMember(context.Background(), privateChannel.Id, user.Id)
@@ -4973,9 +5003,12 @@ func TestMoveChannel(t *testing.T) {
 
 	th.TestForSystemAdminAndLocal(t, func(t *testing.T, client *model.Client4) {
 		publicChannel := th.CreatePublicChannel()
-		user := th.BasicUser
+		user := th.BasicUser2
 
-		_, err := client.RemoveTeamMember(context.Background(), team2.Id, user.Id)
+		_, _, err := client.AddTeamMember(context.Background(), team2.Id, user.Id)
+		require.NoError(t, err)
+
+		_, err = client.RemoveTeamMember(context.Background(), team2.Id, user.Id)
 		require.NoError(t, err)
 
 		_, _, err = client.AddChannelMember(context.Background(), publicChannel.Id, user.Id)
@@ -4988,9 +5021,12 @@ func TestMoveChannel(t *testing.T) {
 
 	th.TestForSystemAdminAndLocal(t, func(t *testing.T, client *model.Client4) {
 		privateChannel := th.CreatePrivateChannel()
-		user := th.BasicUser
+		user := th.BasicUser2
 
-		_, err := client.RemoveTeamMember(context.Background(), team2.Id, user.Id)
+		_, _, err := client.AddTeamMember(context.Background(), team2.Id, user.Id)
+		require.NoError(t, err)
+
+		_, err = client.RemoveTeamMember(context.Background(), team2.Id, user.Id)
 		require.NoError(t, err)
 
 		_, _, err = client.AddChannelMember(context.Background(), privateChannel.Id, user.Id)

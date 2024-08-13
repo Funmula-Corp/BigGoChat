@@ -18,6 +18,7 @@ import {
     getCurrentTeam,
 } from 'mattermost-redux/selectors/entities/teams';
 import {getCurrentUser} from 'mattermost-redux/selectors/entities/users';
+import {getCurrentUserEmail} from 'mattermost-redux/selectors/entities/common';
 
 import {openModal} from 'actions/views/modals';
 import {showMentions, showFlaggedPosts, closeRightHandSide, closeMenu as closeRhsMenu} from 'actions/views/rhs';
@@ -49,6 +50,7 @@ function mapStateToProps(state: GlobalState) {
     const canManageSystemBots = (haveISystemPermission(state, {permission: Permissions.MANAGE_BOTS}) || haveISystemPermission(state, {permission: Permissions.MANAGE_OTHERS_BOTS}));
     const canManageIntegrations = canManageTeamIntegrations || canManageSystemBots;
     const canInviteTeamMember = haveICurrentTeamPermission(state, Permissions.ADD_USER_TO_TEAM);
+    const canLeaveTeam = getCurrentTeam(state)?.email !== getCurrentUserEmail(state);
 
     const joinableTeams = getJoinableTeamIds(state);
     const moreTeamsToJoin = joinableTeams && joinableTeams.length > 0;
@@ -84,6 +86,7 @@ function mapStateToProps(state: GlobalState) {
         isLicensedForLDAPGroups: state.entities.general.license.LDAPGroups === 'true',
         guestAccessEnabled: config.EnableGuestAccounts === 'true',
         canInviteTeamMember,
+        canLeaveTeam,
         isCloud,
         isStarterFree,
         isFreeTrial,

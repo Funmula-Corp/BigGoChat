@@ -216,6 +216,7 @@ type UserForIndexing struct {
 	DeleteAt    int64    `json:"delete_at"`
 	TeamsIds    []string `json:"team_id"`
 	ChannelsIds []string `json:"channel_id"`
+	Mobilephone string  `json:"mobilephone"`
 }
 
 //msgp:ignore ViewUsersRestrictions
@@ -654,6 +655,7 @@ func (u *User) Sanitize(options map[string]bool) {
 	}
 	if len(options) != 0 && !options["email"] {
 		u.Email = ""
+		delete(u.Props, UserPropsKeyRemoteEmail)
 	}
 	if len(options) != 0 && !options["fullname"] {
 		u.FirstName = ""
@@ -675,6 +677,8 @@ func (u *User) SanitizeInput(isAdmin bool) {
 		u.EmailVerified = false
 	}
 	u.RemoteId = NewString("")
+	u.CreateAt = 0
+	u.UpdateAt = 0
 	u.DeleteAt = 0
 	u.LastPasswordUpdate = 0
 	u.LastPictureUpdate = 0
@@ -682,6 +686,7 @@ func (u *User) SanitizeInput(isAdmin bool) {
 	u.MfaActive = false
 	u.MfaSecret = ""
 	u.Email = strings.TrimSpace(u.Email)
+	u.LastActivityAt = 0
 }
 
 func (u *User) ClearNonProfileFields() {

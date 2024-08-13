@@ -36,13 +36,27 @@ func TestCreateUser(t *testing.T) {
 	defer th.TearDown()
 
 	user := model.User{
-		Email:         th.GenerateTestEmail(),
-		Nickname:      "Corey Hulen",
-		Password:      "hello1",
-		Username:      GenerateTestUsername(),
-		Roles:         model.SystemAdminRoleId + " " + model.SystemUserRoleId,
-		EmailVerified: true,
-		DeleteAt:      1,
+		Id:       model.NewId(),
+		Email:    th.GenerateTestEmail(),
+		Nickname: "Corey Hulen",
+		Password: "hello1",
+		Username: GenerateTestUsername(),
+	}
+	_, resp, err := th.Client.CreateUser(context.Background(), &user)
+	require.Error(t, err)
+	CheckBadRequestStatus(t, resp)
+
+	user = model.User{
+		Email:          th.GenerateTestEmail(),
+		Nickname:       "Corey Hulen",
+		Password:       "hello1",
+		Username:       GenerateTestUsername(),
+		Roles:          model.SystemAdminRoleId + " " + model.SystemUserRoleId,
+		EmailVerified:  true,
+		DeleteAt:       1,
+		CreateAt:       1,
+		UpdateAt:       1,
+		LastActivityAt: 1,
 	}
 
 	ruser, resp, err := th.Client.CreateUser(context.Background(), &user)
@@ -56,6 +70,9 @@ func TestCreateUser(t *testing.T) {
 	require.Equal(t, user.Nickname, ruser.Nickname, "nickname didn't match")
 	require.Equal(t, model.SystemUserRoleId, ruser.Roles, "did not clear roles")
 	require.Equal(t, int64(0), ruser.DeleteAt, "did not reset deleteAt")
+	require.NotEqual(t, user.UpdateAt, ruser.UpdateAt, "did not reset updateAt")
+	require.NotEqual(t, user.CreateAt, ruser.CreateAt, "did not reset createAt")
+	require.NotEqual(t, user.LastActivityAt, ruser.LastActivityAt, "did not reset LastActivityAt")
 
 	CheckUserSanitization(t, ruser)
 
@@ -455,7 +472,7 @@ func TestCreateUserWithToken(t *testing.T) {
 		user := model.User{Email: th.GenerateTestEmail(), Nickname: "Corey Hulen", Password: "hello1", Username: GenerateTestUsername(), Roles: model.SystemUserRoleId}
 		channelIdWithoutPermissions := th.BasicPrivateChannel2.Id
 		tVar := true
-		th.UpdateChannelMemberRole(th.BasicChannel.Id, th.BasicUser.Id, model.SchemeRolesPatch{SchemeAdmin: &tVar,})
+		th.UpdateChannelMemberRole(th.BasicChannel.Id, th.BasicUser.Id, model.SchemeRolesPatch{SchemeAdmin: &tVar})
 		channelIds := th.BasicChannel.Id + " " + channelIdWithoutPermissions + " " + th.BasicChannel2.Id
 		token := model.NewToken(
 			app.TokenTypeTeamInvitation,
@@ -496,7 +513,7 @@ func TestCreateUserWithToken(t *testing.T) {
 		channelIdWithoutPermissions := th.BasicPrivateChannel2.Id
 		channelIds := th.BasicChannel.Id + " " + channelIdWithoutPermissions + " " + th.BasicChannel2.Id
 		tVar := true
-		th.UpdateChannelMemberRole(th.BasicChannel.Id, th.BasicUser.Id, model.SchemeRolesPatch{SchemeAdmin: &tVar,})
+		th.UpdateChannelMemberRole(th.BasicChannel.Id, th.BasicUser.Id, model.SchemeRolesPatch{SchemeAdmin: &tVar})
 		token := model.NewToken(
 			app.TokenTypeTeamInvitation,
 			model.MapToJSON(map[string]string{"guest": "true", "teamId": th.BasicTeam.Id, "email": user.Email, "senderId": th.BasicUser.Id, "channels": channelIds}),
@@ -6352,7 +6369,7 @@ func TestGetThreadsForUser(t *testing.T) {
 			Deleted: false,
 		})
 		require.NoError(t, err)
-		require.Len(t, uss.Threads, 0)
+		require.Len(t, uss.Threads, 1)
 
 		uss, _, err = th.Client.GetUserThreads(context.Background(), th.BasicUser.Id, th.BasicTeam.Id, model.GetUserThreadsOpts{
 			Deleted: true,
@@ -7156,7 +7173,7 @@ func TestThreadCounts(t *testing.T) {
 	th.App.Srv().Store().Post().Delete(th.Context, rpost.Id, model.GetMillis(), th.BasicUser.Id)
 
 	// we should now have 1 thread with 2 replies
-	checkThreadListReplies(t, th, th.Client, th.BasicUser.Id, 2, 1, &model.GetUserThreadsOpts{
+	checkThreadListReplies(t, th, th.Client, th.BasicUser.Id, 3, 2, &model.GetUserThreadsOpts{
 		Deleted: false,
 	})
 	// with Deleted we should get the same as before deleting
@@ -7734,4 +7751,58 @@ func TestUserUpdateEvents(t *testing.T) {
 			require.Empty(t, eventUser.NotifyProps, "user event for non-source users should be sanitized")
 		})
 	})
+}
+
+func TestRefreshScheme(t *testing.T) {
+	th := Setup(t).InitBasic()
+	defer th.TearDown()
+
+	user := th.BasicUser.DeepCopy()
+	user.Roles = model.SystemUserRoleId
+
+	userUpdate, err := th.App.Srv().Store().User().Update(th.Context, user, true)
+	require.NoError(t, err)
+	require.Equal(t, user.Roles, userUpdate.New.Roles)
+	_, appErr := th.LocalClient.RefreshScheme(context.Background(), th.BasicUser.Id)
+	require.NoError(t, appErr)
+	tms, _, appErr := th.Client.GetTeamMembersForUser(context.Background(), user.Id, "")
+	require.NoError(t, appErr)
+	require.Greater(t, len(tms), 0)
+	for _, tm := range tms {
+		require.False(t, tm.SchemeVerified)
+		require.True(t, tm.SchemeUser)
+	}
+	cms, _, appErr := th.Client.GetChannelMembersForUser(context.Background(), user.Id, th.BasicTeam.Id, "")
+	require.NoError(t, appErr)
+	require.Greater(t, len(cms), 0)
+	for _, cm := range cms {
+		require.False(t, cm.SchemeVerified)
+		require.True(t, cm.SchemeUser)
+	}
+
+	user.Roles = model.SystemUserRoleId + " " + model.SystemVerifiedRoleId
+	userUpdate, err = th.App.Srv().Store().User().Update(th.Context, user, true)
+	require.NoError(t, err)
+	require.Equal(t, user.Roles, userUpdate.New.Roles)
+	_, appErr = th.LocalClient.RefreshScheme(context.Background(), th.BasicUser.Id)
+	require.NoError(t, appErr)
+	tms, _, appErr = th.Client.GetTeamMembersForUser(context.Background(), user.Id, "")
+	require.NoError(t, appErr)
+	require.Greater(t, len(tms), 0)
+	for _, tm := range tms {
+		require.True(t, tm.SchemeVerified)
+		require.True(t, tm.SchemeUser)
+	}
+	cms, _, appErr = th.Client.GetChannelMembersForUser(context.Background(), user.Id, th.BasicTeam.Id, "")
+	require.NoError(t, appErr)
+	require.Greater(t, len(cms), 0)
+	for _, cm := range cms {
+		require.True(t, cm.SchemeVerified)
+		require.True(t, cm.SchemeUser)
+	}
+
+	// refresh scheme is local only
+	resp, appErr := th.Client.RefreshScheme(context.Background(), th.BasicUser.Id)
+	require.Error(t, appErr)
+	CheckNotFoundStatus(t, resp)
 }
