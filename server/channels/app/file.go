@@ -7,8 +7,10 @@ import (
 	"archive/zip"
 	"bytes"
 	"context"
+	"crypto/sha1"
 	"crypto/sha256"
 	"encoding/base64"
+	"encoding/hex"
 	"fmt"
 	"image"
 	"io"
@@ -772,7 +774,24 @@ func (a *App) UploadFileX(c request.CTX, channelID, name string, input io.Reader
 		t.fileinfo.HasPreviewImage = false
 	}
 
-	written, aerr := t.writeFile(io.MultiReader(t.buf, t.limitedInput), t.fileinfo.Path)
+	// cache file in attempt to retry upload
+	const maxUploadAttempts = 3
+	retryBuffer := t.getDiscCache(t.fileinfo.Path)
+	defer t.freeDiscCache(retryBuffer)
+
+	var written int64 = 0
+	for i := 0; i < maxUploadAttempts; i++ {
+		if i == 0 {
+			written, aerr = t.writeFile(io.TeeReader(io.MultiReader(t.buf, t.limitedInput), retryBuffer), t.fileinfo.Path)
+		} else {
+			retryBuffer.Seek(0, 0)
+			written, aerr = t.writeFile(retryBuffer, t.fileinfo.Path)
+		}
+		if aerr == nil {
+			break
+		}
+	}
+
 	if aerr != nil {
 		return nil, aerr
 	}
@@ -827,6 +846,35 @@ func (a *App) UploadFileX(c request.CTX, channelID, name string, input io.Reader
 	}
 
 	return t.fileinfo, nil
+}
+
+func (t *UploadFileTask) getDiscCache(filePath string) (cache *os.File) {
+	hash := sha1.New()
+	hash.Write([]byte(filePath))
+	cacheFileName := hex.EncodeToString(hash.Sum(nil))
+
+	const cacheDir string = "/disk_cache"
+	const cacheDirFallback string = "/tmp/mm_disk_cache"
+
+	var fqCacheFilePath = ""
+	if _, err := os.Stat(cacheDir); os.IsNotExist(err) {
+		if err = os.MkdirAll(cacheDirFallback, 0o777); err != nil && !os.IsExist(err) {
+			return
+		}
+		fqCacheFilePath = filepath.Join(cacheDirFallback, cacheFileName)
+	} else if err == nil {
+		fqCacheFilePath = filepath.Join(cacheDir, cacheFileName)
+	}
+
+	cache, _ = os.OpenFile(fqCacheFilePath, os.O_CREATE|os.O_TRUNC|os.O_RDWR|os.O_APPEND, 0o777)
+	return
+}
+
+func (t *UploadFileTask) freeDiscCache(cache *os.File) {
+	if cache != nil {
+		cache.Close()
+		os.Remove(cache.Name())
+	}
 }
 
 func (t *UploadFileTask) preprocessImage() *model.AppError {
