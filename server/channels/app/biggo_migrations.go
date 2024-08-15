@@ -400,6 +400,39 @@ func (a *App) doMigrationKeyAddChannelMembersPermission() (permissionsMap, error
 	}, nil
 }
 
+func (a *App) doMigrationKeyRemoveTeamVerifiedCreateChannelPermission() (permissionsMap, error) {
+	return permissionsMap{
+		permissionTransformation{
+			On: permissionAnd(
+				isRole(model.TeamVerifiedRoleId),
+				permissionExists(model.PermissionCreatePublicChannel.Id),
+			),
+			Remove: []string {
+				model.PermissionCreatePublicChannel.Id,
+			},
+		},
+		permissionTransformation{
+			On: permissionAnd(
+				isRole(model.TeamVerifiedRoleId),
+				permissionExists(model.PermissionCreatePrivateChannel.Id),
+			),
+			Remove: []string {
+				model.PermissionCreatePrivateChannel.Id,
+			},
+		},
+		permissionTransformation{
+			On: permissionOr(
+				isRole(model.TeamAdminRoleId),
+				isRole(model.TeamModeratorRoleId),
+			),
+			Add: []string {
+				model.PermissionCreatePublicChannel.Id,
+				model.PermissionCreatePrivateChannel.Id,
+			},
+		},
+	}, nil
+}
+
 func (s *Server) doBiggoPermissionMigration() error {
 	a := New(ServerConnector(s.Channels()))
 	PermissionsMigrations := []struct {
@@ -408,6 +441,7 @@ func (s *Server) doBiggoPermissionMigration() error {
 	}{
 		{Key: model.MigrationKeyBigGoRolesPermissions, Migration: a.doMigrationKeyBigGoRolesPermissions},
 		{Key: model.MigrationKeyAddChannelMembersPermission, Migration: a.doMigrationKeyAddChannelMembersPermission},
+		{Key: model.MigrationKeyRemoveTeamVerifiedCreateChannelPermission, Migration: a.doMigrationKeyRemoveTeamVerifiedCreateChannelPermission},
 	}
 
 	roles, err := s.Store().Role().GetAll()

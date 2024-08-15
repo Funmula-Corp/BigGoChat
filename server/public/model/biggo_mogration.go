@@ -7,6 +7,7 @@ const (
 	MigrationKeyBigGoRolesPermissions = "MigrationKeyBigGoRolesPermissions"
 	MigrationBigGoSchemeRolesCreation = "MigrationBigGoSchemeRolesCreation"
 	MigrationKeyAddChannelMembersPermission = "MigrationKeyAddChannelMembersPermission"
+	MigrationKeyRemoveTeamVerifiedCreateChannelPermission = "MigrationKeyRemoveTeamVerifiedCreateChannelPermission"
 
 	ChannelReadOnlySchemeId = "biggosyyyyyyyyyyyyyyyyyyyd"
 )
