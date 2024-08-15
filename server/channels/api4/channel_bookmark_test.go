@@ -265,6 +265,8 @@ func TestEditChannelBookmark(t *testing.T) {
 	th := Setup(t).InitBasic()
 	defer th.TearDown()
 	th.App.SetPhase2PermissionsMigrationStatus(true)
+	th.UpdateUserToNonTeamAdmin(th.BasicUser, th.BasicTeam)
+	th.App.Srv().InvalidateAllCaches()
 
 	t.Run("should not work without a license", func(t *testing.T) {
 		_, _, err := th.Client.UpdateChannelBookmark(context.Background(), th.BasicChannel.Id, model.NewId(), &model.ChannelBookmarkPatch{})
@@ -641,6 +643,8 @@ func TestUpdateChannelBookmarkSortOrder(t *testing.T) {
 	th := Setup(t).InitBasic()
 	defer th.TearDown()
 	th.App.SetPhase2PermissionsMigrationStatus(true)
+	th.UpdateUserToNonTeamAdmin(th.BasicUser, th.BasicTeam)
+	th.App.Srv().InvalidateAllCaches()
 
 	createBookmark := func(name, channelId string) *model.ChannelBookmarkWithFileInfo {
 		b := &model.ChannelBookmark{
@@ -1005,6 +1009,8 @@ func TestDeleteChannelBookmark(t *testing.T) {
 	th := Setup(t).InitBasic()
 	defer th.TearDown()
 	th.App.SetPhase2PermissionsMigrationStatus(true)
+	th.UpdateUserToNonTeamAdmin(th.BasicUser, th.BasicTeam)
+	th.App.Srv().InvalidateAllCaches()
 
 	th.Context.Session().UserId = th.BasicUser.Id // set the user for the session
 

@@ -364,6 +364,8 @@ func TestTeamBlockUserAddRemove(t *testing.T) {
 func TestTeamBlockUserChannel(t *testing.T) {
 	th := Setup(t).InitBasic()
 	defer th.TearDown()
+	th.UpdateUserToNonTeamAdmin(th.BasicUser, th.BasicTeam)
+	th.App.Srv().InvalidateAllCaches()
 
 	sysAdmClient := th.SystemAdminClient
 	client := th.Client

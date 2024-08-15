@@ -2765,6 +2765,8 @@ func TestDeletePost(t *testing.T) {
 	th := Setup(t).InitBasic()
 	defer th.TearDown()
 	client := th.Client
+	th.UpdateUserToNonTeamAdmin(th.BasicUser, th.BasicTeam)
+	th.App.Srv().InvalidateAllCaches()
 
 	resp, err := client.DeletePost(context.Background(), "")
 	require.Error(t, err)
