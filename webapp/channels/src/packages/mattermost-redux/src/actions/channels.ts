@@ -762,6 +762,35 @@ export function getChannels(teamId: string, page = 0, perPage: number = General.
     };
 }
 
+export function getAllPrivateChannels(teamId: string, page = 0, perPage: number = General.CHANNELS_CHUNK_SIZE): ActionFuncAsync<Channel[]> {
+    return async (dispatch, getState) => {
+        dispatch({type: ChannelTypes.GET_CHANNELS_REQUEST, data: null});
+
+        let channels;
+        try {
+            channels = await Client4.getAllPrivateChannels(teamId, page, perPage);
+        } catch (error) {
+            forceLogoutIfNecessary(error, dispatch, getState);
+            dispatch({type: ChannelTypes.GET_CHANNELS_FAILURE, error});
+            dispatch(logError(error));
+            return {error};
+        }
+
+        dispatch(batchActions([
+            {
+                type: ChannelTypes.RECEIVED_CHANNELS,
+                teamId,
+                data: channels,
+            },
+            {
+                type: ChannelTypes.GET_CHANNELS_SUCCESS,
+            },
+        ]));
+
+        return {data: channels};
+    }
+}
+
 export function getArchivedChannels(teamId: string, page = 0, perPage: number = General.CHANNELS_CHUNK_SIZE): ActionFuncAsync<Channel[]> {
     return async (dispatch, getState) => {
         let channels;
