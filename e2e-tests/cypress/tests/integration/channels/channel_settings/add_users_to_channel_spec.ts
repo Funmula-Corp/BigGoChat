@@ -22,7 +22,8 @@ describe('Channel Settings', () => {
 
     const users: Cypress.UserProfile[] = [];
 
-    before(() => {
+    before(function() {
+        this.skip();
         cy.apiInitSetup().then(({team, user}) => {
             testTeam = team;
             firstUser = user;

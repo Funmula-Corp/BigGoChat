@@ -37,6 +37,8 @@ function apiInitSetup(arg: SetupParam = {}): ChainableT<SetupResult> {
         // # Add public channel
         return (cy.apiCreateChannel(team.id, channelPrefix.name, channelPrefix.displayName) as any).then(({channel}) => {
             return (cy.apiCreateUser({prefix: userPrefix || (promoteNewUserAsAdmin ? 'admin' : 'user'), createAt: userCreateAt}) as any).then(({user}) => {
+                (cy as any).apiPatchUserRoles(user.id, ['system_verified']);
+
                 if (promoteNewUserAsAdmin) {
                     (cy as any).apiPatchUserRoles(user.id, ['system_admin', 'system_user']);
 
