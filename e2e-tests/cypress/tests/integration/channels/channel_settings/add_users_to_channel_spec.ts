@@ -23,6 +23,7 @@ describe('Channel Settings', () => {
     const users: Cypress.UserProfile[] = [];
 
     before(function() {
+        // BigGoChat does not support the Group feature
         this.skip();
         cy.apiInitSetup().then(({team, user}) => {
             testTeam = team;
