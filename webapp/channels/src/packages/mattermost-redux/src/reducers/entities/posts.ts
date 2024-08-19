@@ -890,8 +890,12 @@ export function isNotDeleteBySelf(post: Post) {
     return !!post.props.deleteBy && post.props.deleteBy !== post.user_id || post.reply_count > 0;
 }
 
+export function isEmptyPost(post: Post): boolean {
+    return post.message == '' && !post.props?.attachments && post.type !== 'slack_attachment'
+}
+
 export function shouldShowPost(post: Post): boolean {
-    return !post.original_id && post.message !== '' && !post.delete_at || !!post.file_ids?.length;
+    return !post.original_id && !isEmptyPost(post) && !post.delete_at || !!post.file_ids?.length;
 }
 
 export function doPostFilter() {
