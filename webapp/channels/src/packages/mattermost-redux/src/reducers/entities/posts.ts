@@ -887,11 +887,15 @@ export function removeNonRecentEmptyPostBlocks(blocks: PostOrderBlock[]) {
 }
 
 export function isNotDeleteBySelf(post: Post) {
-    return !!post.props.deleteBy && post.props.deleteBy !== post.user_id;
+    return !!post.props.deleteBy && post.props.deleteBy !== post.user_id || post.reply_count > 0;
+}
+
+export function isEmptyPost(post: Post): boolean {
+    return post.message == '' && !post.props?.attachments && post.type !== 'slack_attachment'
 }
 
 export function shouldShowPost(post: Post): boolean {
-    return !post.original_id && post.message !== '' && !post.delete_at || !!post.file_ids?.length;
+    return !post.original_id && !isEmptyPost(post) && !post.delete_at || !!post.file_ids?.length;
 }
 
 export function doPostFilter() {
@@ -1047,7 +1051,7 @@ export function postsInThread(state: RelationOneToMany<Post, Post> = {}, action:
     case PostTypes.RECEIVED_POSTS_BEFORE:
     case PostTypes.RECEIVED_POSTS_IN_CHANNEL:
     case PostTypes.RECEIVED_POSTS_SINCE: {
-        const newPosts: Post[] = (Object.values(action.data.posts) as Post[]).filter(doPostFilter);
+        const newPosts: Post[] = (Object.values(action.data.posts) as Post[]).filter(doPostFilter());
 
         if (newPosts.length === 0) {
             // Nothing to add
@@ -1084,7 +1088,7 @@ export function postsInThread(state: RelationOneToMany<Post, Post> = {}, action:
     }
 
     case PostTypes.RECEIVED_POSTS_IN_THREAD: {
-        const newPosts: Post[] = (Object.values(action.data.posts) as Post[]).filter(doPostFilter);
+        const newPosts: Post[] = (Object.values(action.data.posts) as Post[]).filter(doPostFilter());
 
         if (newPosts.length === 0) {
             // Nothing to add
@@ -1269,7 +1273,7 @@ export function reactions(state: RelationOneToOne<Post, Record<string, Reaction>
         const posts: Post[] = Object.values(action.data.posts);
 
         return posts
-            .filter(doPostFilter)
+            .filter(doPostFilter())
             .reduce(storeReactionsForPost, state);
     }
 
