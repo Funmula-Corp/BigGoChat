@@ -244,6 +244,8 @@ func TestClientListOutgoingOAuthConnection(t *testing.T) {
 	defer os.Unsetenv("MM_FEATUREFLAGS_OUTGOINGOAUTHCONNECTIONS")
 	th := Setup(t).InitBasic()
 	defer th.TearDown()
+	th.UpdateUserToNonTeamAdmin(th.BasicUser, th.BasicTeam)
+	th.App.Srv().InvalidateAllCaches()
 
 	license := model.NewTestLicenseSKU(model.LicenseShortSkuEnterprise, "outgoing_oauth_connections")
 	license.Id = "test-license-id"

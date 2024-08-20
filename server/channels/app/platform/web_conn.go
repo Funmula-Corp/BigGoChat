@@ -92,7 +92,7 @@ type WebConn struct {
 	UserId           string
 	PostedAck        bool
 
-	allChannelMembers         map[string]string
+	allChannelMembers         map[string]*model.AllChannelMember
 	lastAllChannelMembersTime int64
 	lastUserActivityAt        int64
 	send                      chan model.WebSocketMessage

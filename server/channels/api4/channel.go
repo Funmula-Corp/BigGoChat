@@ -1835,8 +1835,8 @@ func addChannelMember(c *Context, w http.ResponseWriter, r *http.Request) {
 		} else if isSelfAdd && !isNewMembership {
 			// nothing to do, since already in the channel
 		} else if !isSelfAdd {
-			if !c.App.SessionHasPermissionToChannel(c.AppContext, *c.AppContext.Session(), channel.Id, model.PermissionManagePublicChannelMembers) {
-				c.SetPermissionError(model.PermissionManagePublicChannelMembers)
+			if !c.App.SessionHasPermissionToChannel(c.AppContext, *c.AppContext.Session(), channel.Id, model.PermissionAddPublicChannelMembers) {
+				c.SetPermissionError(model.PermissionAddPublicChannelMembers)
 				return
 			}
 		}
@@ -1851,8 +1851,8 @@ func addChannelMember(c *Context, w http.ResponseWriter, r *http.Request) {
 		} else if isSelfAdd && !isNewMembership {
 			// nothing to do, since already in the channel
 		} else if !isSelfAdd {
-			if !c.App.SessionHasPermissionToChannel(c.AppContext, *c.AppContext.Session(), channel.Id, model.PermissionManagePrivateChannelMembers) {
-				c.SetPermissionError(model.PermissionManagePrivateChannelMembers)
+			if !c.App.SessionHasPermissionToChannel(c.AppContext, *c.AppContext.Session(), channel.Id, model.PermissionAddPrivateChannelMembers) {
+				c.SetPermissionError(model.PermissionAddPrivateChannelMembers)
 				return
 			}
 		}
