@@ -93,7 +93,7 @@ type channelMemberWithSchemeRoles struct {
 	ChannelSchemeDefaultVerifiedRole  sql.NullString
 	ChannelSchemeDefaultAdminRole sql.NullString
 	MsgCountRoot                  int64
-	ExcludePermissions            string
+	ExcludePermissions            sql.NullString
 }
 
 type channelMemberWithTeamWithSchemeRoles struct {
@@ -286,7 +286,7 @@ func (db channelMemberWithSchemeRoles) ToModel() *model.ChannelMember {
 		SchemeVerified:     rolesResult.schemeVerified,
 		SchemeGuest:        rolesResult.schemeGuest,
 		ExplicitRoles:      strings.Join(rolesResult.explicitRoles, " "),
-		ExcludePermissions: db.ExcludePermissions,
+		ExcludePermissions: db.ExcludePermissions.String,
 	}
 }
 
@@ -363,7 +363,7 @@ func (db channelMemberWithTeamWithSchemeRoles) ToModel() *model.ChannelMemberWit
 			SchemeVerified:     rolesResult.schemeVerified,
 			SchemeGuest:        rolesResult.schemeGuest,
 			ExplicitRoles:      strings.Join(rolesResult.explicitRoles, " "),
-			ExcludePermissions: db.ExcludePermissions,
+			ExcludePermissions: db.ExcludePermissions.String,
 		},
 		TeamName:        db.TeamName,
 		TeamDisplayName: db.TeamDisplayName,
