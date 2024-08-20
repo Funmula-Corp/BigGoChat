@@ -27,6 +27,11 @@ import (
 	"github.com/rs/cors"
 	"golang.org/x/crypto/acme/autocert"
 
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/i18n"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/timezones"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/biggo"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app/email"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app/platform"
@@ -64,6 +69,8 @@ import (
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/services/cache"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/services/httpservice"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/services/remotecluster"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/services/searchengine/biggoengine"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/services/searchengine/biggoengine/biggoindexer"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/services/searchengine/bleveengine"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/services/searchengine/bleveengine/indexer"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/services/sharedchannel"
@@ -73,11 +80,6 @@ import (
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/shared/filestore"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/shared/mail"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/shared/templates"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/i18n"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/timezones"
 )
 
 var SentryDSN = "https://9d7c9cccf549479799f880bcf4f26323@o94110.ingest.sentry.io/5212327"
@@ -1462,6 +1464,12 @@ func (s *Server) initJobs() {
 	s.Jobs.RegisterJobType(
 		model.JobTypeBlevePostIndexing,
 		indexer.MakeWorker(s.Jobs, s.platform.SearchEngine.BleveEngine.(*bleveengine.BleveEngine)),
+		nil,
+	)
+
+	s.Jobs.RegisterJobType(
+		model.JobTypeBiggoIndexing,
+		biggoindexer.MakeWorker(s.Jobs, s.platform.SearchEngine.BiggoEngine.(*biggoengine.BiggoEngine)),
 		nil,
 	)
 

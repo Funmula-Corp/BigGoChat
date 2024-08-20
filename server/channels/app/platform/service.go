@@ -12,6 +12,9 @@ import (
 	"sync"
 	"sync/atomic"
 
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app/featureflag"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/jobs"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
@@ -24,11 +27,9 @@ import (
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/einterfaces"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/services/cache"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/services/searchengine"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/services/searchengine/biggoengine"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/services/searchengine/bleveengine"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/shared/filestore"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
 )
 
 // PlatformService is the service for the platform related tasks. It is
@@ -177,10 +178,15 @@ func New(sc ServiceConfig, options ...Option) (*PlatformService, error) {
 	// Step 3: Search Engine
 	searchEngine := searchengine.NewBroker(ps.Config())
 	bleveEngine := bleveengine.NewBleveEngine(ps.Config())
+	biggoEngine := biggoengine.NewBiggoEngine(ps.Config())
 	if err := bleveEngine.Start(); err != nil {
 		return nil, err
 	}
+	if err := biggoEngine.Start(); err != nil {
+		return nil, err
+	}
 	searchEngine.RegisterBleveEngine(bleveEngine)
+	searchEngine.RegisterBiggoEngine(biggoEngine)
 	ps.SearchEngine = searchEngine
 
 	// Step 4: Init Enterprise
