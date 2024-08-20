@@ -131,8 +131,9 @@ type ChannelModeration struct {
 }
 
 type ChannelModeratedRoles struct {
-	Guests  *ChannelModeratedRole `json:"guests"`
-	Members *ChannelModeratedRole `json:"members"`
+	Guests   *ChannelModeratedRole `json:"guests"`
+	Members  *ChannelModeratedRole `json:"members"`
+	Verified *ChannelModeratedRole `json:"verified"`
 }
 
 type ChannelModeratedRole struct {
@@ -153,8 +154,9 @@ func (c *ChannelModerationPatch) Auditable() map[string]interface{} {
 }
 
 type ChannelModeratedRolesPatch struct {
-	Guests  *bool `json:"guests"`
-	Members *bool `json:"members"`
+	Guests   *bool `json:"guests"`
+	Members  *bool `json:"members"`
+	Verified *bool `json:"verified"`
 }
 
 // ChannelSearchOpts contains options for searching channels.

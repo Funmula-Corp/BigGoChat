@@ -861,13 +861,17 @@ func TestDeleteScheme(t *testing.T) {
 func TestUpdateTeamSchemeWithTeamMembers(t *testing.T) {
 	th := Setup(t).InitBasic()
 	defer th.TearDown()
+	th.AddPermissionToRole(model.PermissionCreatePublicChannel.Id, model.TeamVerifiedRoleId)
 
 	t.Run("Correctly invalidates team member cache", func(t *testing.T) {
 		th.App.SetPhase2PermissionsMigrationStatus(true)
 
+		th.LoginSystemAdmin()
 		team := th.CreateTeam()
 		_, _, appErr := th.App.AddUserToTeam(th.Context, team.Id, th.BasicUser.Id, th.SystemAdminUser.Id)
 		require.Nil(t, appErr)
+		th.UpdateUserToNonTeamAdmin(th.BasicUser, team)
+
 
 		teamScheme := th.SetupTeamScheme()
 

@@ -266,7 +266,7 @@ func (i *InviteProvider) checkPermissions(a *app.App, c request.CTX, args *model
 	for _, targetChannel := range targetChannels {
 		switch targetChannel.Type {
 		case model.ChannelTypeOpen:
-			if !a.HasPermissionToChannel(c, args.UserId, targetChannel.Id, model.PermissionManagePublicChannelMembers) {
+			if !a.HasPermissionToChannel(c, args.UserId, targetChannel.Id, model.PermissionAddPublicChannelMembers) {
 				*resps = append(*resps, args.T("api.command_invite.permission.app_error", map[string]any{
 					"User":    targetUser.Username,
 					"Channel": targetChannel.Name,
@@ -274,7 +274,7 @@ func (i *InviteProvider) checkPermissions(a *app.App, c request.CTX, args *model
 				continue
 			}
 		case model.ChannelTypePrivate:
-			if !a.HasPermissionToChannel(c, args.UserId, targetChannel.Id, model.PermissionManagePrivateChannelMembers) {
+			if !a.HasPermissionToChannel(c, args.UserId, targetChannel.Id, model.PermissionAddPrivateChannelMembers) {
 				if _, err = a.GetChannelMember(c, targetChannel.Id, args.UserId); err == nil {
 					// User doing the inviting is a member of the channel.
 					*resps = append(*resps, args.T("api.command_invite.permission.app_error", map[string]any{

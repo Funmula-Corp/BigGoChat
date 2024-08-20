@@ -98,6 +98,9 @@ func TestCreateChannel(t *testing.T) {
 	th.RemovePermissionFromRole(model.PermissionCreatePublicChannel.Id, model.TeamVerifiedRoleId)
 	th.RemovePermissionFromRole(model.PermissionCreatePrivateChannel.Id, model.TeamVerifiedRoleId)
 
+	th.UpdateUserToNonTeamAdmin(th.BasicUser, th.BasicTeam)
+	th.App.Srv().InvalidateAllCaches()
+
 	_, resp, err = client.CreateChannel(context.Background(), channel)
 	require.Error(t, err)
 	CheckForbiddenStatus(t, resp)
@@ -970,6 +973,10 @@ func TestGetDeletedChannelsForTeam(t *testing.T) {
 
 	client := th.Client
 	team := th.BasicTeam
+	th.UpdateUserToNonTeamAdmin(th.BasicUser, th.BasicTeam)
+	th.AddPermissionToRole(model.PermissionCreatePublicChannel.Id, model.TeamVerifiedRoleId)
+	th.AddPermissionToRole(model.PermissionCreatePrivateChannel.Id, model.TeamVerifiedRoleId)
+	th.App.Srv().InvalidateAllCaches()
 
 	th.LoginTeamAdmin()
 
@@ -1051,6 +1058,8 @@ func TestGetPrivateChannelsForTeam(t *testing.T) {
 	th := Setup(t).InitBasic()
 	defer th.TearDown()
 	team := th.BasicTeam
+	th.UpdateUserToNonTeamAdmin(th.BasicUser, th.BasicTeam)
+	th.App.Srv().InvalidateAllCaches()
 
 	// normal user
 	_, resp, err := th.Client.GetPrivateChannelsForTeam(context.Background(), team.Id, 0, 100, "")
@@ -2122,6 +2131,10 @@ func TestDeleteChannel2(t *testing.T) {
 	defer th.TearDown()
 	client := th.Client
 	user := th.BasicUser
+	th.UpdateUserToNonTeamAdmin(user, th.BasicTeam)
+	th.App.Srv().InvalidateAllCaches()
+	th.AddPermissionToRole(model.PermissionCreatePublicChannel.Id, model.TeamVerifiedRoleId)
+	th.AddPermissionToRole(model.PermissionCreatePrivateChannel.Id, model.TeamVerifiedRoleId)
 
 	// Check the appropriate permissions are enforced.
 	defaultRolePermissions := th.SaveDefaultRolePermissions()
@@ -2237,6 +2250,8 @@ func TestPermanentDeleteChannel(t *testing.T) {
 func TestUpdateChannelPrivacy(t *testing.T) {
 	th := Setup(t).InitBasic()
 	defer th.TearDown()
+	th.AddPermissionToRole(model.PermissionCreatePublicChannel.Id, model.TeamVerifiedRoleId)
+	th.AddPermissionToRole(model.PermissionCreatePrivateChannel.Id, model.TeamVerifiedRoleId)
 
 	defaultChannel, _ := th.App.GetChannelByName(th.Context, model.DefaultChannelName, th.BasicTeam.Id, false)
 
@@ -2332,6 +2347,10 @@ func TestUpdateChannelPrivacy(t *testing.T) {
 func TestRestoreChannel(t *testing.T) {
 	th := Setup(t).InitBasic()
 	defer th.TearDown()
+	th.UpdateUserToNonTeamAdmin(th.BasicUser, th.BasicTeam)
+	th.AddPermissionToRole(model.PermissionCreatePublicChannel.Id, model.TeamVerifiedRoleId)
+	th.AddPermissionToRole(model.PermissionCreatePrivateChannel.Id, model.TeamVerifiedRoleId)
+	th.App.Srv().InvalidateAllCaches()
 
 	publicChannel1 := th.CreatePublicChannel()
 	th.Client.DeleteChannel(context.Background(), publicChannel1.Id)
@@ -3189,6 +3208,8 @@ func TestUpdateChannelNotifyProps(t *testing.T) {
 func TestAddChannelMember(t *testing.T) {
 	th := Setup(t).InitBasic()
 	defer th.TearDown()
+	th.AddPermissionToRole(model.PermissionCreatePublicChannel.Id, model.TeamVerifiedRoleId)
+	th.AddPermissionToRole(model.PermissionCreatePrivateChannel.Id, model.TeamVerifiedRoleId)
 	client := th.Client
 	user := th.BasicUser
 	user2 := th.BasicUser2
@@ -3266,7 +3287,7 @@ func TestAddChannelMember(t *testing.T) {
 
 	_, resp, err = client.AddChannelMember(context.Background(), publicChannel.Id, otherUser.Id)
 	require.Error(t, err)
-	CheckForbiddenStatus(t, resp)
+	CheckNotFoundStatus(t, resp)
 
 	_, resp, err = client.AddChannelMember(context.Background(), privateChannel.Id, otherUser.Id)
 	require.Error(t, err)
@@ -3318,7 +3339,7 @@ func TestAddChannelMember(t *testing.T) {
 		th.RestoreDefaultRolePermissions(defaultRolePermissions)
 	}()
 
-	th.AddPermissionToRole(model.PermissionManagePrivateChannelMembers.Id, model.ChannelUserRoleId)
+	th.AddPermissionToRole(model.PermissionAddPrivateChannelMembers.Id, model.ChannelUserRoleId)
 
 	// Check that a regular channel user can add other users.
 	client.Login(context.Background(), user2.Username, user2.Password)
@@ -3333,8 +3354,8 @@ func TestAddChannelMember(t *testing.T) {
 	client.Logout(context.Background())
 
 	// Restrict the permission for adding users to Channel Admins
-	th.AddPermissionToRole(model.PermissionManagePrivateChannelMembers.Id, model.ChannelAdminRoleId)
-	th.RemovePermissionFromRole(model.PermissionManagePrivateChannelMembers.Id, model.ChannelUserRoleId)
+	th.AddPermissionToRole(model.PermissionAddPrivateChannelMembers.Id, model.ChannelAdminRoleId)
+	th.RemovePermissionFromRole(model.PermissionAddPrivateChannelMembers.Id, model.ChannelUserRoleId)
 
 	client.Login(context.Background(), user2.Username, user2.Password)
 	privateChannel = th.CreatePrivateChannel()

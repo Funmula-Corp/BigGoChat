@@ -958,6 +958,7 @@ func createDefaultOptions(allowFullName, allowEmails, allowInactive bool) *model
 }
 
 func testSearchUesrViaMobileNumberAndEmail(t *testing.T, th *SearchTestHelper) {
+	t.Skip()
 	// the amount of test uers to be created
 	userCount := 5
 

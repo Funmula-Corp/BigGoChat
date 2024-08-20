@@ -63,6 +63,7 @@ const (
 	UserLocaleMaxLength   = 5
 	UserTimezoneMaxRunes  = 256
 	UserRolesMaxLength    = 256
+	UserExcludePermissionsMaxLength = 256
 
 	DesktopTokenTTL = time.Minute * 3
 )

@@ -6,9 +6,9 @@ package localcachelayer
 import (
 	"bytes"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
 )
 
 type LocalCacheChannelStore struct {
@@ -268,13 +268,13 @@ func (s LocalCacheChannelStore) GetMany(ids []string, allowFromCache bool) (mode
 	return append(foundChannels, channels...), nil
 }
 
-func (s LocalCacheChannelStore) GetAllChannelMembersForUser(userId string, allowFromCache bool, includeDeleted bool) (map[string]string, error) {
+func (s LocalCacheChannelStore) GetAllChannelMembersForUser(userId string, allowFromCache bool, includeDeleted bool) (map[string]*model.AllChannelMember, error) {
 	cache_key := userId
 	if includeDeleted {
 		cache_key += "_deleted"
 	}
 	if allowFromCache {
-		ids := make(map[string]string)
+		ids := make(map[string]*model.AllChannelMember)
 		if err := s.rootStore.doStandardReadCache(s.rootStore.channelMembersForUserCache, cache_key, &ids); err == nil {
 			return ids, nil
 		}
