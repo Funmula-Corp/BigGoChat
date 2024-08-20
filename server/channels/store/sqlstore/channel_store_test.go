@@ -102,7 +102,7 @@ func testChannelMemberWithSchemeRolesToModel(t *testing.T) {
 			ChannelSchemeDefaultUserRole:  sql.NullString{Valid: false},
 			ChannelSchemeDefaultVerifiedRole:  sql.NullString{Valid: false},
 			ChannelSchemeDefaultAdminRole: sql.NullString{Valid: false},
-			ExcludePermissions:            "custom_permission",
+			ExcludePermissions:            sql.NullString{Valid: true, String: "custom_permission"},
 		}
 
 		m := db.ToModel()
