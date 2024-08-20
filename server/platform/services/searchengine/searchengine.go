@@ -17,6 +17,10 @@ func (seb *Broker) RegisterElasticsearchEngine(es SearchEngineInterface) {
 	seb.ElasticsearchEngine = es
 }
 
+func (seb *Broker) RegisterBiggoEngine(be SearchEngineInterface) {
+	seb.BiggoEngine = be
+}
+
 func (seb *Broker) RegisterBleveEngine(be SearchEngineInterface) {
 	seb.BleveEngine = be
 }
@@ -24,6 +28,7 @@ func (seb *Broker) RegisterBleveEngine(be SearchEngineInterface) {
 type Broker struct {
 	cfg                 *model.Config
 	ElasticsearchEngine SearchEngineInterface
+	BiggoEngine         SearchEngineInterface
 	BleveEngine         SearchEngineInterface
 }
 
@@ -32,7 +37,9 @@ func (seb *Broker) UpdateConfig(cfg *model.Config) *model.AppError {
 	if seb.ElasticsearchEngine != nil {
 		seb.ElasticsearchEngine.UpdateConfig(cfg)
 	}
-
+	if seb.BiggoEngine != nil {
+		seb.BiggoEngine.UpdateConfig(cfg)
+	}
 	if seb.BleveEngine != nil {
 		seb.BleveEngine.UpdateConfig(cfg)
 	}
@@ -44,6 +51,9 @@ func (seb *Broker) GetActiveEngines() []SearchEngineInterface {
 	engines := []SearchEngineInterface{}
 	if seb.ElasticsearchEngine != nil && seb.ElasticsearchEngine.IsActive() {
 		engines = append(engines, seb.ElasticsearchEngine)
+	}
+	if seb.BiggoEngine != nil && seb.BiggoEngine.IsActive() && seb.BiggoEngine.IsIndexingEnabled() {
+		engines = append(engines, seb.BiggoEngine)
 	}
 	if seb.BleveEngine != nil && seb.BleveEngine.IsActive() && seb.BleveEngine.IsIndexingEnabled() {
 		engines = append(engines, seb.BleveEngine)
