@@ -16,6 +16,8 @@ import (
 func TestCreateIncomingWebhook(t *testing.T) {
 	th := Setup(t).InitBasic()
 	defer th.TearDown()
+	th.UpdateUserToNonTeamAdmin(th.BasicUser, th.BasicTeam)
+	th.App.Srv().InvalidateAllCaches()
 	client := th.Client
 
 	th.App.UpdateConfig(func(cfg *model.Config) {
@@ -133,9 +135,13 @@ func TestCreateIncomingWebhook_BypassTeamPermissions(t *testing.T) {
 	team := th.CreateTeam()
 	team.AllowOpenInvite = false
 	th.Client.UpdateTeam(context.Background(), team)
-	th.SystemAdminClient.RemoveTeamMember(context.Background(), team.Id, th.BasicUser.Id)
+	th.LinkUserToTeam(th.BasicUser2, team)
+	th.UpdateUserToTeamAdmin(th.BasicUser2, team)
+	// cannot not remove last member of the team, use user2 to test
+	th.SystemAdminClient.RemoveTeamMember(context.Background(), team.Id, th.BasicUser2.Id)
 	channel := th.CreateChannelWithClientAndTeam(th.SystemAdminClient, model.ChannelTypeOpen, team.Id)
 
+	th.LoginBasic2()
 	hook = &model.IncomingWebhook{ChannelId: channel.Id}
 	_, resp, err := th.Client.CreateIncomingWebhook(context.Background(), hook)
 	require.Error(t, err)
@@ -265,6 +271,8 @@ func TestGetIncomingWebhooksListByUser(t *testing.T) {
 func TestGetIncomingWebhooksByTeam(t *testing.T) {
 	th := Setup(t).InitBasic()
 	defer th.TearDown()
+	th.UpdateUserToNonTeamAdmin(th.BasicUser, th.BasicTeam)
+	th.App.Srv().InvalidateAllCaches()
 	BasicClient := th.Client
 
 	th.App.UpdateConfig(func(cfg *model.Config) { *cfg.ServiceSettings.EnableIncomingWebhooks = true })
@@ -307,6 +315,8 @@ func TestGetIncomingWebhooksByTeam(t *testing.T) {
 func TestGetIncomingWebhook(t *testing.T) {
 	th := Setup(t).InitBasic()
 	defer th.TearDown()
+	th.UpdateUserToNonTeamAdmin(th.BasicUser, th.BasicTeam)
+	th.App.Srv().InvalidateAllCaches()
 
 	th.App.UpdateConfig(func(cfg *model.Config) { *cfg.ServiceSettings.EnableIncomingWebhooks = true })
 
@@ -343,6 +353,8 @@ func TestGetIncomingWebhook(t *testing.T) {
 func TestDeleteIncomingWebhook(t *testing.T) {
 	th := Setup(t).InitBasic()
 	defer th.TearDown()
+	th.UpdateUserToNonTeamAdmin(th.BasicUser, th.BasicTeam)
+	th.App.Srv().InvalidateAllCaches()
 
 	th.App.UpdateConfig(func(cfg *model.Config) { *cfg.ServiceSettings.EnableIncomingWebhooks = true })
 
@@ -395,6 +407,8 @@ func TestCreateOutgoingWebhook(t *testing.T) {
 	th := Setup(t).InitBasic()
 	defer th.TearDown()
 	client := th.Client
+	th.UpdateUserToNonTeamAdmin(th.BasicUser, th.BasicTeam)
+	th.App.Srv().InvalidateAllCaches()
 
 	th.App.UpdateConfig(func(cfg *model.Config) { *cfg.ServiceSettings.EnableOutgoingWebhooks = true })
 
@@ -576,6 +590,8 @@ func TestGetOutgoingWebhooks(t *testing.T) {
 func TestGetOutgoingWebhooksByTeam(t *testing.T) {
 	th := Setup(t).InitBasic()
 	defer th.TearDown()
+	th.UpdateUserToNonTeamAdmin(th.BasicUser, th.BasicTeam)
+	th.App.Srv().InvalidateAllCaches()
 
 	th.App.UpdateConfig(func(cfg *model.Config) { *cfg.ServiceSettings.EnableOutgoingWebhooks = true })
 
@@ -617,6 +633,8 @@ func TestGetOutgoingWebhooksByTeam(t *testing.T) {
 func TestGetOutgoingWebhooksByChannel(t *testing.T) {
 	th := Setup(t).InitBasic()
 	defer th.TearDown()
+	th.UpdateUserToNonTeamAdmin(th.BasicUser, th.BasicTeam)
+	th.App.Srv().InvalidateAllCaches()
 
 	th.App.UpdateConfig(func(cfg *model.Config) { *cfg.ServiceSettings.EnableOutgoingWebhooks = true })
 
@@ -700,6 +718,8 @@ func TestGetOutgoingWebhooksListByUser(t *testing.T) {
 func TestGetOutgoingWebhook(t *testing.T) {
 	th := Setup(t).InitBasic()
 	defer th.TearDown()
+	th.UpdateUserToNonTeamAdmin(th.BasicUser, th.BasicTeam)
+	th.App.Srv().InvalidateAllCaches()
 
 	th.App.UpdateConfig(func(cfg *model.Config) { *cfg.ServiceSettings.EnableOutgoingWebhooks = true })
 
@@ -735,6 +755,8 @@ func TestGetOutgoingWebhook(t *testing.T) {
 func TestUpdateIncomingHook(t *testing.T) {
 	th := Setup(t).InitBasic()
 	defer th.TearDown()
+	th.UpdateUserToNonTeamAdmin(th.BasicUser, th.BasicTeam)
+	th.App.Srv().InvalidateAllCaches()
 
 	th.App.UpdateConfig(func(cfg *model.Config) { *cfg.ServiceSettings.EnableIncomingWebhooks = true })
 
@@ -964,6 +986,8 @@ func TestUpdateIncomingWebhook_BypassTeamPermissions(t *testing.T) {
 func TestRegenOutgoingHookToken(t *testing.T) {
 	th := Setup(t).InitBasic()
 	defer th.TearDown()
+	th.UpdateUserToNonTeamAdmin(th.BasicUser, th.BasicTeam)
+	th.App.Srv().InvalidateAllCaches()
 	client := th.Client
 
 	th.App.UpdateConfig(func(cfg *model.Config) { *cfg.ServiceSettings.EnableOutgoingWebhooks = true })
@@ -997,6 +1021,8 @@ func TestRegenOutgoingHookToken(t *testing.T) {
 func TestUpdateOutgoingHook(t *testing.T) {
 	th := Setup(t).InitBasic()
 	defer th.TearDown()
+	th.UpdateUserToNonTeamAdmin(th.BasicUser, th.BasicTeam)
+	th.App.Srv().InvalidateAllCaches()
 
 	th.App.UpdateConfig(func(cfg *model.Config) { *cfg.ServiceSettings.EnableOutgoingWebhooks = true })
 	defaultRolePermissions := th.SaveDefaultRolePermissions()
@@ -1234,6 +1260,8 @@ func TestUpdateOutgoingWebhook_BypassTeamPermissions(t *testing.T) {
 func TestDeleteOutgoingHook(t *testing.T) {
 	th := Setup(t).InitBasic()
 	defer th.TearDown()
+	th.UpdateUserToNonTeamAdmin(th.BasicUser, th.BasicTeam)
+	th.App.Srv().InvalidateAllCaches()
 
 	th.App.UpdateConfig(func(cfg *model.Config) { *cfg.ServiceSettings.EnableIncomingWebhooks = true })
 

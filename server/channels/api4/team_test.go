@@ -1096,6 +1096,8 @@ func TestRegenerateTeamInviteId(t *testing.T) {
 func TestSoftDeleteTeam(t *testing.T) {
 	th := Setup(t).InitBasic()
 	defer th.TearDown()
+	th.UpdateUserToNonTeamAdmin(th.BasicUser, th.BasicTeam)
+	th.App.Srv().InvalidateAllCaches()
 
 	resp, err := th.Client.SoftDeleteTeam(context.Background(), th.BasicTeam.Id)
 	require.Error(t, err)
@@ -2269,6 +2271,8 @@ func TestGetTeamMembersByIds(t *testing.T) {
 func TestAddTeamMember(t *testing.T) {
 	th := Setup(t).InitBasic()
 	defer th.TearDown()
+	th.UpdateUserToNonTeamAdmin(th.BasicUser, th.BasicTeam)
+	th.App.Srv().InvalidateAllCaches()
 	client := th.Client
 	team := th.BasicTeam
 	otherUser := th.CreateUser()
@@ -2665,6 +2669,8 @@ func TestAddTeamMembersDomainConstrained(t *testing.T) {
 func TestAddTeamMembers(t *testing.T) {
 	th := Setup(t).InitBasic()
 	defer th.TearDown()
+	th.UpdateUserToNonTeamAdmin(th.BasicUser, th.BasicTeam)
+	th.App.Srv().InvalidateAllCaches()
 	client := th.Client
 	team := th.BasicTeam
 	otherUser := th.CreateUser()
@@ -2985,6 +2991,8 @@ func TestGetTeamStats(t *testing.T) {
 func TestUpdateTeamMemberRoles(t *testing.T) {
 	th := Setup(t).InitBasic()
 	defer th.TearDown()
+	th.UpdateUserToNonTeamAdmin(th.BasicUser, th.BasicTeam)
+	th.App.Srv().InvalidateAllCaches()
 	client := th.Client
 	SystemAdminClient := th.SystemAdminClient
 
@@ -3345,6 +3353,8 @@ func TestTeamExists(t *testing.T) {
 func TestImportTeam(t *testing.T) {
 	th := Setup(t).InitBasic()
 	defer th.TearDown()
+	th.UpdateUserToNonTeamAdmin(th.BasicUser, th.BasicTeam)
+	th.App.Srv().InvalidateAllCaches()
 
 	th.TestForAllClients(t, func(T *testing.T, c *model.Client4) {
 		data, err := testutils.ReadTestFile("Fake_Team_Import.zip")
@@ -3829,6 +3839,8 @@ func TestGetTeamInviteInfo(t *testing.T) {
 func TestSetTeamIcon(t *testing.T) {
 	th := Setup(t).InitBasic()
 	defer th.TearDown()
+	th.UpdateUserToNonTeamAdmin(th.BasicUser, th.BasicTeam)
+	th.App.Srv().InvalidateAllCaches()
 	client := th.Client
 	team := th.BasicTeam
 
@@ -3904,6 +3916,8 @@ func TestGetTeamIcon(t *testing.T) {
 func TestRemoveTeamIcon(t *testing.T) {
 	th := Setup(t).InitBasic()
 	defer th.TearDown()
+	th.UpdateUserToNonTeamAdmin(th.BasicUser, th.BasicTeam)
+	th.App.Srv().InvalidateAllCaches()
 	client := th.Client
 	team := th.BasicTeam
 

@@ -490,6 +490,7 @@ func (th *TestHelper) InitBasic() *TestHelper {
 	th.BasicChannel2 = th.CreatePublicChannel()
 	th.BasicPost = th.CreatePost()
 	th.LinkUserToTeam(th.BasicUser, th.BasicTeam)
+	th.UpdateUserToTeamAdmin(th.BasicUser, th.BasicTeam)
 	th.LinkUserToTeam(th.BasicUser2, th.BasicTeam)
 	th.App.AddUserToChannel(th.Context, th.BasicUser, th.BasicChannel, false)
 	th.App.AddUserToChannel(th.Context, th.BasicUser2, th.BasicChannel, false)

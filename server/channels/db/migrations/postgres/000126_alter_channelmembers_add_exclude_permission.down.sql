@@ -1,0 +1,1 @@
+ALTER TABLE public.channelmembers DROP COLUMN IF EXISTS excludepermissions;

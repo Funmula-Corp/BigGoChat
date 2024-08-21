@@ -45,6 +45,7 @@ type channelMember struct {
 	SchemeVerified     sql.NullBool
 	MentionCountRoot   int64
 	MsgCountRoot       int64
+	ExcludePermissions string
 }
 
 func NewMapFromChannelMemberModel(cm *model.ChannelMember) map[string]any {
@@ -62,8 +63,9 @@ func NewMapFromChannelMemberModel(cm *model.ChannelMember) map[string]any {
 		"LastUpdateAt":       cm.LastUpdateAt,
 		"SchemeGuest":        sql.NullBool{Valid: true, Bool: cm.SchemeGuest},
 		"SchemeUser":         sql.NullBool{Valid: true, Bool: cm.SchemeUser},
-		"SchemeVerified":        sql.NullBool{Valid: true, Bool: cm.SchemeVerified},
+		"SchemeVerified":     sql.NullBool{Valid: true, Bool: cm.SchemeVerified},
 		"SchemeAdmin":        sql.NullBool{Valid: true, Bool: cm.SchemeAdmin},
+		"ExcludePermissions": cm.ExcludePermissions,
 	}
 }
 
@@ -91,6 +93,7 @@ type channelMemberWithSchemeRoles struct {
 	ChannelSchemeDefaultVerifiedRole  sql.NullString
 	ChannelSchemeDefaultAdminRole sql.NullString
 	MsgCountRoot                  int64
+	ExcludePermissions            sql.NullString
 }
 
 type channelMemberWithTeamWithSchemeRoles struct {
@@ -103,7 +106,7 @@ type channelMemberWithTeamWithSchemeRoles struct {
 type channelMemberWithTeamWithSchemeRolesList []channelMemberWithTeamWithSchemeRoles
 
 func channelMemberSliceColumns() []string {
-	return []string{"ChannelId", "UserId", "Roles", "LastViewedAt", "MsgCount", "MsgCountRoot", "MentionCount", "MentionCountRoot", "UrgentMentionCount", "NotifyProps", "LastUpdateAt", "SchemeUser", "SchemeAdmin", "SchemeVerified", "SchemeGuest"}
+	return []string{"ChannelId", "UserId", "Roles", "LastViewedAt", "MsgCount", "MsgCountRoot", "MentionCount", "MentionCountRoot", "UrgentMentionCount", "NotifyProps", "LastUpdateAt", "SchemeUser", "SchemeAdmin", "SchemeVerified", "SchemeGuest", "ExcludePermissions"}
 }
 
 func channelMemberToSlice(member *model.ChannelMember) []any {
@@ -123,6 +126,7 @@ func channelMemberToSlice(member *model.ChannelMember) []any {
 	resultSlice = append(resultSlice, member.SchemeAdmin)
 	resultSlice = append(resultSlice, member.SchemeVerified)
 	resultSlice = append(resultSlice, member.SchemeGuest)
+	resultSlice = append(resultSlice, member.ExcludePermissions)
 	return resultSlice
 }
 
@@ -282,6 +286,7 @@ func (db channelMemberWithSchemeRoles) ToModel() *model.ChannelMember {
 		SchemeVerified:     rolesResult.schemeVerified,
 		SchemeGuest:        rolesResult.schemeGuest,
 		ExplicitRoles:      strings.Join(rolesResult.explicitRoles, " "),
+		ExcludePermissions: db.ExcludePermissions.String,
 	}
 }
 
@@ -358,6 +363,7 @@ func (db channelMemberWithTeamWithSchemeRoles) ToModel() *model.ChannelMemberWit
 			SchemeVerified:     rolesResult.schemeVerified,
 			SchemeGuest:        rolesResult.schemeGuest,
 			ExplicitRoles:      strings.Join(rolesResult.explicitRoles, " "),
+			ExcludePermissions: db.ExcludePermissions.String,
 		},
 		TeamName:        db.TeamName,
 		TeamDisplayName: db.TeamDisplayName,
@@ -400,6 +406,7 @@ type allChannelMember struct {
 	ChannelSchemeDefaultUserRole  sql.NullString
 	ChannelSchemeDefaultVerifiedRole  sql.NullString
 	ChannelSchemeDefaultAdminRole sql.NullString
+	ExcludePermissions            sql.NullString
 }
 
 type allChannelMembers []allChannelMember
@@ -462,12 +469,16 @@ func (db allChannelMember) Process() (string, string) {
 	return db.ChannelId, strings.Join(roles, " ")
 }
 
-func (db allChannelMembers) ToMapStringString() map[string]string {
-	result := make(map[string]string)
+func (db allChannelMembers) ToAllChannelMembers() map[string]*model.AllChannelMember {
+	result := make(map[string]*model.AllChannelMember)
 
 	for _, item := range db {
 		key, value := item.Process()
-		result[key] = value
+		result[key] = &model.AllChannelMember{
+			Roles:              value,
+			ExcludePermissions: item.ExcludePermissions.String,
+			IgnoreExclude:      item.SchemeAdmin.Bool,
+		}
 	}
 
 	return result
@@ -527,6 +538,7 @@ func (s *SqlChannelStore) initializeQueries() {
 			"ChannelScheme.DefaultChannelUserRole ChannelSchemeDefaultUserRole",
 			"ChannelScheme.DefaultChannelVerifiedRole ChannelSchemeDefaultVerifiedRole",
 			"ChannelScheme.DefaultChannelAdminRole ChannelSchemeDefaultAdminRole",
+			"ChannelMembers.ExcludePermissions",
 		).
 		From("ChannelMembers").
 		InnerJoin("Channels ON ChannelMembers.ChannelId = Channels.Id").
@@ -2203,7 +2215,7 @@ func (s SqlChannelStore) GetMemberForPost(postId string, userId string, includeA
 	return dbMember.ToModel(), nil
 }
 
-func (s SqlChannelStore) GetAllChannelMembersForUser(userId string, allowFromCache bool, includeDeleted bool) (_ map[string]string, err error) {
+func (s SqlChannelStore) GetAllChannelMembersForUser(userId string, allowFromCache bool, includeDeleted bool) (_ map[string]*model.AllChannelMember, err error) {
 	query := s.getQueryBuilder().
 		Select(`
 				ChannelMembers.ChannelId, ChannelMembers.Roles, ChannelMembers.SchemeGuest,
@@ -2215,7 +2227,8 @@ func (s SqlChannelStore) GetAllChannelMembersForUser(userId string, allowFromCac
 				ChannelScheme.DefaultChannelGuestRole ChannelSchemeDefaultGuestRole,
 				ChannelScheme.DefaultChannelUserRole ChannelSchemeDefaultUserRole,
 				ChannelScheme.DefaultChannelVerifiedRole ChannelSchemeDefaultVerifiedRole,
-				ChannelScheme.DefaultChannelAdminRole ChannelSchemeDefaultAdminRole
+				ChannelScheme.DefaultChannelAdminRole ChannelSchemeDefaultAdminRole,
+				ChannelMembers.ExcludePermissions
 		`).
 		From("ChannelMembers").
 		Join("Channels ON ChannelMembers.ChannelId = Channels.Id").
@@ -2245,6 +2258,7 @@ func (s SqlChannelStore) GetAllChannelMembersForUser(userId string, allowFromCac
 			&cm.SchemeAdmin, &cm.TeamSchemeDefaultGuestRole, &cm.TeamSchemeDefaultUserRole, &cm.TeamSchemeDefaultVerifiedRole,
 			&cm.TeamSchemeDefaultAdminRole, &cm.ChannelSchemeDefaultGuestRole,
 			&cm.ChannelSchemeDefaultUserRole, &cm.ChannelSchemeDefaultVerifiedRole, &cm.ChannelSchemeDefaultAdminRole,
+			&cm.ExcludePermissions,
 		)
 		if err != nil {
 			return nil, errors.Wrap(err, "unable to scan columns")
@@ -2254,7 +2268,7 @@ func (s SqlChannelStore) GetAllChannelMembersForUser(userId string, allowFromCac
 	if err = rows.Err(); err != nil {
 		return nil, errors.Wrap(err, "error while iterating over rows")
 	}
-	ids := data.ToMapStringString()
+	ids := data.ToAllChannelMembers()
 
 	return ids, nil
 }
@@ -2343,12 +2357,12 @@ func (s SqlChannelStore) GetFileCount(channelId string) (int64, error) {
 	var count int64
 	err := s.GetReplicaX().Get(&count, `
 		SELECT
-		    COUNT(*)
+			COUNT(*)
 		FROM
-		    FileInfo
+			FileInfo
 		WHERE
-		    FileInfo.DeleteAt = 0
-            AND FileInfo.ChannelId = ?`,
+			FileInfo.DeleteAt = 0
+			AND FileInfo.ChannelId = ?`,
 		channelId)
 	if err != nil {
 		return 0, errors.Wrapf(err, "failed to count files with channelId=%s", channelId)

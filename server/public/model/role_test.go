@@ -62,6 +62,7 @@ func TestRolePatchFromChannelModerationsPatch(t *testing.T) {
 	createReactions := ChannelModeratedPermissions[1]
 	manageMembers := ChannelModeratedPermissions[2]
 	channelMentions := ChannelModeratedPermissions[3]
+	addMembers := ChannelModeratedPermissions[5]
 
 	basePermissions := []string{
 		PermissionAddReaction.Id,
@@ -138,6 +139,10 @@ func TestRolePatchFromChannelModerationsPatch(t *testing.T) {
 					Name:  &channelMentions,
 					Roles: &ChannelModeratedRolesPatch{Members: NewBool(false)},
 				},
+				{
+					Name:  &addMembers,
+					Roles: &ChannelModeratedRolesPatch{Members: NewBool(false)},
+				},
 			},
 			"members",
 			[]string{PermissionCreatePost.Id},
@@ -157,6 +162,10 @@ func TestRolePatchFromChannelModerationsPatch(t *testing.T) {
 				{
 					Name:  &channelMentions,
 					Roles: &ChannelModeratedRolesPatch{Guests: NewBool(false)},
+				},
+				{
+					Name:  &addMembers,
+					Roles: &ChannelModeratedRolesPatch{Members: NewBool(false)},
 				},
 			},
 			"guests",
@@ -181,6 +190,10 @@ func TestRolePatchFromChannelModerationsPatch(t *testing.T) {
 				{
 					Name:  &createPosts,
 					Roles: &ChannelModeratedRolesPatch{Members: NewBool(true)},
+				},
+				{
+					Name:  &addMembers,
+					Roles: &ChannelModeratedRolesPatch{Members: NewBool(false)},
 				},
 			},
 			"members",
@@ -239,13 +252,14 @@ func TestGetChannelModeratedPermissions(t *testing.T) {
 		},
 		{
 			"Returns a map of moderated permissions",
-			[]string{PermissionCreatePost.Id, PermissionAddReaction.Id, PermissionRemoveReaction.Id, PermissionManagePublicChannelMembers.Id, PermissionManagePrivateChannelMembers.Id, PermissionUseChannelMentions.Id},
+			[]string{PermissionCreatePost.Id, PermissionAddReaction.Id, PermissionRemoveReaction.Id, PermissionManagePublicChannelMembers.Id, PermissionManagePrivateChannelMembers.Id, PermissionUseChannelMentions.Id, PermissionAddPublicChannelMembers.Id, PermissionAddPrivateChannelMembers.Id},
 			ChannelTypeOpen,
 			map[string]bool{
 				ChannelModeratedPermissions[0]: true,
 				ChannelModeratedPermissions[1]: true,
 				ChannelModeratedPermissions[2]: true,
 				ChannelModeratedPermissions[3]: true,
+				ChannelModeratedPermissions[5]: true,
 			},
 		},
 		{

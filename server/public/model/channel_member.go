@@ -65,9 +65,10 @@ type ChannelMember struct {
 	LastUpdateAt       int64     `json:"last_update_at"`
 	SchemeGuest        bool      `json:"scheme_guest"`
 	SchemeUser         bool      `json:"scheme_user"`
-	SchemeVerified     bool     `json:"scheme_verified"`
+	SchemeVerified     bool      `json:"scheme_verified"`
 	SchemeAdmin        bool      `json:"scheme_admin"`
 	ExplicitRoles      string    `json:"explicit_roles"`
+	ExcludePermissions string    `json:"exclude_permissions"`
 }
 
 func (o *ChannelMember) Auditable() map[string]interface{} {
@@ -87,6 +88,7 @@ func (o *ChannelMember) Auditable() map[string]interface{} {
 		"scheme_user":          o.SchemeUser,
 		"scheme_admin":         o.SchemeAdmin,
 		"explicit_roles":       o.ExplicitRoles,
+		"exclude_permissions":  o.ExcludePermissions,
 	}
 }
 
@@ -125,6 +127,11 @@ func (o *ChannelMember) IsValid() *AppError {
 	if len(o.Roles) > UserRolesMaxLength {
 		return NewAppError("ChannelMember.IsValid", "model.channel_member.is_valid.roles_limit.app_error",
 			map[string]any{"Limit": UserRolesMaxLength}, "", http.StatusBadRequest)
+	}
+
+	if len(o.ExcludePermissions) > UserExcludePermissionsMaxLength {
+		return NewAppError("ChannelMember.IsValid", "model.channel_member.is_valid.exclude_permissions_limit.app_error",
+			map[string]any{"Limit": UserExcludePermissionsMaxLength}, "", http.StatusBadRequest)
 	}
 
 	return nil
@@ -187,6 +194,10 @@ func (o *ChannelMember) GetRoles() []string {
 	return strings.Fields(o.Roles)
 }
 
+func (o *ChannelMember) GetExcludePermissions() []string {
+	return strings.Fields(o.ExcludePermissions)
+}
+
 func (o *ChannelMember) SetChannelMuted(muted bool) {
 	if o.IsChannelMuted() {
 		o.NotifyProps[MarkUnreadNotifyProp] = ChannelMarkUnreadAll
@@ -236,4 +247,10 @@ func GetDefaultChannelNotifyProps() StringMap {
 type ChannelMemberIdentifier struct {
 	ChannelId string `json:"channel_id"`
 	UserId    string `json:"user_id"`
+}
+
+type AllChannelMember struct {
+	Roles              string `json:"roles"`
+	ExcludePermissions string `json:"exclude_permissions"`
+	IgnoreExclude      bool   `json:"ignore_exclude"`
 }

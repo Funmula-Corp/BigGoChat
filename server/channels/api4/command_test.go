@@ -22,6 +22,8 @@ import (
 func TestCreateCommand(t *testing.T) {
 	th := Setup(t).InitBasic()
 	defer th.TearDown()
+	th.UpdateUserToNonTeamAdmin(th.BasicUser, th.BasicTeam)
+	th.App.Srv().InvalidateAllCaches()
 	client := th.Client
 	LocalClient := th.LocalClient
 
@@ -84,6 +86,8 @@ func TestCreateCommand(t *testing.T) {
 func TestUpdateCommand(t *testing.T) {
 	th := Setup(t).InitBasic()
 	defer th.TearDown()
+	th.UpdateUserToNonTeamAdmin(th.BasicUser, th.BasicTeam)
+	th.App.Srv().InvalidateAllCaches()
 	user := th.SystemAdminUser
 	team := th.BasicTeam
 
@@ -163,6 +167,8 @@ func TestUpdateCommand(t *testing.T) {
 func TestMoveCommand(t *testing.T) {
 	th := Setup(t).InitBasic()
 	defer th.TearDown()
+	th.UpdateUserToNonTeamAdmin(th.BasicUser, th.BasicTeam)
+	th.App.Srv().InvalidateAllCaches()
 	user := th.SystemAdminUser
 	team := th.BasicTeam
 	newTeam := th.CreateTeam()
@@ -221,6 +227,8 @@ func TestMoveCommand(t *testing.T) {
 func TestDeleteCommand(t *testing.T) {
 	th := Setup(t).InitBasic()
 	defer th.TearDown()
+	th.UpdateUserToNonTeamAdmin(th.BasicUser, th.BasicTeam)
+	th.App.Srv().InvalidateAllCaches()
 	user := th.SystemAdminUser
 	team := th.BasicTeam
 
@@ -280,6 +288,8 @@ func TestListCommands(t *testing.T) {
 	th := Setup(t).InitBasic()
 	defer th.TearDown()
 	client := th.Client
+	th.UpdateUserToNonTeamAdmin(th.BasicUser, th.BasicTeam)
+	th.App.Srv().InvalidateAllCaches()
 
 	enableCommands := *th.App.Config().ServiceSettings.EnableCommands
 	defer func() {
@@ -535,6 +545,8 @@ func TestListCommandAutocompleteSuggestions(t *testing.T) {
 func TestGetCommand(t *testing.T) {
 	th := Setup(t).InitBasic()
 	defer th.TearDown()
+	th.UpdateUserToNonTeamAdmin(th.BasicUser, th.BasicTeam)
+	th.App.Srv().InvalidateAllCaches()
 
 	enableCommands := *th.App.Config().ServiceSettings.EnableCommands
 	defer func() {
@@ -596,6 +608,8 @@ func TestGetCommand(t *testing.T) {
 func TestRegenToken(t *testing.T) {
 	th := Setup(t).InitBasic()
 	defer th.TearDown()
+	th.UpdateUserToNonTeamAdmin(th.BasicUser, th.BasicTeam)
+	th.App.Srv().InvalidateAllCaches()
 	client := th.Client
 
 	enableCommands := *th.App.Config().ServiceSettings.EnableCommands

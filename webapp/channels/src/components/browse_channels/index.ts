@@ -7,7 +7,7 @@ import type {Dispatch} from 'redux';
 
 import type {Channel} from '@mattermost/types/channels';
 
-import {getChannels, getArchivedChannels, joinChannel, getChannelsMemberCount, searchAllChannels} from 'mattermost-redux/actions/channels';
+import {getChannels, getArchivedChannels, joinChannel, getChannelsMemberCount, searchAllChannels, getAllPrivateChannels} from 'mattermost-redux/actions/channels';
 import {RequestStatus} from 'mattermost-redux/constants';
 import {createSelector} from 'mattermost-redux/selectors/create_selector';
 import {getChannelsInCurrentTeam, getMyChannelMemberships, getChannelsMemberCount as getChannelsMemberCountSelector} from 'mattermost-redux/selectors/entities/channels';
@@ -59,6 +59,7 @@ function mapStateToProps(state: GlobalState) {
         teamName: team?.name,
         channelsRequestStarted: state.requests.channels.getChannels.status === RequestStatus.STARTED,
         canShowArchivedChannels: haveICurrentTeamPermission(state, Permissions.MANAGE_TEAM),
+        canShowAllPrivateChannels: haveICurrentTeamPermission(state, Permissions.MANAGE_TEAM),
         myChannelMemberships: getMyChannelMemberships(state) || {},
         shouldHideJoinedChannels: getGlobalItem(state) === 'true',
         rhsState: getRhsState(state),
@@ -71,6 +72,7 @@ function mapDispatchToProps(dispatch: Dispatch) {
     return {
         actions: bindActionCreators({
             getChannels,
+            getAllPrivateChannels,
             getArchivedChannels,
             joinChannel,
             searchAllChannels,

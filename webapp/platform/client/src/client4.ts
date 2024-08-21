@@ -1741,6 +1741,13 @@ export default class Client4 {
         );
     };
 
+    getAllPrivateChannels = (teamId: string, page = 0, perPage = PER_PAGE_DEFAULT) => {
+        return this.doFetch<ServerChannel[]>(
+            `${this.getTeamRoute(teamId)}/channels/private${buildQueryString({page, per_page: perPage})}`,
+            {method: 'get'},
+        );
+    };
+
     getAllTeamsChannels = () => {
         return this.doFetch<ServerChannel[]>(
             `${this.getUsersRoute()}/me/channels`,

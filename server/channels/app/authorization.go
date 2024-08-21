@@ -7,6 +7,7 @@ import (
 	"database/sql"
 	"errors"
 	"net/http"
+	"slices"
 	"strings"
 
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
@@ -86,8 +87,10 @@ func (a *App) SessionHasPermissionToChannel(c request.CTX, session model.Session
 	var channelRoles []string
 	if err == nil {
 		if roles, ok := ids[channelID]; ok {
-			channelRoles = strings.Fields(roles)
-			if a.RolesGrantPermission(channelRoles, permission.Id) {
+			channelRoles = strings.Fields(roles.Roles)
+			if !roles.IgnoreExclude && slices.Contains(strings.Fields(roles.ExcludePermissions), permission.Id) {
+				// do nothing
+			} else if a.RolesGrantPermission(channelRoles, permission.Id) {
 				return true
 			}
 		}
@@ -140,8 +143,10 @@ func (a *App) SessionHasPermissionToChannels(c request.CTX, session model.Sessio
 		if err == nil {
 			// If a channel member has permission, then no need to check further.
 			if roles, ok := ids[channelID]; ok {
-				channelRoles = strings.Fields(roles)
-				if a.RolesGrantPermission(channelRoles, permission.Id) {
+				channelRoles = strings.Fields(roles.Roles)
+				if slices.Contains(strings.Fields(roles.ExcludePermissions), permission.Id) {
+					// do nothing
+				} else if a.RolesGrantPermission(channelRoles, permission.Id) {
 					continue
 				}
 			}
@@ -270,8 +275,10 @@ func (a *App) HasPermissionToChannel(c request.CTX, askingUserId string, channel
 	var channelRoles []string
 	if err == nil {
 		if roles, ok := ids[channelID]; ok {
-			channelRoles = strings.Fields(roles)
-			if a.RolesGrantPermission(channelRoles, permission.Id) {
+			channelRoles = strings.Fields(roles.Roles)
+			if !roles.IgnoreExclude && slices.Contains(strings.Fields(roles.ExcludePermissions), permission.Id) {
+				// do nothing
+			} else if a.RolesGrantPermission(channelRoles, permission.Id) {
 				return true
 			}
 		}
@@ -398,5 +405,5 @@ func (a *App) HasPermissionToChannelMemberCount(c request.CTX, userID string, ch
 		return a.HasPermissionToTeam(c, userID, channel.TeamId, model.PermissionListTeamChannels)
 	}
 
-	return false
+	return a.HasPermissionToTeam(c, userID, channel.TeamId, model.PermissionManageTeam)
 }

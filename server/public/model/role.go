@@ -625,6 +625,10 @@ func (r *Role) GetChannelModeratedPermissions(channelType ChannelType) map[strin
 					//
 					// Only AddBookmark is checked even if the permission includes four (add, delete, edit and
 					// order) as all of them are enabled or disabled in together
+				} else if moderated == PermissionAddPublicChannelMembers.Id || moderated == PermissionAddPrivateChannelMembers.Id {
+					canAddPublic := channelType == ChannelTypeOpen && moderated == PermissionAddPublicChannelMembers.Id
+					canAddPrivate := channelType == ChannelTypePrivate && moderated == PermissionAddPrivateChannelMembers.Id
+					moderatedPermissions[moderatedPermissionValue] = canAddPublic || canAddPrivate
 				} else if isModeratedBookmarkPermission(moderated) {
 					canManagePublic := channelType == ChannelTypeOpen && moderated == PermissionAddBookmarkPublicChannel.Id
 					canManagePrivate := channelType == ChannelTypePrivate && moderated == PermissionAddBookmarkPrivateChannel.Id
@@ -659,6 +663,10 @@ func (r *Role) RolePatchFromChannelModerationsPatch(channelModerationsPatch []*C
 					if channelModerationPatch.Roles.Members != nil && !*channelModerationPatch.Roles.Members {
 						permissionEnabled = false
 					}
+				} else if roleName == "verified" {
+					if channelModerationPatch.Roles.Verified != nil && !*channelModerationPatch.Roles.Verified {
+						permissionEnabled = false
+					}
 				} else if roleName == "guests" {
 					if channelModerationPatch.Roles.Guests != nil && !*channelModerationPatch.Roles.Guests {
 						permissionEnabled = false
@@ -676,6 +684,10 @@ func (r *Role) RolePatchFromChannelModerationsPatch(channelModerationsPatch []*C
 	for _, channelModerationPatch := range channelModerationsPatch {
 		for permission, moderatedPermissionName := range ChannelModeratedPermissionsMap {
 			if roleName == "members" && channelModerationPatch.Roles.Members != nil && *channelModerationPatch.Roles.Members && *channelModerationPatch.Name == moderatedPermissionName {
+				permissionsToAddToPatch[permission] = true
+			}
+
+			if roleName == "verified" && channelModerationPatch.Roles.Verified != nil && *channelModerationPatch.Roles.Verified && *channelModerationPatch.Name == moderatedPermissionName {
 				permissionsToAddToPatch[permission] = true
 			}
 

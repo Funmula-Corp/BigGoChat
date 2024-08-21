@@ -41,6 +41,7 @@ export type FilterType = keyof typeof Filter;
 
 type Actions = {
     getChannels: (teamId: string, page: number, perPage: number) => Promise<ActionResult<Channel[]>>;
+    getAllPrivateChannels: (teamId: string, page: number, perPage: number) => Promise<ActionResult<Channel[]>>;
     getArchivedChannels: (teamId: string, page: number, channelsPerPage: number) => Promise<ActionResult<Channel[]>>;
     joinChannel: (currentUserId: string, teamId: string, channelId: string) => Promise<ActionResult>;
     searchAllChannels: (term: string, opts?: ChannelSearchOpts) => Promise<ActionResult<Channel[] | ChannelsWithTotalCount>>;
@@ -64,6 +65,7 @@ export type Props = {
     teamName?: string;
     channelsRequestStarted?: boolean;
     canShowArchivedChannels?: boolean;
+    canShowAllPrivateChannels?: boolean;
     myChannelMemberships: RelationOneToOne<Channel, ChannelMembership>;
     shouldHideJoinedChannels: boolean;
     rhsState?: RhsState;
@@ -112,6 +114,10 @@ export default class BrowseChannels extends React.PureComponent<Props, State> {
             this.props.actions.getChannels(this.props.teamId, 0, CHANNELS_CHUNK_SIZE * 2),
         ];
 
+        if (this.props.canShowAllPrivateChannels) {
+            promises.push(this.props.actions.getAllPrivateChannels(this.props.teamId, 0, CHANNELS_CHUNK_SIZE * 2))
+        }
+
         if (this.props.canShowArchivedChannels) {
             promises.push(this.props.actions.getArchivedChannels(this.props.teamId, 0, CHANNELS_CHUNK_SIZE * 2));
         }
@@ -119,8 +125,7 @@ export default class BrowseChannels extends React.PureComponent<Props, State> {
         Promise.all(promises).then((results) => {
             const channelIDsForMemberCount = results.flatMap((result) => {
                 return result.data ? result.data.map((channel) => channel.id) : [];
-            },
-            );
+            });
             this.props.privateChannels.forEach((channel) => channelIDsForMemberCount.push(channel.id));
             if (channelIDsForMemberCount.length > 0) {
                 this.props.actions.getChannelsMemberCount(channelIDsForMemberCount);
@@ -164,9 +169,20 @@ export default class BrowseChannels extends React.PureComponent<Props, State> {
     };
 
     nextPage = (page: number) => {
-        this.props.actions.getChannels(this.props.teamId, page + 1, CHANNELS_PER_PAGE).then((result) => {
-            if (result.data && result.data.length > 0) {
-                this.props.actions.getChannelsMemberCount(result.data.map((channel) => channel.id));
+        const promises = [
+            this.props.actions.getChannels(this.props.teamId, page + 1, CHANNELS_PER_PAGE),
+        ];
+
+        if (this.props.canShowAllPrivateChannels) {
+            promises.push(this.props.actions.getAllPrivateChannels(this.props.teamId, page + 1, CHANNELS_PER_PAGE))
+        }
+
+        Promise.all(promises).then((results) => {
+            const ids = results.flatMap((result) => {
+                return result.data ? result.data.map((channel) => channel.id) : [];
+            })
+            if (ids.length > 0) {
+                this.props.actions.getChannelsMemberCount(ids);
             }
         });
     };
