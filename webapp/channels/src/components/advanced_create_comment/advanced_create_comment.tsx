@@ -667,11 +667,11 @@ class AdvancedCreateComment extends React.PureComponent<Props, State> {
             return;
         }
 
-        if (this.props.rootDeleted) {
-            this.showPostDeletedModal();
-            this.isDraftSubmitting = false;
-            return;
-        }
+        // if (this.props.rootDeleted) {
+        //     this.showPostDeletedModal();
+        //     this.isDraftSubmitting = false;
+        //     return;
+        // }
 
         const fasterThanHumanWillClick = 150;
         const forceFocus = (Date.now() - this.lastBlurAt < fasterThanHumanWillClick);
