@@ -3316,6 +3316,19 @@ func TestAddChannelMember(t *testing.T) {
 	require.Error(t, err)
 	CheckBadRequestStatus(t, resp)
 
+	th.RemoveUserFromChannel(user, otherChannel)
+	// team admin should able to join the team 
+	member, resp, err := client.AddChannelMember(context.Background(), otherChannel.Id, user.Id)
+	require.Nil(t, err)
+	CheckCreatedStatus(t, resp)
+	require.Equal(t, otherChannel.Id, member.ChannelId)
+
+	client.Logout(context.Background())
+	client.Login(context.Background(), user2.Username, user2.Password)
+	_, resp, err = client.AddChannelMember(context.Background(), otherChannel.Id, user2.Id)
+	require.Error(t, err)
+	CheckForbiddenStatus(t, resp)
+
 	client.Logout(context.Background())
 	_, resp, err = client.AddChannelMember(context.Background(), publicChannel.Id, user2.Id)
 	require.Error(t, err)
