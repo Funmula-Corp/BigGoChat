@@ -21,6 +21,10 @@ func (be *BiggoEngine) IndexPost(post *model.Post, teamId string) (aErr *model.A
 	return
 }
 
+func (be *BiggoEngine) IndexPostsBulk(posts []*model.PostForIndexing) (aErr *model.AppError) {
+	return
+}
+
 func (be *BiggoEngine) SearchPosts(channels model.ChannelList, searchParams []*model.SearchParams, page, perPage int) (postIds []string, matches model.PostSearchMatches, aErr *model.AppError) {
 	return
 }

@@ -40,6 +40,7 @@ import (
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/audit"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/jobs"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/jobs/active_users"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/jobs/biggo_engine"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/jobs/cleanup_desktop_tokens"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/jobs/delete_empty_drafts_migration"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/jobs/delete_orphan_drafts_migration"
@@ -1470,7 +1471,7 @@ func (s *Server) initJobs() {
 	s.Jobs.RegisterJobType(
 		model.JobTypeBiggoIndexing,
 		biggoindexer.MakeWorker(s.Jobs, s.platform.SearchEngine.BiggoEngine.(*biggoengine.BiggoEngine)),
-		nil,
+		biggo_engine.MakeScheduler(s.Jobs),
 	)
 
 	s.Jobs.RegisterJobType(

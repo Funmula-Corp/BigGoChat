@@ -11,7 +11,7 @@ import (
 
 const (
 	EngineName = "biggo"
-	PluginName = "com.biggo.search-engine"
+	PluginName = "com.biggo.biggo-engine"
 
 	PostIndex    = "post"
 	FileIndex    = "file"
@@ -115,10 +115,12 @@ func (be *BiggoEngine) RefreshIndexes(rctx request.CTX) (aErr *model.AppError) {
 }
 
 func (be *BiggoEngine) Start() (aErr *model.AppError) {
+	be.isActive.Store(true)
 	return
 }
 
 func (be *BiggoEngine) Stop() (aErr *model.AppError) {
+	be.isActive.Store(false)
 	return
 }
 

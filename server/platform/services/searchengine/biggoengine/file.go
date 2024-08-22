@@ -25,6 +25,10 @@ func (be *BiggoEngine) IndexFile(file *model.FileInfo, channelId string) (aErr *
 	return
 }
 
+func (be *BiggoEngine) IndexFilesBulk(files []*model.FileForIndexing) (aErr *model.AppError) {
+	return
+}
+
 func (be *BiggoEngine) SearchFiles(channels model.ChannelList, searchParams []*model.SearchParams, page, perPage int) (result []string, aErr *model.AppError) {
 	return
 }
