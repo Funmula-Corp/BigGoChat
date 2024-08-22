@@ -1804,11 +1804,6 @@ func addChannelMember(c *Context, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if channel.DeleteAt > 0 {
-		c.Err = model.NewAppError("addUserToChannel", "api.channel.add_user.to.channel.failed.deleted.app_error", nil, "", http.StatusBadRequest)
-		return
-	}
-
 	if channel.Type == model.ChannelTypeDirect || channel.Type == model.ChannelTypeGroup {
 		c.Err = model.NewAppError("addUserToChannel", "api.channel.add_user_to_channel.type.app_error", nil, "", http.StatusBadRequest)
 		return
@@ -1825,6 +1820,16 @@ func addChannelMember(c *Context, w http.ResponseWriter, r *http.Request) {
 	}
 
 	isSelfAdd := member.UserId == c.AppContext.Session().UserId
+
+	if channel.DeleteAt > 0 {
+		if !isSelfAdd {
+			c.Err = model.NewAppError("addUserToChannel", "api.channel.add_user.to.channel.failed.deleted.app_error", nil, "", http.StatusBadRequest)
+			return
+		} else if isNewMembership && !c.App.SessionHasPermissionToTeam(*c.AppContext.Session(), channel.TeamId, model.PermissionManageTeam) {
+			c.SetPermissionError(model.PermissionManageTeam)
+			return
+		}
+	}
 
 	if channel.Type == model.ChannelTypeOpen {
 		if isSelfAdd && isNewMembership {
