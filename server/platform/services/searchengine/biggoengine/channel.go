@@ -13,6 +13,10 @@ func (be *BiggoEngine) IndexChannel(rctx request.CTX, channel *model.Channel, us
 	return
 }
 
+func (be *BiggoEngine) IndexChannelsBulk(channels []*model.Channel) (aErr *model.AppError) {
+	return
+}
+
 func (be *BiggoEngine) SearchChannels(teamId, userID, term string, isGuest bool) (result []string, aErr *model.AppError) {
 	return
 }
