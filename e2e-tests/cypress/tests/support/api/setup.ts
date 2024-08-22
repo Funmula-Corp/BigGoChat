@@ -37,8 +37,10 @@ function apiInitSetup(arg: SetupParam = {}): ChainableT<SetupResult> {
         // # Add public channel
         return (cy.apiCreateChannel(team.id, channelPrefix.name, channelPrefix.displayName) as any).then(({channel}) => {
             return (cy.apiCreateUser({prefix: userPrefix || (promoteNewUserAsAdmin ? 'admin' : 'user'), createAt: userCreateAt}) as any).then(({user}) => {
+                (cy as any).apiPatchUserRoles(user.id, ['system_verified', 'system_user']);
+
                 if (promoteNewUserAsAdmin) {
-                    (cy as any).apiPatchUserRoles(user.id, ['system_admin', 'system_user']);
+                    (cy as any).apiPatchUserRoles(user.id, ['system_admin', 'system_user', 'system_verified']);
 
                     // Only hide start trial modal for admin since it's not applicable to other users
                     cy.apiSaveStartTrialModal(user.id, hideAdminTrialModal.toString());
