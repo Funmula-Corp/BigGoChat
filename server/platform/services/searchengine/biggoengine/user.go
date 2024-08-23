@@ -5,10 +5,8 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io"
 	"net/http"
-	"strings"
 
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
@@ -18,6 +16,7 @@ import (
 	"github.com/elastic/go-elasticsearch/v7"
 	"github.com/elastic/go-elasticsearch/v7/esapi"
 	"github.com/elastic/go-elasticsearch/v7/esutil"
+	"github.com/neo4j/neo4j-go-driver/v5/neo4j"
 )
 
 const (
@@ -25,11 +24,59 @@ const (
 )
 
 func (be *BiggoEngine) DeleteUser(user *model.User) (aErr *model.AppError) {
+	if _, err := clients.GraphQuery(`
+		MATCH (u:user{user_id:user_id})
+		MATCH (u)-[r]->()
+		DELETE r,u
+		RETURN COUNT(u);
+	`, map[string]interface{}{
+		"user_id": user.Id,
+	}); err != nil {
+		mlog.Error("BiggoIndexer", mlog.Err(err))
+	}
+
+	var (
+		client *elasticsearch.Client
+		err    error
+		res    *esapi.Response
+	)
+	if client, err = clients.EsClient(); err != nil {
+		mlog.Error("BiggoIndexer", mlog.Err(err))
+	}
+
+	if res, err = client.Delete(EsUserIndex, user.Id); err != nil {
+		mlog.Error("BiggoIndexer", mlog.Err(err))
+		return
+	}
+	defer res.Body.Close()
+
+	if res.IsError() {
+		if buffer, err := io.ReadAll(res.Body); err == nil {
+			mlog.Error("BiggoIndexer", mlog.Err(errors.New(string(buffer))))
+		}
+		return
+	}
 	return
 }
 
 func (be *BiggoEngine) IndexUser(rctx request.CTX, user *model.User, teamsIds, channelsIds []string) (aErr *model.AppError) {
-	return
+	var mobilephone string
+	if user.Mobilephone != nil {
+		mobilephone = *user.Mobilephone
+	}
+	return be.IndexUsersBulk([]*model.UserForIndexing{{
+		Id:          user.Id,
+		Username:    user.Username,
+		Nickname:    user.Nickname,
+		FirstName:   user.FirstName,
+		LastName:    user.LastName,
+		Roles:       user.Roles,
+		CreateAt:    user.CreateAt,
+		DeleteAt:    user.DeleteAt,
+		TeamsIds:    teamsIds,
+		ChannelsIds: channelsIds,
+		Mobilephone: mobilephone,
+	}})
 }
 
 func (be *BiggoEngine) IndexUsersBulk(users []*model.UserForIndexing) (aErr *model.AppError) {
@@ -39,27 +86,45 @@ func (be *BiggoEngine) IndexUsersBulk(users []*model.UserForIndexing) (aErr *mod
 	)
 
 	if indexer, err = clients.EsBulkIndex(EsUserIndex); err != nil {
-		aErr = model.NewAppError("BiggoIndexer.IndexUsersBulk", "engine.biggo.bulk_index.create.app_error", nil, "", http.StatusInternalServerError).Wrap(err)
+		aErr = model.NewAppError("BiggoIndexer.IndexUsersBulk", "engine.biggo.indexer.bulk.app_error", nil, "", http.StatusInternalServerError).Wrap(err)
 		mlog.Error("BiggoIndexer", mlog.Err(err))
 		return
 	}
 	defer indexer.Close(context.Background())
 
-	for _, value := range users {
+	for _, user := range users {
+		if _, err = clients.GraphQuery(`
+			MERGE (u:user{user_id:$user_id})
+			WITH u
+			UNWIND $channel_ids AS channel_id
+				MERGE (c:channel{channel_id:channel_id})
+				MERGE (u)-[:channel_member]->(c)
+			WITH u
+			UNWIND $team_ids AS team_id
+				MERGE (t:team{team_id:team_id})
+				MERGE (u)-[:team_member]->(t)
+		`, map[string]interface{}{
+			"channel_ids": user.ChannelsIds,
+			"team_ids":    user.TeamsIds,
+			"user_id":     user.Id,
+		}); err != nil {
+			//aErr = model.NewAppError("BiggoIndexer.IndexUsersBulk", "engine.biggo.indexer.bulk.app_error", nil, "", http.StatusInternalServerError).Wrap(err)
+			mlog.Error("BiggoIndexer", mlog.Err(err))
+			continue
+		}
+
 		var buffer []byte
-		if buffer, err = json.Marshal(value); err != nil {
-			//aErr = model.NewAppError("BiggoIndexer.IndexUsersBulk", "engine.biggo.unmarshal.user.app_error", nil, "", http.StatusInternalServerError).Wrap(err)
+		if buffer, err = json.Marshal(user); err != nil {
 			mlog.Error("BiggoIndexer", mlog.Err(err))
 			continue
 		}
 
 		if err = indexer.Add(context.Background(), esutil.BulkIndexerItem{
 			Action:     "index",
-			DocumentID: value.Id,
+			DocumentID: user.Id,
 			Body:       bytes.NewBuffer(buffer),
 			Index:      EsUserIndex,
 		}); err != nil {
-			//aErr = model.NewAppError("BiggoIndexer.IndexUsersBulk", "engine.biggo.index.user.app_error", nil, "", http.StatusInternalServerError).Wrap(err)
 			mlog.Error("BiggoIndexer", mlog.Err(err))
 			continue
 		}
@@ -69,106 +134,77 @@ func (be *BiggoEngine) IndexUsersBulk(users []*model.UserForIndexing) (aErr *mod
 
 func (be *BiggoEngine) SearchUsersInChannel(teamId, channelId string, restrictedToChannels []string, term string, options *model.UserSearchOptions) (userInChannel []string, userNotInChannel []string, aErr *model.AppError) {
 	var (
-		cli *elasticsearch.Client
 		err error
-		res *esapi.Response
+		res *neo4j.EagerResult
 	)
-
-	if cli, err = clients.EsClient(); err != nil {
-		aErr = model.NewAppError("BiggoIndexer.SearchUsersInChannel", "engine.biggo.client.elasticsearch.app_error", nil, "", http.StatusInternalServerError).Wrap(err)
-		return
-	}
-
-	query := `{
-		"query": {
-			"prefix": {
-				"username": {
-					"value": "%s"
+	if res, err = clients.GraphQuery(`
+		CALL apoc.es.query($es_address, 'mm_biggoengine_user', '_doc', null, {
+			fields: ['_id'],
+			query: {
+				prefix: {
+					username: {
+						value: $term
+					}
 				}
-			}
-		}
-	}`
-
-	if res, err = cli.Search(
-		cli.Search.WithIndex(EsUserIndex),
-		cli.Search.WithBody(strings.NewReader(fmt.Sprintf(query, term))),
-	); err != nil {
-		aErr = model.NewAppError("BiggoIndexer.SearchUsersInChannel", "engine.biggo.search.elasticsearch.app_error", nil, "", http.StatusInternalServerError).Wrap(err)
-		return
-	}
-	defer res.Body.Close()
-
-	if res.IsError() {
-		if buffer, err := io.ReadAll(res.Body); err == nil {
-			aErr = model.NewAppError("BiggoIndexer.SearchUsersInChannel", "engine.biggo.response.elasticsearch.app_error", nil, "", http.StatusInternalServerError).Wrap(errors.New(string(buffer)))
-		}
+			}, from: 0, size: $size
+		}) YIELD value
+		UNWIND value.hits.hits AS hit
+		OPTIONAL MATCH (:user{user_id:hit._id})-[r:channel_member]->(:channel{channel_id:$channel_id})
+		RETURN hit._id as id, r IS NOT NULL AS in_channel
+	`, map[string]interface{}{
+		"es_address": "http://172.17.0.1:9200",
+		"channel_id": channelId,
+		"term":       term,
+		"size":       25,
+	}); err != nil {
+		mlog.Error("BiggoIndexer", mlog.Err(err))
 		return
 	}
 
-	var response clients.EnvelopeResponse
-	if err := json.NewDecoder(res.Body).Decode(&response); err != nil {
-		aErr = model.NewAppError("BiggoIndexer.SearchUsersInChannel", "engine.biggo.parse.elasticsearch.app_error", nil, "", http.StatusInternalServerError).Wrap(err)
-		return
-	}
-
+	userInChannel = []string{}
 	userNotInChannel = []string{}
-	for _, hit := range response.Hits.Hits {
-		userNotInChannel = append(userNotInChannel, hit.ID)
+	for _, record := range res.Records {
+		entry := record.AsMap()
+		if entry["in_channel"].(bool) {
+			userInChannel = append(userInChannel, entry["id"].(string))
+		} else {
+			userNotInChannel = append(userNotInChannel, entry["id"].(string))
+		}
 	}
 	return
 }
 
 func (be *BiggoEngine) SearchUsersInTeam(teamId string, restrictedToChannels []string, term string, options *model.UserSearchOptions) (result []string, aErr *model.AppError) {
 	var (
-		cli *elasticsearch.Client
 		err error
-		res *esapi.Response
+		res *neo4j.EagerResult
 	)
-
-	if cli, err = clients.EsClient(); err != nil {
-		aErr = model.NewAppError("BiggoIndexer.SearchUsersInTeam", "engine.biggo.client.elasticsearch.app_error", nil, "", http.StatusInternalServerError).Wrap(err)
-		return
-	}
-
-	if term == "" {
-		term = "*"
-	}
-
-	query := `{
-		"query": {
-			"prefix": {
-				"username": {
-					"value": "%s"
+	if res, err = clients.GraphQuery(`
+		CALL apoc.es.query($es_address, 'mm_biggoengine_user', '_doc', null, {
+			fields: ['_id'],
+			query: {
+				prefix: {
+					username: {
+						value: $term
+					}
 				}
-			}
-		}
-	}`
-
-	if res, err = cli.Search(
-		cli.Search.WithIndex(EsUserIndex),
-		cli.Search.WithBody(strings.NewReader(fmt.Sprintf(query, term))),
-	); err != nil {
-		aErr = model.NewAppError("BiggoIndexer.SearchUsersInTeam", "engine.biggo.search.elasticsearch.app_error", nil, "", http.StatusInternalServerError).Wrap(err)
-		return
-	}
-	defer res.Body.Close()
-
-	if res.IsError() {
-		if buffer, err := io.ReadAll(res.Body); err == nil {
-			aErr = model.NewAppError("BiggoIndexer.SearchUsersInTeam", "engine.biggo.response.elasticsearch.app_error", nil, "", http.StatusInternalServerError).Wrap(errors.New(string(buffer)))
-		}
-		return
-	}
-
-	var response clients.EnvelopeResponse
-	if err := json.NewDecoder(res.Body).Decode(&response); err != nil {
-		aErr = model.NewAppError("BiggoIndexer.SearchUsersInTeam", "engine.biggo.parse.elasticsearch.app_error", nil, "", http.StatusInternalServerError).Wrap(err)
+			}, from: 0, size: $size
+		}) YIELD value
+		UNWIND value.hits.hits AS hit
+		RETURN hit._id as id
+	`, map[string]interface{}{
+		"es_address": "http://172.17.0.1:9200",
+		"term":       term,
+		"size":       25,
+	}); err != nil {
+		mlog.Error("BiggoIndexer", mlog.Err(err))
 		return
 	}
 
 	result = []string{}
-	for _, hit := range response.Hits.Hits {
-		result = append(result, hit.ID)
+	for _, record := range res.Records {
+		entry := record.AsMap()
+		result = append(result, entry["id"].(string))
 	}
 	return
 }
