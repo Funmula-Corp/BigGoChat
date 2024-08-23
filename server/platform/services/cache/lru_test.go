@@ -209,9 +209,10 @@ func TestLRUMarshalUnMarshal(t *testing.T) {
 		UserId:         "rpgh1q5ra38y9xjn9z8fjctezr",
 		Roles:          "role",
 		DeleteAt:       1,
-		SchemeGuest:    true,
+		SchemeGuest:    false,
 		SchemeUser:     true,
 		SchemeVerified: true,
+		SchemeModerator: false,
 		SchemeAdmin:    true,
 		ExplicitRoles:  "",
 		CreateAt:       1,
@@ -280,6 +281,7 @@ func TestLRUMarshalUnMarshal(t *testing.T) {
 		IsBot:                  true,
 		TermsOfServiceId:       "TermsOfServiceId",
 		TermsOfServiceCreateAt: 111111,
+		Mobilephone: model.NewString("886911111111"),
 	}
 
 	err = l.Set("user", user)
