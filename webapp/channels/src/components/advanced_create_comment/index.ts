@@ -73,7 +73,7 @@ function makeMapStateToProps() {
         const enableEmojiPicker = config.EnableEmojiPicker === 'true';
         const enableGifPicker = config.EnableGifPicker === 'true';
         const badConnection = connectionErrorCount(state) > 1;
-        const canPost = isPhoneVerified && haveIChannelPermission(state, channel.team_id, channel.id, Permissions.CREATE_POST);
+        const canPost = haveIChannelPermission(state, channel.team_id, channel.id, Permissions.CREATE_POST);
         const useChannelMentions = haveIChannelPermission(state, channel.team_id, channel.id, Permissions.USE_CHANNEL_MENTIONS);
         const isLDAPEnabled = license?.IsLicensed === 'true' && license?.LDAPGroups === 'true';
         const useCustomGroupMentions = isCustomGroupsEnabled(state) && haveIChannelPermission(state, channel.team_id, channel.id, Permissions.USE_GROUP_MENTIONS);
