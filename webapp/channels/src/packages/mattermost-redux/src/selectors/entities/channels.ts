@@ -1425,3 +1425,12 @@ export const getRecentProfilesFromDMs: (state: GlobalState) => UserProfile[] = c
         return [...sortedUserProfiles];
     },
 );
+
+export const getMyChannelExcludePermissions = createSelector(
+    'getMyExcludePermissions',
+    getMyChannelMembership,
+    (membership) => {
+        const membershipPermission = membership?.exclude_permissions || ""
+        return new Set(membershipPermission.split(" "));
+    },
+);
