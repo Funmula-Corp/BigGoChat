@@ -79,7 +79,7 @@ function makeMapStateToProps() {
         const currentUserId = getCurrentUserId(state);
         const userIsOutOfOffice = getStatusForUserId(state, currentUserId) === UserStatuses.OUT_OF_OFFICE;
         const badConnection = connectionErrorCount(state) > 1;
-        const canPost = isPhoneVerified && haveICurrentChannelPermission(state, Permissions.CREATE_POST);
+        const canPost = haveICurrentChannelPermission(state, Permissions.CREATE_POST);
         const useChannelMentions = haveICurrentChannelPermission(state, Permissions.USE_CHANNEL_MENTIONS);
         const isLDAPEnabled = license?.IsLicensed === 'true' && license?.LDAPGroups === 'true';
         const useCustomGroupMentions = isCustomGroupsEnabled(state) && haveICurrentChannelPermission(state, Permissions.USE_GROUP_MENTIONS);
