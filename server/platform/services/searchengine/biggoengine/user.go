@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
-	"net/http"
 
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
@@ -19,10 +18,6 @@ import (
 	"github.com/neo4j/neo4j-go-driver/v5/neo4j"
 )
 
-const (
-	EsUserIndex string = "mm_biggoengine_user"
-)
-
 func (be *BiggoEngine) DeleteUser(user *model.User) (aErr *model.AppError) {
 	if _, err := clients.GraphQuery(`
 		MATCH (u:user{user_id:user_id})
@@ -33,6 +28,7 @@ func (be *BiggoEngine) DeleteUser(user *model.User) (aErr *model.AppError) {
 		"user_id": user.Id,
 	}); err != nil {
 		mlog.Error("BiggoIndexer", mlog.Err(err))
+		return
 	}
 
 	var (
@@ -42,6 +38,7 @@ func (be *BiggoEngine) DeleteUser(user *model.User) (aErr *model.AppError) {
 	)
 	if client, err = clients.EsClient(); err != nil {
 		mlog.Error("BiggoIndexer", mlog.Err(err))
+		return
 	}
 
 	if res, err = client.Delete(EsUserIndex, user.Id); err != nil {
@@ -86,13 +83,13 @@ func (be *BiggoEngine) IndexUsersBulk(users []*model.UserForIndexing) (aErr *mod
 	)
 
 	if indexer, err = clients.EsBulkIndex(EsUserIndex); err != nil {
-		aErr = model.NewAppError("BiggoIndexer.IndexUsersBulk", "engine.biggo.indexer.bulk.app_error", nil, "", http.StatusInternalServerError).Wrap(err)
 		mlog.Error("BiggoIndexer", mlog.Err(err))
 		return
 	}
 	defer indexer.Close(context.Background())
 
 	for _, user := range users {
+		// potentially improve with bulk CALL via UNWIND []user
 		if _, err = clients.GraphQuery(`
 			MERGE (u:user{user_id:$user_id})
 			WITH u
@@ -108,7 +105,7 @@ func (be *BiggoEngine) IndexUsersBulk(users []*model.UserForIndexing) (aErr *mod
 			"team_ids":    user.TeamsIds,
 			"user_id":     user.Id,
 		}); err != nil {
-			//aErr = model.NewAppError("BiggoIndexer.IndexUsersBulk", "engine.biggo.indexer.bulk.app_error", nil, "", http.StatusInternalServerError).Wrap(err)
+			//aErr = model.NewAppError("BiggoIndexer.IndexUsersBulk", "engine.biggo.indexer.index_user_bulk.app_error", nil, "", http.StatusInternalServerError).Wrap(err)
 			mlog.Error("BiggoIndexer", mlog.Err(err))
 			continue
 		}
@@ -138,7 +135,7 @@ func (be *BiggoEngine) SearchUsersInChannel(teamId, channelId string, restricted
 		res *neo4j.EagerResult
 	)
 	if res, err = clients.GraphQuery(`
-		CALL apoc.es.query($es_address, 'mm_biggoengine_user', '_doc', null, {
+		CALL apoc.es.query($es_address, $es_index, '_doc', null, {
 			fields: ['_id'],
 			query: {
 				prefix: {
@@ -153,6 +150,7 @@ func (be *BiggoEngine) SearchUsersInChannel(teamId, channelId string, restricted
 		RETURN hit._id as id, r IS NOT NULL AS in_channel
 	`, map[string]interface{}{
 		"es_address": "http://172.17.0.1:9200",
+		"es_index":   EsUserIndex,
 		"channel_id": channelId,
 		"term":       term,
 		"size":       25,
@@ -180,7 +178,7 @@ func (be *BiggoEngine) SearchUsersInTeam(teamId string, restrictedToChannels []s
 		res *neo4j.EagerResult
 	)
 	if res, err = clients.GraphQuery(`
-		CALL apoc.es.query($es_address, 'mm_biggoengine_user', '_doc', null, {
+		CALL apoc.es.query($es_address, $es_index, '_doc', null, {
 			fields: ['_id'],
 			query: {
 				prefix: {
@@ -194,6 +192,7 @@ func (be *BiggoEngine) SearchUsersInTeam(teamId string, restrictedToChannels []s
 		RETURN hit._id as id
 	`, map[string]interface{}{
 		"es_address": "http://172.17.0.1:9200",
+		"es_index":   EsUserIndex,
 		"term":       term,
 		"size":       25,
 	}); err != nil {

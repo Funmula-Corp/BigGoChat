@@ -17,6 +17,10 @@ const (
 	FileIndex    = "file"
 	UserIndex    = "user"
 	ChannelIndex = "channel"
+
+	EsChannelIndex string = "mm_biggoengine_channel"
+	EsPostIndex    string = "mm_biggoengine_post"
+	EsUserIndex    string = "mm_biggoengine_user"
 )
 
 func init() {}
