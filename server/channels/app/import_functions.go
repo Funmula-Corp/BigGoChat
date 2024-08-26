@@ -350,7 +350,7 @@ func (a *App) importChannel(rctx request.CTX, data *imports.ChannelImportData, d
 	return nil
 }
 
-func (a *App) importUser(rctx request.CTX, data *imports.UserImportData, dryRun bool) *model.AppError {
+func (a *App) importUser(rctx request.CTX, data *imports.UserImportData, dryRun bool, replaceUser bool) *model.AppError {
 	var fields []mlog.Field
 	if data != nil && data.Username != nil {
 		fields = append(fields, mlog.String("user_name", *data.Username))
@@ -589,7 +589,7 @@ func (a *App) importUser(rctx request.CTX, data *imports.UserImportData, dryRun 
 		if err := a.Srv().Store().Preference().Save(model.Preferences{pref}); err != nil {
 			rctx.Logger().Warn("Encountered error saving tutorial preference", mlog.Err(err))
 		}
-	} else {
+	} else if replaceUser {
 		var appErr *model.AppError
 		if hasUserChanged {
 			if savedUser, appErr = a.UpdateUser(rctx, user, false); appErr != nil {
@@ -803,7 +803,7 @@ func (a *App) importUser(rctx request.CTX, data *imports.UserImportData, dryRun 
 		}
 	}
 
-	if len(preferences) > 0 {
+	if len(preferences) > 0 && replaceUser {
 		if err := a.Srv().Store().Preference().Save(preferences); err != nil {
 			return model.NewAppError("BulkImport", "app.import.import_user.save_preferences.error", nil, "", http.StatusInternalServerError).Wrap(err)
 		}
@@ -1008,7 +1008,7 @@ func (a *App) importUserChannels(rctx request.CTX, user *model.User, team *model
 		channelPreferencesByID   = map[string]model.Preferences{}
 		isGuestByChannelId       = map[string]bool{}
 		isUserByChannelId        = map[string]bool{}
-		isVerifiedByChannelId        = map[string]bool{}
+		isVerifiedByChannelId    = map[string]bool{}
 		isAdminByChannelId       = map[string]bool{}
 	)
 

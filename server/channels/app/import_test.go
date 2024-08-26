@@ -16,11 +16,11 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app/imports"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/utils"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/utils/fileutils"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
 )
 
 func ptrStr(s string) *string {
@@ -80,6 +80,19 @@ func AssertChannelCount(t *testing.T, a *App, channelType model.ChannelType, exp
 	require.NoError(t, err, "Failed to get channel count.")
 }
 
+func checkTeamUser(t *testing.T, a *App, teamId string, expectUsers []string) {
+	users, appErr := a.GetUsersInTeam(&model.UserGetOptions{
+		InTeamId: teamId,
+		PerPage:  99,
+	})
+	require.Nil(t, appErr)
+	names := []string{}
+	for _, n := range users {
+		names = append(names, n.Username)
+	}
+	require.ElementsMatch(t, names, expectUsers)
+}
+
 func TestImportImportLine(t *testing.T) {
 	th := Setup(t)
 	defer th.TearDown()
@@ -89,42 +102,42 @@ func TestImportImportLine(t *testing.T) {
 		Type: "gibberish",
 	}
 
-	err := th.App.importLine(th.Context, line, false)
+	err := th.App.importLine(th.Context, line, false, true)
 	require.NotNil(t, err, "Expected an error when importing a line with invalid type.")
 
 	// Try import line with team type but nil team.
 	line.Type = "team"
-	err = th.App.importLine(th.Context, line, false)
+	err = th.App.importLine(th.Context, line, false, true)
 	require.NotNil(t, err, "Expected an error when importing a line of type team with a nil team.")
 
 	// Try import line with channel type but nil channel.
 	line.Type = "channel"
-	err = th.App.importLine(th.Context, line, false)
+	err = th.App.importLine(th.Context, line, false, true)
 	require.NotNil(t, err, "Expected an error when importing a line with type channel with a nil channel.")
 
 	// Try import line with user type but nil user.
 	line.Type = "user"
-	err = th.App.importLine(th.Context, line, false)
+	err = th.App.importLine(th.Context, line, false, true)
 	require.NotNil(t, err, "Expected an error when importing a line with type user with a nil user.")
 
 	// Try import line with post type but nil post.
 	line.Type = "post"
-	err = th.App.importLine(th.Context, line, false)
+	err = th.App.importLine(th.Context, line, false, true)
 	require.NotNil(t, err, "Expected an error when importing a line with type post with a nil post.")
 
 	// Try import line with direct_channel type but nil direct_channel.
 	line.Type = "direct_channel"
-	err = th.App.importLine(th.Context, line, false)
+	err = th.App.importLine(th.Context, line, false, true)
 	require.NotNil(t, err, "Expected an error when importing a line with type direct_channel with a nil direct_channel.")
 
 	// Try import line with direct_post type but nil direct_post.
 	line.Type = "direct_post"
-	err = th.App.importLine(th.Context, line, false)
+	err = th.App.importLine(th.Context, line, false, true)
 	require.NotNil(t, err, "Expected an error when importing a line with type direct_post with a nil direct_post.")
 
 	// Try import line with scheme type but nil scheme.
 	line.Type = "scheme"
-	err = th.App.importLine(th.Context, line, false)
+	err = th.App.importLine(th.Context, line, false, true)
 	require.NotNil(t, err, "Expected an error when importing a line with type scheme with a nil scheme.")
 }
 
@@ -245,6 +258,46 @@ func TestImportBulkImport(t *testing.T) {
 		require.Nil(t, err, "BulkImport should have succeeded")
 		require.Equal(t, 0, line, "BulkImport line should be 0")
 	})
+}
+
+// Lookup existed user by email and we don't replace exists user info here.
+func TestImportBulkImportByEmail(t *testing.T) {
+	th := Setup(t).InitBasic()
+	defer th.TearDown()
+
+	th.App.UpdateConfig(func(cfg *model.Config) { *cfg.ServiceSettings.EnableCustomEmoji = true })
+
+	teamName := model.NewRandomTeamName()
+	channelName := "ccca" //model.NewId()
+	username := model.NewId()
+	username2 := model.NewId()
+	emojiName := model.NewId()
+	testsDir, _ := fileutils.FindDir("tests")
+	testImage := filepath.Join(testsDir, "test.png")
+	teamTheme1 := `{\"awayIndicator\":\"#DBBD4E\",\"buttonBg\":\"#23A1FF\",\"buttonColor\":\"#FFFFFF\",\"centerChannelBg\":\"#ffffff\",\"centerChannelColor\":\"#333333\",\"codeTheme\":\"github\",\"image\":\"/static/files/a4a388b38b32678e83823ef1b3e17766.png\",\"linkColor\":\"#2389d7\",\"mentionBg\":\"#2389d7\",\"mentionColor\":\"#ffffff\",\"mentionHighlightBg\":\"#fff2bb\",\"mentionHighlightLink\":\"#2f81b7\",\"newMessageSeparator\":\"#FF8800\",\"onlineIndicator\":\"#7DBE00\",\"sidebarBg\":\"#fafafa\",\"sidebarHeaderBg\":\"#3481B9\",\"sidebarHeaderTextColor\":\"#ffffff\",\"sidebarText\":\"#333333\",\"sidebarTextActiveBorder\":\"#378FD2\",\"sidebarTextActiveColor\":\"#111111\",\"sidebarTextHoverBg\":\"#e6f2fa\",\"sidebarUnreadText\":\"#333333\",\"type\":\"Mattermost\"}`
+	teamTheme2 := `{\"awayIndicator\":\"#DBBD4E\",\"buttonBg\":\"#23A100\",\"buttonColor\":\"#EEEEEE\",\"centerChannelBg\":\"#ffffff\",\"centerChannelColor\":\"#333333\",\"codeTheme\":\"github\",\"image\":\"/static/files/a4a388b38b32678e83823ef1b3e17766.png\",\"linkColor\":\"#2389d7\",\"mentionBg\":\"#2389d7\",\"mentionColor\":\"#ffffff\",\"mentionHighlightBg\":\"#fff2bb\",\"mentionHighlightLink\":\"#2f81b7\",\"newMessageSeparator\":\"#FF8800\",\"onlineIndicator\":\"#7DBE00\",\"sidebarBg\":\"#fafafa\",\"sidebarHeaderBg\":\"#3481B9\",\"sidebarHeaderTextColor\":\"#ffffff\",\"sidebarText\":\"#333333\",\"sidebarTextActiveBorder\":\"#378FD2\",\"sidebarTextActiveColor\":\"#222222\",\"sidebarTextHoverBg\":\"#e6f2fa\",\"sidebarUnreadText\":\"#444444\",\"type\":\"Mattermost\"}`
+
+	// Run bulk import with a valid 1 of everything.
+	data1 := `{"type": "version", "version": 1}
+{"type": "team", "team": {"type": "O", "display_name": "lskmw2d7a5ao7ppwqh5ljchvr4", "name": "` + teamName + `"}}
+{"type": "channel", "channel": {"type": "O", "display_name": "xr6m6udffngark2uekvr3hoeny", "team": "` + teamName + `", "name": "` + channelName + `"}}
+{"type": "user", "user": {"username": "` + username + `", "email": "` + th.BasicUser.Email + `", "teams": [{"name": "` + teamName + `","theme": "` + teamTheme1 + `", "channels": [{"name": "` + channelName + `"}]}]}}
+{"type": "user", "user": {"username": "` + username2 + `", "email": "` + username2 + `@example.com", "teams": [{"name": "` + teamName + `","theme": "` + teamTheme2 + `", "channels": [{"name": "` + channelName + `"}]}]}}
+{"type": "post", "post": {"team": "` + teamName + `", "channel": "` + channelName + `", "user": "` + username + `", "message": "Hello World", "create_at": 123456789012, "attachments":[{"path": "` + testImage + `"}]}}
+{"type": "direct_channel", "direct_channel": {"members": ["` + username + `", "` + username + `"]}}
+{"type": "direct_channel", "direct_channel": {"members": ["` + username + `", "` + username2 + `"]}}
+{"type": "direct_post", "direct_post": {"channel_members": ["` + username + `", "` + username + `"], "user": "` + username + `", "message": "Hello Direct Channel to myself", "create_at": 123456789014}}
+{"type": "direct_post", "direct_post": {"channel_members": ["` + username + `", "` + username2 + `"], "user": "` + username + `", "message": "Hello Direct Channel", "create_at": 123456789014}}
+{"type": "emoji", "emoji": {"name": "` + emojiName + `", "image": "` + testImage + `"}}`
+
+	err, line := th.App.BulkImport2(th.Context, strings.NewReader(data1), nil, false, true, false, 2)
+	require.Nil(t, err, "BulkImport should have succeeded")
+	require.Equal(t, 0, line, "BulkImport line should be 0")
+	teamMap, appErr := th.App.getTeamsByNames([]string{teamName})
+	require.Nil(t, appErr)
+	team, ok := teamMap[teamName]
+	require.True(t, ok)
+	checkTeamUser(t, th.App, team.Id, []string{username2, th.BasicUser.Username})
 }
 
 func TestImportProcessImportDataFileVersionLine(t *testing.T) {
@@ -467,6 +520,87 @@ func BenchmarkBulkImport(b *testing.B) {
 		require.Nil(b, err)
 	}
 	b.StopTimer()
+}
+
+func TestImportBulkImportWithAttachmentsByEmail(t *testing.T) {
+	th := Setup(t).InitBasic()
+	defer th.TearDown()
+
+	updatedUser, appErr := th.App.PatchUser(th.Context, th.BasicUser.Id, &model.UserPatch{
+		Email: model.NewString("user-26@sample.mattermost.com"),
+	}, true)
+	require.Nil(t, appErr)
+	th.BasicUser = updatedUser
+
+	updatedUser, appErr = th.App.PatchUser(th.Context, th.BasicUser2.Id, &model.UserPatch{
+		Email: model.NewString("user-29@sample.mattermost.com"),
+	}, true)
+	require.Nil(t, appErr)
+	th.BasicUser2 = updatedUser
+
+	channel, appErr := th.App.getOrCreateDirectChannelWithUser(th.Context, th.BasicUser, th.BasicUser2)
+	require.Nil(t, appErr)
+	newPost, appErr := th.App.CreatePost(th.Context, &model.Post{
+		CreateAt:  1,
+		UserId:    th.BasicUser.Id,
+		ChannelId: channel.Id,
+		Message:   "lala",
+	}, channel, false, false)
+	require.Nil(t, appErr)
+
+	testsDir, _ := fileutils.FindDir("tests")
+
+	importFile, err := os.Open(testsDir + "/export_test.zip")
+	require.NoError(t, err)
+	defer importFile.Close()
+
+	info, err := importFile.Stat()
+	require.NoError(t, err)
+
+	importZipReader, err := zip.NewReader(importFile, info.Size())
+	require.NoError(t, err)
+	require.NotNil(t, importZipReader)
+
+	var jsonFile io.ReadCloser
+	for _, f := range importZipReader.File {
+		if filepath.Ext(f.Name) != ".jsonl" {
+			continue
+		}
+
+		jsonFile, err = f.Open()
+		require.NoError(t, err)
+		defer jsonFile.Close()
+		break
+	}
+	require.NotNil(t, jsonFile)
+
+	th.App.UpdateConfig(func(cfg *model.Config) { cfg.TeamSettings.MaxUsersPerTeam = model.NewInt(1000) })
+
+	appErr, _ = th.App.BulkImport2(th.Context, jsonFile, importZipReader, false, true, true, false, 1, model.ExportDataDir)
+	require.Nil(t, appErr)
+
+	adminUser, appErr := th.App.GetUserByUsername("sysadmin")
+	require.Nil(t, appErr)
+
+	files := GetAttachments(adminUser.Id, th, t)
+	require.Len(t, files, 11)
+
+	_, appErr = th.App.GetUserByUsername("wayne.stone")
+	require.NotNil(t, appErr)
+	_, appErr = th.App.GetUserByUsername("raymond.fisher")
+	require.NotNil(t, appErr)
+
+	postList, appErr := th.App.GetPosts(channel.Id, 0, 100)
+	require.Nil(t, appErr)
+	require.Greater(t, len(postList.Posts), 10, "to few posts %v", len(postList.Posts))
+	var postIds []string
+	for _, post := range postList.Posts {
+		postIds = append(postIds, post.Id)
+	}
+	require.Contains(t, postIds, newPost.Id)
+	channelList, appErr := th.App.GetChannelsForUser(th.Context, th.BasicUser.Id, false, 0, 200, "")
+	require.Nil(t, appErr)
+	require.Greater(t, len(channelList), 10)
 }
 
 func TestImportBulkImportWithAttachments(t *testing.T) {
