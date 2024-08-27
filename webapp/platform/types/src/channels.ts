@@ -118,6 +118,7 @@ export type ChannelMembership = {
     scheme_user: boolean;
     scheme_admin: boolean;
     post_root_id?: string;
+    exclude_permissions?: string;
 };
 
 export type ChannelUnread = {

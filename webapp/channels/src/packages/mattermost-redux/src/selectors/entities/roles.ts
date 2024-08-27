@@ -17,6 +17,7 @@ import {
 } from 'mattermost-redux/selectors/entities/roles_helpers';
 import {getTeamMemberships, getCurrentTeamId} from 'mattermost-redux/selectors/entities/teams';
 import {getCurrentUserId} from 'mattermost-redux/selectors/entities/users';
+import { getMyChannelExcludePermissions } from './channels';
 
 export {getMySystemPermissions, getMySystemRoles, getRoles, haveISystemPermission};
 
@@ -209,6 +210,10 @@ export const haveIGroupPermission: (state: GlobalState, groupID: string, permiss
 );
 
 export function haveIChannelPermission(state: GlobalState, teamId: string | undefined, channelId: string | undefined, permission: string): boolean {
+    if (channelId && getMyChannelExcludePermissions(state, channelId).has(permission)) {
+        return false;
+    }
+
     if (getMySystemPermissions(state).has(permission)) {
         return true;
     }
