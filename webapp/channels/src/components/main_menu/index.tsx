@@ -6,19 +6,18 @@ import {withRouter} from 'react-router-dom';
 import {bindActionCreators} from 'redux';
 import type {Dispatch} from 'redux';
 
-import {Permissions} from 'mattermost-redux/constants';
+import {General, Permissions} from 'mattermost-redux/constants';
 import {getCloudSubscription as selectCloudSubscription, getSubscriptionProduct} from 'mattermost-redux/selectors/entities/cloud';
 import {
     getConfig,
     getLicense,
 } from 'mattermost-redux/selectors/entities/general';
-import {haveICurrentTeamPermission, haveISystemPermission} from 'mattermost-redux/selectors/entities/roles';
+import {getMySystemRoles, getMyTeamRoles, haveICurrentTeamPermission, haveISystemPermission} from 'mattermost-redux/selectors/entities/roles';
 import {
     getJoinableTeamIds,
     getCurrentTeam,
 } from 'mattermost-redux/selectors/entities/teams';
 import {getCurrentUser} from 'mattermost-redux/selectors/entities/users';
-import {getCurrentUserEmail} from 'mattermost-redux/selectors/entities/common';
 
 import {openModal} from 'actions/views/modals';
 import {showMentions, showFlaggedPosts, closeRightHandSide, closeMenu as closeRhsMenu} from 'actions/views/rhs';
@@ -35,6 +34,7 @@ function mapStateToProps(state: GlobalState) {
     const config = getConfig(state);
     const currentTeam = getCurrentTeam(state);
     const currentUser = getCurrentUser(state);
+    const currentRoles = getMyTeamRoles(state)[currentTeam?.id || ""];
 
     const appDownloadLink = config.AppDownloadLink;
     const enableCommands = config.EnableCommands === 'true';
@@ -50,7 +50,7 @@ function mapStateToProps(state: GlobalState) {
     const canManageSystemBots = (haveISystemPermission(state, {permission: Permissions.MANAGE_BOTS}) || haveISystemPermission(state, {permission: Permissions.MANAGE_OTHERS_BOTS}));
     const canManageIntegrations = canManageTeamIntegrations || canManageSystemBots;
     const canInviteTeamMember = haveICurrentTeamPermission(state, Permissions.ADD_USER_TO_TEAM);
-    const canLeaveTeam = getCurrentTeam(state)?.email !== getCurrentUserEmail(state);
+    const canLeaveTeam = !currentRoles.has(General.TEAM_ADMIN_ROLE) && !currentRoles.has(General.TEAM_MODERATOR_ROLE);
 
     const joinableTeams = getJoinableTeamIds(state);
     const moreTeamsToJoin = joinableTeams && joinableTeams.length > 0;
