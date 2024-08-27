@@ -13,7 +13,9 @@
 describe('Profile > Profile Settings > Full Name', () => {
     let testUser;
 
-    before(() => {
+    before(function() {
+        // BigGoChat does not have a feature to open the profile modal
+        this.skip();
         // # Login as new user and visit off-topic
         cy.apiInitSetup({loginAfter: true}).then(({user, offTopicUrl}) => {
             testUser = user;

@@ -19,7 +19,9 @@ describe('Settings > Sidebar > General > Edit', () => {
     let otherUser;
     let offTopicUrl;
 
-    before(() => {
+    before(function() {
+        // BigGoChat does not have a feature to open the profile modal
+        this.skip();
         // # Login as admin and visit off-topic
         cy.apiInitSetup().then(({user, team, channel, offTopicUrl: url}) => {
             testUser = user;
