@@ -7,18 +7,20 @@ import (
 
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/services/searchengine/biggoengine/cfg"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/services/searchengine/biggoengine/clients"
 )
 
 const (
 	EngineName = "biggo"
-	PluginName = "com.biggo.biggo-engine"
 
-	PostIndex    = "post"
-	FileIndex    = "file"
-	UserIndex    = "user"
-	ChannelIndex = "channel"
+	ChannelVertex = "channel"
+	FileVertex    = "file"
+	PostVertex    = "post"
+	UserVertex    = "user"
 
 	EsChannelIndex string = "mm_biggoengine_channel"
+	EsFileIndex    string = "mm_biggoengine_file"
 	EsPostIndex    string = "mm_biggoengine_post"
 	EsUserIndex    string = "mm_biggoengine_user"
 )
@@ -26,6 +28,8 @@ const (
 func init() {}
 
 func NewBiggoEngine(config *model.Config) *BiggoEngine {
+	clients.InitEsClient(config)
+	clients.InitNeo4jClient(config)
 	return &BiggoEngine{
 		config: config,
 	}
@@ -63,12 +67,7 @@ func (be *BiggoEngine) IsActive() (result bool) {
 }
 
 func (be *BiggoEngine) IsAutocompletionEnabled() (result bool) {
-	if settings, ok := be.config.PluginSettings.Plugins[PluginName]; ok {
-		if enabled, found := settings["autocompletion_enabled"]; found {
-			return enabled.(bool)
-		}
-	}
-	return
+	return cfg.EnableAutocomplete(be.config)
 }
 
 func (be *BiggoEngine) IsChannelsIndexVerified() (result bool) {
@@ -76,21 +75,11 @@ func (be *BiggoEngine) IsChannelsIndexVerified() (result bool) {
 }
 
 func (be *BiggoEngine) IsEnabled() (result bool) {
-	if settings, ok := be.config.PluginSettings.Plugins[PluginName]; ok {
-		if enabled, found := settings["enabled"]; found {
-			return enabled.(bool)
-		}
-	}
-	return
+	return cfg.EnableIndexer(be.config)
 }
 
 func (be *BiggoEngine) IsIndexingEnabled() (result bool) {
-	if settings, ok := be.config.PluginSettings.Plugins[PluginName]; ok {
-		if enabled, found := settings["indexing_enabled"]; found {
-			return enabled.(bool)
-		}
-	}
-	return
+	return cfg.EnableIndexing(be.config)
 }
 
 func (be *BiggoEngine) IsIndexingSync() (result bool) {
@@ -98,12 +87,7 @@ func (be *BiggoEngine) IsIndexingSync() (result bool) {
 }
 
 func (be *BiggoEngine) IsSearchEnabled() (result bool) {
-	if settings, ok := be.config.PluginSettings.Plugins[PluginName]; ok {
-		if enabled, found := settings["search_enabled"]; found {
-			return enabled.(bool)
-		}
-	}
-	return
+	return cfg.EnableSearch(be.config)
 }
 
 func (be *BiggoEngine) PurgeIndexes(rctx request.CTX) (aErr *model.AppError) {
