@@ -12,7 +12,7 @@ import {
     getConfig,
     getLicense,
 } from 'mattermost-redux/selectors/entities/general';
-import {getMySystemRoles, getMyTeamRoles, haveICurrentTeamPermission, haveISystemPermission} from 'mattermost-redux/selectors/entities/roles';
+import {getMyTeamRoles, haveICurrentTeamPermission, haveISystemPermission} from 'mattermost-redux/selectors/entities/roles';
 import {
     getJoinableTeamIds,
     getCurrentTeam,
