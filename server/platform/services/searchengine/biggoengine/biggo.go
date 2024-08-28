@@ -25,8 +25,6 @@ const (
 	EsUserIndex    string = "mm_biggoengine_user"
 )
 
-func init() {}
-
 func NewBiggoEngine(config *model.Config) *BiggoEngine {
 	clients.InitEsClient(config)
 	clients.InitNeo4jClient(config)
@@ -71,7 +69,7 @@ func (be *BiggoEngine) IsAutocompletionEnabled() (result bool) {
 }
 
 func (be *BiggoEngine) IsChannelsIndexVerified() (result bool) {
-	return
+	return true
 }
 
 func (be *BiggoEngine) IsEnabled() (result bool) {
@@ -113,7 +111,7 @@ func (be *BiggoEngine) Stop() (aErr *model.AppError) {
 }
 
 func (be *BiggoEngine) TestConfig(rctx request.CTX, cfg *model.Config) (aErr *model.AppError) {
-	return nil
+	return
 }
 
 func (be *BiggoEngine) UpdateConfig(config *model.Config) {

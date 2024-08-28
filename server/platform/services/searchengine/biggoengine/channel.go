@@ -5,11 +5,13 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/services/searchengine/biggoengine/cfg"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/services/searchengine/biggoengine/clients"
 	"github.com/elastic/go-elasticsearch/v7"
 	"github.com/elastic/go-elasticsearch/v7/esapi"
@@ -17,31 +19,34 @@ import (
 	"github.com/neo4j/neo4j-go-driver/v5/neo4j"
 )
 
-func (be *BiggoEngine) DeleteChannel(channel *model.Channel) (aErr *model.AppError) {
-	if _, err := clients.GraphQuery(`
-		MATCH (c:channel{channel_id:$channel_id})
-		MATCH (c)-[r1]->()
-		MATCH ()-[r2]->(c)
-		MATCH (c)-[r3]->()
-		DELETE r1,r2,r3,c;
-	`, map[string]interface{}{
-		"channel_id": channel.Id,
-	}); err != nil {
-		mlog.Error("BiggoIndexer", mlog.Err(err))
-		return
-	}
+const (
+	indexChannelBulkQuery string = `
+		UNWIND $channels AS kvp
+			MERGE (c:channel{channel_id:kvp.channel_id})
+			MERGE (t:team{team_id:kvp.team_id})
+			MERGE (c)-[:in_team]->(t)
+	`
+)
 
+func (be *BiggoEngine) DeleteChannel(channel *model.Channel) (aErr *model.AppError) {
 	var (
 		client *elasticsearch.Client
 		err    error
 		res    *esapi.Response
 	)
+
 	if client, err = clients.EsClient(); err != nil {
 		mlog.Error("BiggoIndexer", mlog.Err(err))
 		return
 	}
 
-	if res, err = client.Delete(EsChannelIndex, channel.Id); err != nil {
+	var buffer []byte
+	if buffer, err = json.Marshal(channel); err != nil {
+		mlog.Error("BiggoIndexer", mlog.Err(err))
+		return
+	}
+
+	if res, err = client.Update(EsChannelIndex, channel.Id, bytes.NewBuffer(buffer)); err != nil {
 		mlog.Error("BiggoIndexer", mlog.Err(err))
 		return
 	}
@@ -49,9 +54,8 @@ func (be *BiggoEngine) DeleteChannel(channel *model.Channel) (aErr *model.AppErr
 
 	if res.IsError() {
 		if buffer, err := io.ReadAll(res.Body); err == nil {
-			mlog.Error("BiggoIndexer", mlog.Err(errors.New(string(buffer))))
+			mlog.Error("BiggoIndexer", mlog.Err(errors.New(string(buffer))), mlog.Any("channel", channel))
 		}
-		return
 	}
 	return
 }
@@ -72,20 +76,8 @@ func (be *BiggoEngine) IndexChannelsBulk(channels []*model.Channel) (aErr *model
 	}
 	defer indexer.Close(context.Background())
 
+	channelsMap := []map[string]string{}
 	for _, channel := range channels {
-		// potentially improve with bulk CALL via UNWIND []channel
-		if _, err = clients.GraphQuery(`
-			MERGE (c:channel{channel_id:$channel_id})
-			MERGE (t:team{team_id:$team_id})
-			MERGE (c)-[:in_team]->(t)
-		`, map[string]interface{}{
-			"channel_id": channel.Id,
-			"team_id":    channel.TeamId,
-		}); err != nil {
-			mlog.Error("BiggoIndexer", mlog.Err(err))
-			continue
-		}
-
 		var buffer []byte
 		if buffer, err = json.Marshal(channel); err != nil {
 			mlog.Error("BiggoIndexer", mlog.Err(err))
@@ -101,6 +93,17 @@ func (be *BiggoEngine) IndexChannelsBulk(channels []*model.Channel) (aErr *model
 			mlog.Error("BiggoIndexer", mlog.Err(err))
 			continue
 		}
+
+		channelsMap = append(channelsMap, map[string]string{
+			"channel_id": channel.Id,
+			"team_id":    channel.TeamId,
+		})
+	}
+
+	if _, err = clients.GraphQuery(indexChannelBulkQuery, map[string]interface{}{
+		"channels": channelsMap,
+	}); err != nil {
+		mlog.Error("BiggoIndexer", mlog.Err(err))
 	}
 	return
 }
@@ -125,10 +128,14 @@ func (be *BiggoEngine) SearchChannels(teamId, userID, term string, isGuest bool)
 		UNWIND value.hits.hits AS hit
 		RETURN hit._id as id
 	`, map[string]interface{}{
-		"es_address": "http://172.17.0.1:9200",
-		"es_index":   EsChannelIndex,
-		"term":       term,
-		"size":       25,
+		"es_address": fmt.Sprintf("%s://%s:%.0f",
+			cfg.ElasticsearchProtocol(be.config),
+			cfg.ElasticsearchHost(be.config),
+			cfg.ElasticsearchPort(be.config),
+		),
+		"es_index": EsChannelIndex,
+		"term":     term,
+		"size":     25,
 	}); err != nil {
 		mlog.Error("BiggoIndexer", mlog.Err(err))
 		return
