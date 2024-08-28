@@ -60,6 +60,9 @@ const (
 	PreferenceEmailIntervalHour              = "hour"
 	PreferenceEmailIntervalHourAsSeconds     = "3600"
 	PreferenceCloudUserEphemeralInfo         = "cloud_user_ephemeral_info"
+
+	PreferenceCategoryPrivacySettings        = "privacy_settings"
+	PreferenceNameAllowUnverifiedMessage     = "allow_unverified_message"
 )
 
 type Preference struct {
