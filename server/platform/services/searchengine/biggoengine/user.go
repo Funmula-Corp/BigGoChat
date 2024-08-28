@@ -5,11 +5,13 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/services/searchengine/biggoengine/cfg"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/services/searchengine/biggoengine/clients"
 
 	"github.com/elastic/go-elasticsearch/v7"
@@ -18,30 +20,49 @@ import (
 	"github.com/neo4j/neo4j-go-driver/v5/neo4j"
 )
 
-func (be *BiggoEngine) DeleteUser(user *model.User) (aErr *model.AppError) {
-	if _, err := clients.GraphQuery(`
-		MATCH (u:user{user_id:user_id})
-		MATCH (u)-[r]->()
-		DELETE r,u
-		RETURN COUNT(u);
-	`, map[string]interface{}{
-		"user_id": user.Id,
-	}); err != nil {
-		mlog.Error("BiggoIndexer", mlog.Err(err))
-		return
-	}
+const (
+	indexUsersBulkQuery string = `
+		UNWIND $users AS kvp
+			MERGE (u:user{user_id:kvp.user_id})
+			WITH kvp, u
+			UNWIND kvp.channel_ids AS channel_id
+				MERGE (c:channel{channel_id:channel_id})
+				MERGE (u)-[:channel_member]->(c)
+			WITH kvp, u
+			UNWIND kvp.team_ids AS team_id
+				MERGE (t:team{team_id:team_id})
+				MERGE (u)-[:team_member]->(t)
+	`
+)
 
+func (be *BiggoEngine) DeleteUser(user *model.User) (aErr *model.AppError) {
 	var (
 		client *elasticsearch.Client
 		err    error
 		res    *esapi.Response
 	)
+
 	if client, err = clients.EsClient(); err != nil {
 		mlog.Error("BiggoIndexer", mlog.Err(err))
 		return
 	}
 
-	if res, err = client.Delete(EsUserIndex, user.Id); err != nil {
+	var buffer []byte
+	if buffer, err = json.Marshal(&model.UserForIndexing{
+		Id:        user.Id,
+		Username:  user.Username,
+		Nickname:  user.Nickname,
+		FirstName: user.FirstName,
+		LastName:  user.LastName,
+		Roles:     user.Roles,
+		CreateAt:  user.CreateAt,
+		DeleteAt:  user.DeleteAt,
+	}); err != nil {
+		mlog.Error("BiggoIndexer", mlog.Err(err))
+		return
+	}
+
+	if res, err = client.Update(EsUserIndex, user.Id, bytes.NewBuffer(buffer)); err != nil {
 		mlog.Error("BiggoIndexer", mlog.Err(err))
 		return
 	}
@@ -49,9 +70,8 @@ func (be *BiggoEngine) DeleteUser(user *model.User) (aErr *model.AppError) {
 
 	if res.IsError() {
 		if buffer, err := io.ReadAll(res.Body); err == nil {
-			mlog.Error("BiggoIndexer", mlog.Err(errors.New(string(buffer))))
+			mlog.Error("BiggoIndexer", mlog.Err(errors.New(string(buffer))), mlog.Any("user", user))
 		}
-		return
 	}
 	return
 }
@@ -88,28 +108,8 @@ func (be *BiggoEngine) IndexUsersBulk(users []*model.UserForIndexing) (aErr *mod
 	}
 	defer indexer.Close(context.Background())
 
+	usersMap := []map[string]any{}
 	for _, user := range users {
-		// potentially improve with bulk CALL via UNWIND []user
-		if _, err = clients.GraphQuery(`
-			MERGE (u:user{user_id:$user_id})
-			WITH u
-			UNWIND $channel_ids AS channel_id
-				MERGE (c:channel{channel_id:channel_id})
-				MERGE (u)-[:channel_member]->(c)
-			WITH u
-			UNWIND $team_ids AS team_id
-				MERGE (t:team{team_id:team_id})
-				MERGE (u)-[:team_member]->(t)
-		`, map[string]interface{}{
-			"channel_ids": user.ChannelsIds,
-			"team_ids":    user.TeamsIds,
-			"user_id":     user.Id,
-		}); err != nil {
-			//aErr = model.NewAppError("BiggoIndexer.IndexUsersBulk", "engine.biggo.indexer.index_user_bulk.app_error", nil, "", http.StatusInternalServerError).Wrap(err)
-			mlog.Error("BiggoIndexer", mlog.Err(err))
-			continue
-		}
-
 		var buffer []byte
 		if buffer, err = json.Marshal(user); err != nil {
 			mlog.Error("BiggoIndexer", mlog.Err(err))
@@ -125,6 +125,19 @@ func (be *BiggoEngine) IndexUsersBulk(users []*model.UserForIndexing) (aErr *mod
 			mlog.Error("BiggoIndexer", mlog.Err(err))
 			continue
 		}
+
+		usersMap = append(usersMap, map[string]any{
+			"channel_ids": user.ChannelsIds,
+			"team_ids":    user.TeamsIds,
+			"user_id":     user.Id,
+		})
+	}
+
+	if _, err = clients.GraphQuery(indexUsersBulkQuery, map[string]interface{}{
+		"users": usersMap,
+	}); err != nil {
+		//aErr = model.NewAppError("BiggoIndexer.IndexUsersBulk", "engine.biggo.indexer.index_user_bulk.app_error", nil, "", http.StatusInternalServerError).Wrap(err)
+		mlog.Error("BiggoIndexer", mlog.Err(err))
 	}
 	return
 }
@@ -149,7 +162,11 @@ func (be *BiggoEngine) SearchUsersInChannel(teamId, channelId string, restricted
 		OPTIONAL MATCH (:user{user_id:hit._id})-[r:channel_member]->(:channel{channel_id:$channel_id})
 		RETURN hit._id as id, r IS NOT NULL AS in_channel
 	`, map[string]interface{}{
-		"es_address": "http://172.17.0.1:9200",
+		"es_address": fmt.Sprintf("%s://%s:%.0f",
+			cfg.ElasticsearchProtocol(be.config),
+			cfg.ElasticsearchHost(be.config),
+			cfg.ElasticsearchPort(be.config),
+		),
 		"es_index":   EsUserIndex,
 		"channel_id": channelId,
 		"term":       term,
@@ -191,10 +208,14 @@ func (be *BiggoEngine) SearchUsersInTeam(teamId string, restrictedToChannels []s
 		UNWIND value.hits.hits AS hit
 		RETURN hit._id as id
 	`, map[string]interface{}{
-		"es_address": "http://172.17.0.1:9200",
-		"es_index":   EsUserIndex,
-		"term":       term,
-		"size":       25,
+		"es_address": fmt.Sprintf("%s://%s:%.0f",
+			cfg.ElasticsearchProtocol(be.config),
+			cfg.ElasticsearchHost(be.config),
+			cfg.ElasticsearchPort(be.config),
+		),
+		"es_index": EsUserIndex,
+		"term":     term,
+		"size":     25,
 	}); err != nil {
 		mlog.Error("BiggoIndexer", mlog.Err(err))
 		return

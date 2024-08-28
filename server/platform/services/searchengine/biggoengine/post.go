@@ -4,32 +4,147 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
+	"fmt"
+	"io"
+	"strings"
 
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/services/searchengine/biggoengine/cfg"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/services/searchengine/biggoengine/clients"
+	"github.com/elastic/go-elasticsearch/v7"
+	"github.com/elastic/go-elasticsearch/v7/esapi"
 	"github.com/elastic/go-elasticsearch/v7/esutil"
 	"github.com/neo4j/neo4j-go-driver/v5/neo4j"
 )
 
+const (
+	deleteUserPostsQuery string = `{
+		"query": {
+			"match": {
+				"user_id": "%s"
+			}
+		},
+		"script": {
+			"source": "ctx._source['delete_at'] = %dL",
+			"lang": "painless"
+		}
+	}`
+	deleteChannelPostsQuery string = `{
+		"query": {
+			"match": {
+				"channel_id": "%s"
+			}
+		},
+		"script": {
+			"source": "ctx._source['delete_at'] = %dL",
+			"lang": "painless"
+		}
+	}`
+	indexPostBulkQuery string = `
+		UNWIND $posts AS kvp
+			MERGE (p:post{post_id:kvp.post_id})
+			MERGE (c:channel{channel_id:kvp.channel_id})
+			MERGE (p)-[:in_channel]->(c)
+	`
+)
+
 func (be *BiggoEngine) DeleteChannelPosts(rctx request.CTX, channelID string) (aErr *model.AppError) {
+	var (
+		client *elasticsearch.Client
+		err    error
+		res    *esapi.Response
+	)
+
+	if client, err = clients.EsClient(); err != nil {
+		mlog.Error("BiggoIndexer", mlog.Err(err))
+		return
+	}
+
+	request := esapi.UpdateByQueryRequest{
+		Index: []string{EsPostIndex}, Body: strings.NewReader(fmt.Sprintf(deleteChannelPostsQuery, channelID, model.GetMillis())),
+	}
+
+	if res, err = request.Do(context.Background(), client); err != nil {
+		mlog.Error("BiggoIndexer", mlog.Err(err))
+		return
+	}
+	defer res.Body.Close()
+
+	if res.IsError() {
+		if buffer, err := io.ReadAll(res.Body); err == nil {
+			mlog.Error("BiggoIndexer", mlog.Err(errors.New(string(buffer))), mlog.Any("channelID", channelID))
+		}
+	}
 	return
 }
 
 func (be *BiggoEngine) DeletePost(post *model.Post) (aErr *model.AppError) {
+	var (
+		client *elasticsearch.Client
+		err    error
+		res    *esapi.Response
+	)
+
+	if client, err = clients.EsClient(); err != nil {
+		mlog.Error("BiggoIndexer", mlog.Err(err))
+		return
+	}
+
+	var buffer []byte
+	if buffer, err = json.Marshal(post); err != nil {
+		mlog.Error("BiggoIndexer", mlog.Err(err))
+		return
+	}
+
+	if res, err = client.Update(EsPostIndex, post.Id, bytes.NewBuffer(buffer)); err != nil {
+		mlog.Error("BiggoIndexer", mlog.Err(err))
+		return
+	}
+	defer res.Body.Close()
+
+	if res.IsError() {
+		if buffer, err := io.ReadAll(res.Body); err == nil {
+			mlog.Error("BiggoIndexer", mlog.Err(errors.New(string(buffer))), mlog.Any("post", post))
+		}
+	}
 	return
 }
 
 func (be *BiggoEngine) DeleteUserPosts(rctx request.CTX, userID string) (aErr *model.AppError) {
+	var (
+		client *elasticsearch.Client
+		err    error
+		res    *esapi.Response
+	)
+
+	if client, err = clients.EsClient(); err != nil {
+		mlog.Error("BiggoIndexer", mlog.Err(err))
+		return
+	}
+
+	request := esapi.UpdateByQueryRequest{
+		Index: []string{EsPostIndex}, Body: strings.NewReader(fmt.Sprintf(deleteUserPostsQuery, userID, model.GetMillis())),
+	}
+
+	if res, err = request.Do(context.Background(), client); err != nil {
+		mlog.Error("BiggoIndexer", mlog.Err(err))
+		return
+	}
+	defer res.Body.Close()
+
+	if res.IsError() {
+		if buffer, err := io.ReadAll(res.Body); err == nil {
+			mlog.Error("BiggoIndexer", mlog.Err(errors.New(string(buffer))), mlog.Any("userID", userID))
+		}
+	}
 	return
 }
 
 func (be *BiggoEngine) IndexPost(post *model.Post, teamId string) (aErr *model.AppError) {
-	return be.IndexPostsBulk([]*model.PostForIndexing{{
-		Post:   *post.Clone(),
-		TeamId: teamId,
-	}})
+	return be.IndexPostsBulk([]*model.PostForIndexing{{Post: *post.Clone(), TeamId: teamId}})
 }
 
 func (be *BiggoEngine) IndexPostsBulk(posts []*model.PostForIndexing) (aErr *model.AppError) {
@@ -44,20 +159,8 @@ func (be *BiggoEngine) IndexPostsBulk(posts []*model.PostForIndexing) (aErr *mod
 	}
 	defer indexer.Close(context.Background())
 
+	postsMap := []map[string]string{}
 	for _, post := range posts {
-		// potentially improve with bulk CALL via UNWIND []post
-		if _, err = clients.GraphQuery(`
-			MERGE (p:post{post_id:$post_id})
-			MERGE (c:channel{channel_id:$channel_id})
-			MERGE (p)-[:in_channel]->(c)
-		`, map[string]interface{}{
-			"post_id":    post.Id,
-			"channel_id": post.ChannelId,
-		}); err != nil {
-			mlog.Error("BiggoIndexer", mlog.Err(err))
-			continue
-		}
-
 		var buffer []byte
 		if buffer, err = json.Marshal(post); err != nil {
 			mlog.Error("BiggoIndexer", mlog.Err(err))
@@ -73,6 +176,17 @@ func (be *BiggoEngine) IndexPostsBulk(posts []*model.PostForIndexing) (aErr *mod
 			mlog.Error("BiggoIndexer", mlog.Err(err))
 			continue
 		}
+
+		postsMap = append(postsMap, map[string]string{
+			"channel_id": post.ChannelId,
+			"post_id":    post.Id,
+		})
+	}
+
+	if _, err = clients.GraphQuery(indexPostBulkQuery, map[string]interface{}{
+		"posts": postsMap,
+	}); err != nil {
+		mlog.Error("BiggoIndexer", mlog.Err(err))
 	}
 	return
 }
@@ -116,10 +230,14 @@ func (be *BiggoEngine) SearchPosts(channels model.ChannelList, searchParams []*m
 		UNWIND value.hits.hits AS hit
 		RETURN hit._id AS id;
 	`, map[string]interface{}{
-		"es_address": "http://172.17.0.1:9200",
-		"es_index":   EsPostIndex,
-		"term":       searchParams[0].Terms,
-		"size":       perPage,
+		"es_address": fmt.Sprintf("%s://%s:%.0f",
+			cfg.ElasticsearchProtocol(be.config),
+			cfg.ElasticsearchHost(be.config),
+			cfg.ElasticsearchPort(be.config),
+		),
+		"es_index": EsPostIndex,
+		"term":     searchParams[0].Terms,
+		"size":     perPage,
 	}); err != nil {
 		mlog.Error("BiggoIndexer", mlog.Err(err))
 		return
