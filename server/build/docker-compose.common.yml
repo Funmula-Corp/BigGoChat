@@ -166,3 +166,15 @@ services:
      - "./docker/grafana/dashboards:/var/lib/grafana/dashboards"
     networks:
       - mm-test
+  neo4j:
+    image: "neo4j:5.22.0-community"
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 1024M
+    networks:
+      - mm-test
+    environment:
+      NEO4J_AUTH: none
+      NEO4J_PLUGINS: '["apoc","apoc-extended"]'
