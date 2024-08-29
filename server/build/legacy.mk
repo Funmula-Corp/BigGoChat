@@ -78,3 +78,9 @@ clean-old-docker:
 		docker stop mattermost-elasticsearch > /dev/null; \
 		docker rm -v mattermost-elasticsearch > /dev/null; \
 	fi
+
+	@if [ $(shell docker ps -a | grep -ci mattermost-neo4j) -eq 1 ]; then \
+		echo removing mattermost-neo4j; \
+		docker stop mattermost-neo4j > /dev/null; \
+		docker rm -v mattermost-neo4j > /dev/null; \
+	fi
