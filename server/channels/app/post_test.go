@@ -1100,6 +1100,23 @@ func TestCreatePost(t *testing.T) {
 
 		wg.Wait()
 	})
+
+	t.Run("create thread on deleted post", func(t *testing.T) {
+		th := Setup(t).InitBasic()
+		defer th.TearDown()
+		deletedPost, err := th.App.DeletePost(th.Context, th.BasicPost.Id, th.BasicUser.Id)
+		require.Nil(t, err)
+		require.NotZero(t, deletedPost.DeleteAt)
+
+		replyPost := &model.Post{
+			ChannelId: th.BasicChannel.Id,
+			Message:   "test reply",
+			UserId:    th.BasicUser.Id,
+			RootId:    th.BasicPost.Id,
+		}
+		_, err = th.App.CreatePost(th.Context, replyPost, th.BasicChannel, false, false)
+		require.Nil(t, err)
+	})
 }
 
 func TestPatchPost(t *testing.T) {
