@@ -390,6 +390,8 @@ func TestUpdateCategoryForTeamForUser(t *testing.T) {
 
 	t.Run("should not be able to mute DM category", func(t *testing.T) {
 		user, client := setupUserForSubtest(t, th)
+		vErr := th.App.MarkUserVerified(th.Context, user.Id)
+		require.Nil(t, vErr)
 
 		categories, _, err := client.GetSidebarCategoriesForTeamForUser(context.Background(), user.Id, th.BasicTeam.Id, "")
 		require.NoError(t, err)
