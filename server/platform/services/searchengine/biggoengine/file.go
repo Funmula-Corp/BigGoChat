@@ -57,9 +57,17 @@ const (
 	indexFilesBulkQuery string = `
 		UNWIND $files AS kvp
 			MERGE (f:file{file_id:kvp.file_id})
+				ON CREATE SET f = {file_id:kvp.file_id}
+				ON MATCH SET f += {file_id:kvp.file_id}
 			MERGE (u:user{user_id:kvp.user_id})
+				ON CREATE SET u = {user_id:kvp.user_id}
+				ON MATCH SET u = u
 			MERGE (p:post{post_id:kvp.post_id})
+				ON CREATE SET p = {post_id:kvp.post_id}
+				ON MATCH SET p = p
 			MERGE (c:channel{channel_id:kvp.channel_id})
+				ON CREATE SET c = {channel_id:kvp.channel_id}
+				ON MATCH SET c = c
 			MERGE (f)-[:in_channel]->(c)
 			MERGE (f)-[:by_user]->(u)
 			MERGE (f)-[:in_post]->(p)

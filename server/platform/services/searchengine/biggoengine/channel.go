@@ -23,7 +23,11 @@ const (
 	indexChannelBulkQuery string = `
 		UNWIND $channels AS kvp
 			MERGE (c:channel{channel_id:kvp.channel_id})
+				ON CREATE SET c = {channel_id:kvp.channel_id,type:kvp.type}
+				ON MATCH SET c += {channel_id:kvp.channel_id,type:kvp.type}
 			MERGE (t:team{team_id:kvp.team_id})
+				ON CREATE SET t = {team_id:kvp.team_id}
+				ON MATCH SET t = t
 			MERGE (c)-[:in_team]->(t)
 	`
 )
@@ -97,6 +101,7 @@ func (be *BiggoEngine) IndexChannelsBulk(channels []*model.Channel) (aErr *model
 		channelsMap = append(channelsMap, map[string]string{
 			"channel_id": channel.Id,
 			"team_id":    channel.TeamId,
+			"type":       string(channel.Type),
 		})
 	}
 
@@ -109,19 +114,70 @@ func (be *BiggoEngine) IndexChannelsBulk(channels []*model.Channel) (aErr *model
 }
 
 func (be *BiggoEngine) SearchChannels(teamId, userID, term string, isGuest bool) (result []string, aErr *model.AppError) {
-	mlog.Debug("BiggoIndexer", mlog.String("teamId", teamId), mlog.String("userID", userID), mlog.String("term", term), mlog.Bool("isGuest", isGuest))
 	var (
 		err error
 		res *neo4j.EagerResult
 	)
 	if res, err = clients.GraphQuery(`
+		MATCH (u:user{user_id:$user_id})-[:channel_member]->(c:channel{type:'P'})
+		WITH COLLECT(c.channel_id) AS channel_ids
 		CALL apoc.es.query($es_address, $es_index, '_doc', null, {
 			fields: ['_id'],
 			query: {
-				prefix: {
-					display_name: {
-						value: $term
-					}
+				bool: {
+					should: [
+						{
+							bool: {
+								must: [
+									{ 
+										match: {
+											type: 'P'
+										}
+									},
+									{ 
+										prefix: {
+											team_id: $team_id
+										}
+									},
+									{
+										terms: {
+											id: channel_ids
+										}
+									},
+									{
+										prefix: {
+											display_name: {
+												value: $term
+											}
+										}
+									}
+								]
+							}
+						},
+						{
+							bool: {
+								must: [
+									{ 
+										match: {
+											type: 'O'
+										}
+									},
+									{ 
+										prefix: {
+											team_id: $team_id
+										}
+									},
+									{
+										prefix: {
+											display_name: {
+												value: $term
+											}
+										}
+									}
+								]
+							}
+						}
+					]
 				}
 			}, from: 0, size: $size
 		}) YIELD value
@@ -134,6 +190,8 @@ func (be *BiggoEngine) SearchChannels(teamId, userID, term string, isGuest bool)
 			cfg.ElasticsearchPort(be.config),
 		),
 		"es_index": EsChannelIndex,
+		"team_id":  teamId,
+		"user_id":  userID,
 		"term":     term,
 		"size":     25,
 	}); err != nil {
