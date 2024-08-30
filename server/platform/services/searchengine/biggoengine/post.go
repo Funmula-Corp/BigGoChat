@@ -46,8 +46,16 @@ const (
 	indexPostBulkQuery string = `
 		UNWIND $posts AS kvp
 			MERGE (p:post{post_id:kvp.post_id})
+				ON CREATE SET p = {post_id:kvp.post_id}
+				ON MATCH SET p += {post_id:kvp.post_id}
 			MERGE (c:channel{channel_id:kvp.channel_id})
+				ON CREATE SET c = {channel_id:kvp.channel_id}
+				ON MATCH SET c = c
+			MERGE (u:user{user_id:kvp.user_id})
+				ON CREATE SET u = {user_id:kvp.user_id}
+				ON MATCH SET u = u
 			MERGE (p)-[:in_channel]->(c)
+			MERGE (p)-[:posted_by]->(u)
 	`
 )
 
@@ -180,6 +188,7 @@ func (be *BiggoEngine) IndexPostsBulk(posts []*model.PostForIndexing) (aErr *mod
 		postsMap = append(postsMap, map[string]string{
 			"channel_id": post.ChannelId,
 			"post_id":    post.Id,
+			"user_id":    post.UserId,
 		})
 	}
 

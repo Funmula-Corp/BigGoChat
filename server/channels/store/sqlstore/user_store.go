@@ -1904,6 +1904,7 @@ func (us SqlUserStore) GetUsersBatchForIndexing(startTime int64, startFileID str
 				sq.Eq{"c.Type": model.ChannelTypeOpen},
 				sq.Eq{"c.Type": model.ChannelTypeDirect},
 				sq.Eq{"c.Type": model.ChannelTypeGroup},
+				sq.Eq{"c.Type": model.ChannelTypePrivate},
 			},
 		}).
 		ToSql()
@@ -1934,7 +1935,7 @@ func (us SqlUserStore) GetUsersBatchForIndexing(startTime int64, startFileID str
 	userMap := map[string]*model.UserForIndexing{}
 	for _, user := range users {
 		var mobilephone string
-		if user.Mobilephone != nil{
+		if user.Mobilephone != nil {
 			mobilephone = *user.Mobilephone
 		}
 

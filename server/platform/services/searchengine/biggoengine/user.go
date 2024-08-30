@@ -27,10 +27,14 @@ const (
 			WITH kvp, u
 			UNWIND kvp.channel_ids AS channel_id
 				MERGE (c:channel{channel_id:channel_id})
+					ON CREATE SET c = {channel_id:channel_id}
+					ON MATCH SET c = c
 				MERGE (u)-[:channel_member]->(c)
 			WITH kvp, u
 			UNWIND kvp.team_ids AS team_id
 				MERGE (t:team{team_id:team_id})
+					ON CREATE SET t = {team_id:team_id}
+					ON MATCH SET t = t
 				MERGE (u)-[:team_member]->(t)
 	`
 )
@@ -97,6 +101,7 @@ func (be *BiggoEngine) IndexUser(rctx request.CTX, user *model.User, teamsIds, c
 }
 
 func (be *BiggoEngine) IndexUsersBulk(users []*model.UserForIndexing) (aErr *model.AppError) {
+	mlog.Warn("BIGGO-INDEXER-DEBUG", mlog.Any("users", users))
 	var (
 		indexer esutil.BulkIndexer
 		err     error
