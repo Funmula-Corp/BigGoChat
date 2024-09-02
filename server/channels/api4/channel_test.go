@@ -4883,11 +4883,25 @@ func TestGetChannelsMemberCount(t *testing.T) {
 		require.Equal(t, 0, len(channelsMemberCount))
 	})
 
-	t.Run("Should fail due to permissions", func(t *testing.T) {
-		_, resp, err := client.GetChannelsMemberCount(context.Background(), []string{channel3.Id})
-		require.Error(t, err)
-		CheckForbiddenStatus(t, resp)
-		CheckErrorID(t, err, "api.context.permissions.app_error")
+	t.Run("team admin has permissions", func(t *testing.T) {
+		channelMemberCount, resp, err := client.GetChannelsMemberCount(context.Background(), []string{channel3.Id})
+		require.NoError(t, err)
+		CheckOKStatus(t, resp)
+		require.Equal(t, 1, len(channelMemberCount))
+	})
+
+	t.Run("team moderator has permissions", func(t *testing.T) {
+		th.LoginBasic2()
+		th.UpdateTeamMemberRole(th.BasicTeam.Id, th.BasicUser2.Id, model.SchemeRolesPatch{
+			SchemeModerator: model.NewBool(true),
+		})
+		defer th.UpdateTeamMemberRole(th.BasicTeam.Id, th.BasicUser2.Id, model.SchemeRolesPatch{
+			SchemeModerator: model.NewBool(false),
+		})
+		channelMemberCount, resp, err := th.Client.GetChannelsMemberCount(context.Background(), []string{channel3.Id})
+		require.NoError(t, err)
+		CheckOKStatus(t, resp)
+		require.Equal(t, 1, len(channelMemberCount))
 	})
 
 	t.Run("Should fail due to expired session when logged out", func(t *testing.T) {

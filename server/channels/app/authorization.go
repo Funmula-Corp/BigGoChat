@@ -405,5 +405,5 @@ func (a *App) HasPermissionToChannelMemberCount(c request.CTX, userID string, ch
 		return a.HasPermissionToTeam(c, userID, channel.TeamId, model.PermissionListTeamChannels)
 	}
 
-	return false
+	return a.HasPermissionToTeam(c, userID, channel.TeamId, model.PermissionManageTeam)
 }

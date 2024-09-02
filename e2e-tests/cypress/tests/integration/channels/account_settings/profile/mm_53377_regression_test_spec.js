@@ -14,7 +14,9 @@ describe('MM-53377 Regression tests', () => {
     let testUser;
     let testUser2;
 
-    before(() => {
+    before(function() {
+        // BigGoChat does not have a feature to open the profile modal
+        this.skip();
         cy.apiUpdateConfig({
             PrivacySettings: {
                 ShowEmailAddress: false,
