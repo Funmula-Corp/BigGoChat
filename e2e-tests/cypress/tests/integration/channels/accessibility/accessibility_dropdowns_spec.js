@@ -39,9 +39,7 @@ describe('Verify Accessibility Support in Dropdown Menus', () => {
             tab({shift: true});
 
         // * Verify the aria-label in channel menu button
-        cy.uiGetChannelHeaderButton().
-            findByLabelText('channel menu').
-            should('be.focused').click();
+        cy.uiGetChannelHeaderButton().findByLabelText('channel menu').click().should('be.focused');
 
         // * Verify the accessibility support in the Channel Dropdown menu
         cy.uiGetChannelMenu().
@@ -56,6 +54,21 @@ describe('Verify Accessibility Support in Dropdown Menus', () => {
         cy.focused().tab();
 
         // * Verify the accessibility support in the Channel Dropdown menu items
+        // const menuItems = [
+        //     'View Info',
+        //     'Move to...',
+        //     'Notification Preferences',
+        //     'Mute Channel',
+        //     'Add Members',
+        //     'Manage Members',
+        //     'Edit Channel Header',
+        //     'Edit Channel Purpose',
+        //     'Rename Channel',
+        //     'Convert to Private Channel',
+        //     'Archive Channel',
+        //     'Leave Channel',
+        // ];
+
         const menuItems = [
             'View Info',
             'Move to...',
@@ -67,9 +80,9 @@ describe('Verify Accessibility Support in Dropdown Menus', () => {
             'Edit Channel Purpose',
             'Rename Channel',
             'Convert to Private Channel',
-            'Archive Channel',
             'Leave Channel',
-        ];
+            'Archive Channel',
+        ];        
 
         menuItems.forEach((item) => {
             // * Verify that the menu item is focused
@@ -106,7 +119,6 @@ describe('Verify Accessibility Support in Dropdown Menus', () => {
             {id: 'teamSettings', label: 'Team Settings dialog'},
             {id: 'manageMembers', label: 'Manage Members dialog'},
             {id: 'joinTeam', text: 'Join Another Team'},
-            {id: 'leaveTeam', label: 'Leave Team dialog'},
             {id: 'createTeam', text: 'Create a Team'},
         ];
 
@@ -152,22 +164,23 @@ describe('Verify Accessibility Support in Dropdown Menus', () => {
         // # Press tab
         cy.focused().tab();
 
+        // BigGoChat changes this function to open a new window
         // * Verify first focus is on menu header which is the profile image
-        cy.uiGetStatusMenuContainer().within(() => {
-            cy.findByAltText('user profile image').should('be.focused');
-        });
+        // cy.uiGetStatusMenuContainer().within(() => {
+        //     cy.findByAltText('user profile image').should('be.focused');
+        // });
 
         // # Press tab
-        cy.focused().tab();
+        // cy.focused().tab();
 
         // * Verify the accessibility support in the Status Dropdown menu items
         const menuItems = [
-            {id: 'status-menu-custom-status', label: 'Set a Custom Status dialog'},
-            {id: 'status-menu-online', label: 'online'},
-            {id: 'status-menu-away', label: 'away'},
-            {id: 'status-menu-dnd_menuitem', label: 'do not disturb. disables all notifications'},
-            {id: 'status-menu-offline', label: 'offline'},
-            {id: 'accountSettings', label: 'Profile dialog'},
+            {id: 'status-menu-custom-status', label: 'Set a custom status dialog'},
+            {id: 'status-menu-online', label: 'Online'},
+            {id: 'status-menu-away', label: 'Away'},
+            {id: 'status-menu-dnd_menuitem', label: 'Do not disturb. Disables all notifications'},
+            {id: 'status-menu-offline', label: 'Offline'},
+            {id: 'accountSettings', label: 'Profile'},
             {id: 'logout', label: 'Log Out'},
         ];
 

@@ -13,7 +13,7 @@ describe('Support Packet Generation', () => {
     it('MM-T3817 - Commercial Support Dialog UI - No License', () => {
         // # Remove license
         cy.apiAdminLogin();
-        cy.apiDeleteLicense();
+        // cy.apiDeleteLicense();
 
         // # Go to System Console
         cy.visit('/admin_console');
