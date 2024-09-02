@@ -54,21 +54,6 @@ describe('Verify Accessibility Support in Dropdown Menus', () => {
         cy.focused().tab();
 
         // * Verify the accessibility support in the Channel Dropdown menu items
-        // const menuItems = [
-        //     'View Info',
-        //     'Move to...',
-        //     'Notification Preferences',
-        //     'Mute Channel',
-        //     'Add Members',
-        //     'Manage Members',
-        //     'Edit Channel Header',
-        //     'Edit Channel Purpose',
-        //     'Rename Channel',
-        //     'Convert to Private Channel',
-        //     'Archive Channel',
-        //     'Leave Channel',
-        // ];
-
         const menuItems = [
             'View Info',
             'Move to...',
@@ -163,15 +148,6 @@ describe('Verify Accessibility Support in Dropdown Menus', () => {
 
         // # Press tab
         cy.focused().tab();
-
-        // BigGoChat changes this function to open a new window
-        // * Verify first focus is on menu header which is the profile image
-        // cy.uiGetStatusMenuContainer().within(() => {
-        //     cy.findByAltText('user profile image').should('be.focused');
-        // });
-
-        // # Press tab
-        // cy.focused().tab();
 
         // * Verify the accessibility support in the Status Dropdown menu items
         const menuItems = [
