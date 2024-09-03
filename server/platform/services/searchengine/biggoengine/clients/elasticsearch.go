@@ -1,6 +1,7 @@
 package clients
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -10,6 +11,7 @@ import (
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/services/searchengine/biggoengine/cfg"
 	"github.com/elastic/go-elasticsearch/v7"
+	"github.com/elastic/go-elasticsearch/v7/esapi"
 	"github.com/elastic/go-elasticsearch/v7/esutil"
 )
 
@@ -72,5 +74,18 @@ func EsBulkIndex(index string) (indexer esutil.BulkIndexer, err error) {
 		FlushBytes:    10 * 1024 * 1024,
 		FlushInterval: 30 * time.Second,
 	})
+	return
+}
+
+func CheckIndexExists(indexName string) (retult bool) {
+	if client, err := EsClient(); err == nil {
+		req := esapi.IndicesExistsRequest{Index: []string{indexName}}
+		if res, err := req.Do(context.Background(), client); err == nil {
+			defer res.Body.Close()
+			if res.StatusCode == 200 {
+				retult = true
+			}
+		}
+	}
 	return
 }

@@ -308,15 +308,19 @@ func (worker *BiggoIndexerWorker) DoJob(job *model.Job) {
 
 func (worker *BiggoIndexerWorker) IndexBatch(logger mlog.LoggerIFace, progress IndexingProgress) (IndexingProgress, *model.AppError) {
 	if !progress.DonePosts {
+		worker.engine.InitializePostIndex()
 		return worker.IndexPostsBatch(logger, progress)
 	}
 	if !progress.DoneChannels {
+		worker.engine.InitializeChannelIndex()
 		return worker.IndexChannelsBatch(logger, progress)
 	}
 	if !progress.DoneUsers {
+		worker.engine.InitializeUserIndex()
 		return worker.IndexUsersBatch(logger, progress)
 	}
 	if !progress.DoneFiles {
+		worker.engine.InitializeFilesIndex()
 		return worker.IndexFilesBatch(logger, progress)
 	}
 	return progress, model.NewAppError("BiggoIndexerWorker", "biggoengine.indexer.index_batch.nothing_left_to_index.error", nil, "", http.StatusInternalServerError)
