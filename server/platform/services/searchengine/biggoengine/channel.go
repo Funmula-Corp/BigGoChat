@@ -64,6 +64,8 @@ func (be *BiggoEngine) DeleteChannel(channel *model.Channel) (aErr *model.AppErr
 	return
 }
 
+func (be *BiggoEngine) InitializeChannelIndex() {}
+
 func (be *BiggoEngine) IndexChannel(rctx request.CTX, channel *model.Channel, userIDs, teamMemberIDs []string) (aErr *model.AppError) {
 	return be.IndexChannelsBulk([]*model.Channel{channel})
 }
@@ -118,7 +120,7 @@ func (be *BiggoEngine) SearchChannels(teamId, userID, term string, isGuest bool)
 		err error
 		res *neo4j.EagerResult
 	)
-	if res, err = clients.GraphQuery(`
+	query := `
 		MATCH (u:user{user_id:$user_id})-[:channel_member]->(c:channel{type:'P'})
 		WITH COLLECT(c.channel_id) AS channel_ids
 		CALL apoc.es.query($es_address, $es_index, '_doc', null, {
@@ -183,7 +185,8 @@ func (be *BiggoEngine) SearchChannels(teamId, userID, term string, isGuest bool)
 		}) YIELD value
 		UNWIND value.hits.hits AS hit
 		RETURN hit._id as id
-	`, map[string]interface{}{
+	`
+	queryParams := map[string]interface{}{
 		"es_address": fmt.Sprintf("%s://%s:%.0f",
 			cfg.ElasticsearchProtocol(be.config),
 			cfg.ElasticsearchHost(be.config),
@@ -194,8 +197,9 @@ func (be *BiggoEngine) SearchChannels(teamId, userID, term string, isGuest bool)
 		"user_id":  userID,
 		"term":     term,
 		"size":     25,
-	}); err != nil {
-		mlog.Error("BiggoIndexer", mlog.Err(err))
+	}
+	if res, err = clients.GraphQuery(query, queryParams); err != nil {
+		mlog.Error("BiggoIndexer", mlog.String("function", "SearchChannels"), mlog.Err(err), mlog.String("query", query), mlog.Any("query_params", queryParams))
 		return
 	}
 

@@ -80,6 +80,8 @@ func (be *BiggoEngine) DeleteUser(user *model.User) (aErr *model.AppError) {
 	return
 }
 
+func (be *BiggoEngine) InitializeUserIndex() {}
+
 func (be *BiggoEngine) IndexUser(rctx request.CTX, user *model.User, teamsIds, channelsIds []string) (aErr *model.AppError) {
 	var mobilephone string
 	if user.Mobilephone != nil {
@@ -101,7 +103,6 @@ func (be *BiggoEngine) IndexUser(rctx request.CTX, user *model.User, teamsIds, c
 }
 
 func (be *BiggoEngine) IndexUsersBulk(users []*model.UserForIndexing) (aErr *model.AppError) {
-	mlog.Warn("BIGGO-INDEXER-DEBUG", mlog.Any("users", users))
 	var (
 		indexer esutil.BulkIndexer
 		err     error
@@ -152,7 +153,7 @@ func (be *BiggoEngine) SearchUsersInChannel(teamId, channelId string, restricted
 		err error
 		res *neo4j.EagerResult
 	)
-	if res, err = clients.GraphQuery(`
+	query := `
 		CALL apoc.es.query($es_address, $es_index, '_doc', null, {
 			fields: ['_id'],
 			query: {
@@ -166,7 +167,8 @@ func (be *BiggoEngine) SearchUsersInChannel(teamId, channelId string, restricted
 		UNWIND value.hits.hits AS hit
 		OPTIONAL MATCH (:user{user_id:hit._id})-[r:channel_member]->(:channel{channel_id:$channel_id})
 		RETURN hit._id as id, r IS NOT NULL AS in_channel
-	`, map[string]interface{}{
+	`
+	queryParams := map[string]any{
 		"es_address": fmt.Sprintf("%s://%s:%.0f",
 			cfg.ElasticsearchProtocol(be.config),
 			cfg.ElasticsearchHost(be.config),
@@ -175,9 +177,10 @@ func (be *BiggoEngine) SearchUsersInChannel(teamId, channelId string, restricted
 		"es_index":   EsUserIndex,
 		"channel_id": channelId,
 		"term":       term,
-		"size":       25,
-	}); err != nil {
-		mlog.Error("BiggoIndexer", mlog.Err(err))
+		"size":       options.Limit,
+	}
+	if res, err = clients.GraphQuery(query, queryParams); err != nil {
+		mlog.Error("BiggoIndexer", mlog.String("function", "SearchUsersInChannel"), mlog.Err(err), mlog.String("query", query), mlog.Any("query_params", queryParams))
 		return
 	}
 
@@ -199,7 +202,7 @@ func (be *BiggoEngine) SearchUsersInTeam(teamId string, restrictedToChannels []s
 		err error
 		res *neo4j.EagerResult
 	)
-	if res, err = clients.GraphQuery(`
+	query := `
 		CALL apoc.es.query($es_address, $es_index, '_doc', null, {
 			fields: ['_id'],
 			query: {
@@ -212,7 +215,8 @@ func (be *BiggoEngine) SearchUsersInTeam(teamId string, restrictedToChannels []s
 		}) YIELD value
 		UNWIND value.hits.hits AS hit
 		RETURN hit._id as id
-	`, map[string]interface{}{
+	`
+	queryParams := map[string]any{
 		"es_address": fmt.Sprintf("%s://%s:%.0f",
 			cfg.ElasticsearchProtocol(be.config),
 			cfg.ElasticsearchHost(be.config),
@@ -220,9 +224,10 @@ func (be *BiggoEngine) SearchUsersInTeam(teamId string, restrictedToChannels []s
 		),
 		"es_index": EsUserIndex,
 		"term":     term,
-		"size":     25,
-	}); err != nil {
-		mlog.Error("BiggoIndexer", mlog.Err(err))
+		"size":     options.Limit,
+	}
+	if res, err = clients.GraphQuery(query, queryParams); err != nil {
+		mlog.Error("BiggoIndexer", mlog.String("function", "SearchUsersInTeam"), mlog.Err(err), mlog.String("query", query), mlog.Any("query_params", queryParams))
 		return
 	}
 

@@ -12,8 +12,8 @@ import (
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/services/searchengine/biggoengine/cfg"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/services/searchengine/biggoengine/clients"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/services/searchengine/biggoengine/helper"
 	"github.com/elastic/go-elasticsearch/v7"
 	"github.com/elastic/go-elasticsearch/v7/esapi"
 	"github.com/elastic/go-elasticsearch/v7/esutil"
@@ -151,6 +151,56 @@ func (be *BiggoEngine) DeleteUserPosts(rctx request.CTX, userID string) (aErr *m
 	return
 }
 
+func (be *BiggoEngine) InitializePostIndex() {
+	if clients.CheckIndexExists(EsPostIndex) {
+		return
+	}
+
+	settings := `{
+		"settings": {
+			"analysis": {
+				"tokenizer": {
+					"mm_search_index_analyzer": {
+						"type": "pattern",
+						"pattern": "[\\._/\\s]"
+					}
+				},
+				"analyzer": {
+					"mm_search_index_analyzer": {
+						"type": "custom",
+						"tokenizer": "mm_search_index_analyzer"
+					}
+				}
+			}
+		},
+		"mappings": {
+			"properties": {
+				"message": {
+					"type": "text",
+					"analyzer": "mm_search_index_analyzer"
+				}
+			}
+		}
+	}`
+
+	client, _ := clients.EsClient()
+	if res, err := client.Indices.Create(EsPostIndex,
+		client.Indices.Create.WithBody(strings.NewReader(settings)),
+	); err != nil {
+		mlog.Error("BiggoIndexer", mlog.Err(err))
+	} else {
+		defer res.Body.Close()
+		if res.StatusCode > 400 {
+			var buffer []byte
+			if buffer, err = io.ReadAll(res.Body); err != nil {
+				mlog.Error("BiggoIndexer", mlog.Err(err))
+				return
+			}
+			mlog.Error("BiggoIndexer", mlog.Err(errors.New(string(buffer))))
+		}
+	}
+}
+
 func (be *BiggoEngine) IndexPost(post *model.Post, teamId string) (aErr *model.AppError) {
 	return be.IndexPostsBulk([]*model.PostForIndexing{{Post: *post.Clone(), TeamId: teamId}})
 }
@@ -169,6 +219,10 @@ func (be *BiggoEngine) IndexPostsBulk(posts []*model.PostForIndexing) (aErr *mod
 
 	postsMap := []map[string]string{}
 	for _, post := range posts {
+		// index only user / bot send messages - ignore all system messages -> [server/public/model/post.go] constants
+		if post.Type != "" {
+			continue
+		}
 		var buffer []byte
 		if buffer, err = json.Marshal(post); err != nil {
 			mlog.Error("BiggoIndexer", mlog.Err(err))
@@ -201,54 +255,20 @@ func (be *BiggoEngine) IndexPostsBulk(posts []*model.PostForIndexing) (aErr *mod
 }
 
 func (be *BiggoEngine) SearchPosts(channels model.ChannelList, searchParams []*model.SearchParams, page, perPage int) (postIds []string, matches model.PostSearchMatches, aErr *model.AppError) {
-	mlog.Debug("BiggoIndexer", mlog.Any("channels", channels), mlog.Any("searchParams", searchParams), mlog.Int("page", page), mlog.Int("perPage", perPage))
 	var (
 		err error
 		res *neo4j.EagerResult
 	)
-	if res, err = clients.GraphQuery(`
-		CALL apoc.es.query($es_address, $es_index, '_doc', null, {
-			fields: ['_id'],
-			query: {
-				bool: {
-					must: [
-						{
-							match_phrase: {
-								message: $term
-							}
-						},
-						{
-							exists: {
-								field: 'type'
-							}
-						}
-					],
-					must_not: [
-						{
-							terms: {
-								type: [
-									'system_join_team',
-									'system_join_channel'
-								]
-							}
-						}
-					]
-				} 
-			}, from: 0, size: $size
-		}) YIELD value
-		UNWIND value.hits.hits AS hit
-		RETURN hit._id AS id;
-	`, map[string]interface{}{
-		"es_address": fmt.Sprintf("%s://%s:%.0f",
-			cfg.ElasticsearchProtocol(be.config),
-			cfg.ElasticsearchHost(be.config),
-			cfg.ElasticsearchPort(be.config),
-		),
-		"es_index": EsPostIndex,
-		"term":     searchParams[0].Terms,
-		"size":     perPage,
-	}); err != nil {
-		mlog.Error("BiggoIndexer", mlog.Err(err))
+
+	if len(searchParams) <= 0 {
+		// no search parameters provided
+		return
+	}
+
+	query, queryParams := helper.ComposeSearchParamsQuery(be.config, EsPostIndex, page, perPage, "message", searchParams[0])
+	mlog.Debug("BiggoIndexer", mlog.String("posts_query", query), mlog.Any("posts_query_params", queryParams))
+	if res, err = clients.GraphQuery(fmt.Sprintf(`%s RETURN hit._id AS id;`, query), queryParams); err != nil {
+		mlog.Error("BiggoIndexer", mlog.String("function", "SearchPosts"), mlog.Err(err), mlog.String("query", query), mlog.Any("query_params", queryParams))
 		return
 	}
 

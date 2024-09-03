@@ -13,9 +13,11 @@ import (
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/services/searchengine/biggoengine/clients"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/services/searchengine/biggoengine/helper"
 	"github.com/elastic/go-elasticsearch/v7"
 	"github.com/elastic/go-elasticsearch/v7/esapi"
 	"github.com/elastic/go-elasticsearch/v7/esutil"
+	"github.com/neo4j/neo4j-go-driver/v5/neo4j"
 )
 
 const (
@@ -198,6 +200,56 @@ func (be *BiggoEngine) DeleteUserFiles(rctx request.CTX, userID string) (aErr *m
 	return
 }
 
+func (be *BiggoEngine) InitializeFilesIndex() {
+	if clients.CheckIndexExists(EsFileIndex) {
+		return
+	}
+
+	settings := `{
+		"settings": {
+			"analysis": {
+				"tokenizer": {
+					"mm_search_index_analyzer": {
+						"type": "pattern",
+						"pattern": "[\\._/\\s]"
+					}
+				},
+				"analyzer": {
+					"mm_search_index_analyzer": {
+						"type": "custom",
+						"tokenizer": "mm_search_index_analyzer"
+					}
+				}
+			}
+		},
+		"mappings": {
+			"properties": {
+				"name": {
+					"type": "text",
+					"analyzer": "mm_search_index_analyzer"
+				}
+			}
+		}
+	}`
+
+	client, _ := clients.EsClient()
+	if res, err := client.Indices.Create(EsFileIndex,
+		client.Indices.Create.WithBody(strings.NewReader(settings)),
+	); err != nil {
+		mlog.Error("BiggoIndexer", mlog.Err(err))
+	} else {
+		defer res.Body.Close()
+		if res.StatusCode > 400 {
+			var buffer []byte
+			if buffer, err = io.ReadAll(res.Body); err != nil {
+				mlog.Error("BiggoIndexer", mlog.Err(err))
+				return
+			}
+			mlog.Error("BiggoIndexer", mlog.Err(errors.New(string(buffer))))
+		}
+	}
+}
+
 func (be *BiggoEngine) IndexFile(file *model.FileInfo, channelId string) (aErr *model.AppError) {
 	return be.IndexFilesBulk([]*model.FileForIndexing{{FileInfo: *file, ChannelId: channelId}})
 }
@@ -249,5 +301,29 @@ func (be *BiggoEngine) IndexFilesBulk(files []*model.FileForIndexing) (aErr *mod
 }
 
 func (be *BiggoEngine) SearchFiles(channels model.ChannelList, searchParams []*model.SearchParams, page, perPage int) (result []string, aErr *model.AppError) {
+	var (
+		err error
+		res *neo4j.EagerResult
+	)
+
+	// use index_* for search and index_1 for indexing
+	// create analyzer and mapping for indices before feeding
+	if len(searchParams) <= 0 {
+		// no search parameters provided
+		return
+	}
+
+	query, queryParams := helper.ComposeSearchParamsQuery(be.config, EsFileIndex, page, perPage, "name", searchParams[0])
+	mlog.Debug("BiggoIndexer", mlog.String("files_query", query), mlog.Any("files_query_params", queryParams))
+	if res, err = clients.GraphQuery(fmt.Sprintf(`%s RETURN hit._id AS id;`, query), queryParams); err != nil {
+		mlog.Error("BiggoIndexer", mlog.String("function", "SearchFiles"), mlog.Err(err), mlog.String("query", query), mlog.Any("query_params", queryParams))
+		return
+	}
+
+	result = []string{}
+	for _, record := range res.Records {
+		entry := record.AsMap()
+		result = append(result, entry["id"].(string))
+	}
 	return
 }
