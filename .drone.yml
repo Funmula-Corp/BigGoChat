@@ -118,7 +118,7 @@ steps:
       from_secret: droneio-dev-docker-user
     password:
       from_secret: droneio-dev-docker-secret
-    cache_from: docker.dev.cloud.biggo.com/mattermost/mattermost:cache
+    cache_from: docker.dev.cloud.biggo.com/mattermost/mattermost:nightly
     registry: docker.dev.cloud.biggo.com
     repo: docker.dev.cloud.biggo.com/mattermost/mattermost
     dockerfile: server/build/Dockerfile
