@@ -88,3 +88,40 @@ steps:
     helmReleaseBranch: release
     helmRepo: "https://git.biggo.com/Funmula/helm-repo.git"
     image: "docker.dev.cloud.biggo.com/mattermost/mattermost"
+
+---
+kind: pipeline
+type: kubernetes
+name: nightly-build
+
+trigger:
+  event:
+  - cron
+  cron:
+  - nightly
+
+steps:
+- name: "build server"
+  image: docker.cloud.biggo.com/droneio/mattermost-funmula-build
+  commands:
+  - export BUILD_NUMBER=${DRONE_COMMIT_SHA:0:8}
+  - make build-server
+  - make build-package
+  - cd server/build 
+  - mkdir packages
+  - cp -r ../dist packages
+
+- name: "build docker image"
+  image: docker.dev.cloud.biggo.com/test/plugin-docker
+  settings:
+    username:
+      from_secret: droneio-dev-docker-user
+    password:
+      from_secret: droneio-dev-docker-secret
+    cache_from: docker.dev.cloud.biggo.com/mattermost/mattermost:nightly
+    registry: docker.dev.cloud.biggo.com
+    repo: docker.dev.cloud.biggo.com/mattermost/mattermost
+    dockerfile: server/build/Dockerfile
+    context: server/build
+    tags:
+    - nightly
