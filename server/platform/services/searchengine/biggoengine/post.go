@@ -152,7 +152,8 @@ func (be *BiggoEngine) DeleteUserPosts(rctx request.CTX, userID string) (aErr *m
 }
 
 func (be *BiggoEngine) InitializePostIndex() {
-	if clients.CheckIndexExists(EsPostIndex) {
+	var index = be.GetEsPostIndex()
+	if clients.CheckIndexExists(index) {
 		return
 	}
 
@@ -184,7 +185,7 @@ func (be *BiggoEngine) InitializePostIndex() {
 	}`
 
 	client, _ := clients.EsClient()
-	if res, err := client.Indices.Create(EsPostIndex,
+	if res, err := client.Indices.Create(index,
 		client.Indices.Create.WithBody(strings.NewReader(settings)),
 	); err != nil {
 		mlog.Error("BiggoIndexer", mlog.Err(err))
@@ -211,7 +212,8 @@ func (be *BiggoEngine) IndexPostsBulk(posts []*model.PostForIndexing) (aErr *mod
 		err     error
 	)
 
-	if indexer, err = clients.EsBulkIndex(EsPostIndex); err != nil {
+	var index = be.GetEsPostIndex()
+	if indexer, err = clients.EsBulkIndex(index); err != nil {
 		mlog.Error("BiggoIndexer", mlog.Err(err))
 		return
 	}
@@ -233,7 +235,7 @@ func (be *BiggoEngine) IndexPostsBulk(posts []*model.PostForIndexing) (aErr *mod
 			Action:     "index",
 			DocumentID: post.Id,
 			Body:       bytes.NewBuffer(buffer),
-			Index:      EsPostIndex,
+			Index:      index,
 		}); err != nil {
 			mlog.Error("BiggoIndexer", mlog.Err(err))
 			continue

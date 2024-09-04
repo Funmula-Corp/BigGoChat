@@ -76,7 +76,8 @@ func (be *BiggoEngine) IndexChannelsBulk(channels []*model.Channel) (aErr *model
 		err     error
 	)
 
-	if indexer, err = clients.EsBulkIndex(EsChannelIndex); err != nil {
+	var index = be.GetEsChannelIndex()
+	if indexer, err = clients.EsBulkIndex(index); err != nil {
 		mlog.Error("BiggoIndexer", mlog.Err(err))
 		return
 	}
@@ -94,7 +95,7 @@ func (be *BiggoEngine) IndexChannelsBulk(channels []*model.Channel) (aErr *model
 			Action:     "index",
 			DocumentID: channel.Id,
 			Body:       bytes.NewBuffer(buffer),
-			Index:      EsChannelIndex,
+			Index:      index,
 		}); err != nil {
 			mlog.Error("BiggoIndexer", mlog.Err(err))
 			continue

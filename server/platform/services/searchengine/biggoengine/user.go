@@ -108,7 +108,8 @@ func (be *BiggoEngine) IndexUsersBulk(users []*model.UserForIndexing) (aErr *mod
 		err     error
 	)
 
-	if indexer, err = clients.EsBulkIndex(EsUserIndex); err != nil {
+	var index = be.GetEsUserIndex()
+	if indexer, err = clients.EsBulkIndex(index); err != nil {
 		mlog.Error("BiggoIndexer", mlog.Err(err))
 		return
 	}
@@ -126,7 +127,7 @@ func (be *BiggoEngine) IndexUsersBulk(users []*model.UserForIndexing) (aErr *mod
 			Action:     "index",
 			DocumentID: user.Id,
 			Body:       bytes.NewBuffer(buffer),
-			Index:      EsUserIndex,
+			Index:      index,
 		}); err != nil {
 			mlog.Error("BiggoIndexer", mlog.Err(err))
 			continue
