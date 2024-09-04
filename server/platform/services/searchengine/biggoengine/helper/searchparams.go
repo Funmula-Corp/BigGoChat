@@ -3,6 +3,7 @@ package helper
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
@@ -63,6 +64,38 @@ func ComposeSearchParamsQuery(config *model.Config, index string, page int, perS
 	if len(searchParam.ExcludedUsers) > 0 {
 		queryParams["exclude_users"] = searchParam.ExcludedUsers
 	}
+
+	if searchParam.AfterDate != "" {
+		if ts, err := time.Parse("2006-01-02", searchParam.AfterDate); err == nil {
+			queryParams["after_date"] = model.GetMillisForTime(ts)
+		} else {
+			queryParams["after_date"] = 0
+		}
+	}
+
+	if searchParam.ExcludedAfterDate != "" {
+		if ts, err := time.Parse("2006-01-02", searchParam.ExcludedAfterDate); err == nil {
+			queryParams["excluded_after_date"] = model.GetMillisForTime(ts)
+		} else {
+			queryParams["excluded_after_date"] = model.GetMillis()
+		}
+	}
+
+	if searchParam.BeforeDate != "" {
+		if ts, err := time.Parse("2006-01-02", searchParam.BeforeDate); err == nil {
+			queryParams["before_date"] = model.GetMillisForTime(ts)
+		} else {
+			queryParams["before_date"] = model.GetMillis()
+		}
+	}
+
+	if searchParam.ExcludedBeforeDate != "" {
+		if ts, err := time.Parse("2006-01-02", searchParam.ExcludedBeforeDate); err == nil {
+			queryParams["excluded_before_date"] = model.GetMillisForTime(ts)
+		} else {
+			queryParams["excluded_before_date"] = 0
+		}
+	}
 	return
 }
 
@@ -111,6 +144,22 @@ func composeSearchQuery(fieldName *string, searchParam *model.SearchParams) (par
 		must_not = append(must_not, "{terms: {user_id: $exclude_users}}")
 	}
 
+	if searchParam.AfterDate != "" {
+		must = append(must, "{range: {create_at: {gte: $after_date}}}")
+	}
+
+	if searchParam.ExcludedAfterDate != "" {
+		must_not = append(must, "{range: {create_at: {gte: $excluded_after_date}}}")
+	}
+
+	if searchParam.BeforeDate != "" {
+		must = append(must, "{range: {create_at: {lte: $before_date}}}")
+	}
+
+	if searchParam.ExcludedBeforeDate != "" {
+		must_not = append(must, "{range: {create_at: {lte: $excluded_before_date}}}")
+	}
+
 	builder := strings.Builder{}
 	builder.WriteString("{ bool: {")
 	if len(should) > 0 {
@@ -119,6 +168,9 @@ func composeSearchQuery(fieldName *string, searchParam *model.SearchParams) (par
 		builder.WriteString("]")
 	}
 	if len(must) > 0 {
+		if len(should) > 0 {
+			builder.WriteString(",")
+		}
 		builder.WriteString("must: [")
 		builder.WriteString(strings.Join(must, ","))
 		builder.WriteString("]")
