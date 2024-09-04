@@ -267,6 +267,13 @@ func (be *BiggoEngine) SearchPosts(channels model.ChannelList, searchParams []*m
 		return
 	}
 
+	if searchParams[0].InChannels == nil {
+		searchParams[0].InChannels = []string{}
+	}
+	for _, c := range channels {
+		searchParams[0].InChannels = append(searchParams[0].InChannels, c.Id)
+	}
+
 	query, queryParams := helper.ComposeSearchParamsQuery(be.config, EsPostIndex, page, perPage, "message", searchParams[0])
 	mlog.Debug("BiggoIndexer", mlog.String("posts_query", query), mlog.Any("posts_query_params", queryParams))
 	if res, err = clients.GraphQuery(fmt.Sprintf(`%s RETURN hit._id AS id;`, query), queryParams); err != nil {
