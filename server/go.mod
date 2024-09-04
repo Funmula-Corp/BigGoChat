@@ -18,6 +18,7 @@ require (
 	github.com/dgryski/dgoogauth v0.0.0-20190221195224-5a805980a5f3
 	github.com/disintegration/imaging v1.6.2
 	github.com/dyatlov/go-opengraph/opengraph v0.0.0-20220524092352-606d7b1e5f8a
+	github.com/elastic/go-elasticsearch/v7 v7.17.10
 	github.com/fatih/color v1.16.0
 	github.com/fsnotify/fsnotify v1.7.0
 	github.com/getsentry/sentry-go v0.27.0
@@ -45,12 +46,14 @@ require (
 	github.com/mattermost/gosaml2 v0.8.0
 	github.com/mattermost/ldap v0.0.0-20231116144001-0f480c025956
 	github.com/mattermost/logr/v2 v2.0.21
+	github.com/mattermost/mattermost/server/public v0.0.10-0.20231116111926-0bc542620ce2
 	github.com/mattermost/morph v1.1.0
 	github.com/mattermost/rsc v0.0.0-20160330161541-bbaefb05eaa0
 	github.com/mattermost/squirrel v0.4.0
 	github.com/mholt/archiver/v3 v3.5.1
 	github.com/microcosm-cc/bluemonday v1.0.26
 	github.com/minio/minio-go/v7 v7.0.67
+	github.com/neo4j/neo4j-go-driver/v5 v5.23.1
 	github.com/oov/psd v0.0.0-20220121172623-5db5eafcecbb
 	github.com/opentracing/opentracing-go v1.2.0
 	github.com/pkg/errors v0.9.1
@@ -122,7 +125,6 @@ require (
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/dsnet/compress v0.0.2-0.20210315054119-f66993602bf5 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
-	github.com/elastic/go-elasticsearch/v7 v7.17.10 // indirect
 	github.com/fatih/set v0.2.1 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
 	github.com/fortytw2/leaktest v1.3.0 // indirect
@@ -161,7 +163,6 @@ require (
 	github.com/levigross/exp-html v0.0.0-20120902181939-8df60c69a8f5 // indirect
 	github.com/magiconair/properties v1.8.7 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
-	github.com/mattermost/mattermost/server/public v0.0.10-0.20231116111926-0bc542620ce2 // indirect
 	github.com/mattermost/xml-roundtrip-validator v0.1.0 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
@@ -176,7 +177,6 @@ require (
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/mschoch/smat v0.2.0 // indirect
 	github.com/ncruces/go-strftime v0.1.9 // indirect
-	github.com/neo4j/neo4j-go-driver/v5 v5.23.1 // indirect
 	github.com/nwaples/rardecode v1.1.3 // indirect
 	github.com/oklog/run v1.1.0 // indirect
 	github.com/olekukonko/tablewriter v0.0.5 // indirect
