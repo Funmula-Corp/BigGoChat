@@ -93,6 +93,22 @@ func ElasticsearchPassword(cfg *model.Config) string {
 	return getString(cfg, keyElasticsearchPassword, "")
 }
 
+func ElasticsearchIndexChannelSuffix(cfg *model.Config) string {
+	return getString(cfg, "elasticsearch_index_channel_suffix", "0")
+}
+
+func ElasticsearchIndexFileSuffix(cfg *model.Config) string {
+	return getString(cfg, "elasticsearch_index_file_suffix", "0")
+}
+
+func ElasticsearchIndexPostSuffix(cfg *model.Config) string {
+	return getString(cfg, "elasticsearch_index_post_suffix", "0")
+}
+
+func ElasticsearchIndexUserSuffix(cfg *model.Config) string {
+	return getString(cfg, "elasticsearch_index_user_suffix", "0")
+}
+
 func getBool(cfg *model.Config, key ConfigKey, fallback bool) (value bool) {
 	value = fallback
 	if cfg != nil {

@@ -19,11 +19,27 @@ const (
 	PostVertex    = "post"
 	UserVertex    = "user"
 
-	EsChannelIndex string = "mm_biggoengine_channel"
-	EsFileIndex    string = "mm_biggoengine_file"
-	EsPostIndex    string = "mm_biggoengine_post"
-	EsUserIndex    string = "mm_biggoengine_user"
+	EsChannelIndex = "mm_biggoengine_channel_*"
+	EsFileIndex    = "mm_biggoengine_file_*"
+	EsPostIndex    = "mm_biggoengine_post_*"
+	EsUserIndex    = "mm_biggoengine_user_*"
 )
+
+func (be *BiggoEngine) GetEsChannelIndex() string {
+	return fmt.Sprintf("mm_biggoengine_channel_%s", cfg.ElasticsearchIndexChannelSuffix(be.config))
+}
+
+func (be *BiggoEngine) GetEsFileIndex() string {
+	return fmt.Sprintf("mm_biggoengine_file_%s", cfg.ElasticsearchIndexFileSuffix(be.config))
+}
+
+func (be *BiggoEngine) GetEsPostIndex() string {
+	return fmt.Sprintf("mm_biggoengine_post_%s", cfg.ElasticsearchIndexPostSuffix(be.config))
+}
+
+func (be *BiggoEngine) GetEsUserIndex() string {
+	return fmt.Sprintf("mm_biggoengine_user_%s", cfg.ElasticsearchIndexUserSuffix(be.config))
+}
 
 func NewBiggoEngine(config *model.Config) *BiggoEngine {
 	clients.InitEsClient(config)

@@ -201,7 +201,8 @@ func (be *BiggoEngine) DeleteUserFiles(rctx request.CTX, userID string) (aErr *m
 }
 
 func (be *BiggoEngine) InitializeFilesIndex() {
-	if clients.CheckIndexExists(EsFileIndex) {
+	var index = be.GetEsFileIndex()
+	if clients.CheckIndexExists(index) {
 		return
 	}
 
@@ -233,7 +234,7 @@ func (be *BiggoEngine) InitializeFilesIndex() {
 	}`
 
 	client, _ := clients.EsClient()
-	if res, err := client.Indices.Create(EsFileIndex,
+	if res, err := client.Indices.Create(index,
 		client.Indices.Create.WithBody(strings.NewReader(settings)),
 	); err != nil {
 		mlog.Error("BiggoIndexer", mlog.Err(err))
@@ -260,7 +261,8 @@ func (be *BiggoEngine) IndexFilesBulk(files []*model.FileForIndexing) (aErr *mod
 		err     error
 	)
 
-	if indexer, err = clients.EsBulkIndex(EsPostIndex); err != nil {
+	var index = be.GetEsFileIndex()
+	if indexer, err = clients.EsBulkIndex(index); err != nil {
 		mlog.Error("BiggoIndexer", mlog.Err(err))
 		return
 	}
@@ -278,7 +280,7 @@ func (be *BiggoEngine) IndexFilesBulk(files []*model.FileForIndexing) (aErr *mod
 			Action:     "index",
 			DocumentID: file.Id,
 			Body:       bytes.NewBuffer(buffer),
-			Index:      EsFileIndex,
+			Index:      index,
 		}); err != nil {
 			mlog.Error("BiggoIndexer", mlog.Err(err))
 			continue
