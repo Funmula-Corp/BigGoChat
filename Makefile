@@ -12,7 +12,7 @@ build-package:
 build-docker:
 	cd server/build && \
 	cp -r ../dist packages && \
-	docker build -t docker.dev.cloud.biggo.com/test/mattermost:development .
+	docker build -t docker.dev.cloud.biggo.com/test/mattermost:searchengine .
 
 build-server:
 	cd server && $(MAKE) build
