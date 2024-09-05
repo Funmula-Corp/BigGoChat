@@ -22,7 +22,9 @@ describe('AD / LDAP', () => {
     let samlLdapUser;
     let testTeamId;
 
-    before(() => {
+    before(function() {
+        // BigGoChat does not support LDAP, SAML, and Keycloak features
+        this.skip();
         cy.shouldNotRunOnCloudEdition();
         cy.apiRequireLicenseForFeature('LDAP', 'SAML');
 
