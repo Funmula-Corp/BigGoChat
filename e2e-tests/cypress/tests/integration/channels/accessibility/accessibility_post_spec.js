@@ -74,7 +74,7 @@ describe('Verify Accessibility Support in Post', () => {
                 cy.get('#FormattingControl_bold').focus().tab({shift: true}).tab({shift: true}).type('{uparrow}');
 
                 // * Verify reader reads out the post correctly
-                verifyPostLabel(`#rhsPost_${postId}`, otherUser.username, `wrote, ${lastMessage}, 2 reactions, message is saved and pinned`);
+                verifyPostLabel(`#rhsPost_${postId}`, otherUser.username, `wrote, ${lastMessage}, 2 reactions, message is saved and pinned`, true);
             });
 
             // * Verify reply message in RHS
@@ -84,7 +84,7 @@ describe('Verify Accessibility Support in Post', () => {
                     cy.get('#FormattingControl_bold').focus().tab({shift: true}).tab({shift: true}).type('{uparrow}{downarrow}');
 
                     // * Verify reader reads out the post correctly
-                    verifyPostLabel(`#rhsPost_${replyId}`, testUser.username, `replied, ${replyMessage}`);
+                    verifyPostLabel(`#rhsPost_${replyId}`, testUser.username, `replied, ${replyMessage}`, true);
                 });
             });
         });
@@ -334,16 +334,78 @@ function performActionsToLastPost() {
     });
 }
 
-function verifyPostLabel(elementId, username, labelSuffix) {
+const parseTimeString = (timeString) => {
+    const now = new Date();
+    const [time, period] = timeString.split(' ');
+    const [hours, minutes] = time.split(':').map(Number);
+    let adjustedHours = hours;
+
+    if (period === 'PM' && hours !== 12) {
+        adjustedHours += 12;
+    } else if (period === 'AM' && hours === 12) {
+        adjustedHours = 0;
+    }
+
+    const timeDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), adjustedHours, minutes);
+    return timeDate.getTime();
+};
+
+const convertToRelativeTime = (timestamp) => {
+    const now = new Date();
+    const secondsPast = (now.getTime() - timestamp) / 1000;
+
+    if (secondsPast < 60) {
+        return 'now';
+    } else if (secondsPast < 3600) {
+        const minutes = Math.round(secondsPast / 60);
+        return `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
+    } else if (secondsPast < 86400) {
+        const hours = Math.round(secondsPast / 3600);
+        return `${hours} hour${hours > 1 ? 's' : ''} ago`;
+    } else if (secondsPast < 172800) {
+        return 'yesterday';
+    } else if (secondsPast < 604800) {
+        const days = Math.round(secondsPast / 86400);
+        return `${days} day${days > 1 ? 's' : ''} ago`;
+    } else if (secondsPast < 2592000) {
+        const weeks = Math.round(secondsPast / 604800);
+        return `${weeks} week${weeks > 1 ? 's' : ''} ago`;
+    } else if (secondsPast < 31536000) {
+        const months = Math.round(secondsPast / 2592000);
+        return `${months} month${months > 1 ? 's' : ''} ago`;
+    } else {
+        const date = new Date(timestamp);
+        const y = date.getFullYear();
+        const m = (date.getMonth() + 1).toString().padStart(2, '0');
+        const d = date.getDate().toString().padStart(2, '0');
+        return `${y}-${m}-${d}`;
+    }
+};
+
+function verifyPostLabel(elementId, username, labelSuffix, isRHS = false) {
     // # Shift focus to the last post
     cy.get(elementId).as('lastPost').should('be.focused');
 
     // * Verify reader reads out the post correctly
     cy.get('@lastPost').then((el) => {
-        // # Get the post time
-        cy.wrap(el).find('time.post__time').invoke('text').then((time) => {
-            const expectedLabel = `At ${time} ${Cypress.dayjs().format('dddd, MMMM D')}, ${username} ${labelSuffix}`;
-            cy.wrap(el).should('have.attr', 'aria-label', expectedLabel);
-        });
+        if (isRHS) {
+            cy.wrap(el).invoke('attr', 'aria-label').then((ariaLabel) => {
+                const timeRegex = /At (\d{1,2}:\d{2} [APM]{2})/;
+                const timeMatch = ariaLabel.match(timeRegex);
+                const timeString = timeMatch ? timeMatch[1] : 'unknown time';
+
+                const timestamp = parseTimeString(timeString);
+                const expectedText = convertToRelativeTime(timestamp);
+
+                cy.wrap(el).find('time.post__time').invoke('text').then((text) => {
+                    expect(text.trim()).to.equal(expectedText);
+                })
+            });
+        } else {
+            cy.wrap(el).find('time.post__time').invoke('text').then((text) => {
+                const expectedLabel = `At ${text} ${Cypress.dayjs().format('dddd, MMMM D')}, ${username} ${labelSuffix}`;
+                cy.wrap(el).should('have.attr', 'aria-label', expectedLabel);
+            });
+        }
     });
 }
