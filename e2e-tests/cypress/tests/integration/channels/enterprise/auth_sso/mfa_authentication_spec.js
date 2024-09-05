@@ -19,7 +19,9 @@ describe('Authentication', () => {
     let testUser;
     let adminMFASecret;
 
-    before(() => {
+    before(function() {
+        // BigGoChat does not support Multi-Factor Authentication (MFA)
+        this.skip();
         cy.apiRequireLicenseForFeature('MFA');
 
         // # Do email test if setup properly
