@@ -1167,6 +1167,17 @@ func updateTeamMemberSchemeRoles(c *Context, w http.ResponseWriter, r *http.Requ
 		return
 	}
 
+	team, err := c.App.GetTeam(c.Params.TeamId)
+	if err != nil {
+		c.Err = err
+		return
+	}
+
+	if team.CreatorId == c.Params.UserId && !c.App.SessionHasPermissionTo(*c.AppContext.Session(), model.PermissionManageSystem) {
+		c.Err = model.NewAppError("updateTeamMemberSchemeRoles", "api.team.update_member_scheme_roles.is_team_owner.app_error", nil, "", http.StatusBadRequest)
+		return
+	}
+
 	if user, err := c.App.GetUser(c.Params.UserId); err != nil {
 		c.Err = err
 		return

@@ -3233,6 +3233,14 @@ func TestUpdateTeamMemberSchemeRoles(t *testing.T) {
 	resp, err = SystemAdminClient.UpdateTeamMemberSchemeRoles(context.Background(), th.BasicTeam.Id, th.SystemAdminUser.Id, s4)
 	require.Error(t, err)
 	CheckUnauthorizedStatus(t, resp)
+
+	th.LoginBasic()
+	team, resp, err := th.Client.CreateTeam(context.Background(), &model.Team{Name: GenerateTestUsername(), DisplayName: "Team Team", Type: model.TeamOpen})
+	require.NoError(t, err)
+	CheckCreatedStatus(t, resp)
+	resp, err = th.Client.UpdateTeamMemberSchemeRoles(context.Background(), team.Id, th.BasicUser.Id, s2)
+	require.Error(t, err)
+	CheckBadRequestStatus(t, resp)
 }
 
 func TestGetMyTeamsUnread(t *testing.T) {
