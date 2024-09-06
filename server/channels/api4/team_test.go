@@ -2893,6 +2893,14 @@ func TestRemoveTeamMember(t *testing.T) {
 	// Can remove self even if team is group-constrained
 	_, err = th.SystemAdminClient.RemoveTeamMember(context.Background(), th.BasicTeam.Id, th.SystemAdminUser.Id)
 	require.NoError(t, err)
+
+	// team creator not allowed to leave the team
+	team, resp, err := client.CreateTeam(context.Background(), &model.Team{Name: GenerateTestUsername(), DisplayName: "Team Team", Type: model.TeamOpen})
+	require.NoError(t, err)
+	CheckCreatedStatus(t, resp)
+	resp, err = client.RemoveTeamMember(context.Background(), team.Id, th.BasicUser.Id)
+	require.Error(t, err)
+	CheckBadRequestStatus(t, resp)
 }
 
 func TestRemoveTeamMemberEvents(t *testing.T) {
@@ -3067,6 +3075,14 @@ func TestUpdateTeamMemberRoles(t *testing.T) {
 	// user 1 (team admin) demotes himself
 	_, err = client.UpdateTeamMemberRoles(context.Background(), th.BasicTeam.Id, th.BasicUser.Id, TeamMember)
 	require.NoError(t, err)
+
+	// team creator can't downgrade self roles
+	team, resp, err := client.CreateTeam(context.Background(), &model.Team{Name: GenerateTestUsername(), DisplayName: "Team Team", Type: model.TeamOpen})
+	require.NoError(t, err)
+	CheckCreatedStatus(t, resp)
+	resp, err = client.UpdateTeamMemberRoles(context.Background(), team.Id, th.BasicUser.Id, TeamMember)
+	require.Error(t, err)
+	CheckBadRequestStatus(t, resp)
 }
 
 func TestUpdateTeamMemberSchemeRoles(t *testing.T) {
