@@ -12,8 +12,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/utils/fileutils"
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/utils/fileutils"
 )
 
 func TestImportValidateSchemeImportData(t *testing.T) {
@@ -337,7 +337,7 @@ func TestImportValidateTeamImportData(t *testing.T) {
 	err = ValidateTeamImportData(&data)
 	require.Nil(t, err, "Should have succeeded with allow open invites false.")
 
-	data.Description = ptrStr(strings.Repeat("abcdefghij ", 26))
+	data.Description = ptrStr(strings.Repeat("abcdefghij ", 103))
 	err = ValidateTeamImportData(&data)
 	require.NotNil(t, err, "Should have failed due to too long description.")
 

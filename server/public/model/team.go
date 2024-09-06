@@ -16,7 +16,7 @@ const (
 	TeamInvite                  = "I"
 	TeamAllowedDomainsMaxLength = 500
 	TeamCompanyNameMaxLength    = 64
-	TeamDescriptionMaxLength    = 255
+	TeamDescriptionMaxLength    = 1024
 	TeamDisplayNameMaxRunes     = 64
 	TeamEmailMaxLength          = 128
 	TeamNameMaxLength           = 64
@@ -42,6 +42,7 @@ type Team struct {
 	GroupConstrained    *bool   `json:"group_constrained"`
 	PolicyID            *string `json:"policy_id"`
 	CloudLimitsArchived bool    `json:"cloud_limits_archived"`
+	CreatorId           string  `json:"creator_id"`
 }
 
 func (o *Team) Auditable() map[string]interface{} {
@@ -165,6 +166,10 @@ func (o *Team) IsValid() *AppError {
 		return NewAppError("Team.IsValid", "model.team.is_valid.domains.app_error", nil, "id="+o.Id, http.StatusBadRequest)
 	}
 
+	if len(o.CreatorId) > 26 {
+		return NewAppError("Team.IsValid", "model.team.is_valid.creator_id.app_error", nil, "", http.StatusBadRequest)
+	}
+
 	return nil
 }
 
@@ -250,6 +255,7 @@ func CleanTeamName(s string) string {
 func (o *Team) Sanitize() {
 	o.Email = ""
 	o.InviteId = ""
+	o.CreatorId = ""
 }
 
 func (o *Team) Patch(patch *TeamPatch) {
