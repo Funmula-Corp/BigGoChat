@@ -23,8 +23,19 @@ import (
 const (
 	deletePostFilesQuery string = `{
 		"query": {
-			"match": {
-				"post_id": "%s"
+			"bool": {
+				"must": [
+					{
+						"match": {
+							"post_id": "%s"
+						}
+					},
+					{
+						"match": {
+							"delete_at": 0
+						}
+					}
+				]
 			}
 		},
 		"script": {
@@ -34,10 +45,21 @@ const (
 	}`
 	deleteFilesBatchQuery string = `{
 		"query": {
-			"range": {
-				"create_at": {
-					"gte": %d
-				}
+			"bool": {
+				"must": [
+					{
+						"range": {
+							"create_at": {
+								"gte": %d
+							}
+						}
+					},
+					{
+						"match": {
+							"delete_at": 0
+						}
+					}
+				]
 			}
 		}, "size": %d,
 		"script": {
@@ -47,8 +69,19 @@ const (
 	}`
 	deleteUserFilesQuery string = `{
 		"query": {
-			"match": {
-				"user_id": "%s"
+			"bool": {
+				"must": [
+					{
+						"match": {
+							"user_id": "%s"
+						}
+					},
+					{
+						"match": {
+							"delete_at": 0
+						}
+					}
+				]
 			}
 		},
 		"script": {
@@ -84,27 +117,31 @@ func (be *BiggoEngine) DeleteFile(fileID string) (aErr *model.AppError) {
 	)
 
 	if client, err = clients.EsClient(); err != nil {
-		mlog.Error("BiggoIndexer", mlog.Err(err))
+		mlog.Error("BiggoEngine", mlog.String("component", "file"), mlog.String("func_name", "DeleteFile"), mlog.Err(err))
 		return
+	}
+
+	update := map[string]interface{}{
+		"doc": map[string]interface{}{
+			"delete_at": model.GetMillis(),
+		},
 	}
 
 	var buffer []byte
-	if buffer, err = json.Marshal(&model.FileInfo{
-		Id: fileID, DeleteAt: model.GetMillis(),
-	}); err != nil {
-		mlog.Error("BiggoIndexer", mlog.Err(err))
+	if buffer, err = json.Marshal(update); err != nil {
+		mlog.Error("BiggoEngine", mlog.String("component", "file"), mlog.String("func_name", "DeleteFile"), mlog.Err(err))
 		return
 	}
 
-	if res, err = client.Update(EsFileIndex, fileID, bytes.NewBuffer(buffer)); err != nil {
-		mlog.Error("BiggoIndexer", mlog.Err(err))
+	if res, err = client.Update(EsFileIndex, fileID, bytes.NewReader(buffer)); err != nil {
+		mlog.Error("BiggoEngine", mlog.String("component", "file"), mlog.String("func_name", "DeleteFile"), mlog.Err(err))
 		return
 	}
 	defer res.Body.Close()
 
 	if res.IsError() {
 		if buffer, err := io.ReadAll(res.Body); err == nil {
-			mlog.Error("BiggoIndexer", mlog.Err(errors.New(string(buffer))), mlog.Any("fileID", fileID))
+			mlog.Error("BiggoEngine", mlog.String("component", "file"), mlog.String("func_name", "DeleteFile"), mlog.Err(errors.New(string(buffer))), mlog.Any("fileID", fileID))
 		}
 	}
 	return
@@ -118,23 +155,24 @@ func (be *BiggoEngine) DeleteFilesBatch(rctx request.CTX, endTime, limit int64) 
 	)
 
 	if client, err = clients.EsClient(); err != nil {
-		mlog.Error("BiggoIndexer", mlog.Err(err))
+		mlog.Error("BiggoEngine", mlog.String("component", "file"), mlog.String("func_name", "DeleteFilesBatch"), mlog.Err(err))
 		return
 	}
 
 	request := esapi.UpdateByQueryRequest{
 		Index: []string{EsFileIndex}, Body: strings.NewReader(fmt.Sprintf(deleteFilesBatchQuery, endTime, limit, model.GetMillis())),
+		Conflicts: "proceed",
 	}
 
 	if res, err = request.Do(context.Background(), client); err != nil {
-		mlog.Error("BiggoIndexer", mlog.Err(err))
+		mlog.Error("BiggoEngine", mlog.String("component", "file"), mlog.String("func_name", "DeleteFilesBatch"), mlog.Err(err))
 		return
 	}
 	defer res.Body.Close()
 
 	if res.IsError() {
 		if buffer, err := io.ReadAll(res.Body); err == nil {
-			mlog.Error("BiggoIndexer", mlog.Err(errors.New(string(buffer))), mlog.Any("endTime", endTime), mlog.Any("limit", limit))
+			mlog.Error("BiggoEngine", mlog.String("component", "file"), mlog.String("func_name", "DeleteFilesBatch"), mlog.Err(errors.New(string(buffer))), mlog.Any("endTime", endTime), mlog.Any("limit", limit))
 		}
 	}
 	return
@@ -148,23 +186,24 @@ func (be *BiggoEngine) DeletePostFiles(rctx request.CTX, postID string) (aErr *m
 	)
 
 	if client, err = clients.EsClient(); err != nil {
-		mlog.Error("BiggoIndexer", mlog.Err(err))
+		mlog.Error("BiggoEngine", mlog.String("component", "file"), mlog.String("func_name", "DeletePostFiles"), mlog.Err(err))
 		return
 	}
 
 	request := esapi.UpdateByQueryRequest{
 		Index: []string{EsFileIndex}, Body: strings.NewReader(fmt.Sprintf(deletePostFilesQuery, postID, model.GetMillis())),
+		Conflicts: "proceed",
 	}
 
 	if res, err = request.Do(context.Background(), client); err != nil {
-		mlog.Error("BiggoIndexer", mlog.Err(err))
+		mlog.Error("BiggoEngine", mlog.String("component", "file"), mlog.String("func_name", "DeletePostFiles"), mlog.Err(err))
 		return
 	}
 	defer res.Body.Close()
 
 	if res.IsError() {
 		if buffer, err := io.ReadAll(res.Body); err == nil {
-			mlog.Error("BiggoIndexer", mlog.Err(errors.New(string(buffer))), mlog.Any("postID", postID))
+			mlog.Error("BiggoEngine", mlog.String("component", "file"), mlog.String("func_name", "DeletePostFiles"), mlog.Err(errors.New(string(buffer))), mlog.Any("postID", postID))
 		}
 	}
 	return
@@ -178,23 +217,24 @@ func (be *BiggoEngine) DeleteUserFiles(rctx request.CTX, userID string) (aErr *m
 	)
 
 	if client, err = clients.EsClient(); err != nil {
-		mlog.Error("BiggoIndexer", mlog.Err(err))
+		mlog.Error("BiggoEngine", mlog.String("component", "file"), mlog.String("func_name", "DeleteUserFiles"), mlog.Err(err))
 		return
 	}
 
 	request := esapi.UpdateByQueryRequest{
 		Index: []string{EsFileIndex}, Body: strings.NewReader(fmt.Sprintf(deleteUserFilesQuery, userID, model.GetMillis())),
+		Conflicts: "proceed",
 	}
 
 	if res, err = request.Do(context.Background(), client); err != nil {
-		mlog.Error("BiggoIndexer", mlog.Err(err))
+		mlog.Error("BiggoEngine", mlog.String("component", "file"), mlog.String("func_name", "DeleteUserFiles"), mlog.Err(err))
 		return
 	}
 	defer res.Body.Close()
 
 	if res.IsError() {
 		if buffer, err := io.ReadAll(res.Body); err == nil {
-			mlog.Error("BiggoIndexer", mlog.Err(errors.New(string(buffer))), mlog.Any("userID", userID))
+			mlog.Error("BiggoEngine", mlog.String("component", "file"), mlog.String("func_name", "DeleteUserFiles"), mlog.Err(errors.New(string(buffer))), mlog.Any("userID", userID))
 		}
 	}
 	return
@@ -237,16 +277,16 @@ func (be *BiggoEngine) InitializeFilesIndex() {
 	if res, err := client.Indices.Create(index,
 		client.Indices.Create.WithBody(strings.NewReader(settings)),
 	); err != nil {
-		mlog.Error("BiggoIndexer", mlog.Err(err))
+		mlog.Error("BiggoEngine", mlog.String("component", "file"), mlog.String("func_name", "DeleteUserFiles"), mlog.Err(err))
 	} else {
 		defer res.Body.Close()
 		if res.StatusCode > 400 {
 			var buffer []byte
 			if buffer, err = io.ReadAll(res.Body); err != nil {
-				mlog.Error("BiggoIndexer", mlog.Err(err))
+				mlog.Error("BiggoEngine", mlog.String("component", "file"), mlog.String("func_name", "DeleteUserFiles"), mlog.Err(err))
 				return
 			}
-			mlog.Error("BiggoIndexer", mlog.Err(errors.New(string(buffer))))
+			mlog.Error("BiggoEngine", mlog.String("component", "file"), mlog.String("func_name", "DeleteUserFiles"), mlog.Err(errors.New(string(buffer))))
 		}
 	}
 }
@@ -263,7 +303,7 @@ func (be *BiggoEngine) IndexFilesBulk(files []*model.FileForIndexing) (aErr *mod
 
 	var index = be.GetEsFileIndex()
 	if indexer, err = clients.EsBulkIndex(index); err != nil {
-		mlog.Error("BiggoIndexer", mlog.Err(err))
+		mlog.Error("BiggoEngine", mlog.String("component", "file"), mlog.String("func_name", "IndexFilesBulk"), mlog.Err(err))
 		return
 	}
 	defer indexer.Close(context.Background())
@@ -272,7 +312,7 @@ func (be *BiggoEngine) IndexFilesBulk(files []*model.FileForIndexing) (aErr *mod
 	for _, file := range files {
 		var buffer []byte
 		if buffer, err = json.Marshal(file); err != nil {
-			mlog.Error("BiggoIndexer", mlog.Err(err))
+			mlog.Error("BiggoEngine", mlog.String("component", "file"), mlog.String("func_name", "IndexFilesBulk"), mlog.Err(err))
 			continue
 		}
 
@@ -282,7 +322,7 @@ func (be *BiggoEngine) IndexFilesBulk(files []*model.FileForIndexing) (aErr *mod
 			Body:       bytes.NewBuffer(buffer),
 			Index:      index,
 		}); err != nil {
-			mlog.Error("BiggoIndexer", mlog.Err(err))
+			mlog.Error("BiggoEngine", mlog.String("component", "file"), mlog.String("func_name", "IndexFilesBulk"), mlog.Err(err))
 			continue
 		}
 
@@ -297,7 +337,7 @@ func (be *BiggoEngine) IndexFilesBulk(files []*model.FileForIndexing) (aErr *mod
 	if _, err = clients.GraphQuery(indexFilesBulkQuery, map[string]interface{}{
 		"files": filesMap,
 	}); err != nil {
-		mlog.Error("BiggoIndexer", mlog.Err(err))
+		mlog.Error("BiggoEngine", mlog.String("component", "file"), mlog.String("func_name", "IndexFilesBulk"), mlog.Err(err))
 	}
 	return
 }
@@ -323,9 +363,9 @@ func (be *BiggoEngine) SearchFiles(channels model.ChannelList, searchParams []*m
 	}
 
 	query, queryParams := helper.ComposeSearchParamsQuery(be.config, EsFileIndex, page, perPage, "name", searchParams[0])
-	mlog.Debug("BiggoIndexer", mlog.String("files_query", query), mlog.Any("files_query_params", queryParams))
+	mlog.Debug("BiggoEngine", mlog.String("component", "file"), mlog.String("func_name", "SearchFiles"), mlog.String("files_query", query), mlog.Any("files_query_params", queryParams))
 	if res, err = clients.GraphQuery(fmt.Sprintf(`%s RETURN hit._id AS id;`, query), queryParams); err != nil {
-		mlog.Error("BiggoIndexer", mlog.String("function", "SearchFiles"), mlog.Err(err), mlog.String("query", query), mlog.Any("query_params", queryParams))
+		mlog.Error("BiggoEngine", mlog.String("component", "file"), mlog.String("func_name", "SearchFiles"), mlog.Err(err), mlog.String("query", query), mlog.Any("query_params", queryParams))
 		return
 	}
 

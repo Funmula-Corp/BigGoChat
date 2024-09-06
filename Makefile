@@ -51,7 +51,7 @@ restart-client:
 	cd server && $(MAKE) restart-client
 
 build-full: build-server build-package build-docker
-	docker push docker.dev.cloud.biggo.com/test/mattermost:development
+	docker push docker.dev.cloud.biggo.com/test/mattermost:searchengine
 
 build-drone-docker-image:
 	docker build --tag docker.cloud.biggo.com/droneio/mattermost-funmula-build:latest --file ./Dockerfile.drone .

@@ -23,8 +23,19 @@ import (
 const (
 	deleteUserPostsQuery string = `{
 		"query": {
-			"match": {
-				"user_id": "%s"
+			"bool": {
+				"must": [
+					{
+						"match": {
+							"user_id": "%s"
+						}
+					},
+					{
+						"match": {
+							"delete_at": 0
+						}
+					}
+				]
 			}
 		},
 		"script": {
@@ -34,8 +45,19 @@ const (
 	}`
 	deleteChannelPostsQuery string = `{
 		"query": {
-			"match": {
-				"channel_id": "%s"
+			"bool": {
+				"must": [
+					{
+						"match": {
+							"channel_id": "%s"
+						}
+					},
+					{
+						"match": {
+							"delete_at": 0
+						}
+					}
+				]
 			}
 		},
 		"script": {
@@ -67,7 +89,7 @@ func (be *BiggoEngine) DeleteChannelPosts(rctx request.CTX, channelID string) (a
 	)
 
 	if client, err = clients.EsClient(); err != nil {
-		mlog.Error("BiggoIndexer", mlog.Err(err))
+		mlog.Error("BiggoEngine", mlog.String("component", "post"), mlog.String("func_name", "DeleteChannelPosts"), mlog.Err(err))
 		return
 	}
 
@@ -76,14 +98,14 @@ func (be *BiggoEngine) DeleteChannelPosts(rctx request.CTX, channelID string) (a
 	}
 
 	if res, err = request.Do(context.Background(), client); err != nil {
-		mlog.Error("BiggoIndexer", mlog.Err(err))
+		mlog.Error("BiggoEngine", mlog.String("component", "post"), mlog.String("func_name", "DeleteChannelPosts"), mlog.Err(err))
 		return
 	}
 	defer res.Body.Close()
 
 	if res.IsError() {
 		if buffer, err := io.ReadAll(res.Body); err == nil {
-			mlog.Error("BiggoIndexer", mlog.Err(errors.New(string(buffer))), mlog.Any("channelID", channelID))
+			mlog.Error("BiggoEngine", mlog.String("component", "post"), mlog.String("func_name", "DeleteChannelPosts"), mlog.Err(errors.New(string(buffer))), mlog.Any("channelID", channelID))
 		}
 	}
 	return
@@ -97,25 +119,25 @@ func (be *BiggoEngine) DeletePost(post *model.Post) (aErr *model.AppError) {
 	)
 
 	if client, err = clients.EsClient(); err != nil {
-		mlog.Error("BiggoIndexer", mlog.Err(err))
+		mlog.Error("BiggoEngine", mlog.String("component", "post"), mlog.String("func_name", "DeletePost"), mlog.Err(err))
 		return
 	}
 
 	var buffer []byte
 	if buffer, err = json.Marshal(post); err != nil {
-		mlog.Error("BiggoIndexer", mlog.Err(err))
+		mlog.Error("BiggoEngine", mlog.String("component", "post"), mlog.String("func_name", "DeletePost"), mlog.Err(err))
 		return
 	}
 
 	if res, err = client.Update(EsPostIndex, post.Id, bytes.NewBuffer(buffer)); err != nil {
-		mlog.Error("BiggoIndexer", mlog.Err(err))
+		mlog.Error("BiggoEngine", mlog.String("component", "post"), mlog.String("func_name", "DeletePost"), mlog.Err(err))
 		return
 	}
 	defer res.Body.Close()
 
 	if res.IsError() {
 		if buffer, err := io.ReadAll(res.Body); err == nil {
-			mlog.Error("BiggoIndexer", mlog.Err(errors.New(string(buffer))), mlog.Any("post", post))
+			mlog.Error("BiggoEngine", mlog.String("component", "post"), mlog.String("func_name", "DeletePost"), mlog.Err(errors.New(string(buffer))), mlog.Any("post", post))
 		}
 	}
 	return
@@ -129,23 +151,24 @@ func (be *BiggoEngine) DeleteUserPosts(rctx request.CTX, userID string) (aErr *m
 	)
 
 	if client, err = clients.EsClient(); err != nil {
-		mlog.Error("BiggoIndexer", mlog.Err(err))
+		mlog.Error("BiggoEngine", mlog.String("component", "post"), mlog.String("func_name", "DeleteUserPosts"), mlog.Err(err))
 		return
 	}
 
 	request := esapi.UpdateByQueryRequest{
 		Index: []string{EsPostIndex}, Body: strings.NewReader(fmt.Sprintf(deleteUserPostsQuery, userID, model.GetMillis())),
+		Conflicts: "proceed",
 	}
 
 	if res, err = request.Do(context.Background(), client); err != nil {
-		mlog.Error("BiggoIndexer", mlog.Err(err))
+		mlog.Error("BiggoEngine", mlog.String("component", "post"), mlog.String("func_name", "DeleteUserPosts"), mlog.Err(err))
 		return
 	}
 	defer res.Body.Close()
 
 	if res.IsError() {
 		if buffer, err := io.ReadAll(res.Body); err == nil {
-			mlog.Error("BiggoIndexer", mlog.Err(errors.New(string(buffer))), mlog.Any("userID", userID))
+			mlog.Error("BiggoEngine", mlog.String("component", "post"), mlog.String("func_name", "DeleteUserPosts"), mlog.Err(errors.New(string(buffer))), mlog.Any("userID", userID))
 		}
 	}
 	return
@@ -188,16 +211,16 @@ func (be *BiggoEngine) InitializePostIndex() {
 	if res, err := client.Indices.Create(index,
 		client.Indices.Create.WithBody(strings.NewReader(settings)),
 	); err != nil {
-		mlog.Error("BiggoIndexer", mlog.Err(err))
+		mlog.Error("BiggoEngine", mlog.String("component", "post"), mlog.String("func_name", "InitializePostIndex"), mlog.Err(err))
 	} else {
 		defer res.Body.Close()
 		if res.StatusCode > 400 {
 			var buffer []byte
 			if buffer, err = io.ReadAll(res.Body); err != nil {
-				mlog.Error("BiggoIndexer", mlog.Err(err))
+				mlog.Error("BiggoEngine", mlog.String("component", "post"), mlog.String("func_name", "InitializePostIndex"), mlog.Err(err))
 				return
 			}
-			mlog.Error("BiggoIndexer", mlog.Err(errors.New(string(buffer))))
+			mlog.Error("BiggoEngine", mlog.String("component", "post"), mlog.String("func_name", "InitializePostIndex"), mlog.Err(errors.New(string(buffer))))
 		}
 	}
 }
@@ -214,7 +237,7 @@ func (be *BiggoEngine) IndexPostsBulk(posts []*model.PostForIndexing) (aErr *mod
 
 	var index = be.GetEsPostIndex()
 	if indexer, err = clients.EsBulkIndex(index); err != nil {
-		mlog.Error("BiggoIndexer", mlog.Err(err))
+		mlog.Error("BiggoEngine", mlog.String("component", "post"), mlog.String("func_name", "IndexPostsBulk"), mlog.Err(err))
 		return
 	}
 	defer indexer.Close(context.Background())
@@ -227,7 +250,7 @@ func (be *BiggoEngine) IndexPostsBulk(posts []*model.PostForIndexing) (aErr *mod
 		}
 		var buffer []byte
 		if buffer, err = json.Marshal(post); err != nil {
-			mlog.Error("BiggoIndexer", mlog.Err(err))
+			mlog.Error("BiggoEngine", mlog.String("component", "post"), mlog.String("func_name", "IndexPostsBulk"), mlog.Err(err))
 			continue
 		}
 
@@ -237,7 +260,7 @@ func (be *BiggoEngine) IndexPostsBulk(posts []*model.PostForIndexing) (aErr *mod
 			Body:       bytes.NewBuffer(buffer),
 			Index:      index,
 		}); err != nil {
-			mlog.Error("BiggoIndexer", mlog.Err(err))
+			mlog.Error("BiggoEngine", mlog.String("component", "post"), mlog.String("func_name", "IndexPostsBulk"), mlog.Err(err))
 			continue
 		}
 
@@ -251,7 +274,7 @@ func (be *BiggoEngine) IndexPostsBulk(posts []*model.PostForIndexing) (aErr *mod
 	if _, err = clients.GraphQuery(indexPostBulkQuery, map[string]interface{}{
 		"posts": postsMap,
 	}); err != nil {
-		mlog.Error("BiggoIndexer", mlog.Err(err))
+		mlog.Error("BiggoEngine", mlog.String("component", "post"), mlog.String("func_name", "IndexPostsBulk"), mlog.Err(err))
 	}
 	return
 }
@@ -275,9 +298,9 @@ func (be *BiggoEngine) SearchPosts(channels model.ChannelList, searchParams []*m
 	}
 
 	query, queryParams := helper.ComposeSearchParamsQuery(be.config, EsPostIndex, page, perPage, "message", searchParams[0])
-	mlog.Debug("BiggoIndexer", mlog.String("posts_query", query), mlog.Any("posts_query_params", queryParams))
+	mlog.Debug("BiggoEngine", mlog.String("component", "post"), mlog.String("func_name", "SearchPosts"), mlog.String("posts_query", query), mlog.Any("posts_query_params", queryParams))
 	if res, err = clients.GraphQuery(fmt.Sprintf(`%s RETURN hit._id AS id;`, query), queryParams); err != nil {
-		mlog.Error("BiggoIndexer", mlog.String("function", "SearchPosts"), mlog.Err(err), mlog.String("query", query), mlog.Any("query_params", queryParams))
+		mlog.Error("BiggoEngine", mlog.String("component", "post"), mlog.String("func_name", "SearchPosts"), mlog.Err(err), mlog.String("query", query), mlog.Any("query_params", queryParams))
 		return
 	}
 
