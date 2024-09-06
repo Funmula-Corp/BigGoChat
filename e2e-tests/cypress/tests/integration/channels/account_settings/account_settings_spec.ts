@@ -14,7 +14,9 @@ describe('Account Settings', () => {
     let testTeam: Cypress.Team;
     let offTopic: string;
 
-    before(() => {
+    before(function() {
+        // BigGoChat does not have a feature to open the profile modal
+        this.skip();
         // # Login as new user and visit off-topic
         cy.apiInitSetup({userPrefix: 'other', loginAfter: true}).then(({offTopicUrl, user, team}) => {
             cy.visit(offTopicUrl);

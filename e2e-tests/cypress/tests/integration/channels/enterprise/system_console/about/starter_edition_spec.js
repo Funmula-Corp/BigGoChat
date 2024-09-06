@@ -13,7 +13,7 @@ describe('System console', () => {
     before(() => {
         // * Ensure we are on self-hosted Starter edition
         cy.shouldNotRunOnCloudEdition();
-        cy.apiDeleteLicense();
+        // cy.apiDeleteLicense();
     });
 
     it('MM-T5132 License page shows View plans button', () => {

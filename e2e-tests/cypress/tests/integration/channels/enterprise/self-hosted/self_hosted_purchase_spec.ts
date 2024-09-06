@@ -148,7 +148,7 @@ describe('Self hosted Purchase', () => {
             cy.apiAdminLogin().then((result) => {
                 // assertion because current typings are wrong.
                 adminUser = (result as unknown as {user: Cypress.UserProfile}).user;
-                cy.apiDeleteLicense();
+                // cy.apiDeleteLicense();
                 cy.visit('/');
 
                 // in case there is lingering state from a prior local run or some other
@@ -167,7 +167,7 @@ describe('Self hosted Purchase', () => {
 
     it('happy path, can purchase a license and have it applied automatically', () => {
         cy.apiAdminLogin();
-        cy.apiDeleteLicense();
+        // cy.apiDeleteLicense();
 
         cy.intercept('GET', '**/api/v4/hosted_customer/signup_available').as('airGappedCheck');
         cy.intercept('GET', 'https://js.stripe.com/v3').as('stripeCheck');
@@ -310,7 +310,7 @@ describe('Self hosted Purchase', () => {
     it('must purchase a license for at least the current number of users', () => {
         cy.apiAdminLogin();
         cy.visit('/');
-        cy.apiDeleteLicense();
+        // cy.apiDeleteLicense();
 
         cy.intercept('GET', '**/api/v4/hosted_customer/signup_available').as('airGappedCheck');
         cy.intercept('GET', 'https://js.stripe.com/v3').as('stripeCheck');
@@ -357,7 +357,7 @@ describe('Self hosted Purchase', () => {
     it('failed payment in stripe means no license is received', () => {
         cy.apiAdminLogin();
         cy.visit('/');
-        cy.apiDeleteLicense();
+        // cy.apiDeleteLicense();
 
         cy.intercept('GET', '**/api/v4/hosted_customer/signup_available').as('airGappedCheck');
         cy.intercept('GET', 'https://js.stripe.com/v3').as('stripeCheck');
@@ -416,7 +416,7 @@ describe('Self hosted Purchase', () => {
 
         cy.apiAdminLogin();
         cy.visit('/');
-        cy.apiDeleteLicense();
+        // cy.apiDeleteLicense();
 
         cy.intercept('GET', '**/api/v4/hosted_customer/signup_available').as('airGappedCheck');
         cy.intercept('GET', '**/api/v4/cloud/products/selfhosted').as('products');

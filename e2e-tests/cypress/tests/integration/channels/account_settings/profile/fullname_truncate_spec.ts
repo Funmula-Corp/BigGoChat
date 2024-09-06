@@ -18,7 +18,9 @@ describe('Profile > Profile Settings> Full Name', () => {
     const firstName = 'This Is a Long Name';
     const lastName = 'That Should Truncate';
 
-    before(() => {
+    before(function() {
+        // BigGoChat does not have a feature to open the profile modal
+        this.skip();
         cy.apiInitSetup().then(({team, user, offTopicUrl}) => {
             firstUser = user;
             cy.apiCreateUser().then(({user: user1}) => {

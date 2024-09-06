@@ -10,6 +10,8 @@
 // Stage: @prod
 // Group: @channels @accessibility @mfa
 
+// BigGoChat does not have a feature to open the profile modal
+
 import * as TIMEOUTS from '../../../fixtures/timeouts';
 import {isMac} from '../../../utils';
 
@@ -93,13 +95,13 @@ describe('Verify Accessibility Support in different sections in Settings and Pro
 
     it('MM-T1465_1 Verify Label & Tab behavior in section links', () => {
         // * Verify aria-label and tab support in section of Account settings modal
-        cy.uiOpenProfileModal('Profile Settings');
-        cy.findByRole('tab', {name: 'profile settings'}).should('be.visible').focus().should('be.focused');
-        ['profile settings', 'security'].forEach((text) => {
-            // * Verify aria-label on each tab and it supports navigating to the next tab with arrow keys
-            cy.focused().should('have.attr', 'aria-label', text).type('{downarrow}');
-        });
-        cy.uiClose();
+        // cy.uiOpenProfileModal('Profile Settings');
+        // cy.findByRole('tab', {name: 'profile settings'}).should('be.visible').focus().should('be.focused');
+        // ['profile settings', 'security'].forEach((text) => {
+        //     // * Verify aria-label on each tab and it supports navigating to the next tab with arrow keys
+        //     cy.focused().should('have.attr', 'aria-label', text).type('{downarrow}');
+        // });
+        // cy.uiClose();
 
         // * Verify aria-label and tab support in section of Settings modal
         cy.uiOpenSettingsModal();
@@ -115,16 +117,16 @@ describe('Verify Accessibility Support in different sections in Settings and Pro
         cy.postMessage('hello');
 
         // # Open profile settings modal
-        cy.uiOpenProfileModal('Profile Settings');
+        // cy.uiOpenProfileModal('Profile Settings');
 
-        // * Verify if the focus goes to the individual fields in Profile section
-        cy.findByRole('tab', {name: 'profile settings'}).click().tab();
-        verifySettings(accountSettings.profile);
+        // // * Verify if the focus goes to the individual fields in Profile section
+        // cy.findByRole('tab', {name: 'profile settings'}).click().tab();
+        // verifySettings(accountSettings.profile);
 
-        // * Verify if the focus goes to the individual fields in Security section
-        cy.findByRole('tab', {name: 'security'}).click().tab();
-        verifySettings(accountSettings.security);
-        cy.uiClose();
+        // // * Verify if the focus goes to the individual fields in Security section
+        // cy.findByRole('tab', {name: 'security'}).click().tab();
+        // verifySettings(accountSettings.security);
+        // cy.uiClose();
 
         // # Open settings modal
         cy.uiOpenSettingsModal();
@@ -147,24 +149,24 @@ describe('Verify Accessibility Support in different sections in Settings and Pro
         verifySettings(settings.advanced);
     });
 
-    it('MM-T1482 Input fields in Settings and Profile should read labels', () => {
-        cy.visit(url);
-        cy.postMessage('hello');
-        cy.uiOpenProfileModal('Profile Settings');
+    // it('MM-T1482 Input fields in Settings and Profile should read labels', () => {
+    //     cy.visit(url);
+    //     cy.postMessage('hello');
+    //     cy.uiOpenProfileModal('Profile Settings');
 
-        accountSettings.profile.forEach((section) => {
-            if (section.type === 'text') {
-                cy.get(`#${section.key}Edit`).click();
-                cy.get('.setting-list-item .form-group').each(($el) => {
-                    if ($el.find('input').length) {
-                        cy.wrap($el).find('.control-label').invoke('text').then((label) => {
-                            cy.wrap($el).find('input').should('have.attr', 'aria-label', label);
-                        });
-                    }
-                });
-            }
-        });
-    });
+    //     accountSettings.profile.forEach((section) => {
+    //         if (section.type === 'text') {
+    //             cy.get(`#${section.key}Edit`).click();
+    //             cy.get('.setting-list-item .form-group').each(($el) => {
+    //                 if ($el.find('input').length) {
+    //                     cy.wrap($el).find('.control-label').invoke('text').then((label) => {
+    //                         cy.wrap($el).find('input').should('have.attr', 'aria-label', label);
+    //                     });
+    //                 }
+    //             });
+    //         }
+    //     });
+    // });
 
     it('MM-T1485 Language dropdown should read labels', () => {
         cy.visit(url);
@@ -205,84 +207,84 @@ describe('Verify Accessibility Support in different sections in Settings and Pro
         cy.get('@ariaEl').get('#aria-selection-event').should('contain', 'option English (US), selected');
     });
 
-    it('MM-T1488 Profile Picture should read labels', () => {
-        cy.visit(url);
-        cy.postMessage('hello');
+    // it('MM-T1488 Profile Picture should read labels', () => {
+    //     cy.visit(url);
+    //     cy.postMessage('hello');
 
-        // # Go to Edit Profile picture
-        cy.uiOpenProfileModal('Profile Settings');
-        cy.get('#pictureEdit').click();
+    //     // # Go to Edit Profile picture
+    //     cy.uiOpenProfileModal('Profile Settings');
+    //     cy.get('#pictureEdit').click();
 
-        // * Verify image alt in profile image
-        cy.get('.profile-img').should('have.attr', 'alt', 'profile image');
+    //     // * Verify image alt in profile image
+    //     cy.get('.profile-img').should('have.attr', 'alt', 'profile image');
 
-        cy.get('#generalSettings').then((el) => {
-            if (el.find('.profile-img__remove').length > 0) {
-                cy.findByTestId('removeSettingPicture').click();
-                cy.uiSave();
-                cy.get('#pictureEdit').click();
-            }
-        });
+    //     cy.get('#generalSettings').then((el) => {
+    //         if (el.find('.profile-img__remove').length > 0) {
+    //             cy.findByTestId('removeSettingPicture').click();
+    //             cy.uiSave();
+    //             cy.get('#pictureEdit').click();
+    //         }
+    //     });
 
-        // * Check Labels in different buttons
-        cy.findByTestId('inputSettingPictureButton').should('have.attr', 'aria-label', 'Select');
-        cy.uiSaveButton().should('have.attr', 'disabled');
-        cy.findByTestId('cancelSettingPicture').should('have.attr', 'aria-label', 'Cancel');
+    //     // * Check Labels in different buttons
+    //     cy.findByTestId('inputSettingPictureButton').should('have.attr', 'aria-label', 'Select');
+    //     cy.uiSaveButton().should('have.attr', 'disabled');
+    //     cy.findByTestId('cancelSettingPicture').should('have.attr', 'aria-label', 'Cancel');
 
-        // # Upload a pic and save
-        cy.findByTestId('uploadPicture').attachFile('mattermost-icon.png');
-        cy.uiSave();
+    //     // # Upload a pic and save
+    //     cy.findByTestId('uploadPicture').attachFile('mattermost-icon.png');
+    //     cy.uiSave();
 
-        // # Click on Edit Profile Picture
-        cy.get('#pictureEdit').click();
+    //     // # Click on Edit Profile Picture
+    //     cy.get('#pictureEdit').click();
 
-        // * Verify image alt in profile image
-        cy.get('.profile-img').should('have.attr', 'alt', 'profile image');
+    //     // * Verify image alt in profile image
+    //     cy.get('.profile-img').should('have.attr', 'alt', 'profile image');
 
-        // # Option to Remove Profile picture should be present
-        cy.findByTestId('removeSettingPicture').within(() => {
-            cy.get('.sr-only').should('have.text', 'Remove Profile Picture');
-        });
+    //     // # Option to Remove Profile picture should be present
+    //     cy.findByTestId('removeSettingPicture').within(() => {
+    //         cy.get('.sr-only').should('have.text', 'Remove Profile Picture');
+    //     });
 
-        // # Check tab behavior
-        cy.findByTestId('removeSettingPicture').focus().tab({shift: true}).tab();
-        cy.findByTestId('removeSettingPicture').should('have.class', 'a11y--active a11y--focused').tab();
-        cy.findByTestId('inputSettingPictureButton').should('have.class', 'a11y--active a11y--focused').tab();
-        cy.findByTestId('cancelSettingPicture').should('have.class', 'a11y--active a11y--focused');
+    //     // # Check tab behavior
+    //     cy.findByTestId('removeSettingPicture').focus().tab({shift: true}).tab();
+    //     cy.findByTestId('removeSettingPicture').should('have.class', 'a11y--active a11y--focused').tab();
+    //     cy.findByTestId('inputSettingPictureButton').should('have.class', 'a11y--active a11y--focused').tab();
+    //     cy.findByTestId('cancelSettingPicture').should('have.class', 'a11y--active a11y--focused');
 
-        // # Remove the profile picture and check the tab behavior
-        cy.findByTestId('removeSettingPicture').click().wait(TIMEOUTS.HALF_SEC);
-        cy.findByTestId('inputSettingPictureButton').focus().tab({shift: true}).tab();
-        cy.findByTestId('inputSettingPictureButton').should('have.class', 'a11y--active a11y--focused').tab();
-        cy.uiSaveButton().should('be.focused').tab();
-        cy.findByTestId('cancelSettingPicture').should('have.class', 'a11y--active a11y--focused');
-        cy.uiSave();
-    });
+    //     // # Remove the profile picture and check the tab behavior
+    //     cy.findByTestId('removeSettingPicture').click().wait(TIMEOUTS.HALF_SEC);
+    //     cy.findByTestId('inputSettingPictureButton').focus().tab({shift: true}).tab();
+    //     cy.findByTestId('inputSettingPictureButton').should('have.class', 'a11y--active a11y--focused').tab();
+    //     cy.uiSaveButton().should('be.focused').tab();
+    //     cy.findByTestId('cancelSettingPicture').should('have.class', 'a11y--active a11y--focused');
+    //     cy.uiSave();
+    // });
 
-    it('MM-T1496 Security Settings screen should read labels', () => {
-        cy.visit(url);
-        cy.postMessage('hello');
+    // it('MM-T1496 Security Settings screen should read labels', () => {
+    //     cy.visit(url);
+    //     cy.postMessage('hello');
 
-        // # Go to Security Settings
-        cy.uiOpenProfileModal('Profile Settings');
-        cy.get('#securityButton').click();
+    //     // # Go to Security Settings
+    //     cy.uiOpenProfileModal('Profile Settings');
+    //     cy.get('#securityButton').click();
 
-        // * Check Tab behavior in MFA section
-        cy.get('#mfaEdit').click();
-        cy.get('#passwordEdit').focus().tab({shift: true}).tab().tab();
-        cy.get('.setting-list a.btn').should('have.class', 'a11y--active a11y--focused').tab();
-        cy.get('#cancelSetting').should('have.class', 'a11y--active a11y--focused');
+    //     // * Check Tab behavior in MFA section
+    //     cy.get('#mfaEdit').click();
+    //     cy.get('#passwordEdit').focus().tab({shift: true}).tab().tab();
+    //     cy.get('.setting-list a.btn').should('have.class', 'a11y--active a11y--focused').tab();
+    //     cy.get('#cancelSetting').should('have.class', 'a11y--active a11y--focused');
 
-        // * Check Tab behavior in Sign-In Method if its available
-        cy.get('.user-settings').then((el) => {
-            if (el.find('#signinEdit').length) {
-                cy.get('#signinEdit').click();
-                cy.get('#mfaEdit').focus().tab({shift: true}).tab().tab();
-                cy.get('.setting-list a.btn').should('have.class', 'a11y--active a11y--focused').tab();
-                cy.get('#cancelSetting').should('have.class', 'a11y--active a11y--focused');
-            }
-        });
-    });
+    //     // * Check Tab behavior in Sign-In Method if its available
+    //     cy.get('.user-settings').then((el) => {
+    //         if (el.find('#signinEdit').length) {
+    //             cy.get('#signinEdit').click();
+    //             cy.get('#mfaEdit').focus().tab({shift: true}).tab().tab();
+    //             cy.get('.setting-list a.btn').should('have.class', 'a11y--active a11y--focused').tab();
+    //             cy.get('#cancelSetting').should('have.class', 'a11y--active a11y--focused');
+    //         }
+    //     });
+    // });
 });
 
 function verifySettings(settings) {

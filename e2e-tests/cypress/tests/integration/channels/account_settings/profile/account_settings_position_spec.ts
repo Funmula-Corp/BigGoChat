@@ -11,7 +11,9 @@
 // Group: @channels @account_setting
 
 describe('Profile > Profile Settings > Position', () => {
-    beforeEach(() => {
+    beforeEach(function() {
+        // BigGoChat does not have a feature to open the profile modal
+        this.skip();
         cy.apiAdminLogin();
         cy.apiInitSetup({loginAfter: true}).then(({offTopicUrl}) => {
             // # Visit off-topic channel

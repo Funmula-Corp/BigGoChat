@@ -24,7 +24,9 @@ describe('AD / LDAP', () => {
     let samlLdapUser;
     let testTeamId;
 
-    before(() => {
+    before(function() {
+        // BigGoChat does not support LDAP, SAML, and Keycloak features
+        this.skip();
         cy.createLDAPUser().then((user) => {
             samlLdapUser = user;
         });

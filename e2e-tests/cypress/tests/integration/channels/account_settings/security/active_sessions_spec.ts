@@ -27,7 +27,9 @@ describe('Profile > Security > View and Log Out of Active Sessions', () => {
 
     let testUser: Cypress.UserProfile;
 
-    before(() => {
+    before(function() {
+        // BigGoChat does not have a feature to open the profile modal
+        this.skip();
         // # Login as new user and visit off-topic
         cy.apiInitSetup({loginAfter: true}).then(({offTopicUrl, user}) => {
             testUser = user;

@@ -11,7 +11,9 @@
 // Group: @channels @account_setting
 
 describe('Profile > Security > View Access History', () => {
-    before(() => {
+    before(function() {
+        // BigGoChat does not have a feature to open the profile modal
+        this.skip();
         // # Login as new user and visit off-topic
         cy.apiInitSetup({loginAfter: true}).then(({offTopicUrl}) => {
             cy.visit(offTopicUrl);
