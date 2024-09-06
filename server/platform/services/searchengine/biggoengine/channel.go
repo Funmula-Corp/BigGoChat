@@ -40,25 +40,31 @@ func (be *BiggoEngine) DeleteChannel(channel *model.Channel) (aErr *model.AppErr
 	)
 
 	if client, err = clients.EsClient(); err != nil {
-		mlog.Error("BiggoIndexer", mlog.Err(err))
+		mlog.Error("BiggoEngine", mlog.String("component", "channel"), mlog.String("func_name", "DeleteChannel"), mlog.Err(err))
 		return
+	}
+
+	update := map[string]interface{}{
+		"doc": map[string]interface{}{
+			"delete_at": channel.DeleteAt,
+		},
 	}
 
 	var buffer []byte
-	if buffer, err = json.Marshal(channel); err != nil {
-		mlog.Error("BiggoIndexer", mlog.Err(err))
+	if buffer, err = json.Marshal(update); err != nil {
+		mlog.Error("BiggoEngine", mlog.String("component", "channel"), mlog.String("func_name", "DeleteChannel"), mlog.Err(err))
 		return
 	}
 
-	if res, err = client.Update(EsChannelIndex, channel.Id, bytes.NewBuffer(buffer)); err != nil {
-		mlog.Error("BiggoIndexer", mlog.Err(err))
+	if res, err = client.Update(EsChannelIndex, channel.Id, bytes.NewReader(buffer)); err != nil {
+		mlog.Error("BiggoEngine", mlog.String("component", "channel"), mlog.String("func_name", "DeleteChannel"), mlog.Err(err))
 		return
 	}
 	defer res.Body.Close()
 
 	if res.IsError() {
 		if buffer, err := io.ReadAll(res.Body); err == nil {
-			mlog.Error("BiggoIndexer", mlog.Err(errors.New(string(buffer))), mlog.Any("channel", channel))
+			mlog.Error("BiggoEngine", mlog.String("component", "channel"), mlog.String("func_name", "DeleteChannel"), mlog.Err(errors.New(string(buffer))), mlog.Any("channel", channel))
 		}
 	}
 	return
@@ -78,7 +84,7 @@ func (be *BiggoEngine) IndexChannelsBulk(channels []*model.Channel) (aErr *model
 
 	var index = be.GetEsChannelIndex()
 	if indexer, err = clients.EsBulkIndex(index); err != nil {
-		mlog.Error("BiggoIndexer", mlog.Err(err))
+		mlog.Error("BiggoEngine", mlog.String("component", "channel"), mlog.String("func_name", "IndexChannelsBulk"), mlog.Err(err))
 		return
 	}
 	defer indexer.Close(context.Background())
@@ -87,7 +93,7 @@ func (be *BiggoEngine) IndexChannelsBulk(channels []*model.Channel) (aErr *model
 	for _, channel := range channels {
 		var buffer []byte
 		if buffer, err = json.Marshal(channel); err != nil {
-			mlog.Error("BiggoIndexer", mlog.Err(err))
+			mlog.Error("BiggoEngine", mlog.String("component", "channel"), mlog.String("func_name", "IndexChannelsBulk"), mlog.Err(err))
 			continue
 		}
 
@@ -97,7 +103,7 @@ func (be *BiggoEngine) IndexChannelsBulk(channels []*model.Channel) (aErr *model
 			Body:       bytes.NewBuffer(buffer),
 			Index:      index,
 		}); err != nil {
-			mlog.Error("BiggoIndexer", mlog.Err(err))
+			mlog.Error("BiggoEngine", mlog.String("component", "channel"), mlog.String("func_name", "IndexChannelsBulk"), mlog.Err(err))
 			continue
 		}
 
@@ -111,7 +117,7 @@ func (be *BiggoEngine) IndexChannelsBulk(channels []*model.Channel) (aErr *model
 	if _, err = clients.GraphQuery(indexChannelBulkQuery, map[string]interface{}{
 		"channels": channelsMap,
 	}); err != nil {
-		mlog.Error("BiggoIndexer", mlog.Err(err))
+		mlog.Error("BiggoEngine", mlog.String("component", "channel"), mlog.String("func_name", "IndexChannelsBulk"), mlog.Err(err))
 	}
 	return
 }
@@ -200,7 +206,7 @@ func (be *BiggoEngine) SearchChannels(teamId, userID, term string, isGuest bool)
 		"size":     25,
 	}
 	if res, err = clients.GraphQuery(query, queryParams); err != nil {
-		mlog.Error("BiggoIndexer", mlog.String("function", "SearchChannels"), mlog.Err(err), mlog.String("query", query), mlog.Any("query_params", queryParams))
+		mlog.Error("BiggoEngine", mlog.String("component", "channel"), mlog.String("func_name", "SearchChannels"), mlog.Err(err), mlog.String("query", query), mlog.Any("query_params", queryParams))
 		return
 	}
 

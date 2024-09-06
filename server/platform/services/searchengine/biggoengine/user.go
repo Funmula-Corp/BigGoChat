@@ -47,34 +47,31 @@ func (be *BiggoEngine) DeleteUser(user *model.User) (aErr *model.AppError) {
 	)
 
 	if client, err = clients.EsClient(); err != nil {
-		mlog.Error("BiggoIndexer", mlog.Err(err))
+		mlog.Error("BiggoEngine", mlog.String("component", "user"), mlog.String("func_name", "DeleteUser"), mlog.Err(err))
 		return
+	}
+
+	update := map[string]interface{}{
+		"doc": map[string]interface{}{
+			"delete_at": user.DeleteAt,
+		},
 	}
 
 	var buffer []byte
-	if buffer, err = json.Marshal(&model.UserForIndexing{
-		Id:        user.Id,
-		Username:  user.Username,
-		Nickname:  user.Nickname,
-		FirstName: user.FirstName,
-		LastName:  user.LastName,
-		Roles:     user.Roles,
-		CreateAt:  user.CreateAt,
-		DeleteAt:  user.DeleteAt,
-	}); err != nil {
-		mlog.Error("BiggoIndexer", mlog.Err(err))
+	if buffer, err = json.Marshal(update); err != nil {
+		mlog.Error("BiggoEngine", mlog.String("component", "user"), mlog.String("func_name", "DeleteUser"), mlog.Err(err))
 		return
 	}
 
-	if res, err = client.Update(EsUserIndex, user.Id, bytes.NewBuffer(buffer)); err != nil {
-		mlog.Error("BiggoIndexer", mlog.Err(err))
+	if res, err = client.Update(EsUserIndex, user.Id, bytes.NewReader(buffer)); err != nil {
+		mlog.Error("BiggoEngine", mlog.String("component", "user"), mlog.String("func_name", "DeleteUser"), mlog.Err(err))
 		return
 	}
 	defer res.Body.Close()
 
 	if res.IsError() {
 		if buffer, err := io.ReadAll(res.Body); err == nil {
-			mlog.Error("BiggoIndexer", mlog.Err(errors.New(string(buffer))), mlog.Any("user", user))
+			mlog.Error("BiggoEngine", mlog.String("component", "user"), mlog.String("func_name", "DeleteUser"), mlog.Err(errors.New(string(buffer))), mlog.Any("user", user))
 		}
 	}
 	return
@@ -110,7 +107,7 @@ func (be *BiggoEngine) IndexUsersBulk(users []*model.UserForIndexing) (aErr *mod
 
 	var index = be.GetEsUserIndex()
 	if indexer, err = clients.EsBulkIndex(index); err != nil {
-		mlog.Error("BiggoIndexer", mlog.Err(err))
+		mlog.Error("BiggoEngine", mlog.String("component", "user"), mlog.String("func_name", "IndexUser"), mlog.Err(err))
 		return
 	}
 	defer indexer.Close(context.Background())
@@ -119,7 +116,7 @@ func (be *BiggoEngine) IndexUsersBulk(users []*model.UserForIndexing) (aErr *mod
 	for _, user := range users {
 		var buffer []byte
 		if buffer, err = json.Marshal(user); err != nil {
-			mlog.Error("BiggoIndexer", mlog.Err(err))
+			mlog.Error("BiggoEngine", mlog.String("component", "user"), mlog.String("func_name", "IndexUser"), mlog.Err(err))
 			continue
 		}
 
@@ -129,7 +126,7 @@ func (be *BiggoEngine) IndexUsersBulk(users []*model.UserForIndexing) (aErr *mod
 			Body:       bytes.NewBuffer(buffer),
 			Index:      index,
 		}); err != nil {
-			mlog.Error("BiggoIndexer", mlog.Err(err))
+			mlog.Error("BiggoEngine", mlog.String("component", "user"), mlog.String("func_name", "IndexUser"), mlog.Err(err))
 			continue
 		}
 
@@ -143,8 +140,8 @@ func (be *BiggoEngine) IndexUsersBulk(users []*model.UserForIndexing) (aErr *mod
 	if _, err = clients.GraphQuery(indexUsersBulkQuery, map[string]interface{}{
 		"users": usersMap,
 	}); err != nil {
-		//aErr = model.NewAppError("BiggoIndexer.IndexUsersBulk", "engine.biggo.indexer.index_user_bulk.app_error", nil, "", http.StatusInternalServerError).Wrap(err)
-		mlog.Error("BiggoIndexer", mlog.Err(err))
+		//aErr = model.NewAppError("BiggoEngine., mlog.String("component", "user"), mlog.String("func_name", )IndexUsersBulk", "engine.biggo.indexer.index_user_bulk.app_error", nil, "", http.StatusInternalServerError).Wrap(err)
+		mlog.Error("BiggoEngine", mlog.String("component", "user"), mlog.String("func_name", "IndexUser"), mlog.Err(err))
 	}
 	return
 }
@@ -181,7 +178,7 @@ func (be *BiggoEngine) SearchUsersInChannel(teamId, channelId string, restricted
 		"size":       options.Limit,
 	}
 	if res, err = clients.GraphQuery(query, queryParams); err != nil {
-		mlog.Error("BiggoIndexer", mlog.String("function", "SearchUsersInChannel"), mlog.Err(err), mlog.String("query", query), mlog.Any("query_params", queryParams))
+		mlog.Error("BiggoEngine", mlog.String("component", "user"), mlog.String("func_name", "SearchUsersInChannel"), mlog.Err(err), mlog.String("query", query), mlog.Any("query_params", queryParams))
 		return
 	}
 
@@ -228,7 +225,7 @@ func (be *BiggoEngine) SearchUsersInTeam(teamId string, restrictedToChannels []s
 		"size":     options.Limit,
 	}
 	if res, err = clients.GraphQuery(query, queryParams); err != nil {
-		mlog.Error("BiggoIndexer", mlog.String("function", "SearchUsersInTeam"), mlog.Err(err), mlog.String("query", query), mlog.Any("query_params", queryParams))
+		mlog.Error("BiggoEngine", mlog.String("component", "user"), mlog.String("func_name", "SearchUsersInTeam"), mlog.Err(err), mlog.String("query", query), mlog.Any("query_params", queryParams))
 		return
 	}
 
