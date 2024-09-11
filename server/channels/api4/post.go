@@ -252,11 +252,6 @@ func getPostsForChannel(c *Context, w http.ResponseWriter, r *http.Request) {
 	page := c.Params.Page
 	perPage := c.Params.PerPage
 
-	if !c.IsSystemAdmin() && includeDeleted {
-		c.SetPermissionError(model.PermissionReadDeletedPosts)
-		return
-	}
-
 	channel, err := c.App.GetChannel(c.AppContext, channelId)
 	if err != nil {
 		c.Err = err
