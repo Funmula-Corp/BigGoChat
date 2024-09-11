@@ -52,6 +52,7 @@ steps:
   image: docker.cloud.biggo.com/droneio/mattermost-funmula-build
   commands:
   - export BUILD_NUMBER=${DRONE_COMMIT_SHA:0:8}
+  - export BUILD_VERSION=${DRONE_SEMVER}
   - make build-server
   - make build-package
   - cd server/build 
