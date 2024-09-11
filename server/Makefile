@@ -95,6 +95,11 @@ GOFLAGS ?= $(GOFLAGS:)
 export GOBIN ?= $(PWD)/bin
 GO ?= go
 DELVE ?= dlv
+
+ifdef BUILD_VERSION
+LDFLAGS += -X "git.biggo.com/Funmula/mattermost-funmula/server/public/model.CurrentVersion=$(BUILD_VERSION)"
+endif
+
 LDFLAGS += -X "git.biggo.com/Funmula/mattermost-funmula/server/public/model.BuildNumber=$(BUILD_NUMBER)"
 LDFLAGS += -X "git.biggo.com/Funmula/mattermost-funmula/server/public/model.BuildDate=$(BUILD_DATE)"
 LDFLAGS += -X "git.biggo.com/Funmula/mattermost-funmula/server/public/model.BuildHash=$(BUILD_HASH)"
