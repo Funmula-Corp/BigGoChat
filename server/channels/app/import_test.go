@@ -290,7 +290,7 @@ func TestImportBulkImportByEmail(t *testing.T) {
 {"type": "direct_post", "direct_post": {"channel_members": ["` + username + `", "` + username2 + `"], "user": "` + username + `", "message": "Hello Direct Channel", "create_at": 123456789014}}
 {"type": "emoji", "emoji": {"name": "` + emojiName + `", "image": "` + testImage + `"}}`
 
-	err, line := th.App.BulkImport2(th.Context, strings.NewReader(data1), nil, false, true, false, 2)
+	err, line := th.App.BulkImport2(th.Context, strings.NewReader(data1), nil, false, false, true, false, 2, "")
 	require.Nil(t, err, "BulkImport should have succeeded")
 	require.Equal(t, 0, line, "BulkImport line should be 0")
 	teamMap, appErr := th.App.getTeamsByNames([]string{teamName})
