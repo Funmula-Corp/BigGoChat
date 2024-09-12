@@ -145,11 +145,12 @@ const AddChannelsCtaButton = (): JSX.Element | null => {
     };
 
     if (!canCreateChannel) {
-        const browseChannelsAction = () => {
-            showMoreChannelsModal();
-            storePreferencesAndTrackEvent();
-        };
-        return addChannelsButton(browseChannelsAction);
+        // const browseChannelsAction = () => {
+        //     showMoreChannelsModal();
+        //     storePreferencesAndTrackEvent();
+        // };
+        // return addChannelsButton(browseChannelsAction);
+        return <></>;
     }
 
     return (
