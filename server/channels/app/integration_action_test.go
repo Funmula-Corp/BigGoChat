@@ -167,7 +167,7 @@ func TestPostActionEmptyResponse(t *testing.T) {
 		})
 
 		_, err = th.App.DoPostActionWithCookie(th.Context, post.Id, attachments[0].Actions[0].Id, th.BasicUser.Id, "", nil)
-		require.Error(t, err)
+		require.NotNil(t, err)
 		assert.Contains(t, err.DetailedError, "context deadline exceeded")
 	})
 }
@@ -885,7 +885,7 @@ func TestPostActionRelativePluginURL(t *testing.T) {
 
 		import (
 			"net/http"
-			"encoding/json" 
+			"encoding/json"
 
 			"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
 			"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
