@@ -3661,7 +3661,7 @@
   "general_tab.regenerate": "Regenerate",
   "general_tab.required": "This field is required",
   "general_tab.teamDescription": "Description",
-  "general_tab.teamDescriptionInfo": "Team description provides additional information to help users select the right team. Maximum of 50 characters.",
+  "general_tab.teamDescriptionInfo": "Team description provides additional information to help users select the right team. Maximum of {max} characters.",
   "general_tab.teamIconError": "An error occurred while selecting the image.",
   "general_tab.teamIconInvalidFileType": "Only BMP, JPG or PNG images may be used for team icons",
   "general_tab.teamIconTooLarge": "Unable to upload team icon. File is too large.",
