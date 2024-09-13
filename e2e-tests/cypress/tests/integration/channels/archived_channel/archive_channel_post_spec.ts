@@ -75,6 +75,8 @@ describe('Archived channels', () => {
     it('MM-T1722 Can click reply arrow on a post from archived channel, from saved posts list', () => {
         // # Create a channel that will be archived
         cy.apiCreateChannel(testTeam.id, 'archived-channel', 'Archived Channel').then(({channel}) => {
+            cy.apiAddUserToChannel(channel.id, otherUser.id);
+
             // # Visit the channel
             cy.visit(`/${testTeam.name}/channels/${channel.name}`);
 

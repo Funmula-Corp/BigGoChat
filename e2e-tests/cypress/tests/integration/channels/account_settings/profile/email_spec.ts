@@ -20,7 +20,9 @@ describe('Profile > Profile Settings > Email', () => {
     let offTopicUrl;
     let origConfig: Cypress.AdminConfig;
 
-    before(() => {
+    before(function() {
+        // BigGoChat does not have a feature to open the profile modal
+        this.skip();
         // Get config
         cy.apiGetConfig().then(({config}) => {
             origConfig = config;

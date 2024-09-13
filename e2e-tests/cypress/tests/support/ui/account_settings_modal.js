@@ -17,6 +17,18 @@ Cypress.Commands.add('uiOpenProfileModal', (section = '') => {
     return profileSettingsModal();
 });
 
+// BigGoChat profile opens in a new window, so use uiOpenProfilePage instead of uiOpenProfileModal
+Cypress.Commands.add('uiOpenProfilePage', () => {
+    cy.uiOpenUserMenu('Profile').then(() => {
+        cy.window().then((win) => {
+            cy.stub(win, 'open').callsFake((url) => {
+                expect(url).to.eq('https://account.biggo.com/setting/');
+                return null;
+            });
+        });
+    });
+});
+
 Cypress.Commands.add('verifyAccountNameSettings', (firstname, lastname) => {
     // # Go to Profile
     cy.uiOpenProfileModal('Profile Settings');

@@ -122,7 +122,8 @@ describe('Authentication', () => {
         });
     });
 
-    it('MM-T1777 - Multi-factor Authentication option hidden in Profile when disabled', () => {
+    // BigGoChat does not have a feature to open the profile modal
+    it.skip('MM-T1777 - Multi-factor Authentication option hidden in Profile when disabled', () => {
         cy.apiUpdateConfig({
             ServiceSettings: {
                 EnableMultifactorAuthentication: false,
@@ -138,7 +139,8 @@ describe('Authentication', () => {
         cy.findByText('Multi-factor Authentication').should('not.exist');
     });
 
-    it('MM-T1779 - Multi-factor Authentication option appears in Profile when enabled', () => {
+    // BigGoChat does not have a feature to open the profile modal
+    it.skip('MM-T1779 - Multi-factor Authentication option appears in Profile when enabled', () => {
         cy.apiUpdateConfig({
             ServiceSettings: {
                 EnableMultifactorAuthentication: true,

@@ -19,7 +19,9 @@ describe('Profile', () => {
     let testUser: Cypress.UserProfile;
     let offTopic: string;
 
-    before(() => {
+    before(function() {
+        // BigGoChat does not have a feature to open the profile modal
+        this.skip();
         cy.apiGetConfig().then(({config}) => {
             siteName = config.TeamSettings.SiteName;
         });

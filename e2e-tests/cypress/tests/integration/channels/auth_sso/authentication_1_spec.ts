@@ -67,7 +67,8 @@ describe('Authentication', () => {
         cy.findByText('Teams you can join:', {timeout: TIMEOUTS.ONE_MIN}).should('be.visible');
     });
 
-    it('MM-T1757 - Restrict Domains - Multiple - fail', () => {
+    // BigGoChat does not have a feature to open the profile modal
+    it.skip('MM-T1757 - Restrict Domains - Multiple - fail', () => {
         // # Set restricted domain
         cy.apiUpdateConfig({
             TeamSettings: {

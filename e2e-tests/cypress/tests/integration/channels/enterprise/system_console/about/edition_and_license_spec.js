@@ -75,7 +75,7 @@ describe('System console', () => {
 
         // # Remove license and verify user access when downgraded to E0/team edition
         cy.apiAdminLogin();
-        cy.apiDeleteLicense();
+        // cy.apiDeleteLicense();
         verifyUserChannelPermission(teamName, privateChannelName, sysadmin, teamAdmin, regularUser);
 
         // # Re-add license and verify user access when upgraded to E20

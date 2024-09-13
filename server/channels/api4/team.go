@@ -1014,7 +1014,7 @@ func removeTeamMember(c *Context, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if team.Email == user.Email && !user.IsBot {
+	if team.CreatorId == user.Id && !user.IsBot && !c.App.SessionHasPermissionTo(*c.AppContext.Session(), model.PermissionManageSystem) {
 		c.Err = model.NewAppError("removeTeamMember", "api.team.remove_member.is_team_owner.app_error", nil, "", http.StatusBadRequest)
 		return
 	}
@@ -1106,6 +1106,17 @@ func updateTeamMemberRoles(c *Context, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	team, err := c.App.GetTeam(c.Params.TeamId)
+	if err != nil {
+		c.Err = err
+		return
+	}
+
+	if team.CreatorId == c.Params.UserId && !c.App.SessionHasPermissionTo(*c.AppContext.Session(), model.PermissionManageSystem) {
+		c.Err = model.NewAppError("updateTeamMemberRoles", "api.team.update_member_roles.is_team_owner.app_error", nil, "", http.StatusBadRequest)
+		return
+	}
+
 	if user, err := c.App.GetUser(c.Params.UserId); err != nil {
 		c.Err = err
 		return
@@ -1153,6 +1164,17 @@ func updateTeamMemberSchemeRoles(c *Context, w http.ResponseWriter, r *http.Requ
 
 	if !c.App.SessionHasPermissionToTeam(*c.AppContext.Session(), c.Params.TeamId, model.PermissionManageTeamRoles) {
 		c.SetPermissionError(model.PermissionManageTeamRoles)
+		return
+	}
+
+	team, err := c.App.GetTeam(c.Params.TeamId)
+	if err != nil {
+		c.Err = err
+		return
+	}
+
+	if team.CreatorId == c.Params.UserId && !c.App.SessionHasPermissionTo(*c.AppContext.Session(), model.PermissionManageSystem) {
+		c.Err = model.NewAppError("updateTeamMemberSchemeRoles", "api.team.update_member_scheme_roles.is_team_owner.app_error", nil, "", http.StatusBadRequest)
 		return
 	}
 

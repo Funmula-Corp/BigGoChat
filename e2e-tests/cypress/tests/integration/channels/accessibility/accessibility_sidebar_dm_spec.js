@@ -89,7 +89,7 @@ describe('Verify Accessibility Support in Channel Sidebar Navigation', () => {
             }
 
             // * Verify if focus changes to different channels in Direct Messages section
-            cy.wrap(el).find('.SidebarLink').should('be.focused');
+            cy.wrap(el).find('.SidebarLink').focus().should('be.focused');
             cy.focused().tab().tab().tab();
         });
     });

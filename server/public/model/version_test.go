@@ -35,6 +35,11 @@ func TestSplitVersion(t *testing.T) {
 	require.EqualValues(t, 1, major5)
 	require.EqualValues(t, 2, minor5)
 	require.EqualValues(t, 3, patch5)
+
+	major, minor, patch := SplitVersion("9.9.2-bc5-d1")
+	require.EqualValues(t, 9, major)
+	require.EqualValues(t, 9, minor)
+	require.EqualValues(t, 2, patch)
 }
 
 func TestGetPreviousVersion(t *testing.T) {

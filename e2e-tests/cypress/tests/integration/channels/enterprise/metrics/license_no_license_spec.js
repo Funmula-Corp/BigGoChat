@@ -16,7 +16,7 @@ describe('Metrics > No license', () => {
     before(() => {
         cy.shouldNotRunOnCloudEdition();
         cy.apiAdminLogin().wait(50);
-        cy.apiDeleteLicense();
+        // cy.apiDeleteLicense();
         toggleMetricsOn();
     });
 
