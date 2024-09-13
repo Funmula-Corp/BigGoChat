@@ -3051,6 +3051,7 @@ func (s SqlChannelStore) Autocomplete(rctx request.CTX, userID, term string, inc
 		"t.Name AS TeamName",
 		"t.UpdateAt AS TeamUpdateAt").
 		From("Channels c, Teams t, TeamMembers tm").
+		LeftJoin("Users u ON u.Id = tm.UserId").
 		Where(sq.And{
 			sq.Expr("c.TeamId = t.id"),
 			sq.Expr("t.id = tm.TeamId"),
@@ -3071,15 +3072,22 @@ func (s SqlChannelStore) Autocomplete(rctx request.CTX, userID, term string, inc
 			From("ChannelMembers").
 			Where(sq.Eq{"UserId": userID})))
 	} else {
-		query = query.Where(sq.Or{
-			sq.NotEq{"c.Type": model.ChannelTypePrivate},
-			sq.And{
-				sq.Eq{"c.Type": model.ChannelTypePrivate},
+		// team / system admin can check all channels
+		query = query.Where(
+			sq.Case().When(sq.Or{
+				sq.Eq{"tm.SchemeAdmin": true},
+				sq.Eq{"tm.SchemeModerator": true},
+				sq.Like{"u.Roles": wildcardSearchTerm(model.SystemAdminRoleId)},
+			}, "true").Else(sq.Or{
+				sq.And{
+					sq.NotEq{"c.Type": model.ChannelTypePrivate},
+					sq.Eq{"c.DeleteAt": 0},
+				},
 				sq.Expr("c.Id IN (?)", sq.Select("ChannelId").
 					From("ChannelMembers").
 					Where(sq.Eq{"UserId": userID})),
-			},
-		})
+			}),
+		)
 	}
 
 	searchClause := s.searchClause(term)
