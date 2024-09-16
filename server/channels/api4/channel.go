@@ -905,12 +905,12 @@ func getDeletedChannelsForTeam(c *Context, w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	if !c.App.SessionHasPermissionToTeam(*c.AppContext.Session(), c.Params.TeamId, model.PermissionManageTeam) {
-		c.SetPermissionError(model.PermissionManageTeam)
-		return
+	userId := c.AppContext.Session().UserId
+	if c.App.SessionHasPermissionToTeam(*c.AppContext.Session(), c.Params.TeamId, model.PermissionManageTeam) {
+		userId = ""
 	}
 
-	channels, err := c.App.GetDeletedChannels(c.AppContext, c.Params.TeamId, c.Params.Page*c.Params.PerPage, c.Params.PerPage, "")
+	channels, err := c.App.GetDeletedChannels(c.AppContext, c.Params.TeamId, c.Params.Page*c.Params.PerPage, c.Params.PerPage, userId)
 	if err != nil {
 		c.Err = err
 		return
@@ -1268,10 +1268,6 @@ func searchAllChannels(c *Context, w http.ResponseWriter, r *http.Request) {
 	}
 
 	if !fromSysConsole {
-		if props.IncludeDeleted && !c.App.SessionHasPermissionToTeams(c.AppContext, *c.AppContext.Session(), props.TeamIds, model.PermissionManageTeam) {
-			c.SetPermissionError(model.PermissionManageTeam)
-			return
-		}
 		// If the request is not coming from system_console, only show the user level channels
 		// from all teams.
 		channels, err := c.App.AutocompleteChannels(c.AppContext, c.AppContext.Session().UserId, props.Term)

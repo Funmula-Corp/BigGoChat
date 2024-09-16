@@ -222,13 +222,7 @@ export default class BrowseChannels extends React.PureComponent<Props, State> {
         const searchTimeoutId = window.setTimeout(
             async () => {
                 try {
-                    const searchOpts: ChannelSearchOpts = {
-                        team_ids: [this.props.teamId],
-                        nonAdminSearch: true,
-                        include_deleted: this.props.canShowArchivedChannels
-                    };
-
-                    const {data} = await this.props.actions.searchAllChannels(term, searchOpts) as ActionResult<Channel[]>;
+                    const {data} = await this.props.actions.searchAllChannels(term, {team_ids: [this.props.teamId], nonAdminSearch: true, include_deleted: true}) as ActionResult<Channel[]>;
                     if (searchTimeoutId !== this.searchTimeoutId) {
                         return;
                     }
