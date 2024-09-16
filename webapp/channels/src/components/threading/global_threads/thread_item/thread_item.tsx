@@ -88,7 +88,12 @@ function ThreadItem({
     const currentUserId = useSelector(getCurrentUserId);
     const tipStep = useSelector((state: GlobalState) => getInt(state, Preferences.CRT_TUTORIAL_STEP, currentUserId));
     const showListTutorialTip = tipStep === CrtTutorialSteps.LIST_POPOVER;
-    const msgDeleted = formatMessage({id: 'post_body.deleted', defaultMessage: '(message deleted)'});
+    const isDeleted = !!post.props.delteBy || post.state === Posts.POST_DELETED;
+    const isDeleteByAdmin = post.props?.deleteBy && post.props.deleteBy != post.user_id;
+    const msgDeleted = isDeleteByAdmin
+        ? formatMessage({id: 'post_body.deleted_by', description: {name: 'admin'}, defaultMessage: '(message deleted by admin)'})
+        : formatMessage({id: 'post_body.deleted', defaultMessage: '(message deleted)'});
+    console.log(msgDeleted, post.props.deleteBy);
     const postAuthor = post.props?.override_username || displayName;
 
     useEffect(() => {
@@ -250,9 +255,10 @@ function ThreadItem({
                 tabIndex={0}
                 onClick={handleFormattedTextClick}
             >
-                {post.message ? (
+                {isDeleted && msgDeleted}
+                {post.message && !isDeleted ? (
                     <Markdown
-                        message={post.state === Posts.POST_DELETED ? msgDeleted : post.message}
+                        message={post.message}
                         options={markdownPreviewOptions}
                         imagesMetadata={post?.metadata && post?.metadata?.images}
                         imageProps={imageProps}
