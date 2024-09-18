@@ -143,6 +143,7 @@ func (a *App) CreateTeamWithUser(c request.CTX, team *model.Team, userID string)
 		return nil, err
 	}
 	team.Email = user.Email
+	team.CreatorId = user.Id
 
 	if !a.ch.srv.teamService.IsTeamEmailAllowed(user, team) {
 		return nil, model.NewAppError("CreateTeamWithUser", "api.team.is_team_creation_allowed.domain.app_error", nil, "", http.StatusBadRequest)

@@ -6,7 +6,9 @@ package app
 import (
 	"archive/zip"
 	"bufio"
+	"database/sql"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -14,10 +16,10 @@ import (
 	"strings"
 	"sync"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app/imports"
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app/imports"
 )
 
 type ReactionImportData = imports.ReactionImportData // part of the app interface
@@ -111,7 +113,7 @@ func processAttachments(c request.CTX, line *imports.LineImportData, basePath st
 	return nil
 }
 
-func (a *App) bulkImportWorker(c request.CTX, dryRun, extractContent bool, wg *sync.WaitGroup, lines <-chan imports.LineImportWorkerData, errors chan<- imports.LineImportWorkerError) {
+func (a *App) bulkImportWorker(c request.CTX, dryRun, extractContent, replaceUser bool, wg *sync.WaitGroup, lines <-chan imports.LineImportWorkerData, errors chan<- imports.LineImportWorkerError) {
 	workerID := model.NewId()
 	processedLines := uint64(0)
 
@@ -148,7 +150,7 @@ func (a *App) bulkImportWorker(c request.CTX, dryRun, extractContent bool, wg *s
 				directPostLines = []imports.LineImportWorkerData{}
 			}
 		default:
-			if err := a.importLine(c, line.LineImportData, dryRun); err != nil {
+			if err := a.importLine(c, line.LineImportData, dryRun, replaceUser); err != nil {
 				errors <- imports.LineImportWorkerError{Error: err, LineNumber: line.LineNumber}
 			}
 		}
@@ -171,22 +173,106 @@ func (a *App) bulkImportWorker(c request.CTX, dryRun, extractContent bool, wg *s
 	}
 }
 
+func (a *App) processUserNameMap(_ request.CTX, line *imports.LineImportData, userMap map[string]*string) error {
+	mapReactions := func(reactions *[]imports.ReactionImportData) {
+		for i, reaction := range *reactions {
+			if v, ok := userMap[*reaction.User]; ok {
+				(*reactions)[i].User = v
+			}
+		}
+	}
+	mapReplies := func(replies *[]imports.ReplyImportData) {
+		for i, reply := range *replies {
+			if v, ok := userMap[*reply.User]; ok {
+				(*replies)[i].User = v
+			}
+			if reply.Reactions != nil {
+				mapReactions(reply.Reactions)
+			}
+		}
+	}
+	mapNameListPtr := func(flaggedBy *[]string) {
+		for i, name := range *flaggedBy {
+			m, ok := userMap[name]
+			if ok {
+				(*flaggedBy)[i] = *m
+			}
+		}
+	}
+	switch line.Type {
+	case "user":
+		user, nErr := a.Srv().Store().User().GetByEmail(*line.User.Email)
+		if nErr != nil {
+			if errors.Is(nErr, sql.ErrNoRows) {
+				return nil
+			}
+			return nErr
+		}
+		userMap[*line.User.Username] = &user.Username
+		line.User.Username = &user.Username
+	case "post":
+		name, ok := userMap[*line.Post.User]
+		if ok {
+			line.Post.User = name
+		}
+		if line.Post.Replies != nil {
+			mapReplies(line.Post.Replies)
+		}
+		if line.Post.Reactions != nil {
+			mapReactions(line.Post.Reactions)
+		}
+		if line.Post.FlaggedBy != nil {
+			mapNameListPtr(line.Post.FlaggedBy)
+		}
+	case "direct_post":
+		name, ok := userMap[*line.DirectPost.User]
+		if ok {
+			line.DirectPost.User = name
+		}
+		if line.DirectPost.ChannelMembers != nil {
+			mapNameListPtr(line.DirectPost.ChannelMembers)
+		}
+		if line.DirectPost.Replies != nil {
+			mapReplies(line.DirectPost.Replies)
+		}
+		if line.DirectPost.Reactions != nil {
+			mapReactions(line.DirectPost.Reactions)
+		}
+		if line.DirectPost.FlaggedBy != nil {
+			mapNameListPtr(line.DirectPost.FlaggedBy)
+		}
+	case "direct_channel":
+		if line.DirectChannel.Members != nil {
+			mapNameListPtr(line.DirectChannel.Members)
+		}
+		if line.DirectChannel.FavoritedBy != nil {
+			mapNameListPtr(line.DirectChannel.FavoritedBy)
+		}
+	}
+	return nil
+}
+
 func (a *App) BulkImport(c request.CTX, jsonlReader io.Reader, attachmentsReader *zip.Reader, dryRun bool, workers int) (*model.AppError, int) {
-	return a.bulkImport(c, jsonlReader, attachmentsReader, dryRun, true, workers, "")
+	return a.bulkImport(c, jsonlReader, attachmentsReader, dryRun, true, false, true, workers, "")
 }
 
 func (a *App) BulkImportWithPath(c request.CTX, jsonlReader io.Reader, attachmentsReader *zip.Reader, dryRun, extractContent bool, workers int, importPath string) (*model.AppError, int) {
-	return a.bulkImport(c, jsonlReader, attachmentsReader, dryRun, extractContent, workers, importPath)
+	return a.bulkImport(c, jsonlReader, attachmentsReader, dryRun, extractContent, false, true, workers, importPath)
+}
+
+func (a *App) BulkImport2(c request.CTX, jsonlReader io.Reader, attachmentsReader *zip.Reader, dryRun, extractContent, byEmail, replaceUser bool, workers int, importPath string) (*model.AppError, int) {
+	return a.bulkImport(c, jsonlReader, attachmentsReader, dryRun, extractContent, byEmail, replaceUser, workers, importPath)
 }
 
 // bulkImport will extract attachments from attachmentsReader if it is
 // not nil. If it is nil, it will look for attachments on the
 // filesystem in the locations specified by the JSONL file according
 // to the older behavior
-func (a *App) bulkImport(c request.CTX, jsonlReader io.Reader, attachmentsReader *zip.Reader, dryRun, extractContent bool, workers int, importPath string) (*model.AppError, int) {
+func (a *App) bulkImport(c request.CTX, jsonlReader io.Reader, attachmentsReader *zip.Reader, dryRun, extractContent, byEmail, replaceUser bool, workers int, importPath string) (*model.AppError, int) {
 	scanner := bufio.NewScanner(jsonlReader)
 	buf := make([]byte, 0, 64*1024)
 	scanner.Buffer(buf, maxScanTokenSize)
+	usereMap := make(map[string]*string)
 
 	lineNumber := 0
 
@@ -215,6 +301,12 @@ func (a *App) bulkImport(c request.CTX, jsonlReader io.Reader, attachmentsReader
 		var line imports.LineImportData
 		if err := json.Unmarshal(scanner.Bytes(), &line); err != nil {
 			return model.NewAppError("BulkImport", "app.import.bulk_import.json_decode.error", nil, "", http.StatusBadRequest).Wrap(err), lineNumber
+		}
+
+		if byEmail {
+			if err := a.processUserNameMap(c, &line, usereMap); err != nil {
+				c.Logger().Warn("Error while processing username mapping.", mlog.Err(err))
+			}
 		}
 
 		if err := processAttachments(c, &line, importPath, attachedFiles); err != nil {
@@ -268,7 +360,7 @@ func (a *App) bulkImport(c request.CTX, jsonlReader io.Reader, attachmentsReader
 			linesChan = make(chan imports.LineImportWorkerData, workers)
 			for i := 0; i < workers; i++ {
 				wg.Add(1)
-				go a.bulkImportWorker(c, dryRun, extractContent, &wg, linesChan, errorsChan)
+				go a.bulkImportWorker(c, dryRun, extractContent, replaceUser, &wg, linesChan, errorsChan)
 			}
 		}
 
@@ -312,7 +404,7 @@ func processImportDataFileVersionLine(line imports.LineImportData) (int, *model.
 	return *line.Version, nil
 }
 
-func (a *App) importLine(c request.CTX, line imports.LineImportData, dryRun bool) *model.AppError {
+func (a *App) importLine(c request.CTX, line imports.LineImportData, dryRun bool, replaceUser bool) *model.AppError {
 	switch {
 	case line.Type == "role":
 		if line.Role == nil {
@@ -338,7 +430,7 @@ func (a *App) importLine(c request.CTX, line imports.LineImportData, dryRun bool
 		if line.User == nil {
 			return model.NewAppError("BulkImport", "app.import.import_line.null_user.error", nil, "", http.StatusBadRequest)
 		}
-		return a.importUser(c, line.User, dryRun)
+		return a.importUser(c, line.User, dryRun, replaceUser)
 	case line.Type == "direct_channel":
 		if line.DirectChannel == nil {
 			return model.NewAppError("BulkImport", "app.import.import_line.null_direct_channel.error", nil, "", http.StatusBadRequest)

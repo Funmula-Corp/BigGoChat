@@ -473,14 +473,39 @@ func createDirectChannel(c *Context, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if !allowed && !c.App.SessionHasPermissionTo(*c.AppContext.Session(), model.PermissionManageSystem) {
-		c.SetPermissionError(model.PermissionManageSystem)
-		return
-	}
-
 	otherUserId := userIds[0]
 	if c.AppContext.Session().UserId == otherUserId {
 		otherUserId = userIds[1]
+	}
+
+	user, uErr := c.App.GetUser(c.AppContext.Session().UserId)
+	if uErr != nil {
+		c.Err = uErr
+		return
+	}
+
+	// check other user is accepts unverififed user message
+	acceptsDM := false
+	if !user.IsBot && !user.IsVerified() && userIds[0] != userIds[1] {
+		pref, prefErr := c.App.GetPreferenceByCategoryAndNameForUser(c.AppContext, otherUserId, model.PreferenceCategoryPrivacySettings, model.PreferenceNameAllowUnverifiedMessage)
+		if prefErr == nil {
+			if parseErr := json.Unmarshal([]byte(pref.Value), &acceptsDM); parseErr != nil {
+				c.Err = model.NewAppError("createDirectChannel", "api.unmarshal_error", nil, "", http.StatusBadRequest).Wrap(parseErr)
+				return
+			}
+		}
+		allowed = acceptsDM
+	} else {
+		acceptsDM = true
+	}
+
+	if !allowed && !c.App.SessionHasPermissionTo(*c.AppContext.Session(), model.PermissionManageSystem) {
+		if !acceptsDM {
+			c.Err = model.NewAppError("createDirectChannel", "api.channel.create_channel.direct_channel.user_restricted_error", nil, "", http.StatusForbidden)
+			return
+		}
+		c.SetPermissionError(model.PermissionManageSystem)
+		return
 	}
 
 	audit.AddEventParameter(auditRec, "user_id", otherUserId)
@@ -756,7 +781,12 @@ func getPinnedPosts(c *Context, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if !c.App.SessionHasPermissionToChannel(c.AppContext, *c.AppContext.Session(), c.Params.ChannelId, model.PermissionReadChannelContent) {
+	channel, err := c.App.GetChannel(c.AppContext, c.Params.ChannelId)
+	if err != nil {
+		c.Err = err
+		return
+	}
+	if !c.App.SessionHasPermissionToReadChannel(c.AppContext, *c.AppContext.Session(), channel) {
 		c.SetPermissionError(model.PermissionReadChannelContent)
 		return
 	}
@@ -875,12 +905,12 @@ func getDeletedChannelsForTeam(c *Context, w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	if !c.App.SessionHasPermissionToTeam(*c.AppContext.Session(), c.Params.TeamId, model.PermissionManageTeam) {
-		c.SetPermissionError(model.PermissionManageTeam)
-		return
+	userId := c.AppContext.Session().UserId
+	if c.App.SessionHasPermissionToTeam(*c.AppContext.Session(), c.Params.TeamId, model.PermissionManageTeam) {
+		userId = ""
 	}
 
-	channels, err := c.App.GetDeletedChannels(c.AppContext, c.Params.TeamId, c.Params.Page*c.Params.PerPage, c.Params.PerPage, "")
+	channels, err := c.App.GetDeletedChannels(c.AppContext, c.Params.TeamId, c.Params.Page*c.Params.PerPage, c.Params.PerPage, userId)
 	if err != nil {
 		c.Err = err
 		return
@@ -1238,10 +1268,6 @@ func searchAllChannels(c *Context, w http.ResponseWriter, r *http.Request) {
 	}
 
 	if !fromSysConsole {
-		if props.IncludeDeleted && !c.App.SessionHasPermissionToTeams(c.AppContext, *c.AppContext.Session(), props.TeamIds, model.PermissionManageTeam) {
-			c.SetPermissionError(model.PermissionManageTeam)
-			return
-		}
 		// If the request is not coming from system_console, only show the user level channels
 		// from all teams.
 		channels, err := c.App.AutocompleteChannels(c.AppContext, c.AppContext.Session().UserId, props.Term)
@@ -1804,11 +1830,6 @@ func addChannelMember(c *Context, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if channel.DeleteAt > 0 {
-		c.Err = model.NewAppError("addUserToChannel", "api.channel.add_user.to.channel.failed.deleted.app_error", nil, "", http.StatusBadRequest)
-		return
-	}
-
 	if channel.Type == model.ChannelTypeDirect || channel.Type == model.ChannelTypeGroup {
 		c.Err = model.NewAppError("addUserToChannel", "api.channel.add_user_to_channel.type.app_error", nil, "", http.StatusBadRequest)
 		return
@@ -1825,6 +1846,16 @@ func addChannelMember(c *Context, w http.ResponseWriter, r *http.Request) {
 	}
 
 	isSelfAdd := member.UserId == c.AppContext.Session().UserId
+
+	if channel.DeleteAt > 0 {
+		if !isSelfAdd {
+			c.Err = model.NewAppError("addUserToChannel", "api.channel.add_user.to.channel.failed.deleted.app_error", nil, "", http.StatusBadRequest)
+			return
+		} else if isNewMembership && !c.App.SessionHasPermissionToTeam(*c.AppContext.Session(), channel.TeamId, model.PermissionManageTeam) {
+			c.SetPermissionError(model.PermissionManageTeam)
+			return
+		}
+	}
 
 	if channel.Type == model.ChannelTypeOpen {
 		if isSelfAdd && isNewMembership {

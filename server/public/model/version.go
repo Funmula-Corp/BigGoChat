@@ -13,6 +13,7 @@ import (
 // It should be maintained in chronological order with most current
 // release at the front of the list.
 var versions = []string{
+	"9.9.3",
 	"9.9.2",
 	"9.9.1",
 	"9.9.0",
@@ -127,7 +128,7 @@ var versions = []string{
 	"0.5.0",
 }
 
-var CurrentVersion = versions[0]
+var CurrentVersion string// = versions[0]
 var BuildNumber string
 var BuildDate string
 var BuildHash string
@@ -136,6 +137,9 @@ var BuildEnterpriseReady string
 var versionsWithoutHotFixes []string
 
 func init() {
+	if CurrentVersion == "" {
+		CurrentVersion = versions[0]
+	}
 	versionsWithoutHotFixes = make([]string, 0, len(versions))
 	seen := make(map[string]string)
 
@@ -166,7 +170,8 @@ func SplitVersion(version string) (int64, int64, int64) {
 	}
 
 	if len(parts) > 2 {
-		patch, _ = strconv.ParseInt(parts[2], 10, 64)
+		dash := strings.Split(parts[2], "-")
+		patch, _ = strconv.ParseInt(dash[0], 10, 64)
 	}
 
 	return major, minor, patch

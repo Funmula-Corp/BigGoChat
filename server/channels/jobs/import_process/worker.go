@@ -15,12 +15,12 @@ import (
 	"strconv"
 	"strings"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/jobs"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/services/configservice"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/shared/filestore"
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/jobs"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/services/configservice"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/shared/filestore"
 )
 
 type AppIface interface {
@@ -30,6 +30,7 @@ type AppIface interface {
 	FileSize(path string) (int64, *model.AppError)
 	FileReader(path string) (filestore.ReadCloseSeeker, *model.AppError)
 	BulkImportWithPath(c request.CTX, jsonlReader io.Reader, attachmentsReader *zip.Reader, dryRun, extractContent bool, workers int, importPath string) (*model.AppError, int)
+	BulkImport2(c request.CTX, jsonlReader io.Reader, attachmentsReader *zip.Reader, dryRun, extractContent, byEmail, replaceUser bool, workers int, importPath string) (*model.AppError, int)
 	Log() *mlog.Logger
 }
 
@@ -123,9 +124,11 @@ func MakeWorker(jobServer *jobs.JobServer, app AppIface) *jobs.SimpleWorker {
 			return model.NewAppError("ImportProcessWorker", "import_process.worker.do_job.missing_jsonl", nil, "jsonFile was nil", http.StatusBadRequest)
 		}
 
+		byEmail := true
+		replaceUser := false
 		extractContent := job.Data["extract_content"] == "true"
 		// do the actual import.
-		appErr, lineNumber := app.BulkImportWithPath(appContext, jsonFile, importZipReader, false, extractContent, runtime.NumCPU(), model.ExportDataDir)
+		appErr, lineNumber := app.BulkImport2(appContext, jsonFile, importZipReader, false, extractContent, byEmail, replaceUser, runtime.NumCPU(), model.ExportDataDir)
 		if appErr != nil {
 			job.Data["line_number"] = strconv.Itoa(lineNumber)
 			return appErr
