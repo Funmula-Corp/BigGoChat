@@ -19,7 +19,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/mattermost/ldap"
+	//"github.com/mattermost/ldap"
 
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/utils"
@@ -3924,24 +3924,25 @@ func (s *LdapSettings) isValid() *AppError {
 		if *s.LoginIdAttribute == "" {
 			return NewAppError("Config.IsValid", "model.config.is_valid.ldap_login_id", nil, "", http.StatusBadRequest)
 		}
-
-		if *s.UserFilter != "" {
-			if _, err := ldap.CompileFilter(*s.UserFilter); err != nil {
-				return NewAppError("ValidateFilter", "ent.ldap.validate_filter.app_error", nil, "", http.StatusBadRequest).Wrap(err)
+		/*
+			if *s.UserFilter != "" {
+				if _, err := ldap.CompileFilter(*s.UserFilter); err != nil {
+					return NewAppError("ValidateFilter", "ent.ldap.validate_filter.app_error", nil, "", http.StatusBadRequest).Wrap(err)
+				}
 			}
-		}
 
-		if *s.GuestFilter != "" {
-			if _, err := ldap.CompileFilter(*s.GuestFilter); err != nil {
-				return NewAppError("LdapSettings.isValid", "ent.ldap.validate_guest_filter.app_error", nil, "", http.StatusBadRequest).Wrap(err)
+			if *s.GuestFilter != "" {
+				if _, err := ldap.CompileFilter(*s.GuestFilter); err != nil {
+					return NewAppError("LdapSettings.isValid", "ent.ldap.validate_guest_filter.app_error", nil, "", http.StatusBadRequest).Wrap(err)
+				}
 			}
-		}
 
-		if *s.AdminFilter != "" {
-			if _, err := ldap.CompileFilter(*s.AdminFilter); err != nil {
-				return NewAppError("LdapSettings.isValid", "ent.ldap.validate_admin_filter.app_error", nil, "", http.StatusBadRequest).Wrap(err)
+			if *s.AdminFilter != "" {
+				if _, err := ldap.CompileFilter(*s.AdminFilter); err != nil {
+					return NewAppError("LdapSettings.isValid", "ent.ldap.validate_admin_filter.app_error", nil, "", http.StatusBadRequest).Wrap(err)
+				}
 			}
-		}
+		*/
 	}
 
 	return nil
