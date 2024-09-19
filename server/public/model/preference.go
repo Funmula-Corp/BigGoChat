@@ -63,6 +63,7 @@ const (
 
 	PreferenceCategoryPrivacySettings        = "privacy_settings"
 	PreferenceNameAllowUnverifiedMessage     = "allow_unverified_message"
+	MaxPreferenceValueLength = 20000
 )
 
 type Preference struct {
@@ -87,7 +88,7 @@ func (o *Preference) IsValid() *AppError {
 		return NewAppError("Preference.IsValid", "model.preference.is_valid.name.app_error", nil, "name="+o.Name, http.StatusBadRequest)
 	}
 
-	if utf8.RuneCountInString(o.Value) > 2000 {
+	if utf8.RuneCountInString(o.Value) > MaxPreferenceValueLength {
 		return NewAppError("Preference.IsValid", "model.preference.is_valid.value.app_error", nil, "value="+o.Value, http.StatusBadRequest)
 	}
 

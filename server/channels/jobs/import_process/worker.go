@@ -19,7 +19,7 @@ import (
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/jobs"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/services/configservice"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/configservice"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/shared/filestore"
 )
 

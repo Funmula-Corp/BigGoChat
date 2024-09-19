@@ -1437,11 +1437,11 @@ func (s *RetryLayerChannelStore) GetAllChannelMemberIdsByChannelId(id string) ([
 
 }
 
-func (s *RetryLayerChannelStore) GetAllChannelMembersForUser(userID string, allowFromCache bool, includeDeleted bool) (map[string]*model.AllChannelMember, error) {
+func (s *RetryLayerChannelStore) GetAllChannelMembersForUser(ctx request.CTX, userID string, allowFromCache bool, includeDeleted bool) (map[string]*model.AllChannelMember, error) {
 
 	tries := 0
 	for {
-		result, err := s.ChannelStore.GetAllChannelMembersForUser(userID, allowFromCache, includeDeleted)
+		result, err := s.ChannelStore.GetAllChannelMembersForUser(ctx, userID, allowFromCache, includeDeleted)
 		if err == nil {
 			return result, nil
 		}
@@ -6270,6 +6270,27 @@ func (s *RetryLayerJobStore) GetAllByTypeAndStatus(c request.CTX, jobType string
 
 }
 
+func (s *RetryLayerJobStore) GetAllByTypeAndStatusPage(c request.CTX, jobType []string, status string, offset int, limit int) ([]*model.Job, error) {
+
+	tries := 0
+	for {
+		result, err := s.JobStore.GetAllByTypeAndStatusPage(c, jobType, status, offset, limit)
+		if err == nil {
+			return result, nil
+		}
+		if !isRepeatableError(err) {
+			return result, err
+		}
+		tries++
+		if tries >= 3 {
+			err = errors.Wrap(err, "giving up after 3 consecutive repeatable transaction failures")
+			return result, err
+		}
+		timepkg.Sleep(100 * timepkg.Millisecond)
+	}
+
+}
+
 func (s *RetryLayerJobStore) GetAllByTypePage(c request.CTX, jobType string, offset int, limit int) ([]*model.Job, error) {
 
 	tries := 0
@@ -8052,11 +8073,11 @@ func (s *RetryLayerPostStore) GetRepliesForExport(parentID string) ([]*model.Rep
 
 }
 
-func (s *RetryLayerPostStore) GetSingle(id string, inclDeleted bool) (*model.Post, error) {
+func (s *RetryLayerPostStore) GetSingle(rctx request.CTX, id string, inclDeleted bool) (*model.Post, error) {
 
 	tries := 0
 	for {
-		result, err := s.PostStore.GetSingle(id, inclDeleted)
+		result, err := s.PostStore.GetSingle(rctx, id, inclDeleted)
 		if err == nil {
 			return result, nil
 		}
@@ -9255,11 +9276,11 @@ func (s *RetryLayerRemoteClusterStore) Get(remoteClusterId string) (*model.Remot
 
 }
 
-func (s *RetryLayerRemoteClusterStore) GetAll(filter model.RemoteClusterQueryFilter) ([]*model.RemoteCluster, error) {
+func (s *RetryLayerRemoteClusterStore) GetAll(offset int, limit int, filter model.RemoteClusterQueryFilter) ([]*model.RemoteCluster, error) {
 
 	tries := 0
 	for {
-		result, err := s.RemoteClusterStore.GetAll(filter)
+		result, err := s.RemoteClusterStore.GetAll(offset, limit, filter)
 		if err == nil {
 			return result, nil
 		}
@@ -11571,27 +11592,6 @@ func (s *RetryLayerTeamStore) GetAll() ([]*model.Team, error) {
 
 }
 
-func (s *RetryLayerTeamStore) GetAllTeamsByEmail(email string) ([]*model.Team, error) {
-
-	tries := 0
-	for {
-		result, err := s.TeamStore.GetAllTeamsByEmail(email)
-		if err == nil {
-			return result, nil
-		}
-		if !isRepeatableError(err) {
-			return result, err
-		}
-		tries++
-		if tries >= 3 {
-			err = errors.Wrap(err, "giving up after 3 consecutive repeatable transaction failures")
-			return result, err
-		}
-		timepkg.Sleep(100 * timepkg.Millisecond)
-	}
-
-}
-
 func (s *RetryLayerTeamStore) GetAllForExportAfter(limit int, afterID string) ([]*model.TeamForExport, error) {
 
 	tries := 0
@@ -11660,6 +11660,27 @@ func (s *RetryLayerTeamStore) GetAllTeamListing() ([]*model.Team, error) {
 	tries := 0
 	for {
 		result, err := s.TeamStore.GetAllTeamListing()
+		if err == nil {
+			return result, nil
+		}
+		if !isRepeatableError(err) {
+			return result, err
+		}
+		tries++
+		if tries >= 3 {
+			err = errors.Wrap(err, "giving up after 3 consecutive repeatable transaction failures")
+			return result, err
+		}
+		timepkg.Sleep(100 * timepkg.Millisecond)
+	}
+
+}
+
+func (s *RetryLayerTeamStore) GetAllTeamsByEmail(email string) ([]*model.Team, error) {
+
+	tries := 0
+	for {
+		result, err := s.TeamStore.GetAllTeamsByEmail(email)
 		if err == nil {
 			return result, nil
 		}
@@ -13626,11 +13647,11 @@ func (s *RetryLayerUserStore) GetAllProfiles(options *model.UserGetOptions) ([]*
 
 }
 
-func (s *RetryLayerUserStore) GetAllProfilesInChannel(ctx context.Context, channelID string, allowFromCache bool) (map[string]*model.User, error) {
+func (s *RetryLayerUserStore) GetAllProfilesInChannel(rctx context.Context, channelID string, allowFromCache bool) (map[string]*model.User, error) {
 
 	tries := 0
 	for {
-		result, err := s.UserStore.GetAllProfilesInChannel(ctx, channelID, allowFromCache)
+		result, err := s.UserStore.GetAllProfilesInChannel(rctx, channelID, allowFromCache)
 		if err == nil {
 			return result, nil
 		}
