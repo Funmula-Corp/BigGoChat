@@ -15,7 +15,9 @@
 // for setup with AWS: Follow the instructions mentioned in the mattermost/platform-private/config/ldap-test-setup.txt file
 
 describe('LDAP settings', () => {
-    beforeEach(() => {
+    beforeEach(function() {
+        // BigGoChat does not support LDAP, SAML, and Keycloak features
+        this.skip();
         // # Login as sysadmin
         cy.apiAdminLogin();
 

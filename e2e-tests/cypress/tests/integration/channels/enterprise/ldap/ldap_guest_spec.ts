@@ -27,7 +27,9 @@ describe('LDAP guest', () => {
     const user2 = ldapUsers['test-3'];
     const userBoard1 = ldapUsers['board-1'];
 
-    before(() => {
+    before(function() {
+        // BigGoChat does not support LDAP, SAML, and Keycloak features
+        this.skip();
         // * Check if server has license for LDAP
         cy.apiRequireLicenseForFeature('LDAP');
 
