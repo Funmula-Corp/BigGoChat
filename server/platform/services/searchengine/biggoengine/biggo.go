@@ -8,52 +8,21 @@ import (
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/services/searchengine/biggoengine/cfg"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/services/searchengine/biggoengine/clients"
 )
 
 const (
 	EngineName = "biggo"
-
-	ChannelVertex = "channel"
-	FileVertex    = "file"
-	PostVertex    = "post"
-	UserVertex    = "user"
-
-	EsChannelIndex = "mm_biggoengine_channel_*"
-	EsFileIndex    = "mm_biggoengine_file_*"
-	EsPostIndex    = "mm_biggoengine_post_*"
-	EsUserIndex    = "mm_biggoengine_user_*"
 )
 
-func (be *BiggoEngine) GetEsChannelIndex() string {
-	return fmt.Sprintf("mm_biggoengine_channel_%s", cfg.ElasticsearchIndexChannelSuffix(be.config))
-}
-
-func (be *BiggoEngine) GetEsFileIndex() string {
-	return fmt.Sprintf("mm_biggoengine_file_%s", cfg.ElasticsearchIndexFileSuffix(be.config))
-}
-
-func (be *BiggoEngine) GetEsPostIndex() string {
-	return fmt.Sprintf("mm_biggoengine_post_%s", cfg.ElasticsearchIndexPostSuffix(be.config))
-}
-
-func (be *BiggoEngine) GetEsUserIndex() string {
-	return fmt.Sprintf("mm_biggoengine_user_%s", cfg.ElasticsearchIndexUserSuffix(be.config))
-}
-
 func NewBiggoEngine(config *model.Config) *BiggoEngine {
-	clients.InitEsClient(config)
-	clients.InitNeo4jClient(config)
 	return &BiggoEngine{
 		config: config,
 	}
 }
 
 type BiggoEngine struct {
-	config *model.Config
-
+	config   *model.Config
 	isActive atomic.Bool
-	isSync   atomic.Bool
 }
 
 func (be *BiggoEngine) DataRetentionDeleteIndexes(rctx request.CTX, cutoff time.Time) (aErr *model.AppError) {
@@ -93,11 +62,11 @@ func (be *BiggoEngine) IsEnabled() (result bool) {
 }
 
 func (be *BiggoEngine) IsIndexingEnabled() (result bool) {
-	return cfg.EnableIndexing(be.config)
+	return false
 }
 
 func (be *BiggoEngine) IsIndexingSync() (result bool) {
-	return be.isSync.Load()
+	return true
 }
 
 func (be *BiggoEngine) IsSearchEnabled() (result bool) {
