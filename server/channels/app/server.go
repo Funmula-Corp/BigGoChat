@@ -40,7 +40,6 @@ import (
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/audit"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/jobs"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/jobs/active_users"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/jobs/biggo_engine"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/jobs/cleanup_desktop_tokens"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/jobs/delete_empty_drafts_migration"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/jobs/delete_orphan_drafts_migration"
@@ -70,8 +69,6 @@ import (
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/services/cache"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/services/httpservice"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/services/remotecluster"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/services/searchengine/biggoengine"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/services/searchengine/biggoengine/biggoindexer"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/services/searchengine/bleveengine"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/services/searchengine/bleveengine/indexer"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/services/sharedchannel"
@@ -1466,12 +1463,6 @@ func (s *Server) initJobs() {
 		model.JobTypeBlevePostIndexing,
 		indexer.MakeWorker(s.Jobs, s.platform.SearchEngine.BleveEngine.(*bleveengine.BleveEngine)),
 		nil,
-	)
-
-	s.Jobs.RegisterJobType(
-		model.JobTypeBiggoIndexing,
-		biggoindexer.MakeWorker(s.Jobs, s.platform.SearchEngine.BiggoEngine.(*biggoengine.BiggoEngine)),
-		biggo_engine.MakeScheduler(s.Jobs),
 	)
 
 	s.Jobs.RegisterJobType(
