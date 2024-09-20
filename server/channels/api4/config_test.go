@@ -16,9 +16,9 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/config"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 )
 
 func TestGetConfig(t *testing.T) {
@@ -282,6 +282,23 @@ func TestUpdateConfig(t *testing.T) {
 		cfg, _, err = th.SystemAdminClient.GetConfig(context.Background())
 		require.NoError(t, err)
 		require.Equal(t, nonEmptyURL, *cfg.ServiceSettings.SiteURL)
+	})
+
+	t.Run("update elasticsearch config when elasticsearch not registered", func(t *testing.T) {
+		client := th.SystemAdminClient
+
+		cfg, resp, err := client.GetConfig(context.Background())
+		require.NoError(t, err)
+		CheckOKStatus(t, resp)
+
+		cfg.ElasticsearchSettings.Password = model.NewString("changeme")
+		cfg.ElasticsearchSettings.EnableIndexing = model.NewBool(true)
+		cfg.ElasticsearchSettings.EnableSearching = model.NewBool(true)
+		cfg.ElasticsearchSettings.EnableAutocomplete = model.NewBool(true)
+
+		_, resp, err = client.UpdateConfig(context.Background(), cfg)
+		require.NoError(t, err)
+		CheckOKStatus(t, resp)
 	})
 }
 
