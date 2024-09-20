@@ -23,7 +23,9 @@ describe('Autocomplete with Elasticsearch - Channel', () => {
     let testTeam;
     let testUser;
 
-    before(() => {
+    before(function() {
+        // Mattermost close source feature
+        this.skip();
         cy.shouldNotRunOnCloudEdition();
 
         // # Check if server has license for Elasticsearch
