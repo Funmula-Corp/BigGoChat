@@ -1862,9 +1862,9 @@ func addChannelMember(c *Context, w http.ResponseWriter, r *http.Request) {
 	}
 
 	if channel.Type == model.ChannelTypePrivate {
-		if !c.App.SessionHasPermissionToChannel(c.AppContext, *c.AppContext.Session(), channel.Id, model.PermissionAddPrivateChannelMembers) {
-			c.SetPermissionError(model.PermissionAddPrivateChannelMembers)
-			return
+		if c.App.SessionHasPermissionToChannel(c.AppContext, *c.AppContext.Session(), channel.Id, model.PermissionAddPrivateChannelMembers) {
+			canAddOthers = true
+			canAddSelf = true
 		}
 	}
 
@@ -1939,7 +1939,19 @@ func addChannelMember(c *Context, w http.ResponseWriter, r *http.Request) {
 				continue
 			} else if !isSelfAdd && !canAddOthers {
 				c.Logger.Warn("Error adding channel member, Invalid Permission to add others", mlog.String("UserId", userId), mlog.String("ChannelId", channel.Id))
-				c.SetPermissionError(model.PermissionManagePublicChannelMembers)
+				c.SetPermissionError(model.PermissionAddPublicChannelMembers)
+				lastError = c.Err
+				continue
+			}
+		} else if channel.Type == model.ChannelTypePrivate {
+			if isSelfAdd && !canAddSelf {
+				c.Logger.Warn("Error adding channel member, Invalid Permission to add self", mlog.String("UserId", userId), mlog.String("ChannelId", channel.Id))
+				c.SetPermissionError(model.PermissionAddPrivateChannelMembers)
+				lastError = c.Err
+				continue
+			} else if !isSelfAdd && !canAddOthers {
+				c.Logger.Warn("Error adding channel member, Invalid Permission to add others", mlog.String("UserId", userId), mlog.String("ChannelId", channel.Id))
+				c.SetPermissionError(model.PermissionAddPrivateChannelMembers)
 				lastError = c.Err
 				continue
 			}
