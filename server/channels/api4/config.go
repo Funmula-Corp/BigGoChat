@@ -10,12 +10,12 @@ import (
 	"reflect"
 	"strings"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/audit"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/utils"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/config"
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/i18n"
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/audit"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/utils"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/config"
 )
 
 var writeFilter func(c *Context, structField reflect.StructField) bool
@@ -170,7 +170,8 @@ func updateConfig(c *Context, w http.ResponseWriter, r *http.Request) {
 	// if ES autocomplete was enabled, we need to make sure that index has been checked.
 	// we need to stop enabling ES autocomplete otherwise.
 	if !*appCfg.ElasticsearchSettings.EnableAutocomplete && *cfg.ElasticsearchSettings.EnableAutocomplete {
-		if !c.App.SearchEngine().ElasticsearchEngine.IsAutocompletionEnabled() {
+		elasticsearchEngine := c.App.SearchEngine().ElasticsearchEngine
+		if elasticsearchEngine != nil && !elasticsearchEngine.IsAutocompletionEnabled() {
 			c.Err = model.NewAppError("updateConfig", "api.config.update.elasticsearch.autocomplete_cannot_be_enabled_error", nil, "", http.StatusBadRequest)
 			return
 		}
