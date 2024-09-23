@@ -1043,10 +1043,11 @@ func TestGetDeletedChannelsForTeam(t *testing.T) {
 	require.NoError(t, err)
 	CheckOKStatus(t, resp)
 
-	// only team admin can see deleted channels.
-	_, resp, err = client.GetDeletedChannelsForTeam(context.Background(), team.Id, 0, 100, "")
-	require.Error(t, err)
-	CheckForbiddenStatus(t, resp)
+	// user can list archived channel that joined.
+	channels, resp, err = client.GetDeletedChannelsForTeam(context.Background(), team.Id, 0, 100, "")
+	require.NoError(t, err)
+	CheckOKStatus(t, resp)
+	require.Len(t, channels, 2)
 
 	th.LoginTeamAdmin()
 	channels, resp, err = client.GetDeletedChannelsForTeam(context.Background(), team.Id, 0, 100, "")
@@ -1071,8 +1072,9 @@ func TestGetDeletedChannelsForTeam(t *testing.T) {
 	th.LoginBasic()
 
 	channels, resp, err = client.GetDeletedChannelsForTeam(context.Background(), team.Id, 0, 100, "")
-	require.Error(t, err)
-	CheckForbiddenStatus(t, resp)
+	require.NoError(t, err)
+	CheckOKStatus(t, resp)
+	require.Len(t, channels, 2)
 
 	th.TestForSystemAdminAndLocal(t, func(t *testing.T, client *model.Client4) {
 		channels, _, err = client.GetDeletedChannelsForTeam(context.Background(), team.Id, 0, 100, "")

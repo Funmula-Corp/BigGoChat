@@ -19,11 +19,11 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/utils"
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/timezones"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/utils"
 )
 
 type SqlStore interface {
@@ -1002,6 +1002,11 @@ func testChannelStoreGetDeleted(t *testing.T, rctx request.CTX, ss store.Store) 
 
 	_, nErr := ss.Channel().Save(rctx, &o1, -1)
 	require.NoError(t, nErr)
+	ss.Channel().SaveMember(rctx, &model.ChannelMember{
+		UserId: userId,
+		ChannelId: o1.Id,
+		NotifyProps: model.GetDefaultChannelNotifyProps(),
+	})
 
 	err := ss.Channel().Delete(o1.Id, model.GetMillis())
 	require.NoError(t, err, "channel should have been deleted")
@@ -1035,15 +1040,15 @@ func testChannelStoreGetDeleted(t *testing.T, rctx request.CTX, ss store.Store) 
 	err = ss.Channel().Delete(o3.Id, model.GetMillis())
 	require.NoError(t, err, "channel should have been deleted")
 
-	list, nErr = ss.Channel().GetDeleted(o1.TeamId, 0, 100, userId)
+	list, nErr = ss.Channel().GetDeleted(o1.TeamId, 0, 100, "")
 	require.NoError(t, nErr, nErr)
 	require.Len(t, list, 2, "wrong list length")
 
-	list, nErr = ss.Channel().GetDeleted(o1.TeamId, 0, 1, userId)
+	list, nErr = ss.Channel().GetDeleted(o1.TeamId, 0, 1, "")
 	require.NoError(t, nErr, nErr)
 	require.Len(t, list, 1, "wrong list length")
 
-	list, nErr = ss.Channel().GetDeleted(o1.TeamId, 1, 1, userId)
+	list, nErr = ss.Channel().GetDeleted(o1.TeamId, 1, 1, "")
 	require.NoError(t, nErr, nErr)
 	require.Len(t, list, 1, "wrong list length")
 }

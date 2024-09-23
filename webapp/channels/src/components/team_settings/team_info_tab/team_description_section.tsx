@@ -42,8 +42,8 @@ const TeamDescriptionSection = ({handleDescriptionChanges, clientError, descript
         <BaseSettingItem
             description={formatMessage({
                 id: 'general_tab.teamDescriptionInfo',
-                defaultMessage: 'Team description provides additional information to help users select the right team. Maximum of 50 characters.',
-            })}
+                defaultMessage: 'Team description provides additional information to help users select the right team. Maximum of {max} characters.',
+            }, {max: Constants.MAX_TEAMDESCRIPTION_LENGTH})}
             content={descriptionSectionInput}
             className='description-setting-item'
             error={clientError}
