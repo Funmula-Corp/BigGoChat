@@ -1919,8 +1919,19 @@ func addChannelMember(c *Context, w http.ResponseWriter, r *http.Request) {
 			continue
 		}
 
+		isSelfAdd := member.UserId == c.AppContext.Session().UserId
+		if channel.DeleteAt > 0 {
+			if !isSelfAdd {
+				c.Err = model.NewAppError("addUserToChannel", "api.channel.add_user.to.channel.failed.deleted.app_error", nil, "", http.StatusBadRequest)
+				lastError = c.Err
+				continue
+			} else if !c.App.SessionHasPermissionToTeam(*c.AppContext.Session(), channel.TeamId, model.PermissionManageTeam) {
+				c.SetPermissionError(model.PermissionManageTeam)
+				lastError = c.Err
+				continue
+			}
+		}
 		if channel.Type == model.ChannelTypeOpen {
-			isSelfAdd := member.UserId == c.AppContext.Session().UserId
 			if isSelfAdd && !canAddSelf {
 				c.Logger.Warn("Error adding channel member, Invalid Permission to add self", mlog.String("UserId", userId), mlog.String("ChannelId", channel.Id))
 				c.SetPermissionError(model.PermissionJoinPublicChannels)
