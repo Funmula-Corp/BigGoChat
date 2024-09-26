@@ -88,6 +88,7 @@ const Login = ({onCustomizeHeader}: LoginProps) => {
         EnableSignUpWithBiggo,
         EnableSignUpWithOpenId,
         EnableOpenServer,
+        EnableUserCreation,
         LdapLoginFieldName,
         GitLabButtonText,
         GitLabButtonColor,
@@ -126,10 +127,11 @@ const Login = ({onCustomizeHeader}: LoginProps) => {
     const enableCustomBrand = EnableCustomBrand === 'true';
     const enableLdap = EnableLdap === 'true';
     const enableOpenServer = EnableOpenServer === 'true';
+    const enableUserCreation = EnableUserCreation === 'true';
     const enableSaml = EnableSaml === 'true';
     const enableSignInWithEmail = EnableSignInWithEmail === 'true';
     const enableSignInWithUsername = EnableSignInWithUsername === 'true';
-    const enableSignUpWithEmail = EnableSignUpWithEmail === 'true';
+    const enableSignUpWithEmail = enableUserCreation && EnableSignUpWithEmail === 'true';
     const enableSignUpWithGitLab = EnableSignUpWithGitLab === 'true';
     const enableSignUpWithGoogle = EnableSignUpWithGoogle === 'true';
     const enableSignUpWithBiggo = EnableSignUpWithBiggo === 'true';
@@ -758,7 +760,10 @@ const Login = ({onCustomizeHeader}: LoginProps) => {
         if (ForgotPasswordLink) {
             return (
                 <div className='login-body-card-form-link'>
-                    <ExternalLink href={ForgotPasswordLink}>
+                    <ExternalLink
+                        location='login_page'
+                        href={ForgotPasswordLink}
+                    >
                         {formatMessage({id: 'login.forgot', defaultMessage: 'Forgot your password?'})}
                     </ExternalLink>
                 </div>
