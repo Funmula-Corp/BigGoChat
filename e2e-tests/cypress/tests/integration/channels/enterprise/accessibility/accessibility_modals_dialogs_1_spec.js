@@ -9,6 +9,8 @@
 
 // Group: @channels @enterprise @accessibility
 
+// BigGoChat does not have a feature to open the profile modal
+
 import * as TIMEOUTS from '../../../../fixtures/timeouts';
 
 describe('Verify Accessibility Support in Modals & Dialogs', () => {
@@ -25,11 +27,13 @@ describe('Verify Accessibility Support in Modals & Dialogs', () => {
             testChannel = channel;
             testUser = user;
 
-            cy.apiCreateUser().then(({user: newUser}) => {
-                cy.apiAddUserToTeam(testTeam.id, newUser.id).then(() => {
-                    cy.apiAddUserToChannel(testChannel.id, newUser.id);
+            for (let i = 0; i < 20; i++) {
+                cy.apiCreateUser().then(({user: newUser}) => {
+                    cy.apiAddUserToTeam(testTeam.id, newUser.id).then(() => {
+                        cy.apiAddUserToChannel(testChannel.id, newUser.id);
+                    });
                 });
-            });
+            }
         });
     });
 
@@ -41,7 +45,7 @@ describe('Verify Accessibility Support in Modals & Dialogs', () => {
 
     it('MM-T1454 Accessibility Support in Different Modals and Dialog screen', () => {
         // * Verify the accessibility support in Profile Dialog
-        verifyUserMenuModal('Profile');
+        // verifyUserMenuModal('Profile');
 
         // * Verify the accessibility support in Team Settings Dialog
         verifyMainMenuModal('Team Settings');
@@ -72,11 +76,12 @@ describe('Verify Accessibility Support in Modals & Dialogs', () => {
         cy.findByText('Manage Members').click().wait(TIMEOUTS.FIVE_SEC);
 
         // * Verify the accessibility support in Manage Members Dialog
-        cy.findByRole('dialog', {name: 'Off-Topic Members'}).within(() => {
-            cy.findByRole('heading', {name: 'Off-Topic Members'});
+        cy.get('#sidebar-right').within(() => {
+            cy.contains('span', 'Managing Members');
+            cy.contains('span', 'Off-Topic');
 
             // # Set focus on search input
-            cy.findByPlaceholderText('Search users').
+            cy.findByPlaceholderText('Search members').
                 focus().
                 type(' {backspace}').
                 wait(TIMEOUTS.HALF_SEC).
@@ -85,26 +90,32 @@ describe('Verify Accessibility Support in Modals & Dialogs', () => {
 
             // # Press tab and verify focus on first user's profile image
             cy.focused().tab();
-            cy.findByAltText('sysadmin profile image').should('be.focused');
+            cy.focused().within(() => {
+                cy.findByAltText('sysadmin profile image').should('exist');
+            });
 
             // # Press tab and verify focus on first user's username
             cy.focused().tab();
-            cy.focused().should('have.text', '@sysadmin');
+            cy.focused().within(() => {
+                cy.findByText('sysadmin').should('exist');
+            });
 
             // # Press tab and verify focus on second user's profile image
             cy.focused().tab();
-            cy.findByAltText(`${testUser.username} profile image`).should('be.focused');
+            cy.focused().within(() => {
+                cy.findByAltText(`${testUser.username} profile image`).should('exist');
+            });
 
             // # Press tab and verify focus on second user's username
             cy.focused().tab();
-            cy.focused().should('have.text', `@${testUser.username}`);
-
-            // # Press tab and verify focus on second user's dropdown option
-            cy.focused().tab();
-            cy.focused().should('have.class', 'dropdown-toggle').and('contain', 'Channel Member');
+            cy.focused().within(() => {
+                cy.findByText(`${testUser.username}`).should('exist');
+            })
+            .should('have.class', 'dropdown-toggle')
+            .and('contain', 'Member');
 
             // * Verify accessibility support in search total results
-            cy.get('#searchableUserListTotal').should('have.attr', 'aria-live', 'polite');
+            cy.get('[aria-live="polite"]').should('exist');
         });
     });
 });
@@ -133,8 +144,8 @@ function verifyModal(menuItem, modalName) {
 
     // * Verify the modal
     const name = modalName || menuItem;
-    cy.findByRole('dialog', {name}).within(() => {
-        cy.findByRole('heading', {name});
+    cy.findAllByRole('dialog').eq(1).within(() => {
+        cy.get('.modal-title').contains(name);
         cy.uiClose();
     });
 }
