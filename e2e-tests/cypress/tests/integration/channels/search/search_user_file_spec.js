@@ -51,11 +51,12 @@ describe('Search in DMs', () => {
 
         // # Create new DM channel with user's email
         createNewDMChannel(otherUser.email);
+        cy.wait(500);
 
         // # Post file to user
         cy.get('#advancedTextEditorCell').find('#fileUploadInput').attachFile('word-file.doc');
         cy.get('.post-image__thumbnail').should('be.visible');
-        cy.uiGetPostTextBox().clear().type('{enter}');
+        cy.uiGetPostTextBox().click().wait(500).type('{enter}');
 
         // # Type `in:` in searchbox
         cy.get('#searchBox').type('in:');
@@ -67,7 +68,7 @@ describe('Search in DMs', () => {
         cy.get('#searchBox').should('have.value', 'in:@' + otherUser.username + ' ');
 
         // # Press Enter in searchbox
-        cy.get('#searchBox').type('word-file.doc').type('{enter}');
+        cy.get('#searchBox').type('word-file').type('{enter}');
 
         // # Click the files tab
         cy.get('.files-tab').should('be.visible').click();
