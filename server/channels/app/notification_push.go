@@ -17,11 +17,11 @@ import (
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
 	"github.com/golang-jwt/jwt/v5"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/utils"
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/i18n"
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/utils"
 )
 
 type notificationType string
@@ -472,7 +472,7 @@ func (s *Server) StopPushNotificationsHubWorkers() {
 	s.PushNotificationsHub.stop()
 }
 
-func (a *App) rawSendToPushProxy(msg *model.PushNotification) (model.PushResponse, error) {
+func (a *App) rawSendToPushProxyHTTP(msg *model.PushNotification) (model.PushResponse, error) {
 	msgJSON, err := json.Marshal(msg)
 	if err != nil {
 		return nil, fmt.Errorf("failed to encode to JSON: %w", err)
@@ -500,6 +500,15 @@ func (a *App) rawSendToPushProxy(msg *model.PushNotification) (model.PushRespons
 	}
 
 	return pushResponse, nil
+}
+
+func (a *App) rawSendToPushProxy(msg *model.PushNotification) (model.PushResponse, error) {
+	notificationServer := *a.Config().EmailSettings.PushNotificationServer
+	if strings.HasPrefix(notificationServer, "amqp://") {
+		return a.rawSendToPushProxyAMQP(msg)
+	} else {
+		return a.rawSendToPushProxyHTTP(msg)
+	}
 }
 
 func (a *App) sendToPushProxy(msg *model.PushNotification, session *model.Session) error {

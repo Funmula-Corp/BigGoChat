@@ -28,6 +28,7 @@ import (
 	"golang.org/x/crypto/acme/autocert"
 
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/amqp"
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/httpservice"
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/i18n"
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
@@ -113,6 +114,8 @@ type Server struct {
 	PushNotificationsHub   PushNotificationsHub
 	pushNotificationClient *http.Client // TODO: move this to it's own package
 	outgoingWebhookClient  *http.Client
+	
+	pushNotificationAMQPClient *amqp.AMQPClient
 
 	runEssentialJobs bool
 	Jobs             *jobs.JobServer
@@ -300,6 +303,11 @@ func NewServer(options ...Option) (*Server, error) {
 
 	s.pushNotificationClient = s.httpService.MakeClient(true)
 	s.outgoingWebhookClient = s.httpService.MakeClient(false)
+
+	notificationServer := *s.Platform().Config().EmailSettings.PushNotificationServer
+	if strings.HasPrefix(notificationServer, "amqp://") {
+		s.pushNotificationAMQPClient = amqp.MakeAMQPClient(notificationServer)
+	}
 
 	if err2 := utils.TranslationsPreInit(); err2 != nil {
 		return nil, errors.Wrapf(err2, "unable to load Mattermost translation files")
