@@ -29,10 +29,10 @@ import type {GlobalState} from 'types/store';
 import BrowseChannels from './browse_channels';
 import { haveICurrentTeamPermission } from 'mattermost-redux/selectors/entities/roles';
 
-const getChannelsWithoutArchived = createSelector(
+const getChannelsWithoutPrivateArchived = createSelector(
     'getChannelsWithoutArchived',
     getChannelsInCurrentTeam,
-    (channels: Channel[]) => channels && channels.filter((c) => c.delete_at === 0 && c.type !== Constants.PRIVATE_CHANNEL),
+    (channels: Channel[]) => channels && channels.filter((c) => c.type !== Constants.PRIVATE_CHANNEL),
 );
 
 const getArchivedOtherChannels = createSelector(
@@ -52,7 +52,7 @@ function mapStateToProps(state: GlobalState) {
     const getGlobalItem = makeGetGlobalItem(StoragePrefixes.HIDE_JOINED_CHANNELS, 'false');
 
     return {
-        channels: getChannelsWithoutArchived(state) || [],
+        channels: getChannelsWithoutPrivateArchived(state) || [],
         archivedChannels: getArchivedOtherChannels(state) || [],
         privateChannels: getPrivateChannelsSelector(state) || [],
         currentUserId: getCurrentUserId(state),
