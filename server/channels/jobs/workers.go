@@ -6,8 +6,8 @@ package jobs
 import (
 	"errors"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/services/configservice"
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/configservice"
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
 )
 

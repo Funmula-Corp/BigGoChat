@@ -13,14 +13,15 @@ import (
 
 	"github.com/pkg/errors"
 
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store/searchlayer"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store/sqlstore"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store/storetest"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/utils"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/services/searchengine"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
 )
 
 type MainHelper struct {
@@ -195,25 +196,15 @@ func (h *MainHelper) PreloadMigrations() {
 	var buf []byte
 	var err error
 
-	basePath := os.Getenv("MM_SERVER_PATH")
-	if basePath == "" {
-		_, errFile := os.Stat("mattermost-server/server")
-		if os.IsNotExist(errFile) {
-			basePath = "mattermost/server"
-		} else {
-			basePath = "mattermost-server/server"
-		}
-	}
-	relPath := "channels/testlib/testdata"
 	switch *h.Settings.DriverName {
 	case model.DatabaseDriverPostgres:
-		finalPath := filepath.Join(basePath, relPath, "postgres_migration_warmup.sql")
+		finalPath := filepath.Join(server.GetPackagePath(), "channels", "testlib", "testdata", "postgres_migration_warmup.sql")
 		buf, err = os.ReadFile(finalPath)
 		if err != nil {
 			panic(fmt.Errorf("cannot read file: %v", err))
 		}
 	case model.DatabaseDriverMysql:
-		finalPath := filepath.Join(basePath, relPath, "mysql_migration_warmup.sql")
+		finalPath := filepath.Join(server.GetPackagePath(), "channels", "testlib", "testdata", "mysql_migration_warmup.sql")
 		buf, err = os.ReadFile(finalPath)
 		if err != nil {
 			panic(fmt.Errorf("cannot read file: %v", err))

@@ -23,10 +23,10 @@ import (
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin/plugintest"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/httpservice"
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
 	storeMocks "git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store/storetest/mocks"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/config"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/services/httpservice"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/services/searchengine"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/services/telemetry/mocks"
 )

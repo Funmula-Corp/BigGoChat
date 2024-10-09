@@ -7,7 +7,7 @@ package mocks
 import (
 	context "context"
 
-	httpservice "git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/services/httpservice"
+	httpservice "git.biggo.com/Funmula/mattermost-funmula/server/public/shared/httpservice"
 	mock "github.com/stretchr/testify/mock"
 
 	model "git.biggo.com/Funmula/mattermost-funmula/server/public/model"
