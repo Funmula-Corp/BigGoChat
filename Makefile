@@ -23,6 +23,9 @@ build-webapp:
 clean-docker:
 	cd server && $(MAKE) clean-docker
 
+debug-headless:
+	cd server && $(MAKE) debug-server-headless
+
 run: run-server run-client
 
 run-client:
