@@ -539,7 +539,7 @@ func (a *App) sendToPushProxy(msg *model.PushNotification, session *model.Sessio
 	return nil
 }
 
-func (a *App) SendAckToPushProxy(ack *model.PushNotificationAck) error {
+func (a *App) SendAckToPushProxyHTTP(ack *model.PushNotificationAck) error {
 	if ack == nil {
 		return nil
 	}
@@ -582,6 +582,15 @@ func (a *App) SendAckToPushProxy(ack *model.PushNotificationAck) error {
 	// Reading the body to completion.
 	_, err = io.Copy(io.Discard, resp.Body)
 	return err
+}
+
+func (a *App) SendAckToPushProxy(ack *model.PushNotificationAck) error {
+	notificationServer := *a.Config().EmailSettings.PushNotificationServer
+	if strings.HasPrefix(notificationServer, "amqp://") {
+		return a.SendAckToPushProxyAMQP(ack)
+	} else {
+		return a.SendAckToPushProxyHTTP(ack)
+	}
 }
 
 func (a *App) getMobileAppSessions(userID string) ([]*model.Session, *model.AppError) {

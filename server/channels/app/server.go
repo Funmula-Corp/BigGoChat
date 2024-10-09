@@ -309,6 +309,18 @@ func NewServer(options ...Option) (*Server, error) {
 		s.pushNotificationAMQPClient = amqp.MakeAMQPClient(notificationServer)
 	}
 
+	s.platform.AddConfigListener(func(prev, curr *model.Config) {
+		newNotificationServer := *curr.EmailSettings.PushNotificationServer
+		enableAMQP := *curr.EmailSettings.SendPushNotifications && strings.HasPrefix(newNotificationServer, "amqp://")
+		if enableAMQP && s.pushNotificationAMQPClient == nil {
+			s.pushNotificationAMQPClient = amqp.MakeAMQPClient(newNotificationServer)
+		} else if enableAMQP {
+			s.pushNotificationAMQPClient.SwitchToNewServer(newNotificationServer)
+		} else if s.pushNotificationAMQPClient != nil {
+			s.pushNotificationAMQPClient.Shutdown()
+		}
+	})
+
 	if err2 := utils.TranslationsPreInit(); err2 != nil {
 		return nil, errors.Wrapf(err2, "unable to load Mattermost translation files")
 	}

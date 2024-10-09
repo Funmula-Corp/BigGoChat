@@ -2,7 +2,6 @@ package amqp
 
 import (
 	"context"
-	"errors"
 	"runtime"
 	"sync"
 	"time"
@@ -52,7 +51,7 @@ func (a *AMQPClient) Publish(message AMQPMessage) {
 	a.queue <- message
 }
 
-// expose channel for other usage
+// **unsafe** expose channel for other usage
 func (a *AMQPClient) Channel() (*amqp.Channel, error) {
 	return a.client.Channel()
 }
@@ -66,11 +65,19 @@ func (a *AMQPClient) Shutdown() {
 	}
 }
 
+// connect to new url without drop data
+func (a *AMQPClient) SwitchToNewServer(url string) {
+	a.url = url
+	go a.reconnect()
+}
+
 func (a *AMQPClient) reconnect() {
-	if !a.lock.TryLock() {
+	// can only run reconnect once at same time
+	if a.lock.TryLock() {
+		defer a.lock.Unlock()
+	} else {
 		return
 	}
-	defer a.lock.Unlock()
 
 	a.Shutdown()
 
@@ -95,7 +102,7 @@ func (a *AMQPClient) reconnect() {
 
 		break
 	}
-
+	mlog.Info("AMQPClient: remote server connected")
 }
 
 // can only call by worker
@@ -103,15 +110,15 @@ func (a *AMQPClient) handleErr(err error) {
 	mlog.Error("AMQPClient: worker failed", mlog.Err(err))
 
 	// should always reconnect or just amqp server down?
-	if errors.Is(err, amqp.ErrClosed) {
-		a.reconnect()
-	}
+	// if errors.Is(err, amqp.ErrClosed) {
+	// }
+	a.reconnect()
 }
 
 func (a *AMQPClient) worker() {
 	channel, err := a.client.Channel()
 	if err != nil {
-		defer a.handleErr(err)
+		a.handleErr(err)
 		return
 	}
 
@@ -119,9 +126,9 @@ func (a *AMQPClient) worker() {
 		select {
 		case message := <-a.queue:
 			if err := publish(a.ctx, channel, message); err != nil {
-				defer a.handleErr(err)
 				// put it back
 				go func() { a.queue <- message }()
+				a.handleErr(err)
 				return
 			}
 		case <-a.ctx.Done():
