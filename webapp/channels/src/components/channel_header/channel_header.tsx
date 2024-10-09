@@ -375,8 +375,15 @@ class ChannelHeader extends React.PureComponent<Props, State> {
             />
         );
 
+        let readonlyIcon = null;
         let memberListButton = null;
         if (!isDirect) {
+            readonlyIcon = (
+                <div style={{display: 'flex', alignItems: 'center'}}>
+                    <span className={classNames('material-icons-outlined')} style={{fontSize: 12}}>edit_off</span>
+                </div>
+            );
+
             const membersIconClass = classNames('member-rhs__trigger channel-header__icon channel-header__icon--wide channel-header__icon--left btn btn-icon btn-xs', {
                 'channel-header__icon--active': rhsState === RHSStates.CHANNEL_MEMBERS,
             });
@@ -602,6 +609,7 @@ class ChannelHeader extends React.PureComponent<Props, State> {
                                 <div
                                     className='channel-header__icons'
                                 >
+                                    {readonlyIcon}
                                     {muteTrigger}
                                     {memberListButton}
                                     <HeaderIconWrapper
