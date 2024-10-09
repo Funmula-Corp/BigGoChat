@@ -77,6 +77,7 @@ const (
 	PostPropsPreviewedPost            = "previewed_post"
 
 	PostPriorityUrgent               = "urgent"
+	PostPriorityLow                  = "low"
 	PostPropsRequestedAck            = "requested_ack"
 	PostPropsPersistentNotifications = "persistent_notifications"
 )
