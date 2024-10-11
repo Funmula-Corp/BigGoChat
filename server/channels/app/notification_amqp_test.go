@@ -1,12 +1,14 @@
 package app
 
 import (
+	"context"
 	"encoding/json"
 	"sync"
 	"testing"
 	"time"
 
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/amqp"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store/storetest/mocks"
 	amqp091 "github.com/rabbitmq/amqp091-go"
 	"github.com/stretchr/testify/assert"
@@ -47,7 +49,9 @@ func (ac *testAMQPConsumer) numReqs() int {
 }
 
 func newTestAMQPConsumer() *testAMQPConsumer {
-	client, err := amqp091.Dial(testAMQPServer)
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	client, _, err := amqp.Connect(ctx, testAMQPServer)
 	if err != nil {
 		panic(err)
 	}
@@ -60,7 +64,7 @@ func newTestAMQPConsumer() *testAMQPConsumer {
 	if err != nil {
 		panic(err)
 	}
-	queue, err := channel.QueueDeclare(model.NewId(), true, false, false, false, nil)
+	queue, err := channel.QueueDeclare(model.NewId(), false, true, false, false, nil)
 	if err != nil {
 		panic(err)
 	}

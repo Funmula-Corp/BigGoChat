@@ -10,7 +10,9 @@ import (
 )
 
 const (
-	pushProxyAMQPExchange = "chat.pushNotification"
+	pushProxyAMQPExchange  = "chat.pushNotification"
+	sendToPushProxyAMQPKey = "send_push"
+	ackToPushProxyAMQPKey  = "ack"
 )
 
 func (a *App) rawSendToPushProxyAMQP(msg *model.PushNotification) (model.PushResponse, error) {
@@ -20,11 +22,15 @@ func (a *App) rawSendToPushProxyAMQP(msg *model.PushNotification) (model.PushRes
 	}
 	// TODO: add msg priroity to header
 
-	a.Srv().pushNotificationAMQPClient.Publish(amqp.AMQPMessage{
+	err = a.Srv().pushNotificationAMQPClient.Publish(amqp.AMQPMessage{
 		Exchange: pushProxyAMQPExchange,
-		Key: "send_push",
-		Body: msgJSON,
+		Key:      sendToPushProxyAMQPKey,
+		Body:     msgJSON,
 	})
+
+	if err != nil {
+		return model.NewErrorPushResponse(err.Error()), err
+	}
 	return model.NewOkPushResponse(), nil
 }
 
@@ -49,11 +55,9 @@ func (a *App) SendAckToPushProxyAMQP(ack *model.PushNotificationAck) error {
 		return fmt.Errorf("failed to encode to JSON: %w", err)
 	}
 
-	a.Srv().pushNotificationAMQPClient.Publish(amqp.AMQPMessage{
+	return a.Srv().pushNotificationAMQPClient.Publish(amqp.AMQPMessage{
 		Exchange: pushProxyAMQPExchange,
-		Key: "ack",
-		Body: ackJSON,
+		Key:      ackToPushProxyAMQPKey,
+		Body:     ackJSON,
 	})
-
-	return nil
 }

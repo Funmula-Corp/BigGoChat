@@ -8,8 +8,9 @@ var service *AMQPClient
 var messages []*[]byte = []*[]byte{}
 
 func TestMain(m *testing.M) {
-	service = MakeAMQPClient("amqp://guest:guest@localhost:5672")
+	service = MakeAMQPClient("amqp://guest:guest@localhost:5672", []Exchange{{Name: "test"}})
 	m.Run()
+	service.Shutdown()
 }
 
 func getMessages(size int) []*[]byte {

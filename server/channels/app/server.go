@@ -305,15 +305,18 @@ func NewServer(options ...Option) (*Server, error) {
 	s.outgoingWebhookClient = s.httpService.MakeClient(false)
 
 	notificationServer := *s.Platform().Config().EmailSettings.PushNotificationServer
+	exchanges := []amqp.Exchange{
+		{Name: pushProxyAMQPExchange},
+	}
 	if strings.HasPrefix(notificationServer, "amqp://") {
-		s.pushNotificationAMQPClient = amqp.MakeAMQPClient(notificationServer)
+		s.pushNotificationAMQPClient = amqp.MakeAMQPClient(notificationServer, exchanges)
 	}
 
 	s.platform.AddConfigListener(func(prev, curr *model.Config) {
 		newNotificationServer := *curr.EmailSettings.PushNotificationServer
 		enableAMQP := *curr.EmailSettings.SendPushNotifications && strings.HasPrefix(newNotificationServer, "amqp://")
 		if enableAMQP && s.pushNotificationAMQPClient == nil {
-			s.pushNotificationAMQPClient = amqp.MakeAMQPClient(newNotificationServer)
+			s.pushNotificationAMQPClient = amqp.MakeAMQPClient(newNotificationServer, exchanges)
 		} else if enableAMQP {
 			s.pushNotificationAMQPClient.SwitchToNewServer(newNotificationServer)
 		} else if s.pushNotificationAMQPClient != nil {
