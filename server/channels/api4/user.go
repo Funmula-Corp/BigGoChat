@@ -1138,6 +1138,10 @@ func searchUsers(c *Context, w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	if len(profiles) == 0 { // len checks for nil and length
+		profiles = []*model.User{}
+	}
+
 	js, err := json.Marshal(profiles)
 	if err != nil {
 		c.Err = model.NewAppError("searchUsers", "api.marshal_error", nil, "", http.StatusInternalServerError).Wrap(err)
