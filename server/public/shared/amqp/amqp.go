@@ -141,11 +141,13 @@ func (a *AMQPClient) supervisor() {
 				mlog.Info("AMQPClient: connection closed", mlog.Err(notify))
 			}
 			cancelWorkers()
+			close(a.err)
 			a.client, notifyClose, err = connect(a.ctx, a.url)
 			if err != nil {
 				// root canceled
 				return
 			}
+			a.err = make(chan error)
 			cancelWorkers = createWorkers(a.ctx, numWorker)
 		case err := <-a.err:
 			if errors.Is(err, ErrSwitchNewServer) {
@@ -156,6 +158,9 @@ func (a *AMQPClient) supervisor() {
 			if a.client != nil {
 				a.client.Close()
 			}
+			close(a.queue)
+			close(a.err)
+			return
 		}
 	}
 }
