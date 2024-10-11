@@ -2,7 +2,6 @@ package amqp
 
 import (
 	"context"
-	"errors"
 	"net"
 	"runtime"
 	"time"
@@ -18,8 +17,13 @@ const (
 
 var (
 	numWorker = runtime.NumCPU() * 8
+)
 
-	ErrSwitchNewServer = errors.New("amqp switch to new server")
+type Cmd int
+
+const (
+	commandReserved Cmd = iota // don't use 0
+	commandReconnect
 )
 
 // connect to server with const timeout, run forever until canceled
@@ -50,6 +54,25 @@ func connect(ctx context.Context, url string) (*amqp.Connection, chan *amqp.Erro
 	}
 }
 
+func getChannel(ctx context.Context, client *amqp.Connection) (*amqp.Channel, chan *amqp.Error, error) {
+	currentRetryWaiting := time.Second
+	for {
+		select {
+		case <-ctx.Done():
+		default:
+			channel, err := client.Channel()
+			if err != nil {
+				mlog.Info("AMQPClient: cannot create channel", mlog.Err(err))
+				time.Sleep(min(currentRetryWaiting, maxRetryWaiting))
+				currentRetryWaiting *= 2
+				continue
+			}
+			// mlog.Info("AMQPClient: channel created")
+			return channel, channel.NotifyClose(make(chan *amqp.Error)), nil
+		}
+	}
+}
+
 type AMQPMessage struct {
 	Exchange string
 	Key      string
@@ -63,7 +86,7 @@ type AMQPClient struct {
 	ctx    context.Context // root context
 	cancel func()          // root cancel
 	queue  chan AMQPMessage
-	err    chan error
+	cmd    chan Cmd
 }
 
 // **MUST** call this to create AMQPClient service
@@ -75,7 +98,7 @@ func MakeAMQPClient(url string) *AMQPClient {
 		queue:  make(chan AMQPMessage),
 		ctx:    ctx,
 		cancel: cancel,
-		err:    make(chan error),
+		cmd:    make(chan Cmd),
 	}
 
 	go amqpClient.supervisor()
@@ -105,7 +128,7 @@ func (a *AMQPClient) Shutdown() {
 func (a *AMQPClient) SwitchToNewServer(url string) error {
 	a.url = url
 	select {
-	case a.err <- ErrSwitchNewServer:
+	case a.cmd <- commandReconnect:
 	case <-a.ctx.Done():
 		return a.ctx.Err()
 	}
@@ -121,15 +144,16 @@ func (a *AMQPClient) supervisor() {
 	}
 	a.client = client
 
-	createWorkers := func(ctx context.Context, c int) func() {
+	createWorkers := func(ctx context.Context, c int) (func(), <-chan error) {
 		sub, cancel := context.WithCancel(ctx)
+		ch := make(chan error)
 		for i := 0; i < c; i++ {
-			go a.worker(sub)
+			go a.worker(sub, ch)
 		}
-		return cancel
+		return cancel, ch
 	}
 
-	cancelWorkers := createWorkers(a.ctx, numWorker)
+	cancelWorkers, workerErr := createWorkers(a.ctx, numWorker)
 
 	// watch
 	for {
@@ -141,45 +165,44 @@ func (a *AMQPClient) supervisor() {
 				mlog.Info("AMQPClient: connection closed", mlog.Err(notify))
 			}
 			cancelWorkers()
-			close(a.err)
 			a.client, notifyClose, err = connect(a.ctx, a.url)
 			if err != nil {
-				// root canceled
-				return
+				// root canceled, go to ctx.Done()
+				continue
 			}
-			a.err = make(chan error)
-			cancelWorkers = createWorkers(a.ctx, numWorker)
-		case err := <-a.err:
-			if errors.Is(err, ErrSwitchNewServer) {
+			cancelWorkers, workerErr = createWorkers(a.ctx, numWorker)
+		case cmd := <-a.cmd:
+			if cmd == commandReconnect {
 				a.client.Close()
 			}
+		case <-workerErr:
+			// ...
 		case <-a.ctx.Done():
 			// full shutdown
 			if a.client != nil {
 				a.client.Close()
 			}
 			close(a.queue)
-			close(a.err)
+			close(a.cmd)
 			return
 		}
 	}
 }
 
-func (a *AMQPClient) worker(ctx context.Context) {
+func (a *AMQPClient) worker(ctx context.Context, errCh chan<- error) {
 	handleErr := func(err error) {
 		mlog.Error("AMQPClient: worker failed", mlog.Err(err))
 		select {
-		case a.err <- err:
+		case errCh <- err:
 		case <-ctx.Done():
 		}
 	}
 
-	channel, err := a.client.Channel()
+	channel, notify, err := getChannel(ctx, a.client)
 	if err != nil {
-		handleErr(err)
+		// canceled
 		return
 	}
-	defer channel.Close()
 
 	// enable confirm mode
 	if err := channel.Confirm(false); err != nil {
@@ -196,7 +219,13 @@ func (a *AMQPClient) worker(ctx context.Context) {
 			if err != nil {
 				handleErr(err)
 			}
+		case <-notify:
+			channel, notify, err = getChannel(ctx, a.client)
+			if err != nil {
+				return
+			}
 		case <-ctx.Done():
+			channel.Close()
 			return
 		}
 	}
