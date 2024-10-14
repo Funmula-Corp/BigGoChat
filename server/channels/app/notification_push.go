@@ -726,6 +726,10 @@ func (a *App) BuildPushNotificationMessage(c request.CTX, contentsConfig string,
 	msg.PostType = post.Type
 	msg.ChannelType = channel.Type
 
+	if priority := post.GetPriority(); priority != nil {
+		msg.Priority = *priority.Priority
+	}
+
 	return msg, nil
 }
 

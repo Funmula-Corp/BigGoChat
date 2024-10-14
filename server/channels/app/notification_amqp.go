@@ -20,13 +20,19 @@ func (a *App) rawSendToPushProxyAMQP(msg *model.PushNotification) (model.PushRes
 	if err != nil {
 		return nil, fmt.Errorf("failed to encode to JSON: %w", err)
 	}
-	// TODO: add msg priroity to header
-
-	err = a.Srv().pushNotificationAMQPClient.Publish(amqp.AMQPMessage{
+	amqpMessage := amqp.AMQPMessage{
 		Exchange: pushProxyAMQPExchange,
 		Key:      sendToPushProxyAMQPKey,
 		Body:     msgJSON,
-	})
+	}
+
+	if msg.Priority != "" {
+		amqpMessage.Headers = map[string]interface{}{
+			"priority": msg.Priority,
+		}
+	}
+
+	err = a.Srv().pushNotificationAMQPClient.Publish(amqpMessage)
 
 	if err != nil {
 		return model.NewErrorPushResponse(err.Error()), err

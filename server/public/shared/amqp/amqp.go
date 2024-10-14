@@ -66,6 +66,7 @@ func getChannel(ctx context.Context, client *amqp.Connection, onChannelCreated f
 	for {
 		select {
 		case <-ctx.Done():
+			return nil, nil, ctx.Err()
 		default:
 			channel, err := client.Channel()
 			if err != nil {

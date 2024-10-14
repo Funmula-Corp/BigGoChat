@@ -19,11 +19,12 @@ import (
 const testAMQPServer = "amqp://guest:guest@localhost:5672/"
 
 type testAMQPConsumer struct {
-	_notifications    []*model.PushNotification
-	_notificationAcks []*model.PushNotificationAck
-	_numReqs          int
-	conn              *amqp091.Connection
-	lock              *sync.RWMutex
+	_notifications       []*model.PushNotification
+	_notificationsHeader []*map[string]interface{}
+	_notificationAcks    []*model.PushNotificationAck
+	_numReqs             int
+	conn                 *amqp091.Connection
+	lock                 *sync.RWMutex
 }
 
 func (ac *testAMQPConsumer) Shutdown() {
@@ -34,6 +35,12 @@ func (ac *testAMQPConsumer) notifications() []*model.PushNotification {
 	ac.lock.RLock()
 	defer ac.lock.RUnlock()
 	return ac._notifications
+}
+
+func (ac *testAMQPConsumer) notificationsHeader() []*map[string]interface{} {
+	ac.lock.RLock()
+	defer ac.lock.RUnlock()
+	return ac._notificationsHeader
 }
 
 func (ac *testAMQPConsumer) notificationAcks() []*model.PushNotificationAck {
@@ -90,12 +97,14 @@ func newTestAMQPConsumer() *testAMQPConsumer {
 		for message := range consume {
 			ac.lock.Lock()
 			ac._numReqs += 1
-			if message.RoutingKey == "send_push" {
+			if message.RoutingKey == sendToPushProxyAMQPKey {
 				var notification model.PushNotification
 				if json.Unmarshal(message.Body, &notification) == nil {
 					ac._notifications = append(ac._notifications, &notification)
+					header := map[string]interface{}(message.Headers)
+					ac._notificationsHeader = append(ac._notificationsHeader, &header)
 				}
-			} else if message.RoutingKey == "ack" {
+			} else if message.RoutingKey == ackToPushProxyAMQPKey {
 				var notificationAck model.PushNotificationAck
 				if json.Unmarshal(message.Body, &notificationAck) == nil {
 					ac._notificationAcks = append(ac._notificationAcks, &notificationAck)
@@ -410,4 +419,30 @@ func TestAllPushNotificationsAMQP(t *testing.T) {
 	assert.Equal(t, 8, numMessages)
 	assert.Equal(t, 3, numClears)
 	assert.Equal(t, 6, numUpdateBadges)
+}
+
+func TestSendPushToPushProxyPriorityAMQP(t *testing.T) {
+	th := Setup(t).InitBasic()
+	defer th.TearDown()
+
+	consumer := newTestAMQPConsumer()
+	defer consumer.Shutdown()
+
+	th.App.UpdateConfig(func(cfg *model.Config) {
+		*cfg.EmailSettings.PushNotificationServer = testAMQPServer
+	})
+
+	msg := &model.PushNotification{
+		Version:  "2",
+		Type:     model.PushTypeTest,
+		Priority: model.PostPriorityUrgent,
+	}
+	msg.SetDeviceIdAndPlatform("platform:id")
+
+	_, err := th.App.rawSendToPushProxy(msg)
+	require.Nil(t, err)
+	time.Sleep(2 * time.Second)
+	headers := consumer.notificationsHeader()
+	require.Len(t, headers, 1)
+	require.Equal(t, model.PostPriorityUrgent, (*headers[0])["priority"])
 }
