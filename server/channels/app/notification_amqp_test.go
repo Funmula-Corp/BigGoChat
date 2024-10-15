@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"sync"
 	"testing"
 	"time"
@@ -25,6 +26,10 @@ type testAMQPConsumer struct {
 	_numReqs             int
 	conn                 *amqp091.Connection
 	lock                 *sync.RWMutex
+	subscribe            chan struct {
+		exited <-chan struct{}
+		notify chan<- int
+	}
 }
 
 func (ac *testAMQPConsumer) Shutdown() {
@@ -55,6 +60,39 @@ func (ac *testAMQPConsumer) numReqs() int {
 	return ac._numReqs
 }
 
+// wait numReqs
+func (ac *testAMQPConsumer) waitNumReqs(c int) error {
+	reqs := ac.numReqs()
+	if reqs >= c {
+		return nil
+	}
+
+	exit := make(chan struct{})
+	reqChan := make(chan int)
+
+	sub := struct {
+		exited <-chan struct{}
+		notify chan<- int
+	}{
+		exited: exit,
+		notify: reqChan,
+	}
+
+	ac.subscribe <- sub
+
+	defer close(exit)
+	for {
+		select {
+		case reqs = <-reqChan:
+			if reqs >= c {
+				return nil
+			}
+		case <-time.After(2 * time.Second):
+			return fmt.Errorf("consumer timeout/less req, expect: %d, get: %d", c, reqs)
+		}
+	}
+}
+
 func newTestAMQPConsumer() *testAMQPConsumer {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
@@ -75,11 +113,11 @@ func newTestAMQPConsumer() *testAMQPConsumer {
 	if err != nil {
 		panic(err)
 	}
-	err = channel.QueueBind(queue.Name, "send_push", pushProxyAMQPExchange, false, nil)
+	err = channel.QueueBind(queue.Name, sendToPushProxyAMQPKey, pushProxyAMQPExchange, false, nil)
 	if err != nil {
 		panic(err)
 	}
-	err = channel.QueueBind(queue.Name, "ack", pushProxyAMQPExchange, false, nil)
+	err = channel.QueueBind(queue.Name, ackToPushProxyAMQPKey, pushProxyAMQPExchange, false, nil)
 	if err != nil {
 		panic(err)
 	}
@@ -91,9 +129,46 @@ func newTestAMQPConsumer() *testAMQPConsumer {
 	ac := &testAMQPConsumer{
 		conn: client,
 		lock: new(sync.RWMutex),
+		subscribe: make(chan struct {
+			exited <-chan struct{}
+			notify chan<- int
+		}),
 	}
 
+	reqChan := make(chan int)
+
 	go func() {
+		subscribers := []struct {
+			exited <-chan struct{}
+			notify chan<- int
+		}{}
+
+		broadcase := func(num int) {
+			for _, subscriber := range subscribers {
+				select {
+				case <-subscriber.exited:
+					// closed, do nothing
+				default:
+					subscriber.notify <- num
+				}
+			}
+		}
+
+		for {
+			select {
+			case subscriber := <-ac.subscribe:
+				subscribers = append(subscribers, subscriber)
+			case num, ok := <-reqChan:
+				if !ok {
+					return
+				}
+				go broadcase(num)
+			}
+		}
+	}()
+
+	go func() {
+		defer close(reqChan)
 		for message := range consume {
 			ac.lock.Lock()
 			ac._numReqs += 1
@@ -111,6 +186,7 @@ func newTestAMQPConsumer() *testAMQPConsumer {
 				}
 			}
 			message.Ack(false)
+			reqChan <- ac._numReqs
 			ac.lock.Unlock()
 		}
 	}()
@@ -166,7 +242,7 @@ func TestClearPushNotificationSyncAMQP(t *testing.T) {
 
 	err := th.App.clearPushNotificationSync(th.Context, sess1.Id, "user1", "channel1", "")
 	require.Nil(t, err)
-	time.Sleep(2 * time.Second)
+	assert.Nil(t, consumer.waitNumReqs(1))
 	// Server side verification.
 	// We verify that 1 request has been sent, and also check the message contents.
 	require.Equal(t, 1, consumer.numReqs())
@@ -189,7 +265,7 @@ func TestClearPushNotificationSyncAMQP(t *testing.T) {
 
 	err = th.App.clearPushNotificationSync(th.Context, sess1.Id, "user1", "channel1", "")
 	require.Nil(t, err)
-	time.Sleep(2 * time.Second)
+	assert.Nil(t, consumer.waitNumReqs(2))
 	assert.Equal(t, consumer.notifications()[1].Badge, 4)
 }
 
@@ -240,7 +316,7 @@ func TestUpdateMobileAppBadgeSyncAMQP(t *testing.T) {
 
 	err := th.App.updateMobileAppBadgeSync(th.Context, "user1")
 	require.Nil(t, err)
-	time.Sleep(2 * time.Second)
+	assert.Nil(t, consumer.waitNumReqs(2))
 	// Server side verification.
 	// We verify that 2 requests have been sent, and also check the message contents.
 	require.Equal(t, 2, consumer.numReqs())
@@ -266,7 +342,7 @@ func TestSendTestPushNotificationAMQP(t *testing.T) {
 	result = th.App.SendTestPushNotification("platform:id")
 	assert.Equal(t, "true", result)
 
-	time.Sleep(2 * time.Second)
+	assert.Nil(t, consumer.waitNumReqs(2))
 
 	// Server side verification.
 	// We verify that 2 requests have been sent, and also check the message contents.
@@ -307,7 +383,7 @@ func TestSendAckToPushProxyAMQP(t *testing.T) {
 	}
 	err := th.App.SendAckToPushProxy(ack)
 	require.NoError(t, err)
-	time.Sleep(2 * time.Second)
+	assert.Nil(t, consumer.waitNumReqs(1))
 	// Server side verification.
 	// We verify that 1 request has been sent, and also check the message contents.
 	require.Equal(t, 1, consumer.numReqs())
@@ -397,7 +473,7 @@ func TestAllPushNotificationsAMQP(t *testing.T) {
 	wg.Wait()
 
 	// Hack to let the worker goroutines complete.
-	time.Sleep(1 * time.Second)
+	assert.Nil(t, consumer.waitNumReqs(17))
 	// Server side verification.
 	assert.Equal(t, 17, consumer.numReqs())
 	var numClears, numMessages, numUpdateBadges int
@@ -441,7 +517,7 @@ func TestSendPushToPushProxyPriorityAMQP(t *testing.T) {
 
 	_, err := th.App.rawSendToPushProxy(msg)
 	require.Nil(t, err)
-	time.Sleep(2 * time.Second)
+	assert.Nil(t, consumer.waitNumReqs(1))
 	headers := consumer.notificationsHeader()
 	require.Len(t, headers, 1)
 	require.Equal(t, model.PostPriorityUrgent, (*headers[0])["priority"])
