@@ -48,6 +48,18 @@ services:
     extends:
         file: docker-compose.common.yml
         service: neo4j
+  elasticsearch8:
+    extends:
+        file: docker-compose.common.yml
+        service: elasticsearch8
+  searchindexer:
+    extends:
+        file: docker-compose.common.yml
+        service: searchindexer
+  searchengine:
+    extends:
+        file: docker-compose.common.yml
+        service: searchengine
 
   start_dependencies:
     image: mattermost/mattermost-wait-for-dep:latest
@@ -61,7 +73,10 @@ services:
       - openldap
       - elasticsearch
       - neo4j
-    command: postgres:5432 mysql:3306 minio:9000 inbucket:9001 openldap:389 elasticsearch:9200 neo4j:7474
+      - elasticsearch8
+      - searchengine
+      - searchindexer
+    command: postgres:5432 mysql:3306 minio:9000 inbucket:9001 openldap:389 elasticsearch:9200 elasticsearch8:9201 searchindexer:8080 searchengine:8080 neo4j:7474
 
 networks:
   mm-test:

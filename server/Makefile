@@ -196,6 +196,15 @@ ifneq ($(DOCKER_SERVICES_OVERRIDE),true)
 	ifeq (,$(findstring neo4j,$(ENABLED_DOCKER_SERVICES)))
 		TEMP_DOCKER_SERVICES:=$(TEMP_DOCKER_SERVICES) neo4j
   	endif
+	ifeq (,$(findstring elasticsearch8,$(ENABLED_DOCKER_SERVICES)))
+		TEMP_DOCKER_SERVICES:=$(TEMP_DOCKER_SERVICES) elasticsearch8
+  	endif
+	ifeq (,$(findstring searchindexer,$(ENABLED_DOCKER_SERVICES)))
+		TEMP_DOCKER_SERVICES:=$(TEMP_DOCKER_SERVICES) searchindexer
+  	endif
+	ifeq (,$(findstring searchengine,$(ENABLED_DOCKER_SERVICES)))
+		TEMP_DOCKER_SERVICES:=$(TEMP_DOCKER_SERVICES) searchengine
+  	endif
   endif
   ENABLED_DOCKER_SERVICES:=$(ENABLED_DOCKER_SERVICES) $(TEMP_DOCKER_SERVICES)
 endif

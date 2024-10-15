@@ -36,6 +36,9 @@ func main() {
 		"prometheus":         9090,
 		"grafana":            3000,
 		"neo4j":              7474,
+		"elasticsearch8":     9201,
+		"searchindexer":      8080,
+		"searchengine":       8080,
 		"mysql-read-replica": 3306, // FIXME: not recognizing the successfully running service on port 3307.
 	}
 	command := []string{}

@@ -84,3 +84,21 @@ clean-old-docker:
 		docker stop mattermost-neo4j > /dev/null; \
 		docker rm -v mattermost-neo4j > /dev/null; \
 	fi
+
+	@if [ $(shell docker ps -a | grep -ci elasticsearch8) -eq 1 ]; then \
+		echo removing elasticsearch8; \
+		docker stop elasticsearch8 > /dev/null; \
+		docker rm -v elasticsearch8 > /dev/null; \
+	fi
+
+	@if [ $(shell docker ps -a | grep -ci mattermost-searchindexer) -eq 1 ]; then \
+		echo removing mattermost-searchindexer; \
+		docker stop mattermost-searchindexer > /dev/null; \
+		docker rm -v mattermost-searchindexer > /dev/null; \
+	fi
+
+	@if [ $(shell docker ps -a | grep -ci mattermost-searchengine) -eq 1 ]; then \
+		echo removing mattermost-searchengine; \
+		docker stop mattermost-searchengine > /dev/null; \
+		docker rm -v mattermost-searchengine > /dev/null; \
+	fi
