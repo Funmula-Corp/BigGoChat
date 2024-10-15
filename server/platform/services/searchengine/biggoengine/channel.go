@@ -7,6 +7,7 @@ import (
 	"net/url"
 
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/services/searchengine/biggoengine/cfg"
 )
@@ -23,7 +24,8 @@ func (be *BiggoEngine) IndexChannelsBulk(channels []*model.Channel) (aErr *model
 	return
 }
 
-func (be *BiggoEngine) SearchChannels(teamId, userID, term string, isGuest bool) (result []string, aErr *model.AppError) {
+func (be *BiggoEngine) SearchChannels(teamId, userID, term string, isGuest bool, page, perPage int) (result []string, aErr *model.AppError) {
+	mlog.Debug("SEARCH-ENGINE", mlog.String("type", "channel"))
 	const keyErrWhere string = "biggo.search_engine.search_channels"
 	const endpoint string = "/api/v1/search/channel"
 	var (
@@ -36,30 +38,35 @@ func (be *BiggoEngine) SearchChannels(teamId, userID, term string, isGuest bool)
 
 	var buffer []byte
 	parameters := map[string]any{
-		"term":    term,
-		"team_id": teamId,
-		"user_id": userID,
-		"page":    0,
-		"size":    50,
+		"term":     term,
+		"team_id":  teamId,
+		"user_id":  userID,
+		"is_guest": isGuest,
+		"page":     page,
+		"size":     perPage,
 	}
 	if buffer, err = json.Marshal(&parameters); err != nil {
 		aErr = model.NewAppError(keyErrWhere, "marshal_search_buffer", nil, aErr.Error(), http.StatusInternalServerError)
+		mlog.Error("failed to marshal search buffer", mlog.Err(err))
 		return
 	}
 
 	if searchUrl, err = url.Parse(cfg.SearchServiceHost(be.config)); err != nil {
 		aErr = model.NewAppError(keyErrWhere, "parse_service_url", nil, aErr.Error(), http.StatusInternalServerError)
+		mlog.Error("failed to parse service url", mlog.Err(err))
 		return
 	}
 	searchUrl = searchUrl.JoinPath(endpoint)
 
 	if req, err = http.NewRequest(http.MethodPost, searchUrl.String(), bytes.NewReader(buffer)); err != nil {
 		aErr = model.NewAppError(keyErrWhere, "create_request", nil, aErr.Error(), http.StatusInternalServerError)
+		mlog.Error("failed to create request", mlog.Err(err))
 		return
 	}
 
 	if res, err = http.DefaultClient.Do(req); err != nil {
 		aErr = model.NewAppError(keyErrWhere, "get_response", nil, aErr.Error(), http.StatusInternalServerError)
+		mlog.Error("failed to get response", mlog.Err(err))
 		return
 	}
 	defer res.Body.Close()
@@ -67,7 +74,9 @@ func (be *BiggoEngine) SearchChannels(teamId, userID, term string, isGuest bool)
 	result = []string{}
 	if err = json.NewDecoder(res.Body).Decode(&result); err != nil {
 		aErr = model.NewAppError(keyErrWhere, "parse_response", nil, aErr.Error(), http.StatusInternalServerError)
+		mlog.Error("failed to parse search result", mlog.Err(err))
 		return
 	}
+	mlog.Info("SEARCH-RESULT", mlog.Any("result", result))
 	return
 }

@@ -8,11 +8,11 @@ import (
 
 	"github.com/pkg/errors"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/services/searchengine"
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/services/searchengine"
 )
 
 type SearchChannelStore struct {
@@ -229,7 +229,7 @@ func (c *SearchChannelStore) AutocompleteInTeam(rctx request.CTX, teamID, userID
 }
 
 func (c *SearchChannelStore) searchAutocompleteChannels(engine searchengine.SearchEngineInterface, teamId, userID, term string, includeDeleted, isGuest bool) (model.ChannelList, error) {
-	channelIds, err := engine.SearchChannels(teamId, userID, term, isGuest)
+	channelIds, err := engine.SearchChannels(teamId, userID, term, isGuest, 0, 50)
 	if err != nil {
 		return nil, err
 	}
@@ -247,7 +247,7 @@ func (c *SearchChannelStore) searchAutocompleteChannels(engine searchengine.Sear
 }
 
 func (c *SearchChannelStore) searchAutocompleteChannelsAllTeams(engine searchengine.SearchEngineInterface, userID, term string, includeDeleted, isGuest bool) (model.ChannelListWithTeamData, error) {
-	channelIds, err := engine.SearchChannels("", userID, term, isGuest)
+	channelIds, err := engine.SearchChannels("", userID, term, isGuest, 0, 50)
 	if err != nil {
 		return nil, err
 	}

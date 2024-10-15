@@ -62,7 +62,7 @@ func (be *BiggoEngine) IsEnabled() (result bool) {
 }
 
 func (be *BiggoEngine) IsIndexingEnabled() (result bool) {
-	return false
+	return true
 }
 
 func (be *BiggoEngine) IsIndexingSync() (result bool) {

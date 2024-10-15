@@ -6,13 +6,11 @@ package searchlayer
 import (
 	"context"
 
-	"github.com/pkg/errors"
-
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/services/searchengine"
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/services/searchengine"
 )
 
 type SearchPostStore struct {
@@ -138,22 +136,12 @@ func (s SearchPostStore) PermanentDeleteByChannel(rctx request.CTX, channelID st
 	return err
 }
 
-func (s SearchPostStore) searchPostsForUserByEngine(engine searchengine.SearchEngineInterface, paramsList []*model.SearchParams, userId, teamId string, page, perPage int) (*model.PostSearchResults, error) {
+func (s SearchPostStore) searchPostsForUserByEngine(engine searchengine.SearchEngineInterface, paramsList []*model.SearchParams, userId, _ string, page, perPage int) (*model.PostSearchResults, error) {
 	if err := model.IsSearchParamsListValid(paramsList); err != nil {
 		return nil, err
 	}
 
-	// We only allow the user to search in channels they are a member of.
-	userChannels, err2 := s.rootStore.Channel().GetChannels(teamId, userId,
-		&model.ChannelSearchOpts{
-			IncludeDeleted: paramsList[0].IncludeDeletedChannels,
-			LastDeleteAt:   0,
-		})
-	if err2 != nil {
-		return nil, errors.Wrap(err2, "error getting channel for user")
-	}
-
-	postIds, matches, err := engine.SearchPosts(userChannels, paramsList, page, perPage)
+	postIds, matches, err := engine.SearchPosts(userId, paramsList, page, perPage)
 	if err != nil {
 		return nil, err
 	}

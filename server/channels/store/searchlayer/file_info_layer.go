@@ -4,11 +4,11 @@
 package searchlayer
 
 import (
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/services/searchengine"
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/services/searchengine"
 )
 
 type SearchFileInfoStore struct {
@@ -159,14 +159,7 @@ func (s SearchFileInfoStore) PermanentDeleteByUser(rctx request.CTX, userId stri
 func (s SearchFileInfoStore) Search(rctx request.CTX, paramsList []*model.SearchParams, userId, teamId string, page, perPage int) (*model.FileInfoList, error) {
 	for _, engine := range s.rootStore.searchEngine.GetActiveEngines() {
 		if engine.IsSearchEnabled() {
-			userChannels, nErr := s.rootStore.Channel().GetChannels(teamId, userId, &model.ChannelSearchOpts{
-				IncludeDeleted: paramsList[0].IncludeDeletedChannels,
-				LastDeleteAt:   0,
-			})
-			if nErr != nil {
-				return nil, nErr
-			}
-			fileIds, appErr := engine.SearchFiles(userChannels, paramsList, page, perPage)
+			fileIds, appErr := engine.SearchFiles(userId, paramsList, page, perPage)
 			if appErr != nil {
 				rctx.Logger().Error("Encountered error on Search.", mlog.String("search_engine", engine.GetName()), mlog.Err(appErr))
 				continue
