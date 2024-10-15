@@ -6,9 +6,9 @@ package app
 import (
 	"net/http"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/services/searchengine"
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/services/searchengine"
 )
 
 func (a *App) TestElasticsearch(rctx request.CTX, cfg *model.Config) *model.AppError {
@@ -51,18 +51,6 @@ func (a *App) PurgeElasticsearchIndexes(c request.CTX, indexes []string) *model.
 	}
 
 	return appErr
-}
-
-func (a *App) PurgeBleveIndexes(c request.CTX) *model.AppError {
-	engine := a.SearchEngine().BleveEngine
-	if engine == nil {
-		err := model.NewAppError("PurgeBleveIndexes", "searchengine.bleve.disabled.error", nil, "", http.StatusNotImplemented)
-		return err
-	}
-	if err := engine.PurgeIndexes(c); err != nil {
-		return err
-	}
-	return nil
 }
 
 func (a *App) ActiveSearchBackend() string {

@@ -162,10 +162,6 @@ func init() {
 		PermissionSysconsoleReadComplianceCustomTermsOfService.Id: {
 			PermissionReadAudits,
 		},
-		PermissionSysconsoleWriteExperimentalBleve.Id: {
-			PermissionCreatePostBleveIndexesJob,
-			PermissionPurgeBleveIndexes,
-		},
 		PermissionSysconsoleWriteAuthenticationLdap.Id: {
 			PermissionCreateLdapSyncJob,
 			PermissionAddLdapPublicCert,
@@ -262,7 +258,6 @@ func init() {
 		PermissionSysconsoleReadComplianceCustomTermsOfService.Id,
 		PermissionSysconsoleReadExperimentalFeatures.Id,
 		PermissionSysconsoleReadExperimentalFeatureFlags.Id,
-		PermissionSysconsoleReadExperimentalBleve.Id,
 		PermissionSysconsoleReadProductsBoards.Id,
 	}
 

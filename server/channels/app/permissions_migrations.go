@@ -8,9 +8,9 @@ import (
 	"net/http"
 	"strings"
 
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store/sqlstore"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 )
 
 type permissionTransformation struct {
@@ -630,33 +630,6 @@ func (a *App) getAddDownloadComplianceExportResult() (permissionsMap, error) {
 	return transformations, nil
 }
 
-func (a *App) getAddExperimentalSubsectionPermissions() (permissionsMap, error) {
-	transformations := []permissionTransformation{}
-
-	permissionsExperimentalRead := []string{model.PermissionSysconsoleReadExperimentalBleve.Id, model.PermissionSysconsoleReadExperimentalFeatures.Id, model.PermissionSysconsoleReadExperimentalFeatureFlags.Id}
-	permissionsExperimentalWrite := []string{model.PermissionSysconsoleWriteExperimentalBleve.Id, model.PermissionSysconsoleWriteExperimentalFeatures.Id, model.PermissionSysconsoleWriteExperimentalFeatureFlags.Id}
-
-	// Give the new subsection READ permissions to any user with READ_EXPERIMENTAL
-	transformations = append(transformations, permissionTransformation{
-		On:  permissionExists(model.PermissionSysconsoleReadExperimental.Id),
-		Add: permissionsExperimentalRead,
-	})
-
-	// Give the new subsection WRITE permissions to any user with WRITE_EXPERIMENTAL
-	transformations = append(transformations, permissionTransformation{
-		On:  permissionExists(model.PermissionSysconsoleWriteExperimental.Id),
-		Add: permissionsExperimentalWrite,
-	})
-
-	// Give the ancillary permissions MANAGE_JOBS and PURGE_BLEVE_INDEXES to anyone with WRITE_EXPERIMENTAL_BLEVE
-	transformations = append(transformations, permissionTransformation{
-		On:  permissionExists(model.PermissionSysconsoleWriteExperimentalBleve.Id),
-		Add: []string{model.PermissionCreatePostBleveIndexesJob.Id, model.PermissionPurgeBleveIndexes.Id},
-	})
-
-	return transformations, nil
-}
-
 func (a *App) getAddIntegrationsSubsectionPermissions() (permissionsMap, error) {
 	transformations := []permissionTransformation{}
 
@@ -1210,7 +1183,6 @@ func (s *Server) doPermissionsMigrations() error {
 		{Key: model.MigrationKeyAddSystemRolesPermissions, Migration: a.getSystemRolesPermissionsMigration},
 		{Key: model.MigrationKeyAddBillingPermissions, Migration: a.getBillingPermissionsMigration},
 		{Key: model.MigrationKeyAddDownloadComplianceExportResults, Migration: a.getAddDownloadComplianceExportResult},
-		{Key: model.MigrationKeyAddExperimentalSubsectionPermissions, Migration: a.getAddExperimentalSubsectionPermissions},
 		{Key: model.MigrationKeyAddAuthenticationSubsectionPermissions, Migration: a.getAddAuthenticationSubsectionPermissions},
 		{Key: model.MigrationKeyAddIntegrationsSubsectionPermissions, Migration: a.getAddIntegrationsSubsectionPermissions},
 		{Key: model.MigrationKeyAddSiteSubsectionPermissions, Migration: a.getAddSiteSubsectionPermissions},

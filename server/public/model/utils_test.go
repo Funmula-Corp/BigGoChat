@@ -993,8 +993,7 @@ func checkNowhereNil(t *testing.T, name string, value any) bool {
 	case reflect.Ptr:
 		// Ignoring these 2 settings.
 		// TODO: remove them completely in v8.0.
-		if name == "config.BleveSettings.BulkIndexingTimeWindowSeconds" ||
-			name == "config.ElasticsearchSettings.BulkIndexingTimeWindowSeconds" {
+		if name == "config.ElasticsearchSettings.BulkIndexingTimeWindowSeconds" {
 			return true
 		}
 

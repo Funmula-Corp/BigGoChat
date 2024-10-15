@@ -9,9 +9,9 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
 )
 
 var searchPostStoreTests = []searchTest{
@@ -23,7 +23,7 @@ var searchPostStoreTests = []searchTest{
 	{
 		Name: "Should be able to search posts using pagination",
 		Fn:   testSearchPostsWithPagination,
-		Tags: []string{EngineElasticSearch, EngineBleve},
+		Tags: []string{EngineElasticSearch},
 	},
 	{
 		Name: "Should return pinned and unpinned posts",

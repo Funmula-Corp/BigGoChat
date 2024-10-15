@@ -80,7 +80,4 @@ func (ps *PlatformService) StopSearchEngine() {
 	if ps.SearchEngine != nil && ps.SearchEngine.ElasticsearchEngine != nil && ps.SearchEngine.ElasticsearchEngine.IsActive() {
 		ps.SearchEngine.ElasticsearchEngine.Stop()
 	}
-	if ps.SearchEngine != nil && ps.SearchEngine.BleveEngine != nil && ps.SearchEngine.BleveEngine.IsActive() {
-		ps.SearchEngine.BleveEngine.Stop()
-	}
 }

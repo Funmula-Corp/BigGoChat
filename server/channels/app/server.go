@@ -69,8 +69,6 @@ import (
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/services/cache"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/services/httpservice"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/services/remotecluster"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/services/searchengine/bleveengine"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/services/searchengine/bleveengine/indexer"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/services/sharedchannel"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/services/telemetry"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/services/tracing"
@@ -1458,12 +1456,6 @@ func (s *Server) initJobs() {
 		builder := jobsLdapSyncInterface(New(ServerConnector(s.Channels())))
 		s.Jobs.RegisterJobType(model.JobTypeLdapSync, builder.MakeWorker(), builder.MakeScheduler())
 	}
-
-	s.Jobs.RegisterJobType(
-		model.JobTypeBlevePostIndexing,
-		indexer.MakeWorker(s.Jobs, s.platform.SearchEngine.BleveEngine.(*bleveengine.BleveEngine)),
-		nil,
-	)
 
 	s.Jobs.RegisterJobType(
 		model.JobTypeMigrations,

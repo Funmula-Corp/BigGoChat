@@ -141,8 +141,6 @@ var PermissionCreateElasticsearchPostIndexingJob *Permission
 var PermissionCreateElasticsearchPostAggregationJob *Permission
 var PermissionReadElasticsearchPostIndexingJob *Permission
 var PermissionReadElasticsearchPostAggregationJob *Permission
-var PermissionPurgeBleveIndexes *Permission
-var PermissionCreatePostBleveIndexesJob *Permission
 var PermissionCreateLdapSyncJob *Permission
 var PermissionReadLdapSyncJob *Permission
 var PermissionTestLdap *Permission
@@ -352,9 +350,6 @@ var PermissionSysconsoleWriteExperimentalFeatures *Permission
 
 var PermissionSysconsoleReadExperimentalFeatureFlags *Permission
 var PermissionSysconsoleWriteExperimentalFeatureFlags *Permission
-
-var PermissionSysconsoleReadExperimentalBleve *Permission
-var PermissionSysconsoleWriteExperimentalBleve *Permission
 
 var PermissionPublicPlaybookCreate *Permission
 var PermissionPublicPlaybookManageProperties *Permission
@@ -826,20 +821,6 @@ func initializePermissions() {
 
 	PermissionReadAudits = &Permission{
 		"read_audits",
-		"",
-		"",
-		PermissionScopeSystem,
-	}
-
-	PermissionPurgeBleveIndexes = &Permission{
-		"purge_bleve_indexes",
-		"",
-		"",
-		PermissionScopeSystem,
-	}
-
-	PermissionCreatePostBleveIndexesJob = &Permission{
-		"create_post_bleve_indexes_job",
 		"",
 		"",
 		PermissionScopeSystem,
@@ -2027,18 +2008,6 @@ func initializePermissions() {
 		"",
 		PermissionScopeSystem,
 	}
-	PermissionSysconsoleReadExperimentalBleve = &Permission{
-		"sysconsole_read_experimental_bleve",
-		"",
-		"",
-		PermissionScopeSystem,
-	}
-	PermissionSysconsoleWriteExperimentalBleve = &Permission{
-		"sysconsole_write_experimental_bleve",
-		"",
-		"",
-		PermissionScopeSystem,
-	}
 
 	PermissionCreateCustomGroup = &Permission{
 		"create_custom_group",
@@ -2262,7 +2231,6 @@ func initializePermissions() {
 		PermissionSysconsoleReadComplianceCustomTermsOfService,
 		PermissionSysconsoleReadExperimentalFeatures,
 		PermissionSysconsoleReadExperimentalFeatureFlags,
-		PermissionSysconsoleReadExperimentalBleve,
 		PermissionSysconsoleReadProductsBoards,
 		PermissionSysconsoleReadIPFilters,
 	}
@@ -2321,7 +2289,6 @@ func initializePermissions() {
 		PermissionSysconsoleWriteComplianceCustomTermsOfService,
 		PermissionSysconsoleWriteExperimentalFeatures,
 		PermissionSysconsoleWriteExperimentalFeatureFlags,
-		PermissionSysconsoleWriteExperimentalBleve,
 		PermissionSysconsoleWriteProductsBoards,
 		PermissionSysconsoleWriteIPFilters,
 	}
@@ -2377,8 +2344,6 @@ func initializePermissions() {
 		PermissionCreateElasticsearchPostAggregationJob,
 		PermissionReadElasticsearchPostIndexingJob,
 		PermissionReadElasticsearchPostAggregationJob,
-		PermissionPurgeBleveIndexes,
-		PermissionCreatePostBleveIndexesJob,
 		PermissionCreateLdapSyncJob,
 		PermissionReadLdapSyncJob,
 		PermissionTestLdap,
@@ -2549,8 +2514,8 @@ func initializePermissions() {
 		PermissionManagePublicChannelMembers.Id:  ChannelModeratedPermissions[2],
 		PermissionManagePrivateChannelMembers.Id: ChannelModeratedPermissions[2],
 		PermissionUseChannelMentions.Id:          ChannelModeratedPermissions[3],
-		PermissionAddPublicChannelMembers.Id: 	  ChannelModeratedPermissions[5],
-		PermissionAddPrivateChannelMembers.Id: 	  ChannelModeratedPermissions[5],
+		PermissionAddPublicChannelMembers.Id:     ChannelModeratedPermissions[5],
+		PermissionAddPrivateChannelMembers.Id:    ChannelModeratedPermissions[5],
 	}
 
 	ModeratedBookmarkPermissions = []*Permission{

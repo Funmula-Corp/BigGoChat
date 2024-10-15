@@ -28,7 +28,6 @@ import (
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/services/cache"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/services/searchengine"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/services/searchengine/biggoengine"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/services/searchengine/bleveengine"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/shared/filestore"
 )
 
@@ -177,15 +176,10 @@ func New(sc ServiceConfig, options ...Option) (*PlatformService, error) {
 
 	// Step 3: Search Engine
 	searchEngine := searchengine.NewBroker(ps.Config())
-	bleveEngine := bleveengine.NewBleveEngine(ps.Config())
 	biggoEngine := biggoengine.NewBiggoEngine(ps.Config())
-	if err := bleveEngine.Start(); err != nil {
-		return nil, err
-	}
 	if err := biggoEngine.Start(); err != nil {
 		return nil, err
 	}
-	searchEngine.RegisterBleveEngine(bleveEngine)
 	searchEngine.RegisterBiggoEngine(biggoEngine)
 	ps.SearchEngine = searchEngine
 

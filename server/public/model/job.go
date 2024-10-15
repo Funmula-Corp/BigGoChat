@@ -13,7 +13,6 @@ const (
 	JobTypeElasticsearchPostIndexing    = "elasticsearch_post_indexing"
 	JobTypeElasticsearchPostAggregation = "elasticsearch_post_aggregation"
 	JobTypeBiggoIndexing                = "biggo_indexing"
-	JobTypeBlevePostIndexing            = "bleve_post_indexing"
 	JobTypeLdapSync                     = "ldap_sync"
 	JobTypeMigrations                   = "migrations"
 	JobTypePlugins                      = "plugins"
@@ -56,7 +55,6 @@ var AllJobTypes = [...]string{
 	JobTypeElasticsearchPostIndexing,
 	JobTypeElasticsearchPostAggregation,
 	JobTypeBiggoIndexing,
-	JobTypeBlevePostIndexing,
 	JobTypeLdapSync,
 	JobTypeMigrations,
 	JobTypePlugins,

@@ -7,9 +7,9 @@ import (
 	"errors"
 	"net/http"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
 )
 
 func (a *App) GetJob(c request.CTX, id string) (*model.Job, *model.AppError) {
@@ -62,8 +62,6 @@ func (a *App) CancelJob(c request.CTX, jobId string) *model.AppError {
 
 func (a *App) SessionHasPermissionToCreateJob(session model.Session, job *model.Job) (bool, *model.Permission) {
 	switch job.Type {
-	case model.JobTypeBlevePostIndexing:
-		return a.SessionHasPermissionTo(session, model.PermissionCreatePostBleveIndexesJob), model.PermissionCreatePostBleveIndexesJob
 	case model.JobTypeDataRetention:
 		return a.SessionHasPermissionTo(session, model.PermissionCreateDataRetentionJob), model.PermissionCreateDataRetentionJob
 	case model.JobTypeMessageExport:
@@ -105,7 +103,6 @@ func (a *App) SessionHasPermissionToReadJob(session model.Session, jobType strin
 	case model.JobTypeLdapSync:
 		return a.SessionHasPermissionTo(session, model.PermissionReadLdapSyncJob), model.PermissionReadLdapSyncJob
 	case
-		model.JobTypeBlevePostIndexing,
 		model.JobTypeMigrations,
 		model.JobTypePlugins,
 		model.JobTypeProductNotices,
