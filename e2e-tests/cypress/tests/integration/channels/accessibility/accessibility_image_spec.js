@@ -54,8 +54,11 @@ describe('Verify Accessibility Support in Different Images', () => {
             });
 
             // * Verify image alt in profile popover
-            cy.get('#user-profile-popover').within(() => {
+            cy.get('.user-profile-popover').within(() => {
                 cy.get('.Avatar').should('have.attr', 'alt', `${otherUser.username} profile image`);
+                
+                // Close profile popover
+                cy.get('button[aria-label="Close user profile popover"]').click();
             });
         });
 
