@@ -503,7 +503,7 @@ func (a *App) rawSendToPushProxyHTTP(msg *model.PushNotification) (model.PushRes
 }
 
 func (a *App) rawSendToPushProxy(msg *model.PushNotification) (model.PushResponse, error) {
-	notificationServer := *a.Config().EmailSettings.PushNotificationServer
+	notificationServer := *a.Config().EmailSettings.PushNotificationAMQPServer
 	if strings.HasPrefix(notificationServer, "amqp://") {
 		return a.rawSendToPushProxyAMQP(msg)
 	} else {
@@ -585,7 +585,7 @@ func (a *App) SendAckToPushProxyHTTP(ack *model.PushNotificationAck) error {
 }
 
 func (a *App) SendAckToPushProxy(ack *model.PushNotificationAck) error {
-	notificationServer := *a.Config().EmailSettings.PushNotificationServer
+	notificationServer := *a.Config().EmailSettings.PushNotificationAMQPServer
 	if strings.HasPrefix(notificationServer, "amqp://") {
 		return a.SendAckToPushProxyAMQP(ack)
 	} else {
@@ -746,7 +746,7 @@ func (a *App) SendTestPushNotification(deviceID string) string {
 	}
 	msg.SetDeviceIdAndPlatform(deviceID)
 
-	pushResponse, err := a.rawSendToPushProxy(msg)
+	pushResponse, err := a.rawSendToPushProxyHTTP(msg)
 	if err != nil {
 		a.CountNotificationReason(model.NotificationStatusError, model.NotificationTypePush, model.NotificationReasonPushProxySendError, msg.Platform)
 		a.NotificationsLog().Error("Failed to send test notification to push proxy",

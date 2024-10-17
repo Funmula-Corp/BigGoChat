@@ -236,7 +236,7 @@ func TestClearPushNotificationSyncAMQP(t *testing.T) {
 
 	// When CRT is disabled
 	th.App.UpdateConfig(func(cfg *model.Config) {
-		*cfg.EmailSettings.PushNotificationServer = testAMQPServer
+		*cfg.EmailSettings.PushNotificationAMQPServer = testAMQPServer
 		*cfg.ServiceSettings.CollapsedThreads = model.CollapsedThreadsDisabled
 	})
 
@@ -310,7 +310,7 @@ func TestUpdateMobileAppBadgeSyncAMQP(t *testing.T) {
 	mockStore.On("GetDBSchemaVersion").Return(1, nil)
 
 	th.App.UpdateConfig(func(cfg *model.Config) {
-		*cfg.EmailSettings.PushNotificationServer = testAMQPServer
+		*cfg.EmailSettings.PushNotificationAMQPServer = testAMQPServer
 		*cfg.ServiceSettings.CollapsedThreads = model.CollapsedThreadsDisabled
 	})
 
@@ -324,31 +324,6 @@ func TestUpdateMobileAppBadgeSyncAMQP(t *testing.T) {
 	assert.Equal(t, model.PushTypeUpdateBadge, consumer.notifications()[0].Type)
 	assert.Equal(t, 1, consumer.notifications()[1].ContentAvailable)
 	assert.Equal(t, model.PushTypeUpdateBadge, consumer.notifications()[1].Type)
-}
-
-func TestSendTestPushNotificationAMQP(t *testing.T) {
-	th := Setup(t)
-	defer th.TearDown()
-
-	consumer := newTestAMQPConsumer()
-	defer consumer.Shutdown()
-
-	th.App.UpdateConfig(func(cfg *model.Config) {
-		*cfg.EmailSettings.PushNotificationServer = testAMQPServer
-	})
-
-	result := th.App.SendTestPushNotification("platform:id")
-	assert.Equal(t, "true", result)
-	result = th.App.SendTestPushNotification("platform:id")
-	assert.Equal(t, "true", result)
-
-	assert.Nil(t, consumer.waitNumReqs(2))
-
-	// Server side verification.
-	// We verify that 2 requests have been sent, and also check the message contents.
-	require.Len(t, consumer.notifications(), 2)
-	assert.Equal(t, model.PushTypeTest, consumer.notifications()[0].Type)
-	assert.Equal(t, model.PushTypeTest, consumer.notifications()[1].Type)
 }
 
 func TestSendAckToPushProxyAMQP(t *testing.T) {
@@ -374,7 +349,7 @@ func TestSendAckToPushProxyAMQP(t *testing.T) {
 	mockStore.On("GetDBSchemaVersion").Return(1, nil)
 
 	th.App.UpdateConfig(func(cfg *model.Config) {
-		*cfg.EmailSettings.PushNotificationServer = testAMQPServer
+		*cfg.EmailSettings.PushNotificationAMQPServer = testAMQPServer
 	})
 
 	ack := &model.PushNotificationAck{
@@ -436,7 +411,7 @@ func TestAllPushNotificationsAMQP(t *testing.T) {
 
 	th.App.UpdateConfig(func(cfg *model.Config) {
 		*cfg.EmailSettings.PushNotificationContents = model.GenericNotification
-		*cfg.EmailSettings.PushNotificationServer = testAMQPServer
+		*cfg.EmailSettings.PushNotificationAMQPServer = testAMQPServer
 	})
 
 	var wg sync.WaitGroup
@@ -505,7 +480,7 @@ func TestSendPushToPushProxyPriorityAMQP(t *testing.T) {
 	defer consumer.Shutdown()
 
 	th.App.UpdateConfig(func(cfg *model.Config) {
-		*cfg.EmailSettings.PushNotificationServer = testAMQPServer
+		*cfg.EmailSettings.PushNotificationAMQPServer = testAMQPServer
 	})
 
 	msg := &model.PushNotification{

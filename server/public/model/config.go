@@ -1834,6 +1834,7 @@ type EmailSettings struct {
 	LoginButtonColor                  *string `access:"experimental_features"`
 	LoginButtonBorderColor            *string `access:"experimental_features"`
 	LoginButtonTextColor              *string `access:"experimental_features"`
+	PushNotificationAMQPServer        *string `access:"environment_push_notification_server"`
 }
 
 func (s *EmailSettings) SetDefaults(isUpdate bool) {
@@ -1919,6 +1920,10 @@ func (s *EmailSettings) SetDefaults(isUpdate bool) {
 		} else {
 			s.PushNotificationServer = NewString(GenericNotificationServer)
 		}
+	}
+
+	if s.PushNotificationAMQPServer == nil {
+		s.PushNotificationAMQPServer = NewString("")
 	}
 
 	if s.PushNotificationContents == nil {
