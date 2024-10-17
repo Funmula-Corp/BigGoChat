@@ -30,7 +30,9 @@ describe('Team Settings', () => {
     let siteName;
     let isLicensed;
 
-    before(() => {
+    before(function() {
+        // BigGoChat does not support user invitation via link
+        this.skip();
         cy.apiGetClientLicense().then((data) => {
             ({isLicensed} = data);
         });
