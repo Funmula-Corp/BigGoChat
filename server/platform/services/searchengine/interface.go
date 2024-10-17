@@ -55,7 +55,7 @@ type SearchEngineInterface interface {
 	SearchChannels(teamId, userID, term string, isGuest bool, page, perPage int) ([]string, *model.AppError)
 	SearchFiles(userId string, searchParams []*model.SearchParams, page, perPage int) ([]string, *model.AppError)
 	SearchPosts(userId string, searchParams []*model.SearchParams, page, perPage int) ([]string, model.PostSearchMatches, *model.AppError)
-	SearchTeams(userId string, searchParams []*model.SearchParams, page, perPage int) ([]string, *model.AppError)
+	SearchTeams(userId string, searchParams []*model.SearchParams, page, perPage int) ([]string, int64, *model.AppError)
 	SearchUsers(userId string, term string, page, perPage int) ([]string, *model.AppError)
 	SearchUsersInChannel(userId string, channelId string, term string, page, perPage int) ([]string, []string, *model.AppError)
 }

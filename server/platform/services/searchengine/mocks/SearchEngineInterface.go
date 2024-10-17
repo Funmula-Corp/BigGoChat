@@ -663,7 +663,7 @@ func (_m *SearchEngineInterface) SearchPosts(userId string, searchParams []*mode
 }
 
 // SearchTeams provides a mock function with given fields: userId, searchParams, page, perPage
-func (_m *SearchEngineInterface) SearchTeams(userId string, searchParams []*model.SearchParams, page int, perPage int) ([]string, *model.AppError) {
+func (_m *SearchEngineInterface) SearchTeams(userId string, searchParams []*model.SearchParams, page int, perPage int) ([]string, int64, *model.AppError) {
 	ret := _m.Called(userId, searchParams, page, perPage)
 
 	if len(ret) == 0 {
@@ -671,8 +671,9 @@ func (_m *SearchEngineInterface) SearchTeams(userId string, searchParams []*mode
 	}
 
 	var r0 []string
-	var r1 *model.AppError
-	if rf, ok := ret.Get(0).(func(string, []*model.SearchParams, int, int) ([]string, *model.AppError)); ok {
+	var r1 int64
+	var r2 *model.AppError
+	if rf, ok := ret.Get(0).(func(string, []*model.SearchParams, int, int) ([]string, int64, *model.AppError)); ok {
 		return rf(userId, searchParams, page, perPage)
 	}
 	if rf, ok := ret.Get(0).(func(string, []*model.SearchParams, int, int) []string); ok {
@@ -683,15 +684,21 @@ func (_m *SearchEngineInterface) SearchTeams(userId string, searchParams []*mode
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(string, []*model.SearchParams, int, int) *model.AppError); ok {
+	if rf, ok := ret.Get(1).(func(string, []*model.SearchParams, int, int) int64); ok {
 		r1 = rf(userId, searchParams, page, perPage)
 	} else {
-		if ret.Get(1) != nil {
-			r1 = ret.Get(1).(*model.AppError)
+		r1 = ret.Get(1).(int64)
+	}
+
+	if rf, ok := ret.Get(2).(func(string, []*model.SearchParams, int, int) *model.AppError); ok {
+		r2 = rf(userId, searchParams, page, perPage)
+	} else {
+		if ret.Get(2) != nil {
+			r2 = ret.Get(2).(*model.AppError)
 		}
 	}
 
-	return r0, r1
+	return r0, r1, r2
 }
 
 // SearchUsers provides a mock function with given fields: userId, term, page, perPage
