@@ -126,6 +126,7 @@ const Signup = ({onCustomizeHeader}: SignupProps) => {
     const enableSignUpWithGoogle = enableUserCreation && EnableSignUpWithGoogle === 'true';
     const enableSignUpWithOffice365 = enableUserCreation && EnableSignUpWithOffice365 === 'true';
     const enableSignUpWithOpenId = enableUserCreation && EnableSignUpWithOpenId === 'true';
+    const enableSignUpWithBiggo = EnableSignUpWithBiggo === 'true';
     const enableLDAP = EnableLdap === 'true';
     const enableSAML = EnableSaml === 'true';
     const enableCustomBrand = EnableCustomBrand === 'true';
