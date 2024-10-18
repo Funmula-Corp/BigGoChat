@@ -50,7 +50,7 @@ describe('Verify Accessibility Support in Different Images', () => {
         // # Open profile popover
         cy.getLastPostId().then((postId) => {
             cy.get(`#post_${postId}`).within(() => {
-                cy.get('.user-popover').click();
+                cy.get('.status-wrapper').click();
             });
 
             // * Verify image alt in profile popover
@@ -61,6 +61,9 @@ describe('Verify Accessibility Support in Different Images', () => {
                 cy.get('button[aria-label="Close user profile popover"]').click();
             });
         });
+
+        // # Close the profile popover
+        cy.get('body').click();
 
         // # Open Settings > Display > Themes
         cy.uiOpenSettingsModal('Display').within(() => {

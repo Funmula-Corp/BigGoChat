@@ -72,10 +72,10 @@ describe('Scroll', () => {
         getFile('mpeg-video-file.mpg').invoke('height').then((height) => {
             cy.wrap(height).as('initialMpgHeight');
         });
-        getFileThumbnail('gif-image-file.gif').invoke('height').then((height) => {
+        getImageThumbnail('gif-image-file.gif').invoke('height').then((height) => {
             cy.wrap(height).as('initialGifHeight');
         });
-        getFileThumbnail('jpg-image-file.jpg').invoke('height').then((height) => {
+        getImageThumbnail('jpg-image-file.jpg').invoke('height').then((height) => {
             cy.wrap(height).as('initialJpgHeight');
         });
         getComponentBySelector('@linkPreviewPostId', '.PostAttachmentOpenGraph__image').invoke('height').then((height) => {
@@ -120,10 +120,10 @@ describe('Scroll', () => {
                 getFile('mpeg-video-file.mpg').invoke('height').should('be.equal', originalHeight);
             });
             cy.get('@initialGifHeight').then((originalHeight) => {
-                getFileThumbnail('gif-image-file.gif').invoke('height').should('be.equal', originalHeight);
+                getImageThumbnail('gif-image-file.gif').invoke('height').should('be.equal', originalHeight);
             });
             cy.get('@initialJpgHeight').then((originalHeight) => {
-                getFileThumbnail('jpg-image-file.jpg').invoke('height').should('be.equal', originalHeight);
+                getImageThumbnail('jpg-image-file.jpg').invoke('height').should('be.equal', originalHeight);
             });
             cy.get('@initialInlineImgHeight').then((originalHeight) => {
                 getComponentBySelector('@gifLinkPostId', 'img[aria-label="file thumbnail"]').invoke('height').should('be.equal', originalHeight);
@@ -143,6 +143,13 @@ describe('Scroll', () => {
 
     // Get thumbnail component based on filename
     const getFileThumbnail = (filename) => {
+        return cy.get(`@${filename}PostId`).then((postId) => {
+            cy.get(`#${postId}_message a.post-image__name`);
+        });
+    };
+
+    // Get image component based on filename
+    const getImageThumbnail = (filename) => {
         return cy.get(`@${filename}PostId`).then((postId) => {
             cy.get(`#${postId}_message`).findByLabelText(`file thumbnail ${filename}`);
         });

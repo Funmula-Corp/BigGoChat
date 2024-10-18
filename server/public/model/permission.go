@@ -125,8 +125,10 @@ var PermissionManageSharedChannels *Permission
 var PermissionManageSecureConnections *Permission
 var PermissionDownloadComplianceExportResult *Permission
 var PermissionCreateDataRetentionJob *Permission
+var PermissionManageDataRetentionJob *Permission
 var PermissionReadDataRetentionJob *Permission
 var PermissionCreateComplianceExportJob *Permission
+var PermissionManageComplianceExportJob *Permission
 var PermissionReadComplianceExportJob *Permission
 var PermissionReadAudits *Permission
 var PermissionTestElasticsearch *Permission
@@ -138,12 +140,16 @@ var PermissionRecycleDatabaseConnections *Permission
 var PermissionPurgeElasticsearchIndexes *Permission
 var PermissionTestEmail *Permission
 var PermissionCreateElasticsearchPostIndexingJob *Permission
+var PermissionManageElasticsearchPostIndexingJob *Permission
 var PermissionCreateElasticsearchPostAggregationJob *Permission
+var PermissionManageElasticsearchPostAggregationJob *Permission
 var PermissionReadElasticsearchPostIndexingJob *Permission
 var PermissionReadElasticsearchPostAggregationJob *Permission
 var PermissionPurgeBleveIndexes *Permission
 var PermissionCreatePostBleveIndexesJob *Permission
+var PermissionManagePostBleveIndexesJob *Permission
 var PermissionCreateLdapSyncJob *Permission
+var PermissionManageLdapSyncJob *Permission
 var PermissionReadLdapSyncJob *Permission
 var PermissionTestLdap *Permission
 var PermissionInvalidateEmailInvite *Permission
@@ -804,6 +810,12 @@ func initializePermissions() {
 		"",
 		PermissionScopeSystem,
 	}
+	PermissionManageDataRetentionJob = &Permission{
+		"manage_data_retention_job",
+		"",
+		"",
+		PermissionScopeSystem,
+	}
 	PermissionReadDataRetentionJob = &Permission{
 		"read_data_retention_job",
 		"",
@@ -813,6 +825,12 @@ func initializePermissions() {
 
 	PermissionCreateComplianceExportJob = &Permission{
 		"create_compliance_export_job",
+		"",
+		"",
+		PermissionScopeSystem,
+	}
+	PermissionManageComplianceExportJob = &Permission{
+		"manage_compliance_export_job",
 		"",
 		"",
 		PermissionScopeSystem,
@@ -845,8 +863,21 @@ func initializePermissions() {
 		PermissionScopeSystem,
 	}
 
+	PermissionManagePostBleveIndexesJob = &Permission{
+		"manage_post_bleve_indexes_job",
+		"",
+		"",
+		PermissionScopeSystem,
+	}
+
 	PermissionCreateLdapSyncJob = &Permission{
 		"create_ldap_sync_job",
+		"",
+		"",
+		PermissionScopeSystem,
+	}
+	PermissionManageLdapSyncJob = &Permission{
+		"manage_ldap_sync_job",
 		"",
 		"",
 		PermissionScopeSystem,
@@ -1043,8 +1074,20 @@ func initializePermissions() {
 		"",
 		PermissionScopeSystem,
 	}
+	PermissionManageElasticsearchPostIndexingJob = &Permission{
+		"manage_elasticsearch_post_indexing_job",
+		"",
+		"",
+		PermissionScopeSystem,
+	}
 	PermissionCreateElasticsearchPostAggregationJob = &Permission{
 		"create_elasticsearch_post_aggregation_job",
+		"",
+		"",
+		PermissionScopeSystem,
+	}
+	PermissionManageElasticsearchPostAggregationJob = &Permission{
+		"manage_elasticsearch_post_aggregation_job",
 		"",
 		"",
 		PermissionScopeSystem,
@@ -2361,8 +2404,10 @@ func initializePermissions() {
 		PermissionManageSecureConnections,
 		PermissionDownloadComplianceExportResult,
 		PermissionCreateDataRetentionJob,
+		PermissionManageDataRetentionJob,
 		PermissionReadDataRetentionJob,
 		PermissionCreateComplianceExportJob,
+		PermissionManageComplianceExportJob,
 		PermissionReadComplianceExportJob,
 		PermissionReadAudits,
 		PermissionTestSiteURL,
@@ -2374,12 +2419,16 @@ func initializePermissions() {
 		PermissionPurgeElasticsearchIndexes,
 		PermissionTestEmail,
 		PermissionCreateElasticsearchPostIndexingJob,
+		PermissionManageElasticsearchPostIndexingJob,
 		PermissionCreateElasticsearchPostAggregationJob,
+		PermissionManageElasticsearchPostAggregationJob,
 		PermissionReadElasticsearchPostIndexingJob,
 		PermissionReadElasticsearchPostAggregationJob,
 		PermissionPurgeBleveIndexes,
 		PermissionCreatePostBleveIndexesJob,
+		PermissionManagePostBleveIndexesJob,
 		PermissionCreateLdapSyncJob,
+		PermissionManageLdapSyncJob,
 		PermissionReadLdapSyncJob,
 		PermissionTestLdap,
 		PermissionInvalidateEmailInvite,

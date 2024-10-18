@@ -3,7 +3,7 @@
   "browser": {
     "./client/web_client.jsx": "./client/browser_web_client.jsx"
   },
-  "version": "9.9.0",
+  "version": "9.11.0",
   "private": true,
   "dependencies": {
     "@floating-ui/react": "0.26.6",
@@ -53,6 +53,7 @@
     "luxon": "3.3.0",
     "mark.js": "8.11.1",
     "marked": "github:mattermost/marked#2ef7f28cc7718e3f551c4ce9ea75fdd7580c2008",
+    "material-icons": "1.13.12",
     "memoize-one": "6.0.0",
     "moment-timezone": "0.5.38",
     "p-queue": "7.3.0",
@@ -93,12 +94,11 @@
     "smooth-scroll-into-view-if-needed": "1.1.33",
     "stream-browserify": "3.0.0",
     "styled-components": "5.3.6",
-    "stylelint": "13.13.1",
     "timezones.json": "1.6.1",
     "tinycolor2": "1.4.2",
     "turndown": "7.1.1",
     "typescript": "5.4.5",
-    "web-vitals": "3.5.2",
+    "web-vitals": "4.2.0",
     "zen-observable": "0.9.0"
   },
   "devDependencies": {

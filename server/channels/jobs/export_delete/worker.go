@@ -9,10 +9,10 @@ import (
 
 	"github.com/wiggin77/merror"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/jobs"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/services/configservice"
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/configservice"
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/jobs"
 )
 
 type AppIface interface {

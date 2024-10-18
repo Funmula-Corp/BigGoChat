@@ -7,11 +7,11 @@ import (
 	"sync"
 	"time"
 
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/configservice"
+	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
 	"git.biggo.com/Funmula/mattermost-funmula/server/v8/einterfaces"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/services/configservice"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
 )
 
 type JobServer struct {

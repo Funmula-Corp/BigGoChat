@@ -23,5 +23,4 @@ import (
 	_ "github.com/prometheus/client_golang/prometheus/collectors"
 	_ "github.com/prometheus/client_golang/prometheus/promhttp"
 	_ "github.com/tylerb/graceful"
-	_ "gopkg.in/olivere/elastic.v6"
 )
