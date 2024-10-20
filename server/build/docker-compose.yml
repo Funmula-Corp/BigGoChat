@@ -76,7 +76,7 @@ services:
       - elasticsearch8
       - searchengine
       - searchindexer
-    command: postgres:5432 mysql:3306 minio:9000 inbucket:9001 openldap:389 elasticsearch:9200 elasticsearch8:9201 searchindexer:8080 searchengine:8080 neo4j:7474
+    command: postgres:5432 mysql:3306 minio:9000 inbucket:9001 openldap:389 elasticsearch:9200 elasticsearch8:9201 searchindexer:2112 searchengine:2112 neo4j:7474
 
 networks:
   mm-test:
