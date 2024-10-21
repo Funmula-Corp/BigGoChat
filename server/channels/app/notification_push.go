@@ -17,11 +17,11 @@ import (
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
 	"github.com/golang-jwt/jwt/v5"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/utils"
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/i18n"
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
 	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
+	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/utils"
 )
 
 type notificationType string
@@ -472,7 +472,7 @@ func (s *Server) StopPushNotificationsHubWorkers() {
 	s.PushNotificationsHub.stop()
 }
 
-func (a *App) rawSendToPushProxy(msg *model.PushNotification) (model.PushResponse, error) {
+func (a *App) rawSendToPushProxyHTTP(msg *model.PushNotification) (model.PushResponse, error) {
 	msgJSON, err := json.Marshal(msg)
 	if err != nil {
 		return nil, fmt.Errorf("failed to encode to JSON: %w", err)
@@ -500,6 +500,15 @@ func (a *App) rawSendToPushProxy(msg *model.PushNotification) (model.PushRespons
 	}
 
 	return pushResponse, nil
+}
+
+func (a *App) rawSendToPushProxy(msg *model.PushNotification) (model.PushResponse, error) {
+	notificationServer := *a.Config().EmailSettings.PushNotificationAMQPServer
+	if strings.HasPrefix(notificationServer, "amqp://") {
+		return a.rawSendToPushProxyAMQP(msg)
+	} else {
+		return a.rawSendToPushProxyHTTP(msg)
+	}
 }
 
 func (a *App) sendToPushProxy(msg *model.PushNotification, session *model.Session) error {
@@ -530,7 +539,7 @@ func (a *App) sendToPushProxy(msg *model.PushNotification, session *model.Sessio
 	return nil
 }
 
-func (a *App) SendAckToPushProxy(ack *model.PushNotificationAck) error {
+func (a *App) SendAckToPushProxyHTTP(ack *model.PushNotificationAck) error {
 	if ack == nil {
 		return nil
 	}
@@ -573,6 +582,15 @@ func (a *App) SendAckToPushProxy(ack *model.PushNotificationAck) error {
 	// Reading the body to completion.
 	_, err = io.Copy(io.Discard, resp.Body)
 	return err
+}
+
+func (a *App) SendAckToPushProxy(ack *model.PushNotificationAck) error {
+	notificationServer := *a.Config().EmailSettings.PushNotificationAMQPServer
+	if strings.HasPrefix(notificationServer, "amqp://") {
+		return a.SendAckToPushProxyAMQP(ack)
+	} else {
+		return a.SendAckToPushProxyHTTP(ack)
+	}
 }
 
 func (a *App) getMobileAppSessions(userID string) ([]*model.Session, *model.AppError) {
@@ -708,6 +726,10 @@ func (a *App) BuildPushNotificationMessage(c request.CTX, contentsConfig string,
 	msg.PostType = post.Type
 	msg.ChannelType = channel.Type
 
+	if priority := post.GetPriority(); priority != nil {
+		msg.Priority = *priority.Priority
+	}
+
 	return msg, nil
 }
 
@@ -724,7 +746,7 @@ func (a *App) SendTestPushNotification(deviceID string) string {
 	}
 	msg.SetDeviceIdAndPlatform(deviceID)
 
-	pushResponse, err := a.rawSendToPushProxy(msg)
+	pushResponse, err := a.rawSendToPushProxyHTTP(msg)
 	if err != nil {
 		a.CountNotificationReason(model.NotificationStatusError, model.NotificationTypePush, model.NotificationReasonPushProxySendError, msg.Platform)
 		a.NotificationsLog().Error("Failed to send test notification to push proxy",

@@ -78,6 +78,7 @@ type PushNotification struct {
 	PostType         string      `json:"-"`
 	ChannelType      ChannelType `json:"-"`
 	Signature        string      `json:"signature"`
+	Priority         string      `json:"priority"`
 }
 
 func (pn *PushNotification) DeepCopy() *PushNotification {
