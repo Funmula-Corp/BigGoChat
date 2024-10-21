@@ -1,4 +1,4 @@
-module git.biggo.com/Funmula/mattermost-funmula/server/v8
+module git.biggo.com/Funmula/BigGoChat/server/v8
 
 go 1.21
 
@@ -6,7 +6,7 @@ toolchain go1.21.8
 
 require (
 	code.sajari.com/docconv/v2 v2.0.0-pre.4
-	git.biggo.com/Funmula/mattermost-funmula/server/public v0.0.0-20240528130652-eab114624377
+	git.biggo.com/Funmula/BigGoChat/server/public v0.0.0-20241021111751-7ebfd4fcb462
 	git.biggo.com/Funmula/mattermost-packages/grpc v0.0.0-20240531034050-3d22f388694c
 	git.biggo.com/Funmula/mattermost-packages/pluginAPI v0.0.0-20240531034050-3d22f388694c
 	github.com/Masterminds/semver/v3 v3.2.1

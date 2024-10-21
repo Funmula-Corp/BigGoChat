@@ -10,8 +10,8 @@ dmitri.shuralyov.com/html/belt v0.0.0-20180602232347-f7d459c86be0/go.mod h1:JLBr
 dmitri.shuralyov.com/service/change v0.0.0-20181023043359-a85b471d5412/go.mod h1:a1inKt/atXimZ4Mv927x+r7UpyzRUf4emIoiiSC2TN4=
 dmitri.shuralyov.com/state v0.0.0-20180228185332-28bcc343414c/go.mod h1:0PRwlb0D6DFvNNtx+9ybjezNCa8XF0xaYcETyp6rHWU=
 git.apache.org/thrift.git v0.0.0-20180902110319-2566ecd5d999/go.mod h1:fPE2ZNJGynbRyZ4dJvy6G277gSllfV2HJqblrnkyeyg=
-git.biggo.com/Funmula/mattermost-funmula/server/public v0.0.0-20240528130652-eab114624377 h1:ZH5fejKmxcUbFwzKLhowAFL6+omd/zGJPxSK8zO5/wU=
-git.biggo.com/Funmula/mattermost-funmula/server/public v0.0.0-20240528130652-eab114624377/go.mod h1:KV+cj12fsfCwO6prpP7s/7VNs0ikewmIjapx8iqD62k=
+git.biggo.com/Funmula/BigGoChat/server/public v0.0.0-20241021111751-7ebfd4fcb462 h1:oiytGFjUJxwIiI3fT2bIsbSXXBrlKICygGOXYdu5HlE=
+git.biggo.com/Funmula/BigGoChat/server/public v0.0.0-20241021111751-7ebfd4fcb462/go.mod h1:uK6BYpdG2/0uB99As2hsfXG62XE2vDJMIo3upJR2j1Q=
 git.biggo.com/Funmula/mattermost-packages/grpc v0.0.0-20240531034050-3d22f388694c h1:ViRm7hwtPzfOxqy9mHP7wGapD19pxtqn3hZtf+/iIww=
 git.biggo.com/Funmula/mattermost-packages/grpc v0.0.0-20240531034050-3d22f388694c/go.mod h1:Bohs77XZTkET/iPhNx73q+R3MkaFaqrr0RcZ4oqhkog=
 git.biggo.com/Funmula/mattermost-packages/pluginAPI v0.0.0-20240531034050-3d22f388694c h1:byiID4ltH40grqvmV2vCANObksWLkZI5eYLJRAE3mJI=
