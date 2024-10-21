@@ -8,9 +8,9 @@ import (
 	"net/http"
 	"strings"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store/sqlstore"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/store"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/store/sqlstore"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
 )
 
 type permissionTransformation struct {
@@ -958,7 +958,7 @@ func (a *App) getAddAuthenticationSubsectionPermissions() (permissionsMap, error
 	return transformations, nil
 }
 
-// This migration fixes https://git.biggo.com/Funmula/mattermost-funmula-server/issues/17642 where this particular ancillary permission was forgotten during the initial migrations
+// This migration fixes https://git.biggo.com/Funmula/BigGoChat-server/issues/17642 where this particular ancillary permission was forgotten during the initial migrations
 func (a *App) getAddTestEmailAncillaryPermission() (permissionsMap, error) {
 	transformations := []permissionTransformation{}
 

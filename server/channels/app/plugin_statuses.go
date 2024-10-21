@@ -6,7 +6,7 @@ package app
 import (
 	"net/http"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
 )
 
 // GetPluginStatus returns the status for a plugin installed on this server.

@@ -6,7 +6,7 @@ package main
 import (
 	"fmt"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app/plugin_api_tests"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/app/plugin_api_tests"
 	"github.com/mattermost/mattermost/server/public/model"
 	"github.com/mattermost/mattermost/server/public/plugin"
 )

@@ -6,7 +6,7 @@ package bleveengine
 import (
 	"strconv"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
 )
 
 func createPost(userId string, channelId string) *model.Post {

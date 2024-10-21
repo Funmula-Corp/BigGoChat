@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"sort"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
 )
 
 type filterPostOptions struct {

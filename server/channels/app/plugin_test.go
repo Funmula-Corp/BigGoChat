@@ -24,11 +24,11 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/testlib"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/utils/fileutils"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/testlib"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/utils/fileutils"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/public/plugin"
+	"git.biggo.com/Funmula/BigGoChat/server/public/shared/mlog"
 )
 
 func getHashedKey(key string) string {
@@ -630,7 +630,7 @@ func TestPluginSync(t *testing.T) {
 	}
 }
 
-// See https://git.biggo.com/Funmula/mattermost-funmula-server/issues/19189
+// See https://git.biggo.com/Funmula/BigGoChat-server/issues/19189
 func TestChannelsPluginsInit(t *testing.T) {
 	th := Setup(t)
 	defer th.TearDown()
@@ -729,8 +729,8 @@ func TestPluginPanicLogs(t *testing.T) {
 		package main
 
 		import (
-			"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
-			"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+			"git.biggo.com/Funmula/BigGoChat/server/public/plugin"
+			"git.biggo.com/Funmula/BigGoChat/server/public/model"
 		)
 
 		type MyPlugin struct {
@@ -778,7 +778,7 @@ func TestPluginStatusActivateError(t *testing.T) {
 		import (
 			"errors"
 
-			"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
+			"git.biggo.com/Funmula/BigGoChat/server/public/plugin"
 		)
 
 		type MyPlugin struct {

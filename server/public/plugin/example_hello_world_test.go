@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
+	"git.biggo.com/Funmula/BigGoChat/server/public/plugin"
 )
 
 // HelloWorldPlugin implements the interface expected by the Mattermost server to communicate

@@ -8,8 +8,8 @@ import (
 	"errors"
 	"os"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/cmd/mmctl/client"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/cmd/mmctl/printer"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/cmd/mmctl/client"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/cmd/mmctl/printer"
 
 	"github.com/spf13/cobra"
 )

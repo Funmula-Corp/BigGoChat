@@ -7,7 +7,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8"
+	"git.biggo.com/Funmula/BigGoChat/server/v8"
 )
 
 func CommonBaseSearchPaths() []string {

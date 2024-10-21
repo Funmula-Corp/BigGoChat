@@ -92,10 +92,10 @@ import (
 
 	"github.com/blang/semver/v4"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/shared/filestore"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/utils"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/platform/shared/filestore"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/public/shared/mlog"
+	"git.biggo.com/Funmula/BigGoChat/server/public/utils"
 )
 
 // managedPluginFileName is the file name of the flag file that marks

@@ -391,7 +391,7 @@ import (
 	"net/http"
 	timePkg "time"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
 )
 
 type apiTimerLayer struct {
@@ -432,7 +432,7 @@ import (
 	"net/http"
 	timePkg "time"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
 )
 
 type hooksTimerLayer struct {
@@ -585,7 +585,7 @@ func generatePluginTimerLayer(info *PluginInterfaceInfo) {
 }
 
 func getPluginPackageDir() string {
-	dirs, err := goList("git.biggo.com/Funmula/mattermost-funmula/server/public/plugin")
+	dirs, err := goList("git.biggo.com/Funmula/BigGoChat/server/public/plugin")
 	if err != nil {
 		panic(err)
 	} else if len(dirs) != 1 {

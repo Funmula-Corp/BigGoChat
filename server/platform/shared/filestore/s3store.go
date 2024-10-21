@@ -22,7 +22,7 @@ import (
 	"github.com/minio/minio-go/v7/pkg/s3utils"
 	"github.com/pkg/errors"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
+	"git.biggo.com/Funmula/BigGoChat/server/public/shared/mlog"
 )
 
 // S3FileBackend contains all necessary information to communicate with

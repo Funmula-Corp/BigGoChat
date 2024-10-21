@@ -9,9 +9,9 @@ import (
 
 	"golang.org/x/oauth2"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/pluginapi"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/pluginapi/experimental/bot/logger"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/pluginapi/experimental/common"
+	"git.biggo.com/Funmula/BigGoChat/server/public/pluginapi"
+	"git.biggo.com/Funmula/BigGoChat/server/public/pluginapi/experimental/bot/logger"
+	"git.biggo.com/Funmula/BigGoChat/server/public/pluginapi/experimental/common"
 )
 
 const (

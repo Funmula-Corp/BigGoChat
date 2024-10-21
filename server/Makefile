@@ -53,7 +53,7 @@ GOTESTSUM_JSONFILE ?= gotestsum.json
 # mmctl
 MMCTL_BUILD_TAGS =
 MMCTL_TESTFLAGS ?= -timeout 30m
-MMCTL_PKG = git.biggo.com/Funmula/mattermost-funmula/server/v8/cmd/mmctl/commands
+MMCTL_PKG = git.biggo.com/Funmula/BigGoChat/server/v8/cmd/mmctl/commands
 MMCTL_BUILD_DATE = $(shell date -u +'%Y-%m-%dT%H:%M:%SZ')
 MMCTL_LDFLAGS += -X "$(MMCTL_PKG).buildDate=$(MMCTL_BUILD_DATE)"
 
@@ -94,14 +94,14 @@ GO ?= go
 DELVE ?= dlv
 
 ifdef BUILD_VERSION
-LDFLAGS += -X "git.biggo.com/Funmula/mattermost-funmula/server/public/model.CurrentVersion=$(BUILD_VERSION)"
+LDFLAGS += -X "git.biggo.com/Funmula/BigGoChat/server/public/model.CurrentVersion=$(BUILD_VERSION)"
 endif
 
-LDFLAGS += -X "git.biggo.com/Funmula/mattermost-funmula/server/public/model.BuildNumber=$(BUILD_NUMBER)"
-LDFLAGS += -X "git.biggo.com/Funmula/mattermost-funmula/server/public/model.BuildDate=$(BUILD_DATE)"
-LDFLAGS += -X "git.biggo.com/Funmula/mattermost-funmula/server/public/model.BuildHash=$(BUILD_HASH)"
-LDFLAGS += -X "git.biggo.com/Funmula/mattermost-funmula/server/public/model.BuildHashEnterprise=$(BUILD_HASH)"
-LDFLAGS += -X "git.biggo.com/Funmula/mattermost-funmula/server/public/model.BuildEnterpriseReady=$(BUILD_ENTERPRISE_READY)"
+LDFLAGS += -X "git.biggo.com/Funmula/BigGoChat/server/public/model.BuildNumber=$(BUILD_NUMBER)"
+LDFLAGS += -X "git.biggo.com/Funmula/BigGoChat/server/public/model.BuildDate=$(BUILD_DATE)"
+LDFLAGS += -X "git.biggo.com/Funmula/BigGoChat/server/public/model.BuildHash=$(BUILD_HASH)"
+LDFLAGS += -X "git.biggo.com/Funmula/BigGoChat/server/public/model.BuildHashEnterprise=$(BUILD_HASH)"
+LDFLAGS += -X "git.biggo.com/Funmula/BigGoChat/server/public/model.BuildEnterpriseReady=$(BUILD_ENTERPRISE_READY)"
 
 GO_MAJOR_VERSION = $(shell $(GO) version | cut -c 14- | cut -d' ' -f1 | cut -d'.' -f1)
 GO_MINOR_VERSION = $(shell $(GO) version | cut -c 14- | cut -d' ' -f1 | cut -d'.' -f2)
@@ -163,8 +163,8 @@ include config.mk
 include build/*.mk
 include public/Makefile
 
-LDFLAGS += -X "git.biggo.com/Funmula/mattermost-funmula/server/public/model.MockCWS=$(MM_ENABLE_CWS_MOCK)"
-LDFLAGS += -X "git.biggo.com/Funmula/mattermost-funmula/server/public/model.MattermostGiphySdkKey=$(MM_GIPHY_SDK_KEY)"
+LDFLAGS += -X "git.biggo.com/Funmula/BigGoChat/server/public/model.MockCWS=$(MM_ENABLE_CWS_MOCK)"
+LDFLAGS += -X "git.biggo.com/Funmula/BigGoChat/server/public/model.MattermostGiphySdkKey=$(MM_GIPHY_SDK_KEY)"
 
 RUN_IN_BACKGROUND ?=
 ifeq ($(RUN_SERVER_IN_BACKGROUND),true)
@@ -355,7 +355,7 @@ platform-mocks: ## Creates mocks for platform interfaces.
 
 mmctl-mocks: ## Creates mocks for mmctl
 	$(GO) install github.com/golang/mock/mockgen@v1.6.0
-	$(GOBIN)/mockgen -destination=cmd/mmctl/mocks/client_mock.go -copyright_file=cmd/mmctl/mocks/copyright.txt -package=mocks git.biggo.com/Funmula/mattermost-funmula/server/v8/cmd/mmctl/client Client
+	$(GOBIN)/mockgen -destination=cmd/mmctl/mocks/client_mock.go -copyright_file=cmd/mmctl/mocks/copyright.txt -package=mocks git.biggo.com/Funmula/BigGoChat/server/v8/cmd/mmctl/client Client
 
 pluginapi: ## Generates api and hooks glue code for plugins
 	cd ./public && $(GO) generate $(GOFLAGS) ./plugin
@@ -537,21 +537,21 @@ run-server: setup-go-work prepackaged-binaries validate-go-version start-docker 
 debug-server: start-docker ## Compile and start server using delve.
 	mkdir -p $(BUILD_WEBAPP_DIR)/channels/dist/files
 	$(DELVE) debug $(PLATFORM_FILES) --build-flags="-ldflags '\
-		-X git.biggo.com/Funmula/mattermost-funmula/server/public/model.BuildNumber=$(BUILD_NUMBER)\
-		-X \"git.biggo.com/Funmula/mattermost-funmula/server/public/model.BuildDate=$(BUILD_DATE)\"\
-		-X git.biggo.com/Funmula/mattermost-funmula/server/public/model.BuildHash=$(BUILD_HASH)\
-		-X git.biggo.com/Funmula/mattermost-funmula/server/public/model.BuildHashEnterprise=$(BUILD_HASH)\
-		-X git.biggo.com/Funmula/mattermost-funmula/server/public/model.BuildEnterpriseReady=$(BUILD_ENTERPRISE_READY)'\
+		-X git.biggo.com/Funmula/BigGoChat/server/public/model.BuildNumber=$(BUILD_NUMBER)\
+		-X \"git.biggo.com/Funmula/BigGoChat/server/public/model.BuildDate=$(BUILD_DATE)\"\
+		-X git.biggo.com/Funmula/BigGoChat/server/public/model.BuildHash=$(BUILD_HASH)\
+		-X git.biggo.com/Funmula/BigGoChat/server/public/model.BuildHashEnterprise=$(BUILD_HASH)\
+		-X git.biggo.com/Funmula/BigGoChat/server/public/model.BuildEnterpriseReady=$(BUILD_ENTERPRISE_READY)'\
 		-tags '$(BUILD_TAGS)'"
 
 debug-server-headless: start-docker ## Debug server from within an IDE like VSCode or IntelliJ.
 	mkdir -p $(BUILD_WEBAPP_DIR)/channels/dist/files
 	$(DELVE) debug --headless --listen=:2345 --api-version=2 --accept-multiclient $(PLATFORM_FILES) --build-flags="-ldflags '\
-		-X git.biggo.com/Funmula/mattermost-funmula/server/public/model.BuildNumber=$(BUILD_NUMBER)\
-		-X \"git.biggo.com/Funmula/mattermost-funmula/server/public/model.BuildDate=$(BUILD_DATE)\"\
-		-X git.biggo.com/Funmula/mattermost-funmula/server/public/model.BuildHash=$(BUILD_HASH)\
-		-X git.biggo.com/Funmula/mattermost-funmula/server/public/model.BuildHashEnterprise=$(BUILD_HASH)\
-		-X git.biggo.com/Funmula/mattermost-funmula/server/public/model.BuildEnterpriseReady=$(BUILD_ENTERPRISE_READY)'\
+		-X git.biggo.com/Funmula/BigGoChat/server/public/model.BuildNumber=$(BUILD_NUMBER)\
+		-X \"git.biggo.com/Funmula/BigGoChat/server/public/model.BuildDate=$(BUILD_DATE)\"\
+		-X git.biggo.com/Funmula/BigGoChat/server/public/model.BuildHash=$(BUILD_HASH)\
+		-X git.biggo.com/Funmula/BigGoChat/server/public/model.BuildHashEnterprise=$(BUILD_HASH)\
+		-X git.biggo.com/Funmula/BigGoChat/server/public/model.BuildEnterpriseReady=$(BUILD_ENTERPRISE_READY)'\
 		-tags '$(BUILD_TAGS)'"
 
 run-cli: start-docker ## Runs CLI.
@@ -812,4 +812,4 @@ test-migration:
 # test-it: export GOTESTSUM_JUNITFILE := $(GOTESTSUM_JUNITFILE)
 # test-it: export GOTESTSUM_JSONFILE := $(GOTESTSUM_JSONFILE)
 # test-it: test-server-pre
-# 	$(GOBIN)/gotestsum  --rerun-fails=0 --packages="git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/api4" -- $(GOFLAGS)-timeout=90m -run TestCreateBot/create_bot_with_permissions
+# 	$(GOBIN)/gotestsum  --rerun-fails=0 --packages="git.biggo.com/Funmula/BigGoChat/server/v8/channels/api4" -- $(GOFLAGS)-timeout=90m -run TestCreateBot/create_bot_with_permissions

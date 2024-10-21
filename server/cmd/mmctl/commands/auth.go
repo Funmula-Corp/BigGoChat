@@ -17,9 +17,9 @@ import (
 	"github.com/spf13/viper"
 	"golang.org/x/term"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/cmd/mmctl/printer"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/cmd/mmctl/printer"
 )
 
 var AuthCmd = &cobra.Command{

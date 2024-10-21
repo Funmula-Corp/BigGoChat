@@ -8,8 +8,8 @@ import (
 	"go/ast"
 	"go/token"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin/checker/internal/asthelpers"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin/checker/internal/version"
+	"git.biggo.com/Funmula/BigGoChat/server/public/plugin/checker/internal/asthelpers"
+	"git.biggo.com/Funmula/BigGoChat/server/public/plugin/checker/internal/version"
 )
 
 func checkAPIVersionComments(pkgPath string) (result, error) {

@@ -8,7 +8,7 @@ import (
 	"errors"
 	"fmt"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
 )
 
 // AcceptInvitation is called when accepting an invitation to connect with a remote cluster.

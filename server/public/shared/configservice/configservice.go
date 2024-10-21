@@ -4,7 +4,7 @@
 package configservice
 
 import (
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
 )
 
 // An interface representing something that contains a Config, such as the app.App struct

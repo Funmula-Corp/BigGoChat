@@ -4,8 +4,8 @@
 package platform
 
 import (
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/services/sharedchannel"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/platform/services/sharedchannel"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
 )
 
 // SharedChannelServiceIFace is the interface to the shared channel service

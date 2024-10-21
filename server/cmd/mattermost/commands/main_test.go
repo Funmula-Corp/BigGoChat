@@ -8,9 +8,9 @@ import (
 	"os"
 	"testing"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/api4"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/testlib"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/api4"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/testlib"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
 )
 
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.

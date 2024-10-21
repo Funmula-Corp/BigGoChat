@@ -3,8 +3,8 @@ package sqlstore
 import (
 	"fmt"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/store"
 	"github.com/pkg/errors"
 )
 

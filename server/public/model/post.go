@@ -15,7 +15,7 @@ import (
 	"sync"
 	"unicode/utf8"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/markdown"
+	"git.biggo.com/Funmula/BigGoChat/server/public/shared/markdown"
 )
 
 const (
