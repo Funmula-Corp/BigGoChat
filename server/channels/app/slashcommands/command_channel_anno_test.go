@@ -3,7 +3,7 @@ package slashcommands
 import (
 	"testing"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
 	"github.com/stretchr/testify/assert"
 )
 

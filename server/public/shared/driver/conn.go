@@ -7,7 +7,7 @@ import (
 	"context"
 	"database/sql/driver"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
+	"git.biggo.com/Funmula/BigGoChat/server/public/plugin"
 )
 
 // Conn is a DB driver conn implementation

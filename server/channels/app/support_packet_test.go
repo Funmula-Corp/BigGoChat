@@ -13,12 +13,12 @@ import (
 	"github.com/stretchr/testify/require"
 	"gopkg.in/yaml.v2"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app/platform"
-	smocks "git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store/storetest/mocks"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/config"
-	emocks "git.biggo.com/Funmula/mattermost-funmula/server/v8/einterfaces/mocks"
-	fmocks "git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/shared/filestore/mocks"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/app/platform"
+	smocks "git.biggo.com/Funmula/BigGoChat/server/v8/channels/store/storetest/mocks"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/config"
+	emocks "git.biggo.com/Funmula/BigGoChat/server/v8/einterfaces/mocks"
+	fmocks "git.biggo.com/Funmula/BigGoChat/server/v8/platform/shared/filestore/mocks"
 )
 
 func TestCreatePluginsFile(t *testing.T) {

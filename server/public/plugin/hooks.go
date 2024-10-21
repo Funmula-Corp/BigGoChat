@@ -7,7 +7,7 @@ import (
 	"io"
 	"net/http"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
 )
 
 // These assignments are part of the wire protocol used to trigger hook events in plugins.

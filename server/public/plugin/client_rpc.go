@@ -24,8 +24,8 @@ import (
 	"github.com/hashicorp/go-plugin"
 	"github.com/lib/pq"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/public/shared/mlog"
 )
 
 var hookNameToId = make(map[string]int)

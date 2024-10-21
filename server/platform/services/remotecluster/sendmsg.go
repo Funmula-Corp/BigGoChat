@@ -17,8 +17,8 @@ import (
 
 	"github.com/wiggin77/merror"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/public/shared/mlog"
 )
 
 type SendMsgResultFunc func(msg model.RemoteClusterMsg, rc *model.RemoteCluster, resp *Response, err error)

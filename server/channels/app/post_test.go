@@ -16,17 +16,17 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin/plugintest/mock"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app/platform"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store/storetest"
-	storemocks "git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store/storetest/mocks"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/testlib"
-	eMocks "git.biggo.com/Funmula/mattermost-funmula/server/v8/einterfaces/mocks"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/services/imageproxy"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/services/searchengine/mocks"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/public/plugin/plugintest/mock"
+	"git.biggo.com/Funmula/BigGoChat/server/public/shared/mlog"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/app/platform"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/store"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/store/storetest"
+	storemocks "git.biggo.com/Funmula/BigGoChat/server/v8/channels/store/storetest/mocks"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/testlib"
+	eMocks "git.biggo.com/Funmula/BigGoChat/server/v8/einterfaces/mocks"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/platform/services/imageproxy"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/platform/services/searchengine/mocks"
 )
 
 func TestCreatePostDeduplicate(t *testing.T) {
@@ -60,8 +60,8 @@ func TestCreatePostDeduplicate(t *testing.T) {
 			package main
 
 			import (
-				"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
-				"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+				"git.biggo.com/Funmula/BigGoChat/server/public/plugin"
+				"git.biggo.com/Funmula/BigGoChat/server/public/model"
 			)
 
 			type MyPlugin struct {
@@ -109,8 +109,8 @@ func TestCreatePostDeduplicate(t *testing.T) {
 			package main
 
 			import (
-				"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
-				"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+				"git.biggo.com/Funmula/BigGoChat/server/public/plugin"
+				"git.biggo.com/Funmula/BigGoChat/server/public/model"
 				"time"
 			)
 
@@ -417,8 +417,8 @@ func TestUpdatePostPluginHooks(t *testing.T) {
 				package main
 
 				import (
-					"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
-					"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+					"git.biggo.com/Funmula/BigGoChat/server/public/plugin"
+					"git.biggo.com/Funmula/BigGoChat/server/public/model"
 				)
 
 				type MyPlugin struct {
@@ -437,8 +437,8 @@ func TestUpdatePostPluginHooks(t *testing.T) {
 				package main
 
 				import (
-					"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
-					"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+					"git.biggo.com/Funmula/BigGoChat/server/public/plugin"
+					"git.biggo.com/Funmula/BigGoChat/server/public/model"
 				)
 
 				type MyPlugin struct {
@@ -486,8 +486,8 @@ func TestUpdatePostPluginHooks(t *testing.T) {
 				package main
 
 				import (
-					"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
-					"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+					"git.biggo.com/Funmula/BigGoChat/server/public/plugin"
+					"git.biggo.com/Funmula/BigGoChat/server/public/model"
 				)
 
 				type MyPlugin struct {
@@ -507,8 +507,8 @@ func TestUpdatePostPluginHooks(t *testing.T) {
 				package main
 
 				import (
-					"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
-					"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+					"git.biggo.com/Funmula/BigGoChat/server/public/plugin"
+					"git.biggo.com/Funmula/BigGoChat/server/public/model"
 				)
 
 				type MyPlugin struct {

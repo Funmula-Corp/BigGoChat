@@ -7,7 +7,7 @@ import (
 	"context"
 	"testing"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
+	"git.biggo.com/Funmula/BigGoChat/server/public/shared/request"
 	"github.com/stretchr/testify/assert"
 )
 

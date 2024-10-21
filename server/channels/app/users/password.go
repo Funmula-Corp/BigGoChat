@@ -9,7 +9,7 @@ import (
 
 	"golang.org/x/crypto/bcrypt"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
 )
 
 func CheckUserPassword(user *model.User, password string) error {

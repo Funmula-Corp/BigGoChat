@@ -9,8 +9,8 @@ import (
 
 	"golang.org/x/oauth2"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/pluginapi"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/public/pluginapi"
 )
 
 func (o *oAuther) oauth2Connect(w http.ResponseWriter, r *http.Request) {

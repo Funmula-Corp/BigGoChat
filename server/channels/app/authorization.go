@@ -10,9 +10,9 @@ import (
 	"slices"
 	"strings"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/public/shared/mlog"
+	"git.biggo.com/Funmula/BigGoChat/server/public/shared/request"
 )
 
 func (a *App) SessionHasPermissionTo(session model.Session, permission *model.Permission) bool {

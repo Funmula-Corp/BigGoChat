@@ -7,7 +7,7 @@ package mocks
 import (
 	io "io"
 
-	filestore "git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/shared/filestore"
+	filestore "git.biggo.com/Funmula/BigGoChat/server/v8/platform/shared/filestore"
 
 	mock "github.com/stretchr/testify/mock"
 

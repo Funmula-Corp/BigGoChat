@@ -10,9 +10,9 @@ import (
 	sq "github.com/mattermost/squirrel"
 	"github.com/pkg/errors"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/utils"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/store"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/utils"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
 )
 
 type SqlChannelBookmarkStore struct {

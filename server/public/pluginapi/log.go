@@ -1,7 +1,7 @@
 package pluginapi
 
 import (
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
+	"git.biggo.com/Funmula/BigGoChat/server/public/plugin"
 )
 
 // LogService exposes methods to log to the Mattermost server log.

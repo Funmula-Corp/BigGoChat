@@ -8,8 +8,8 @@ import (
 
 	"github.com/pkg/errors"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/public/plugin"
 )
 
 // PluginService exposes methods to manipulate the set of plugins as well as communicate with

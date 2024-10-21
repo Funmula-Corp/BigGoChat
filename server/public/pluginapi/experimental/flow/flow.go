@@ -10,8 +10,8 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/pkg/errors"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/pluginapi"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/public/pluginapi"
 )
 
 type Name string

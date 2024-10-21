@@ -3,7 +3,7 @@
 
 package einterfaces
 
-import "git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+import "git.biggo.com/Funmula/BigGoChat/server/public/model"
 
 type IPFilteringInterface interface {
 	ApplyIPFilters(allowedIPRanges *model.AllowedIPRanges) (*model.AllowedIPRanges, error)

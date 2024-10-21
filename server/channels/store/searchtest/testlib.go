@@ -7,7 +7,7 @@ import (
 	"slices"
 	"testing"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/store"
 )
 
 const (

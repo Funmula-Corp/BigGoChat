@@ -10,10 +10,10 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin/plugintest"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin/plugintest/mock"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/pluginapi"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/public/plugin/plugintest"
+	"git.biggo.com/Funmula/BigGoChat/server/public/plugin/plugintest/mock"
+	"git.biggo.com/Funmula/BigGoChat/server/public/pluginapi"
 )
 
 func TestInstallPluginFromURL(t *testing.T) {

@@ -9,8 +9,8 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/pkg/errors"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/store"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
 )
 
 func (ch *Channels) License() *model.License {

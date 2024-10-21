@@ -8,9 +8,9 @@ import (
 	"errors"
 	"net/http"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/public/plugin"
+	"git.biggo.com/Funmula/BigGoChat/server/public/shared/request"
 )
 
 func (a *App) GetPreferencesForUser(c request.CTX, userID string) (model.Preferences, *model.AppError) {

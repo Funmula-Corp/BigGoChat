@@ -1,7 +1,7 @@
 package poster
 
 import (
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
 )
 
 // PostAPI defines the portion of the Post Service used by the poster

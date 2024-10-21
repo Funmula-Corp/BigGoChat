@@ -4,7 +4,7 @@
 package poster
 
 import (
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
 )
 
 // Poster defines an entity that can post DMs and Ephemerals and update and delete those posts

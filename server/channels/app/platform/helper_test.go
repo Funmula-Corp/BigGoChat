@@ -11,13 +11,13 @@ import (
 
 	"github.com/stretchr/testify/mock"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store/storetest/mocks"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/testlib"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/config"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/einterfaces"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/store"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/store/storetest/mocks"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/testlib"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/config"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/einterfaces"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/public/shared/request"
 )
 
 type TestHelper struct {

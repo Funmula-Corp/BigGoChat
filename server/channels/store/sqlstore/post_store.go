@@ -17,13 +17,13 @@ import (
 
 	sq "github.com/mattermost/squirrel"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store/searchlayer"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/utils"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/einterfaces"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/store"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/store/searchlayer"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/utils"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/einterfaces"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/public/shared/mlog"
+	"git.biggo.com/Funmula/BigGoChat/server/public/shared/request"
 )
 
 // Regex to get quoted strings
@@ -2502,7 +2502,7 @@ func (s *SqlPostStore) GetPostsBatchForIndexing(startTime int64, startPostID str
 	//     (CreateAt, Id) > (?, ?)
 	// The wrong choice for any of the two databases makes the query go from
 	// milliseconds to dozens of seconds.
-	// More information in: https://git.biggo.com/Funmula/mattermost-funmula/pull/26517
+	// More information in: https://git.biggo.com/Funmula/BigGoChat/pull/26517
 	// and https://community.mattermost.com/core/pl/ui5dz96shinetb8nq83myggbma
 	if s.DriverName() == model.DatabaseDriverMysql {
 		query := `SELECT

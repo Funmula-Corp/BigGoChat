@@ -21,14 +21,14 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/utils/testutils"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/einterfaces/mocks"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/shared/mail"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/public/shared/request"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/app"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/utils/testutils"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/einterfaces/mocks"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/platform/shared/mail"
 
-	_ "git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app/oauthproviders/gitlab"
+	_ "git.biggo.com/Funmula/BigGoChat/server/v8/channels/app/oauthproviders/gitlab"
 )
 
 func TestCreateUser(t *testing.T) {

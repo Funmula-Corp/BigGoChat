@@ -10,8 +10,8 @@ import (
 	"time"
 	"unicode"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/public/plugin"
 )
 
 // HTTPService wraps the functionality for making http requests to provide some improvements to the default client

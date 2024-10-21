@@ -3,9 +3,9 @@ package telemetrylogger
 import (
 	"fmt"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/pluginapi/experimental/bot/logger"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/pluginapi/experimental/common"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/pluginapi/experimental/telemetry"
+	"git.biggo.com/Funmula/BigGoChat/server/public/pluginapi/experimental/bot/logger"
+	"git.biggo.com/Funmula/BigGoChat/server/public/pluginapi/experimental/common"
+	"git.biggo.com/Funmula/BigGoChat/server/public/pluginapi/experimental/telemetry"
 )
 
 type telemetryLogger struct {

@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"strings"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
 )
 
 // GenerateClientConfig renders the given configuration for a client.

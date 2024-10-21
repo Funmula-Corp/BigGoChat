@@ -13,7 +13,7 @@ import (
 
 	"github.com/pkg/errors"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
+	"git.biggo.com/Funmula/BigGoChat/server/public/shared/mlog"
 )
 
 // extractTarGz takes in an io.Reader containing the bytes for a .tar.gz file and

@@ -6,8 +6,8 @@ package app
 import (
 	"net/http"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/utils"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/utils"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
 )
 
 // GetPostsUsage returns the total posts count rounded down to the most

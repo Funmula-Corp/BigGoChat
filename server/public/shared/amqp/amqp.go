@@ -7,7 +7,7 @@ import (
 	"runtime"
 	"time"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
+	"git.biggo.com/Funmula/BigGoChat/server/public/shared/mlog"
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 

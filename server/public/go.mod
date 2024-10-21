@@ -1,4 +1,4 @@
-module git.biggo.com/Funmula/mattermost-funmula/server/public
+module git.biggo.com/Funmula/BigGoChat/server/public
 
 go 1.21
 

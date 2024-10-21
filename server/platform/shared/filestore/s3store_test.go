@@ -20,7 +20,7 @@ import (
 	"testing"
 	"time"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
 	s3 "github.com/minio/minio-go/v7"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

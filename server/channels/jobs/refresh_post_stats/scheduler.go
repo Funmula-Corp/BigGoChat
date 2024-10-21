@@ -6,8 +6,8 @@ package refresh_post_stats
 import (
 	"time"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/jobs"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/jobs"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
 )
 
 func MakeScheduler(jobServer *jobs.JobServer, sqlDriverName string) *jobs.DailyScheduler {

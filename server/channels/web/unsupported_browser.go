@@ -8,8 +8,8 @@ import (
 
 	"github.com/avct/uasurfer"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/shared/templates"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/platform/shared/templates"
+	"git.biggo.com/Funmula/BigGoChat/server/public/shared/request"
 )
 
 // MattermostApp describes downloads for the Mattermost App

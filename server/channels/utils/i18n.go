@@ -6,8 +6,8 @@ package utils
 import (
 	"fmt"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/utils/fileutils"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/i18n"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/utils/fileutils"
+	"git.biggo.com/Funmula/BigGoChat/server/public/shared/i18n"
 )
 
 // TranslationsPreInit loads translations from filesystem if they are not

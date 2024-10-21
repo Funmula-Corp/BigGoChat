@@ -3,7 +3,7 @@ package cluster
 import (
 	"time"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
+	"git.biggo.com/Funmula/BigGoChat/server/public/plugin"
 )
 
 func ExampleSchedule() {

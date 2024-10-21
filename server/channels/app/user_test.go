@@ -19,15 +19,15 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
-	oauthgitlab "git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app/oauthproviders/gitlab"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app/users"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
-	storemocks "git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store/storetest/mocks"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/utils/testutils"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/einterfaces"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/einterfaces/mocks"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/public/shared/request"
+	oauthgitlab "git.biggo.com/Funmula/BigGoChat/server/v8/channels/app/oauthproviders/gitlab"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/app/users"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/store"
+	storemocks "git.biggo.com/Funmula/BigGoChat/server/v8/channels/store/storetest/mocks"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/utils/testutils"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/einterfaces"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/einterfaces/mocks"
 )
 
 func TestCreateOAuthUser(t *testing.T) {
@@ -286,8 +286,8 @@ func TestCreateUser(t *testing.T) {
 			package main
 
 			import (
-				"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
-				"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+				"git.biggo.com/Funmula/BigGoChat/server/public/plugin"
+				"git.biggo.com/Funmula/BigGoChat/server/public/model"
 			)
 
 			type MyPlugin struct {

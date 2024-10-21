@@ -15,10 +15,10 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store/storetest"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/config"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/einterfaces/mocks"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/store/storetest"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/config"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/einterfaces/mocks"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
 )
 
 func TestReadReplicaDisabledBasedOnLicense(t *testing.T) {

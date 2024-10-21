@@ -25,7 +25,7 @@ import (
 	"github.com/pborman/uuid"
 	"github.com/pkg/errors"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/i18n"
+	"git.biggo.com/Funmula/BigGoChat/server/public/shared/i18n"
 )
 
 const (

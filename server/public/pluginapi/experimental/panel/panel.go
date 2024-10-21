@@ -3,11 +3,11 @@ package panel
 import (
 	"errors"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/pluginapi/experimental/bot/logger"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/pluginapi/experimental/bot/poster"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/pluginapi/experimental/common"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/pluginapi/experimental/panel/settings"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/public/pluginapi/experimental/bot/logger"
+	"git.biggo.com/Funmula/BigGoChat/server/public/pluginapi/experimental/bot/poster"
+	"git.biggo.com/Funmula/BigGoChat/server/public/pluginapi/experimental/common"
+	"git.biggo.com/Funmula/BigGoChat/server/public/pluginapi/experimental/panel/settings"
 )
 
 type Panel interface {

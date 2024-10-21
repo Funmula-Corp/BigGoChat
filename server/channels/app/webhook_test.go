@@ -18,8 +18,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/testlib"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/testlib"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
 )
 
 func TestCreateIncomingWebhookForChannel(t *testing.T) {

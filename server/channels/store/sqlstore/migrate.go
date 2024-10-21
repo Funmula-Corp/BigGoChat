@@ -12,11 +12,11 @@ import (
 	"strconv"
 	"sync"
 
-	sqlUtils "git.biggo.com/Funmula/mattermost-funmula/server/public/utils/sql"
+	sqlUtils "git.biggo.com/Funmula/BigGoChat/server/public/utils/sql"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/db"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/public/shared/mlog"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/db"
 	"github.com/mattermost/morph"
 	"github.com/mattermost/morph/drivers"
 	ms "github.com/mattermost/morph/drivers/mysql"

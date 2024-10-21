@@ -10,10 +10,10 @@ import (
 	"github.com/stretchr/testify/require"
 	"golang.org/x/text/language"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin/plugintest"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/pluginapi/i18n"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/public/plugin"
+	"git.biggo.com/Funmula/BigGoChat/server/public/plugin/plugintest"
+	"git.biggo.com/Funmula/BigGoChat/server/public/pluginapi/i18n"
 )
 
 //nolint:govet

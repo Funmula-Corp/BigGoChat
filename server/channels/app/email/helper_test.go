@@ -8,16 +8,16 @@ import (
 	"path/filepath"
 	"testing"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app/users"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store/storetest/mocks"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/testlib"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/config"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/shared/templates"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin/plugintest/mock"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/app/users"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/store"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/store/storetest/mocks"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/testlib"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/config"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/platform/shared/templates"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/public/plugin/plugintest/mock"
+	"git.biggo.com/Funmula/BigGoChat/server/public/shared/mlog"
+	"git.biggo.com/Funmula/BigGoChat/server/public/shared/request"
 )
 
 type TestHelper struct {
