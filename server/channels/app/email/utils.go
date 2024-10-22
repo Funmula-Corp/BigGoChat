@@ -4,8 +4,8 @@
 package email
 
 import (
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/utils"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/shared/mail"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/utils"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/platform/shared/mail"
 )
 
 func (es *Service) mailServiceConfig(replyToAddress string) *mail.SMTPConfig {

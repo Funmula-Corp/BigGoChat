@@ -4,7 +4,7 @@ import (
 	"net/url"
 	"strings"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/pluginapi"
+	"git.biggo.com/Funmula/BigGoChat/server/public/pluginapi"
 )
 
 // GetPluginURL returns a url like siteURL/plugins/pluginID based on the information from the client.

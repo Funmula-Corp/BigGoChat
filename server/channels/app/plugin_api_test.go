@@ -27,14 +27,14 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin/utils"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/i18n"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/utils/fileutils"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/einterfaces/mocks"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/public/plugin"
+	"git.biggo.com/Funmula/BigGoChat/server/public/plugin/utils"
+	"git.biggo.com/Funmula/BigGoChat/server/public/shared/i18n"
+	"git.biggo.com/Funmula/BigGoChat/server/public/shared/request"
+	"git.biggo.com/Funmula/BigGoChat/server/v8"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/utils/fileutils"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/einterfaces/mocks"
 )
 
 func getDefaultPluginSettingsSchema() string {
@@ -145,7 +145,7 @@ func TestPublicFilesPathConfiguration(t *testing.T) {
 		package main
 
 		import (
-			"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
+			"git.biggo.com/Funmula/BigGoChat/server/public/plugin"
 		)
 
 		type MyPlugin struct {
@@ -925,7 +925,7 @@ func TestPluginAPIGetPlugins(t *testing.T) {
     package main
 
     import (
-      "git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
+      "git.biggo.com/Funmula/BigGoChat/server/public/plugin"
     )
 
     type MyPlugin struct {
@@ -1075,7 +1075,7 @@ func TestInstallPlugin(t *testing.T) {
 
 			"github.com/pkg/errors"
 
-			"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
+			"git.biggo.com/Funmula/BigGoChat/server/public/plugin"
 		)
 
 		type configuration struct {
@@ -1590,7 +1590,7 @@ func TestInterpluginPluginHTTP(t *testing.T) {
 		package main
 
 		import (
-			"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
+			"git.biggo.com/Funmula/BigGoChat/server/public/plugin"
 			"bytes"
 			"net/http"
 		)
@@ -1631,8 +1631,8 @@ func TestInterpluginPluginHTTP(t *testing.T) {
 		package main
 
 		import (
-			"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
-			"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+			"git.biggo.com/Funmula/BigGoChat/server/public/plugin"
+			"git.biggo.com/Funmula/BigGoChat/server/public/model"
 			"bytes"
 			"net/http"
 			"io"
@@ -1736,8 +1736,8 @@ func TestAPIMetrics(t *testing.T) {
 	package main
 
 	import (
-		"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
-		"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
+		"git.biggo.com/Funmula/BigGoChat/server/public/model"
+		"git.biggo.com/Funmula/BigGoChat/server/public/plugin"
 	)
 
 	type MyPlugin struct {
@@ -2117,8 +2117,8 @@ func TestPluginUploadsAPI(t *testing.T) {
 		  "fmt"
 			"bytes"
 
-      "git.biggo.com/Funmula/mattermost-funmula/server/public/model"
-      "git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
+      "git.biggo.com/Funmula/BigGoChat/server/public/model"
+      "git.biggo.com/Funmula/BigGoChat/server/public/plugin"
     )
 
     type TestPlugin struct {
@@ -2481,8 +2481,8 @@ func TestPluginGetChannelsForTeamForUser(t *testing.T) {
 	pluginCode := `
 	package main
 	import (
-		"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
-		"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
+		"git.biggo.com/Funmula/BigGoChat/server/public/model"
+		"git.biggo.com/Funmula/BigGoChat/server/public/plugin"
 		"github.com/pkg/errors"
 	)
 
@@ -2584,8 +2584,8 @@ func TestPluginPatchChannelMembersNotifications(t *testing.T) {
 		pluginCode := `
 			package main
 			import (
-				"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
-				"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+				"git.biggo.com/Funmula/BigGoChat/server/public/plugin"
+				"git.biggo.com/Funmula/BigGoChat/server/public/model"
 			)
 
 			const (
@@ -2653,8 +2653,8 @@ func TestPluginPatchChannelMembersNotifications(t *testing.T) {
 		pluginCode := `
 			package main
 			import (
-				"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
-				"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+				"git.biggo.com/Funmula/BigGoChat/server/public/plugin"
+				"git.biggo.com/Funmula/BigGoChat/server/public/model"
 			)
 
 			const (

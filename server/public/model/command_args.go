@@ -4,7 +4,7 @@
 package model
 
 import (
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/i18n"
+	"git.biggo.com/Funmula/BigGoChat/server/public/shared/i18n"
 )
 
 type CommandArgs struct {

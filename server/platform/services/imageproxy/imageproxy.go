@@ -12,10 +12,10 @@ import (
 	"strings"
 	"sync"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/configservice"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/httpservice"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/public/shared/configservice"
+	"git.biggo.com/Funmula/BigGoChat/server/public/shared/httpservice"
+	"git.biggo.com/Funmula/BigGoChat/server/public/shared/mlog"
 )
 
 var ErrNotEnabled = Error{errors.New("imageproxy.ImageProxy: image proxy not enabled")}

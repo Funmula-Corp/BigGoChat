@@ -8,7 +8,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	mm_model "git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	mm_model "git.biggo.com/Funmula/BigGoChat/server/public/model"
 )
 
 func TestOnboardingSavesOrganizationName(t *testing.T) {

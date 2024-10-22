@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"os"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
 )
 
 // generateDefaultConfig writes default config to outputFile.

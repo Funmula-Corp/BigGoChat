@@ -4,7 +4,7 @@
 package platform
 
 import (
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
 )
 
 func (ps *PlatformService) StartSearchEngine() (string, string) {

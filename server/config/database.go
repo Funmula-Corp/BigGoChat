@@ -15,7 +15,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	sqlUtils "git.biggo.com/Funmula/mattermost-funmula/server/public/utils/sql"
+	sqlUtils "git.biggo.com/Funmula/BigGoChat/server/public/utils/sql"
 
 	"github.com/jmoiron/sqlx"
 	"github.com/pkg/errors"
@@ -27,8 +27,8 @@ import (
 
 	"github.com/mattermost/morph"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/public/shared/mlog"
 	"github.com/mattermost/morph/drivers"
 	ms "github.com/mattermost/morph/drivers/mysql"
 	ps "github.com/mattermost/morph/drivers/postgres"

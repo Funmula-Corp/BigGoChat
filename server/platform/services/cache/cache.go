@@ -7,7 +7,7 @@ import (
 	"errors"
 	"time"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
 )
 
 // ErrKeyNotFound is the error when the given key is not found

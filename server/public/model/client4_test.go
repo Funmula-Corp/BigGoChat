@@ -15,11 +15,11 @@ import (
 	"testing"
 	"time"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
 	"github.com/stretchr/testify/assert"
 )
 
-// https://git.biggo.com/Funmula/mattermost-funmula-plugin-starter-template/issues/115
+// https://git.biggo.com/Funmula/BigGoChat-plugin-starter-template/issues/115
 func TestClient4TrimTrailingSlash(t *testing.T) {
 	slashes := []int{0, 1, 5}
 	baseURL := "https://foo.com:1234"
@@ -32,7 +32,7 @@ func TestClient4TrimTrailingSlash(t *testing.T) {
 	}
 }
 
-// https://git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/issues/8205
+// https://git.biggo.com/Funmula/BigGoChat/server/v8/channels/issues/8205
 func TestClient4CreatePost(t *testing.T) {
 	post := &model.Post{
 		Props: map[string]any{

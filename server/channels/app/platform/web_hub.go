@@ -11,9 +11,9 @@ import (
 	"sync/atomic"
 	"time"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/public/shared/mlog"
+	"git.biggo.com/Funmula/BigGoChat/server/public/shared/request"
 )
 
 const (
@@ -60,7 +60,7 @@ type webConnCountMessage struct {
 // user connections.
 type Hub struct {
 	// connectionCount should be kept first.
-	// See https://git.biggo.com/Funmula/mattermost-funmula-server/pull/7281
+	// See https://git.biggo.com/Funmula/BigGoChat-server/pull/7281
 	connectionCount int64
 	platform        *PlatformService
 	connectionIndex int
@@ -101,7 +101,7 @@ func newWebHub(ps *PlatformService) *Hub {
 func (ps *PlatformService) hubStart(broadcastHooks map[string]BroadcastHook) {
 	// After running some tests, we found using the same number of hubs
 	// as CPUs to be the ideal in terms of performance.
-	// https://git.biggo.com/Funmula/mattermost-funmula/pull/25798#issuecomment-1889386454
+	// https://git.biggo.com/Funmula/BigGoChat/pull/25798#issuecomment-1889386454
 	numberOfHubs := runtime.NumCPU()
 	ps.logger.Info("Starting websocket hubs", mlog.Int("number_of_hubs", numberOfHubs))
 

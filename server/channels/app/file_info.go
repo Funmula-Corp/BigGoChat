@@ -11,8 +11,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/utils/imgutils"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/utils/imgutils"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
 )
 
 func getInfoForBytes(name string, data io.ReadSeeker, size int) (*model.FileInfo, *model.AppError) {

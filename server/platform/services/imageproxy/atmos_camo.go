@@ -11,7 +11,7 @@ import (
 	"net/http"
 	"net/url"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
 )
 
 type AtmosCamoBackend struct {

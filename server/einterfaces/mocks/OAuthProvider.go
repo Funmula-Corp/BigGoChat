@@ -7,8 +7,8 @@ package mocks
 import (
 	io "io"
 
-	model "git.biggo.com/Funmula/mattermost-funmula/server/public/model"
-	request "git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
+	model "git.biggo.com/Funmula/BigGoChat/server/public/model"
+	request "git.biggo.com/Funmula/BigGoChat/server/public/shared/request"
 	mock "github.com/stretchr/testify/mock"
 )
 

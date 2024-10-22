@@ -7,15 +7,15 @@ package mocks
 import (
 	io "io"
 
-	i18n "git.biggo.com/Funmula/mattermost-funmula/server/public/shared/i18n"
+	i18n "git.biggo.com/Funmula/BigGoChat/server/public/shared/i18n"
 
 	mock "github.com/stretchr/testify/mock"
 
-	model "git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	model "git.biggo.com/Funmula/BigGoChat/server/public/model"
 
-	store "git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
+	store "git.biggo.com/Funmula/BigGoChat/server/v8/channels/store"
 
-	templates "git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/shared/templates"
+	templates "git.biggo.com/Funmula/BigGoChat/server/v8/platform/shared/templates"
 
 	throttled "github.com/throttled/throttled"
 )

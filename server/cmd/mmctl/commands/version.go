@@ -7,8 +7,8 @@ import (
 	"fmt"
 	"runtime/debug"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/cmd/mmctl/printer"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/cmd/mmctl/printer"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
 	"github.com/pkg/errors"
 
 	"github.com/spf13/cobra"

@@ -6,7 +6,7 @@ package teams
 import (
 	"strings"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
 )
 
 // By default the list will be (not necessarily in this order):

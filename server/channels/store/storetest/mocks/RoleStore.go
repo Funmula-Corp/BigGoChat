@@ -7,7 +7,7 @@ package mocks
 import (
 	context "context"
 
-	model "git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	model "git.biggo.com/Funmula/BigGoChat/server/public/model"
 	mock "github.com/stretchr/testify/mock"
 )
 

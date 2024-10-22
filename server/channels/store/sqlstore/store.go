@@ -15,7 +15,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	sqlUtils "git.biggo.com/Funmula/mattermost-funmula/server/public/utils/sql"
+	sqlUtils "git.biggo.com/Funmula/BigGoChat/server/public/utils/sql"
 
 	sq "github.com/mattermost/squirrel"
 
@@ -26,11 +26,11 @@ import (
 	"github.com/mattermost/morph/models"
 	"github.com/pkg/errors"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/db"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/einterfaces"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/public/shared/mlog"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/db"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/store"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/einterfaces"
 )
 
 type migrationDirection string
@@ -116,7 +116,7 @@ type SqlStoreStores struct {
 
 type SqlStore struct {
 	// rrCounter and srCounter should be kept first.
-	// See https://git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/pull/7281
+	// See https://git.biggo.com/Funmula/BigGoChat/server/v8/channels/pull/7281
 	rrCounter int64
 	srCounter int64
 

@@ -6,8 +6,8 @@ package sqlstore
 import (
 	"testing"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store/searchtest"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store/storetest"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/store/searchtest"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/store/storetest"
 )
 
 func TestUserStore(t *testing.T) {

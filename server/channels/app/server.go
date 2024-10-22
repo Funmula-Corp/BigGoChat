@@ -27,57 +27,58 @@ import (
 	"github.com/rs/cors"
 	"golang.org/x/crypto/acme/autocert"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/httpservice"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/i18n"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/timezones"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/biggo"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app/email"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app/platform"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app/teams"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app/users"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/audit"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/jobs"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/jobs/active_users"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/jobs/cleanup_desktop_tokens"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/jobs/delete_empty_drafts_migration"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/jobs/delete_orphan_drafts_migration"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/jobs/expirynotify"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/jobs/export_delete"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/jobs/export_process"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/jobs/export_users_to_csv"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/jobs/extract_content"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/jobs/hosted_purchase_screening"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/jobs/import_delete"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/jobs/import_process"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/jobs/last_accessible_file"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/jobs/last_accessible_post"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/jobs/migrations"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/jobs/notify_admin"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/jobs/plugins"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/jobs/post_persistent_notifications"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/jobs/product_notices"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/jobs/refresh_post_stats"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/jobs/resend_invitation_email"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/jobs/s3_path_migration"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/utils"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/config"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/einterfaces"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/services/awsmeter"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/services/cache"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/services/remotecluster"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/services/searchengine/bleveengine"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/services/searchengine/bleveengine/indexer"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/services/sharedchannel"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/services/telemetry"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/services/tracing"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/services/upgrader"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/shared/filestore"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/shared/mail"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/shared/templates"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/public/shared/amqp"
+	"git.biggo.com/Funmula/BigGoChat/server/public/shared/httpservice"
+	"git.biggo.com/Funmula/BigGoChat/server/public/shared/i18n"
+	"git.biggo.com/Funmula/BigGoChat/server/public/shared/mlog"
+	"git.biggo.com/Funmula/BigGoChat/server/public/shared/request"
+	"git.biggo.com/Funmula/BigGoChat/server/public/shared/timezones"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/biggo"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/app/email"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/app/platform"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/app/teams"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/app/users"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/audit"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/jobs"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/jobs/active_users"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/jobs/cleanup_desktop_tokens"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/jobs/delete_empty_drafts_migration"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/jobs/delete_orphan_drafts_migration"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/jobs/expirynotify"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/jobs/export_delete"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/jobs/export_process"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/jobs/export_users_to_csv"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/jobs/extract_content"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/jobs/hosted_purchase_screening"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/jobs/import_delete"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/jobs/import_process"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/jobs/last_accessible_file"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/jobs/last_accessible_post"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/jobs/migrations"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/jobs/notify_admin"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/jobs/plugins"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/jobs/post_persistent_notifications"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/jobs/product_notices"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/jobs/refresh_post_stats"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/jobs/resend_invitation_email"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/jobs/s3_path_migration"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/store"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/utils"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/config"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/einterfaces"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/platform/services/awsmeter"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/platform/services/cache"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/platform/services/remotecluster"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/platform/services/searchengine/bleveengine"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/platform/services/searchengine/bleveengine/indexer"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/platform/services/sharedchannel"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/platform/services/telemetry"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/platform/services/tracing"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/platform/services/upgrader"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/platform/shared/filestore"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/platform/shared/mail"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/platform/shared/templates"
 )
 
 var SentryDSN = "https://9d7c9cccf549479799f880bcf4f26323@o94110.ingest.sentry.io/5212327"
@@ -113,6 +114,8 @@ type Server struct {
 	PushNotificationsHub   PushNotificationsHub
 	pushNotificationClient *http.Client // TODO: move this to it's own package
 	outgoingWebhookClient  *http.Client
+	
+	pushNotificationAMQPClient *amqp.AMQPClient
 
 	runEssentialJobs bool
 	Jobs             *jobs.JobServer
@@ -300,6 +303,30 @@ func NewServer(options ...Option) (*Server, error) {
 
 	s.pushNotificationClient = s.httpService.MakeClient(true)
 	s.outgoingWebhookClient = s.httpService.MakeClient(false)
+
+	notificationServer := *s.Platform().Config().EmailSettings.PushNotificationAMQPServer
+	exchanges := []amqp.Exchange{
+		{Name: pushProxyAMQPExchange},
+	}
+	if strings.HasPrefix(notificationServer, "amqp://") {
+		s.pushNotificationAMQPClient = amqp.MakeAMQPClient(notificationServer, exchanges)
+	}
+
+	s.platform.AddConfigListener(func(prev, curr *model.Config) {
+		newNotificationServer := *curr.EmailSettings.PushNotificationAMQPServer
+		enableAMQP := *curr.EmailSettings.SendPushNotifications && strings.HasPrefix(newNotificationServer, "amqp://")
+		if enableAMQP && s.pushNotificationAMQPClient == nil {
+			// create client
+			s.pushNotificationAMQPClient = amqp.MakeAMQPClient(newNotificationServer, exchanges)
+		} else if enableAMQP {
+			// switch server
+			s.pushNotificationAMQPClient.SwitchToNewServer(newNotificationServer)
+		} else if s.pushNotificationAMQPClient != nil {
+			// delete client
+			s.pushNotificationAMQPClient.Shutdown()
+			s.pushNotificationAMQPClient = nil
+		}
+	})
 
 	if err2 := utils.TranslationsPreInit(); err2 != nil {
 		return nil, errors.Wrapf(err2, "unable to load Mattermost translation files")

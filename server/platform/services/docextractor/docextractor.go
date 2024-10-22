@@ -6,7 +6,7 @@ package docextractor
 import (
 	"io"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
+	"git.biggo.com/Funmula/BigGoChat/server/public/shared/mlog"
 )
 
 // ExtractSettings defines the features enabled/disable during the document text extraction.

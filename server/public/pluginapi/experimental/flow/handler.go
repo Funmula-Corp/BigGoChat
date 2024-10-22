@@ -10,8 +10,8 @@ import (
 
 	"github.com/pkg/errors"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/pluginapi/experimental/common"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/public/pluginapi/experimental/common"
 )
 
 func (f *Flow) handleButtonHTTP(w http.ResponseWriter, r *http.Request) {
