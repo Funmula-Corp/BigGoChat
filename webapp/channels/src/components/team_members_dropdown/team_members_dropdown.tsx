@@ -263,7 +263,7 @@ export default class TeamMembersDropdown extends React.PureComponent<Props, Stat
             );
         }
 
-        if (!canRemoveFromTeam && !showMakeAdmin && !showMakeMember) {
+        if (!canRemoveFromTeam && !showMakeAdmin && !showMakeMember || user.id === me.id) {
             return <div>{currentRoles}</div>;
         }
 
