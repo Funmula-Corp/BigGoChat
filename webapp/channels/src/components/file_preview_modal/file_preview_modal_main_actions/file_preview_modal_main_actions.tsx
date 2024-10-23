@@ -14,7 +14,7 @@ import CopyButton from 'components/copy_button';
 import ExternalLink from 'components/external_link';
 import WithTooltip from 'components/with_tooltip';
 
-import {FileTypes} from 'utils/constants';
+import Constants, {FileTypes} from 'utils/constants';
 import {copyToClipboard, getFileType} from 'utils/utils';
 
 import type {GlobalState} from 'types/store';
@@ -23,6 +23,8 @@ import {isFileInfo} from '../types';
 import type {LinkInfo} from '../types';
 
 import './file_preview_modal_main_actions.scss';
+import OverlayTrigger from 'components/overlay_trigger';
+import Tooltip from 'components/tooltip';
 
 interface Props {
     usedInside?: 'Header' | 'Footer';
