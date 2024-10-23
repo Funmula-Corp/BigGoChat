@@ -76,7 +76,7 @@ describe('Channel switching', () => {
         cy.get('#channelHeaderTitle').should('contain', testChannel.display_name);
 
         // # Have another user post a message in the town square
-        cy.get('@offTopicId').then((offTopicId) => cy.postMessageAs({sender: sysadmin, message: 'Test', channelId: offTopicId.text()}));
+        cy.get('@offTopicId').then((offTopicId) => cy.postMessageAs({sender: sysadmin, message: 'Test', channelId: `${offTopicId}`}));
 
         // # Press alt + shift + down
         cy.get('body').type('{alt}{shift}', {release: false}).type('{downarrow}').type('{alt}{shift}', {release: true});

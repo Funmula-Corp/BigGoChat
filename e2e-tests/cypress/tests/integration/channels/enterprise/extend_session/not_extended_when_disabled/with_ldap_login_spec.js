@@ -23,7 +23,9 @@ describe('Extended Session Length', () => {
     let testLdapUser;
     let offTopicUrl;
 
-    before(() => {
+    before(function() {
+        // BigGoChat does not support LDAP, SAML, and Keycloak features
+        this.skip();
         cy.shouldNotRunOnCloudEdition();
         cy.apiRequireLicense();
 

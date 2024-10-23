@@ -457,7 +457,9 @@ Cypress.Commands.add('userStatus', userStatus);
 // ************************************************************
 
 function getCurrentChannelId(): ChainableT<string> {
-    return cy.get('#channel-header', {timeout: TIMEOUTS.HALF_MIN}).invoke('attr', 'data-channelid');
+    return cy.get('#channel-header', {timeout: TIMEOUTS.HALF_MIN}).invoke('attr', 'data-channelid').then((channelId) => {
+        return `${channelId}`
+    });
 }
 Cypress.Commands.add('getCurrentChannelId', getCurrentChannelId);
 

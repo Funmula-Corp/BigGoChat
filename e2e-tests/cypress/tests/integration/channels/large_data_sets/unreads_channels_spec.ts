@@ -27,6 +27,7 @@ describe('unreads channels', () => {
             cy.apiCreateUser({prefix: 'other'}).then(({user: testUser}) => {
                 otherUser = testUser;
 
+                cy.apiPatchUserRoles(otherUser.id, ['system_verified', 'system_user']);
                 cy.apiAddUserToTeam(team.id, otherUser.id).then(() => {
                     cy.apiAddUserToChannel(channel.id, otherUser.id);
 

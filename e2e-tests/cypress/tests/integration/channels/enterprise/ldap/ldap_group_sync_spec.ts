@@ -34,7 +34,9 @@ context('ldap', () => {
     let testUser: UserProfile;
 
     describe('LDAP Group Sync Automated Tests', () => {
-        beforeEach(() => {
+        beforeEach(function() {
+            // BigGoChat does not support LDAP, SAML, and Keycloak features
+            this.skip();
             // # Login as sysadmin and add board-one to test team
             cy.apiAdminLogin();
 

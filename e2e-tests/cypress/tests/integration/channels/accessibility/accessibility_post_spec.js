@@ -167,7 +167,7 @@ describe('Verify Accessibility Support in Post', () => {
                 cy.focused().tab();
 
                 // * Verify focus is on the username
-                cy.get('button.user-popover').should('be.focused');
+                cy.get('button.user-popover').should('be.focused').and('have.text', otherUser.username);
                 cy.focused().tab();
 
                 // * Verify focus is on the time
@@ -259,7 +259,7 @@ describe('Verify Accessibility Support in Post', () => {
                 cy.focused().tab({shift: true});
 
                 // * Verify focus is on the username
-                cy.get('button.user-popover').should('be.focused');
+                cy.get('button.user-popover').should('be.focused').and('have.text', otherUser.username);
                 cy.focused().tab({shift: true});
             });
         });

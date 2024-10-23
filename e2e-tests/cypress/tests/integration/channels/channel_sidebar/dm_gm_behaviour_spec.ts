@@ -57,13 +57,17 @@ describe('DM category', () => {
             cy.get(`.SidebarLink:contains(${bot.username})`).should('be.visible');
 
             // * Verify bot icon appears
-            cy.get(`.SidebarLink:contains(${bot.username})`).find('.Avatar').should('exist').
-                and('have.attr', 'src').
-                then((avatar) => cy.request({url: avatar.attr('src'), encoding: 'binary'})).
-                should(({body}) => {
-                    // * Verify it matches default bot avatar
-                    cy.fixture('bot-default-avatar.png', 'binary').should('deep.equal', body);
+            cy.get(`.SidebarLink:contains(${bot.username})`)
+            .find('.Avatar')
+            .should('exist')
+            .invoke('attr', 'src')
+            .then((src) => {
+                cy.request({ url: src, encoding: 'binary' }).then(({ body }) => {
+                    cy.fixture('bot-default-avatar.png', 'binary').then((fixtureBody) => {
+                        expect(body).to.deep.equal(fixtureBody);
+                    });
                 });
+            });              
         });
     });
 

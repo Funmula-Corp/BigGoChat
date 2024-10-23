@@ -60,16 +60,16 @@ describe('Scroll', () => {
         cy.getLastPostId().as('lastPostId');
 
         // Getting height of each post before applying 'Fixed width, centered' option and assigning to alias
-        cy.get('button.user-popover.style--none').eq(0).invoke('height').then((height) => {
+        cy.contains('sysadmin').eq(0).invoke('height').then((height) => {
             cy.wrap(height).as('initialUserNameHeight');
         });
         getComponentByText('@firstPostId', firstMessage).invoke('height').then((height) => {
             cy.wrap(height).as('initialFirstPostHeight');
         });
-        getFileThumbnail('mp3-audio-file.mp3').invoke('height').then((height) => {
+        getFile('mp3-audio-file.mp3').invoke('height').then((height) => {
             cy.wrap(height).as('initialMp3Height');
         });
-        getFileThumbnail('mpeg-video-file.mpg').invoke('height').then((height) => {
+        getFile('mpeg-video-file.mpg').invoke('height').then((height) => {
             cy.wrap(height).as('initialMpgHeight');
         });
         getImageThumbnail('gif-image-file.gif').invoke('height').then((height) => {
@@ -105,7 +105,7 @@ describe('Scroll', () => {
         // * Verify there is no scroll pop
         cy.get('#post-list').should('exist').within(() => {
             cy.get('@initialUserNameHeight').then((originalHeight) => {
-                cy.get('button.user-popover.style--none').eq(0).invoke('height').should('be.equal', originalHeight);
+                cy.contains('sysadmin').eq(0).invoke('height').should('be.equal', originalHeight);
             });
             cy.get('@initialFirstPostHeight').then((originalHeight) => {
                 getComponentByText('@firstPostId', firstMessage).invoke('height').should('be.equal', originalHeight);
@@ -114,10 +114,10 @@ describe('Scroll', () => {
                 getComponentByText('@lastPostId', lastMessage).invoke('height').should('be.equal', originalHeight);
             });
             cy.get('@initialMp3Height').then((originalHeight) => {
-                getFileThumbnail('mp3-audio-file.mp3').invoke('height').should('be.equal', originalHeight);
+                getFile('mp3-audio-file.mp3').invoke('height').should('be.equal', originalHeight);
             });
             cy.get('@initialMpgHeight').then((originalHeight) => {
-                getFileThumbnail('mpeg-video-file.mpg').invoke('height').should('be.equal', originalHeight);
+                getFile('mpeg-video-file.mpg').invoke('height').should('be.equal', originalHeight);
             });
             cy.get('@initialGifHeight').then((originalHeight) => {
                 getImageThumbnail('gif-image-file.gif').invoke('height').should('be.equal', originalHeight);
@@ -133,6 +133,13 @@ describe('Scroll', () => {
             });
         });
     });
+
+    // Get component based on filename
+    const getFile = (filename) => {
+        return cy.get(`@${filename}PostId`).then((postId) => {
+            cy.get(`#${postId}_message`).findByText(filename);
+        });
+    };
 
     // Get thumbnail component based on filename
     const getFileThumbnail = (filename) => {

@@ -52,8 +52,9 @@ describe('Scroll', () => {
         cy.reload();
 
         // * Verify that the top of the channel is scrolled past hidden
-        cy.findByText(`Beginning of ${testChannel.display_name}`).should('exist').and('not.be.visible');
-
+        const regex = new RegExp(`This is the start of ${testChannel.display_name}.*?`);
+        cy.findByText(regex).should('exist').and('not.be.visible');
+        
         // * Verify that the last message is visible implying that channel scrolled to bottom on reload
         cy.findByText('This is the last post').should('exist').and('be.visible');
     });
@@ -129,7 +130,7 @@ describe('Scroll', () => {
         cy.get('div.post-list__dynamic').should('be.visible').scrollTo('top', {duration: TIMEOUTS.ONE_SEC}).wait(TIMEOUTS.ONE_SEC);
 
         // * Verify we are on the top of the channel
-        cy.findByText(firstPost).should('exist').and('be.visible');
+        cy.get('#channelIntro').should('exist').and('be.visible');
         cy.findByText(lastPost).should('exist').and('not.be.visible');
 
         // # Add few users to the same channel
@@ -169,7 +170,7 @@ describe('Scroll', () => {
         });
 
         // * Verify we are still on the top of the channel and no scrolling occured
-        cy.findByText(firstPost).should('exist').and('be.visible');
+        cy.get('#channelIntro').should('exist').and('be.visible');
         cy.findByText(lastPost).should('exist').and('not.be.visible');
     });
 });

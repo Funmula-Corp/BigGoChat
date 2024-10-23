@@ -38,7 +38,8 @@ describe('Team Settings', () => {
         });
     });
 
-    it('MM-T387 - Try to join a closed team from a NON-mattermost email address via "Get Team Invite Link" while "Allow only users with a specific email domain to join this team" set to "sample.mattermost.com"', () => {
+    // BigGoChat does not support user invitation via link
+    it.skip('MM-T387 - Try to join a closed team from a NON-mattermost email address via "Get Team Invite Link" while "Allow only users with a specific email domain to join this team" set to "sample.mattermost.com"', () => {
         stubClipboard().as('clipboard');
 
         // # Open team menu and click 'Team Settings'

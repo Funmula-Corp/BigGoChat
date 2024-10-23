@@ -16,7 +16,9 @@ describe('Subpath Channel routing', () => {
     let testTeam;
     let otherUser;
 
-    before(() => {
+    before(function() {
+        // BigGoChat does not use the subpaths feature
+        this.skip();
         cy.shouldRunWithSubpath();
 
         cy.apiInitSetup().then(({team, user}) => {

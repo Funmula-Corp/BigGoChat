@@ -104,6 +104,7 @@ describe('Verify Accessibility Support in Dropdown Menus', () => {
             {id: 'teamSettings', label: 'Team Settings dialog'},
             {id: 'manageMembers', label: 'Manage Members dialog'},
             {id: 'joinTeam', text: 'Join Another Team'},
+            {id: 'leaveTeam', label: 'Leave Team dialog'},
             {id: 'createTeam', text: 'Create a Team'},
         ];
 

@@ -91,7 +91,8 @@ describe('Status dropdown menu', () => {
         });
     });
 
-    it('MM-T4914 Profile menu header is clickable, opens Profile settings', () => {
+    // BigGoChat does not have a feature to open the profile modal
+    it.skip('MM-T4914 Profile menu header is clickable, opens Profile settings', () => {
         // # Open user menu
         cy.uiOpenUserMenu().as('userMenu');
 

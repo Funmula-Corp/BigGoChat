@@ -13,7 +13,9 @@
 import * as TIMEOUTS from '../../../../fixtures/timeouts';
 
 describe('Elasticsearch system console', () => {
-    before(() => {
+    before(function() {
+        // Mattermost close source feature
+        this.skip();
         cy.shouldNotRunOnCloudEdition();
 
         // # Check if server has license for Elasticsearch

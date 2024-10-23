@@ -23,7 +23,9 @@ describe('Team Settings', () => {
     let testTeam;
     let siteName;
 
-    before(() => {
+    before(function() {
+        // BigGoChat's license is enterprise
+        this.skip();
         cy.shouldRunOnTeamEdition();
 
         cy.apiUpdateConfig({

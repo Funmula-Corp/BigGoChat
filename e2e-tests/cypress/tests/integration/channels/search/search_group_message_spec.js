@@ -60,7 +60,7 @@ describe('Search', () => {
 
             //# Search group members in the menu
             cy.get('#search-autocomplete__popover').should('be.visible').within(() => {
-                cy.findAllByTestId('listItem').contains(sortedUsernames.join(',')).click();
+                cy.get('.suggestion-list__item').contains(sortedUsernames.join(',')).click();
             });
 
             //# Press enter to select
@@ -73,7 +73,7 @@ describe('Search', () => {
 
             // * Should return exactly one result from the group channel and matches the message
             cy.findAllByTestId('search-item-container').should('be.visible').and('have.length', 1).within(() => {
-                cy.get('.search-channel__name').should('be.visible').and('have.text', sortedUsernames.filter((username) => username !== testUser.username).join(', '));
+                cy.get('.search-channel__name').should('be.visible').and('have.text', sortedUsernames.join(', '));
                 cy.get('.search-highlight').should('be.visible').and('have.text', message);
             });
         });
@@ -98,7 +98,7 @@ describe('Search', () => {
 
             //# Search group members in the menu
             cy.get('#search-autocomplete__popover').should('be.visible').within(() => {
-                cy.findAllByTestId('listItem').contains(sortedUsernames.join(',')).click();
+                cy.get('.suggestion-list__item').contains(sortedUsernames.join(',')).click();
             });
 
             //# Press enter to select

@@ -152,21 +152,28 @@ function setClockDisplayTo24Hour() {
     setClockDisplayTo('clockFormatB');
 }
 
-function verifyClockFormat(timeFormat, isVisible) {
+function verifyClockFormat(timeFormat, isVisible, isRHS = false) {
     cy.get('time').first().then(($timeEl) => {
         cy.wrap($timeEl).invoke('attr', 'datetime').then((dateTimeString) => {
-            const formattedTime = moment(dateTimeString).format(timeFormat);
+            let formattedTime;
+
+            if (isRHS) {
+                formattedTime = timeAgo(dateTimeString);
+            } else {
+                formattedTime = moment(dateTimeString).format(timeFormat);
+            }
+            
             cy.wrap($timeEl).should(isVisible ? 'be.visible' : 'exist').and('have.text', formattedTime);
         });
     });
 }
 
-function verifyClockFormatIs12Hour(isVisible) {
-    verifyClockFormat(DATE_TIME_FORMAT.TIME_12_HOUR, isVisible);
+function verifyClockFormatIs12Hour(isVisible, isRHS) {
+    verifyClockFormat(DATE_TIME_FORMAT.TIME_12_HOUR, isVisible, isRHS);
 }
 
-function verifyClockFormatIs24Hour(isVisible) {
-    verifyClockFormat(DATE_TIME_FORMAT.TIME_24_HOUR, isVisible);
+function verifyClockFormatIs24Hour(isVisible, isRHS) {
+    verifyClockFormat(DATE_TIME_FORMAT.TIME_24_HOUR, isVisible, isRHS);
 }
 
 function verifyClockFormatIs12HourForPostWithMessage(postId, message, isVisible) {
@@ -179,7 +186,7 @@ function verifyClockFormatIs12HourForPostWithMessage(postId, message, isVisible)
     // * Verify clock format is 12-hour in RHS within the RHS post
     cy.get(`#rhsPost_${postId}`).within(() => {
         cy.get('.post-message__text').should('have.text', message);
-        verifyClockFormatIs12Hour(isVisible);
+        verifyClockFormatIs12Hour(isVisible, true);
     });
 }
 
@@ -193,6 +200,38 @@ function verifyClockFormatIs24HourForPostWithMessage(postId, message, isVisible)
     // * Verify clock format is 24-hour in RHS within the RHS post
     cy.get(`#rhsPost_${postId}`).within(() => {
         cy.get('.post-message__text').should('have.text', message);
-        verifyClockFormatIs24Hour(isVisible);
+        verifyClockFormatIs24Hour(isVisible, true);
     });
+}
+
+const timeAgo = (timestamp) => {
+    const now = new Date();
+    const secondsPast = (now.getTime() - new Date(timestamp).getTime()) / 1000;
+
+    if (secondsPast < 60) {
+        return 'now';
+    } else if (secondsPast < 3600) {
+        const minutes = Math.round(secondsPast / 60);
+        return `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
+    } else if (secondsPast < 86400) {
+        const hours = Math.round(secondsPast / 3600);
+        return `${hours} hour${hours > 1 ? 's' : ''} ago`;
+    } else if (secondsPast < 172800) {
+        return 'yesterday';
+    } else if (secondsPast < 604800) {
+        const days = Math.round(secondsPast / 86400);
+        return `${days} day${days > 1 ? 's' : ''} ago`;
+    } else if (secondsPast < 2592000) {
+        const weeks = Math.round(secondsPast / 604800);
+        return `${weeks} week${weeks > 1 ? 's' : ''} ago`;
+    } else if (secondsPast < 31536000) {
+        const months = Math.round(secondsPast / 2592000);
+        return `${months} month${months > 1 ? 's' : ''} ago`;
+    } else {
+        const date = new Date(timestamp);
+        const y = date.getFullYear();
+        const m = (date.getMonth() + 1).toString().padStart(2, '0');
+        const d = date.getDate().toString().padStart(2, '0');
+        return `${y}-${m}-${d}`;
+    }
 }
