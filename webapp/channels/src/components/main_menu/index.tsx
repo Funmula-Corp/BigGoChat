@@ -50,7 +50,7 @@ function mapStateToProps(state: GlobalState) {
     const canManageSystemBots = (haveISystemPermission(state, {permission: Permissions.MANAGE_BOTS}) || haveISystemPermission(state, {permission: Permissions.MANAGE_OTHERS_BOTS}));
     const canManageIntegrations = canManageTeamIntegrations || canManageSystemBots;
     const canInviteTeamMember = haveICurrentTeamPermission(state, Permissions.ADD_USER_TO_TEAM);
-    const canLeaveTeam = true;
+    const canLeaveTeam = !currentRoles.has(General.TEAM_ADMIN_ROLE) && !currentRoles.has(General.TEAM_MODERATOR_ROLE);
 
     const joinableTeams = getJoinableTeamIds(state);
     const moreTeamsToJoin = joinableTeams && joinableTeams.length > 0;
