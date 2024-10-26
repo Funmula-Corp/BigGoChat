@@ -1,0 +1,100 @@
+syntax = "proto3";
+option go_package = "./proto";
+package proto;
+
+service Cluster {
+  rpc GetClusterInfos (GetClusterInfosRequest) returns (GetClusterInfosReply) {}
+  rpc SendClusterMessageToNode (SendClusterMessageToNodeRequest) returns (SendClusterMessageToNodeReply) {}
+  rpc GetClusterStats (GetClusterStatsRequest) returns (GetClusterStatsReply) {}
+  rpc GetPluginStatuses (GetPluginStatusesRequest) returns (GetPluginStatusesReply) {}
+  rpc ConfigChanged (ConfigChangedRequest) returns (ConfigChangedReply) {}
+  rpc WebConnCountForUser (WebConnCountForUserRequest) returns (WebConnCountForUserReply) {}
+
+  rpc GetLogs (GetLogsRequest) returns (GetLogsReply) {}
+  rpc QueryLogs (QueryLogsRequest) returns (QueryLogsReply) {}
+}
+
+message GetClusterInfosRequest {
+}
+
+message GetClusterInfosReply {
+  bytes Buffer = 1;
+}
+
+message SendClusterMessageToNodeRequest {
+  string Event = 1;
+  bytes Data = 2;
+  map<string, string> Props = 3;
+}
+
+message SendClusterMessageToNodeReply {
+}
+
+message GetClusterStatsRequest {
+}
+
+message GetClusterStatsReply {
+  int64 TotalWebsocketConnections = 1;
+  int64 TotalReadDbConnections = 2;
+  int64 TotalMasterDbConnections = 3;
+}
+
+message GetPluginStatusesRequest {
+}
+
+message GetPluginStatusesReply {
+  repeated PluginStatuses PluginStatus = 1;
+}
+
+message PluginStatuses {
+  string PluginId = 1;
+  string ClusterId = 2;
+  string PluginPath = 3;
+  int64 State = 4;
+  string Error = 5;
+  string Name = 6;
+  string Description = 7;
+  string Version = 8;
+}
+
+message ConfigChangedRequest {
+  bytes ConfigBuffer = 1;
+  string Hash = 2;
+}
+
+message ConfigChangedReply {
+}
+
+message WebConnCountForUserRequest {
+  string UserID = 1;
+}
+
+message WebConnCountForUserReply {
+  int64 Count = 1;
+}
+
+message GetLogsRequest {
+  int64 Page = 1;
+  int64 PerPage = 2;
+}
+
+message GetLogsReply {
+  repeated string LogRecord = 1;
+}
+
+message QueryLogsRequest {
+  int64 Page = 1;
+  int64 PerPage = 2;
+  QueryLogsLogFilterRequest LogFilter = 3;
+}
+
+message QueryLogsLogFilterRequest {
+	repeated string ServerNames = 1;
+	repeated string LogLevels = 2;
+	string DateFrom = 3;
+	string DateTo = 4;
+}
+
+message QueryLogsReply {
+  repeated string LogRecord = 1;
+}
