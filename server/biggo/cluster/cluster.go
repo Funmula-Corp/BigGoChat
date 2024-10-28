@@ -6,6 +6,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"os"
 
 	"git.biggo.com/Funmula/BigGoChat/server/public/model"
 	"git.biggo.com/Funmula/BigGoChat/server/public/shared/mlog"
@@ -113,7 +114,7 @@ func (p *BiggoCluster) GetMyClusterInfo() *model.ClusterInfo {
 	info.Id = p.ClusterDiscoveryService.Id
 	info.ConfigHash = configHash
 	info.IPAddress = p.ClusterDiscoveryService.Hostname
-	info.Hostname = p.ClusterDiscoveryService.Hostname
+	info.Hostname, _ = os.Hostname()
 	info.Version = dbVersion
 	info.SchemaVersion = dbSchemaVersion
 	return info

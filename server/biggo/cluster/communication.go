@@ -98,7 +98,7 @@ func (p *BiggoCluster) GetPluginStatuses() (model.PluginStatuses, *model.AppErro
 			defer mutex.Unlock()
 			for idx := range resp.PluginStatus {
 				result = append(result, &model.PluginStatus{
-					ClusterId:   node.Id,
+					ClusterId:   resp.PluginStatus[idx].ClusterId,
 					PluginId:    resp.PluginStatus[idx].PluginId,
 					PluginPath:  resp.PluginStatus[idx].PluginPath,
 					State:       int(resp.PluginStatus[idx].State),
