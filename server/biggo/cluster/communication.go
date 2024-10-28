@@ -6,6 +6,8 @@ import (
 	"encoding/gob"
 	"encoding/json"
 	"net/http"
+	"slices"
+	"strings"
 	"sync"
 	"sync/atomic"
 
@@ -36,6 +38,12 @@ func (p *BiggoCluster) GetClusterInfos() []*model.ClusterInfo {
 			mlog.Error("cluster.client.GetClusterInfos.error", mlog.String("node_id", node.Id), mlog.Err(err))
 		}
 	}, true)
+
+	if len(result) > 1 {
+		slices.SortFunc(result, func(a, b *model.ClusterInfo) int {
+			return strings.Compare(a.Hostname, b.Hostname)
+		})
+	}
 
 	return result
 }
