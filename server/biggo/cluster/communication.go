@@ -3,9 +3,8 @@ package cluster
 import (
 	"bytes"
 	"context"
-	"crypto/md5"
 	"encoding/gob"
-	"encoding/hex"
+	"encoding/json"
 	"net/http"
 	"sync"
 	"sync/atomic"
@@ -124,22 +123,12 @@ func (p *BiggoCluster) ConfigChanged(previousConfig *model.Config, newConfig *mo
 		return nil
 	}
 
-	newConfig.ClusterSettings.ReadOnlyConfig = model.NewBool(false)
-	p.PlatformService.SaveConfig(newConfig, false)
-
-	oldConfBuffer := bytes.NewBuffer([]byte{})
-	if err := gob.NewEncoder(oldConfBuffer).Encode(previousConfig); err != nil {
-		return model.NewAppError("cluster.client.ConfigChanged", "cluster.serialize.error", nil, err.Error(), http.StatusInternalServerError)
-	}
-
 	newConfBuffer := bytes.NewBuffer([]byte{})
-	if err := gob.NewEncoder(newConfBuffer).Encode(newConfig); err != nil {
+	if err := json.NewEncoder(newConfBuffer).Encode(newConfig); err != nil {
 		return model.NewAppError("cluster.client.ConfigChanged", "cluster.serialize.error", nil, err.Error(), http.StatusInternalServerError)
 	}
 
-	hash := md5.New()
-	hash.Write(oldConfBuffer.Bytes())
-	request := &proto.ConfigChangedRequest{ConfigBuffer: newConfBuffer.Bytes(), Hash: hex.EncodeToString(hash.Sum(nil))}
+	request := &proto.ConfigChangedRequest{ConfigBuffer: newConfBuffer.Bytes()}
 	if err := p.Call(func(client gossip.ClusterClient, node *model.ClusterDiscovery) {
 		if _, err := client.ConfigChanged(context.Background(), request); err != nil {
 			mlog.Error("cluster.client.ConfigChanged.error", mlog.String("node_id", node.Id), mlog.Err(err))

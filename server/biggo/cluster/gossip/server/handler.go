@@ -3,9 +3,8 @@ package server
 import (
 	"bytes"
 	"context"
-	"crypto/md5"
 	"encoding/gob"
-	"encoding/hex"
+	"encoding/json"
 	"fmt"
 
 	"git.biggo.com/Funmula/BigGoChat/server/public/model"
@@ -85,19 +84,8 @@ func (p *GossipServer) ConfigChanged(ctx context.Context, request *proto.ConfigC
 		return nil, ErrMissingRequest
 	}
 
-	buffer := bytes.NewBuffer([]byte{})
-	if err := gob.NewEncoder(buffer).Encode(p.platformService.Config()); err != nil {
-		return nil, fmt.Errorf("cluster.serialize.config.current.error: %v", err)
-	}
-
-	hash := md5.New()
-	hash.Write(buffer.Bytes())
-	if hex.EncodeToString(hash.Sum(nil)) != request.Hash {
-		return &proto.ConfigChangedReply{}, nil
-	}
-
 	newConfig := &model.Config{}
-	if err := gob.NewDecoder(bytes.NewBuffer(request.GetConfigBuffer())).Decode(newConfig); err != nil {
+	if err := json.NewDecoder(bytes.NewBuffer(request.GetConfigBuffer())).Decode(newConfig); err != nil {
 		return nil, fmt.Errorf("cluster.deserialize.config.new.error: %v", err)
 	}
 	p.platformService.SaveConfig(newConfig, false)

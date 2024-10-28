@@ -3,8 +3,8 @@ package cluster
 import (
 	"bytes"
 	"crypto/md5"
-	"encoding/gob"
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
 
 	"git.biggo.com/Funmula/BigGoChat/server/public/model"
@@ -84,7 +84,7 @@ func (p *BiggoCluster) StopInterNodeCommunication() {
 func (p *BiggoCluster) GetMyClusterInfo() *model.ClusterInfo {
 	configHash := func() string {
 		buffer := bytes.NewBuffer([]byte{})
-		gob.NewEncoder(buffer).Encode(p.PlatformService.Config())
+		json.NewEncoder(buffer).Encode(p.PlatformService.Config())
 
 		hash := md5.New()
 		hash.Write(buffer.Bytes())
