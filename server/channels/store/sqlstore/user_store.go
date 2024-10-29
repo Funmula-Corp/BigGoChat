@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"slices"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 	"unicode/utf8"
@@ -56,7 +57,7 @@ func newSqlUserStore(sqlStore *SqlStore, metrics einterfaces.MetricsInterface) s
 
 	// note: we are providing field names explicitly here to maintain order of columns (needed when using raw queries)
 	us.usersQuery = us.getQueryBuilder().
-		Select("u.Id", "u.CreateAt", "u.UpdateAt", "u.DeleteAt", "u.Username", "u.Password", "u.AuthData", "u.AuthService", "u.Email", "u.EmailVerified", "u.Nickname", "u.FirstName", "u.LastName", "u.Position", "u.Roles", "u.AllowMarketing", "u.Props", "u.NotifyProps", "u.LastPasswordUpdate", "u.LastPictureUpdate", "u.FailedAttempts", "u.Locale", "u.Timezone", "u.MfaActive", "u.MfaSecret",
+		Select("u.Id", "u.CreateAt", "u.UpdateAt", "u.DeleteAt", "u.Username", "u.Password", "u.AuthData", "u.AuthService", "u.Email", "u.EmailVerified", "u.Nickname", "u.FirstName", "u.LastName", "u.Position", "u.Roles", "u.AllowMarketing", "u.Props", "u.NotifyProps", "u.LastPasswordUpdate", "u.LastPictureUpdate", "u.FailedAttempts", "u.Locale", "u.Timezone", "u.MfaActive", "u.MfaSecret", "u.MfaUsedTimestamps",
 			"b.UserId IS NOT NULL AS IsBot", "COALESCE(b.Description, '') AS BotDescription", "COALESCE(b.LastIconUpdate, 0) AS BotLastIconUpdate", "u.RemoteId", "u.LastLogin", "u.Mobilephone").
 		From("Users u").
 		LeftJoin("Bots b ON ( b.UserId = u.Id )")
@@ -86,12 +87,12 @@ func (us SqlUserStore) insert(user *model.User) (sql.Result, error) {
 		(Id, CreateAt, UpdateAt, DeleteAt, Username, Password, AuthData, AuthService,
 			Email, EmailVerified, Nickname, FirstName, LastName, Position, Roles, AllowMarketing,
 			Props, NotifyProps, LastPasswordUpdate, LastPictureUpdate, FailedAttempts,
-			Locale, Timezone, MfaActive, MfaSecret, RemoteId, Mobilephone)
+			Locale, Timezone, MfaActive, MfaSecret, RemoteId, Mobilephone, MfaUsedTimestamps)
 		VALUES
 		(:Id, :CreateAt, :UpdateAt, :DeleteAt, :Username, :Password, :AuthData, :AuthService,
 			:Email, :EmailVerified, :Nickname, :FirstName, :LastName, :Position, :Roles, :AllowMarketing,
 			:Props, :NotifyProps, :LastPasswordUpdate, :LastPictureUpdate, :FailedAttempts,
-			:Locale, :Timezone, :MfaActive, :MfaSecret, :RemoteId, :Mobilephone)`
+			:Locale, :Timezone, :MfaActive, :MfaSecret, :RemoteId, :Mobilephone, :MfaUsedTimestamps)`
 
 	user.Props = wrapBinaryParamStringMap(us.IsBinaryParamEnabled(), user.Props)
 	return us.GetMasterX().NamedExec(query, user)
@@ -198,6 +199,7 @@ func (us SqlUserStore) Update(rctx request.CTX, user *model.User, trustedUpdateD
 	user.FailedAttempts = oldUser.FailedAttempts
 	user.MfaSecret = oldUser.MfaSecret
 	user.MfaActive = oldUser.MfaActive
+	user.MfaUsedTimestamps = oldUser.MfaUsedTimestamps
 	user.LastLogin = oldUser.LastLogin
 	if user.Mobilephone == nil || *user.Mobilephone == "" {
 		user.Mobilephone = oldUser.Mobilephone
@@ -231,7 +233,7 @@ func (us SqlUserStore) Update(rctx request.CTX, user *model.User, trustedUpdateD
 				AllowMarketing=:AllowMarketing, Props=:Props, NotifyProps=:NotifyProps,
 				LastPasswordUpdate=:LastPasswordUpdate, LastPictureUpdate=:LastPictureUpdate,
 				FailedAttempts=:FailedAttempts,Locale=:Locale, Timezone=:Timezone, MfaActive=:MfaActive,
-				MfaSecret=:MfaSecret, RemoteId=:RemoteId, LastLogin=:LastLogin, Mobilephone=:Mobilephone
+				MfaSecret=:MfaSecret, RemoteId=:RemoteId, LastLogin=:LastLogin, Mobilephone=:Mobilephone, MfaUsedTimestamps=:MfaUsedTimestamps
 			WHERE Id=:Id`
 
 	user.Props = wrapBinaryParamStringMap(us.IsBinaryParamEnabled(), user.Props)
@@ -347,7 +349,8 @@ func (us SqlUserStore) UpdateAuthData(userId string, service string, authData *s
 
 	if resetMfa {
 		updateQuery = updateQuery.Set("MfaActive", false).
-			Set("MfaSecret", "")
+			Set("MfaSecret", "").
+			Set("MfaUsedTimestamps", model.StringArray{})
 	}
 
 	queryString, args, err := updateQuery.ToSql()
@@ -431,7 +434,7 @@ func (us SqlUserStore) ResetAuthDataToEmailForUsers(service string, userIDs []st
 func (us SqlUserStore) UpdateMfaSecret(userId, secret string) error {
 	updateAt := model.GetMillis()
 
-	if _, err := us.GetMasterX().Exec("UPDATE Users SET MfaSecret = ?, UpdateAt = ? WHERE Id = ?", secret, updateAt, userId); err != nil {
+	if _, err := us.GetMasterX().Exec("UPDATE Users SET MfaSecret = ?, MfaUsedTimestamps = ?, UpdateAt = ? WHERE Id = ?", secret, model.StringArray{}, updateAt, userId); err != nil {
 		return errors.Wrapf(err, "failed to update User with userId=%s", userId)
 	}
 
@@ -446,6 +449,37 @@ func (us SqlUserStore) UpdateMfaActive(userId string, active bool) error {
 	}
 
 	return nil
+}
+
+func (us SqlUserStore) StoreMfaUsedTimestamps(userId string, ts []int) error {
+	tSStrArray := model.StringArray{}
+	for _, t := range ts {
+		tSStrArray = append(tSStrArray, fmt.Sprintf("%d", t))
+	}
+
+	updateAt := model.GetMillis()
+	if _, err := us.GetMasterX().Exec("UPDATE Users SET MfaUsedTimestamps = ?, UpdateAt = ? WHERE Id = ?", tSStrArray, updateAt, userId); err != nil {
+		return errors.Wrapf(err, "failed to update User with userId=%s", userId)
+	}
+	return nil
+}
+
+func (us SqlUserStore) GetMfaUsedTimestamps(userId string) ([]int, error) {
+	tsStrArray := model.StringArray{}
+	err := us.GetReplicaX().Get(&tsStrArray, "SELECT MfaUsedTimestamps FROM Users WHERE Id = ?", userId)
+	if err != nil {
+		return nil, errors.Wrapf(err, "failed to get MFA used timestamps for user with ID %s", userId)
+	}
+
+	ts := make([]int, len(tsStrArray))
+	for i, t := range tsStrArray {
+		ts[i], err = strconv.Atoi(t)
+		if err != nil {
+			return nil, errors.Wrapf(err, "failed to parse MFA used timestamp %s for user with ID %s", t, userId)
+		}
+	}
+
+	return ts, nil
 }
 
 // GetMany returns a list of users for the provided list of ids
@@ -478,7 +512,7 @@ func (us SqlUserStore) Get(ctx context.Context, id string) (*model.User, error) 
 		&user.Password, &user.AuthData, &user.AuthService, &user.Email, &user.EmailVerified,
 		&user.Nickname, &user.FirstName, &user.LastName, &user.Position, &user.Roles,
 		&user.AllowMarketing, &props, &notifyProps, &user.LastPasswordUpdate, &user.LastPictureUpdate,
-		&user.FailedAttempts, &user.Locale, &timezone, &user.MfaActive, &user.MfaSecret,
+		&user.FailedAttempts, &user.Locale, &timezone, &user.MfaActive, &user.MfaSecret, &user.MfaUsedTimestamps,
 		&user.IsBot, &user.BotDescription, &user.BotLastIconUpdate, &user.RemoteId, &user.LastLogin, &user.Mobilephone)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -773,6 +807,8 @@ func (us SqlUserStore) GetProfilesInChannel(options *model.UserGetOptions) ([]*m
 	query = applyMultiRoleFilters(query, options.Roles, options.TeamRoles, options.ChannelRoles, us.DriverName() == model.DatabaseDriverPostgres)
 
 	queryString, args, err := query.ToSql()
+	fmt.Println(queryString)
+	fmt.Printf("%v\n", args)
 	if err != nil {
 		return nil, errors.Wrap(err, "get_profiles_in_channel_tosql")
 	}
@@ -886,7 +922,7 @@ func (us SqlUserStore) GetAllProfilesInChannel(ctx context.Context, channelID st
 			&user.AuthData, &user.AuthService, &user.Email, &user.EmailVerified, &user.Nickname,
 			&user.FirstName, &user.LastName, &user.Position, &user.Roles, &user.AllowMarketing,
 			&props, &notifyProps, &user.LastPasswordUpdate, &user.LastPictureUpdate, &user.FailedAttempts,
-			&user.Locale, &timezone, &user.MfaActive, &user.MfaSecret, &user.IsBot, &user.BotDescription,
+			&user.Locale, &timezone, &user.MfaActive, &user.MfaSecret, &user.MfaUsedTimestamps, &user.IsBot, &user.BotDescription,
 			&user.BotLastIconUpdate, &user.RemoteId, &user.LastLogin, &user.Mobilephone,
 		); err != nil {
 			return nil, errors.Wrap(err, "failed to scan values from rows into User entity")
