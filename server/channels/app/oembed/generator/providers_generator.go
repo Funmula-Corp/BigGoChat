@@ -13,7 +13,7 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/mattermost/mattermost/server/v8/channels/app/oembed"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/app/oembed"
 	"github.com/pkg/errors"
 )
 
