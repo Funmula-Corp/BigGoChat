@@ -102,6 +102,7 @@ func TestUserStore(t *testing.T, rctx request.CTX, ss store.Store, s SqlStore) {
 	t.Run("UpdateLastLogin", func(t *testing.T) { testUpdateLastLogin(t, rctx, ss) })
 	t.Run("GetUserReport", func(t *testing.T) { testGetUserReport(t, rctx, ss, s) })
 	t.Run("UpdateMemberVerifiedStatus", func(t *testing.T) {testUpdateMemberVerifiedStatus(t, rctx, ss, s)})
+	t.Run("MfaUsedTimestamps", func(t *testing.T) { testMfaUsedTimestamps(t, rctx, ss) })
 }
 
 func testUserStoreSave(t *testing.T, rctx request.CTX, ss store.Store) {
@@ -1038,6 +1039,7 @@ func testUserStoreGetProfilesInChannel(t *testing.T, rctx request.CTX, ss store.
 			PerPage:      5,
 		})
 		require.NoError(t, err)
+		require.NotEmpty(t, users)
 		assert.Equal(t, user2Admin.Id, users[0].Id)
 	})
 }
@@ -6706,4 +6708,25 @@ func testUpdateMemberVerifiedStatus(t *testing.T, rctx request.CTX, ss store.Sto
 	require.NoError(t, err)
 	require.Len(t, c, 1)
 	require.Equal(t, 1, c[0])
+}
+
+func testMfaUsedTimestamps(t *testing.T, rctx request.CTX, ss store.Store) {
+	u1, err := ss.User().Save(rctx, &model.User{
+		Email:    "ben@invalid.mattermost.com",
+		Username: "u1" + model.NewId(),
+	})
+
+	require.NoError(t, err)
+	defer func() { require.NoError(t, ss.User().PermanentDelete(rctx, u1.Id)) }()
+
+	tss, err := ss.User().GetMfaUsedTimestamps(u1.Id)
+	require.NoError(t, err)
+	require.Empty(t, tss)
+
+	err = ss.User().StoreMfaUsedTimestamps(u1.Id, []int{1, 2, 3})
+	require.NoError(t, err)
+
+	tss, err = ss.User().GetMfaUsedTimestamps(u1.Id)
+	require.NoError(t, err)
+	require.Equal(t, []int{1, 2, 3}, tss)
 }
