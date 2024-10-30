@@ -45,9 +45,6 @@ ifeq ($(BUILD_NUMBER),)
 	BUILD_NUMBER := dev
 endif
 
-# Ensure developer invocation and tests are anchored.
-MM_SERVER_PATH ?= $(ROOT)
-
 # Go test sum configuration
 GOTESTSUM_FORMAT ?= testname
 GOTESTSUM_JUNITFILE ?= report.xml
@@ -56,7 +53,7 @@ GOTESTSUM_JSONFILE ?= gotestsum.json
 # mmctl
 MMCTL_BUILD_TAGS =
 MMCTL_TESTFLAGS ?= -timeout 30m
-MMCTL_PKG = git.biggo.com/Funmula/mattermost-funmula/server/v8/cmd/mmctl/commands
+MMCTL_PKG = git.biggo.com/Funmula/BigGoChat/server/v8/cmd/mmctl/commands
 MMCTL_BUILD_DATE = $(shell date -u +'%Y-%m-%dT%H:%M:%SZ')
 MMCTL_LDFLAGS += -X "$(MMCTL_PKG).buildDate=$(MMCTL_BUILD_DATE)"
 
@@ -97,14 +94,14 @@ GO ?= go
 DELVE ?= dlv
 
 ifdef BUILD_VERSION
-LDFLAGS += -X "git.biggo.com/Funmula/mattermost-funmula/server/public/model.CurrentVersion=$(BUILD_VERSION)"
+LDFLAGS += -X "git.biggo.com/Funmula/BigGoChat/server/public/model.CurrentVersion=$(BUILD_VERSION)"
 endif
 
-LDFLAGS += -X "git.biggo.com/Funmula/mattermost-funmula/server/public/model.BuildNumber=$(BUILD_NUMBER)"
-LDFLAGS += -X "git.biggo.com/Funmula/mattermost-funmula/server/public/model.BuildDate=$(BUILD_DATE)"
-LDFLAGS += -X "git.biggo.com/Funmula/mattermost-funmula/server/public/model.BuildHash=$(BUILD_HASH)"
-LDFLAGS += -X "git.biggo.com/Funmula/mattermost-funmula/server/public/model.BuildHashEnterprise=$(BUILD_HASH)"
-LDFLAGS += -X "git.biggo.com/Funmula/mattermost-funmula/server/public/model.BuildEnterpriseReady=$(BUILD_ENTERPRISE_READY)"
+LDFLAGS += -X "git.biggo.com/Funmula/BigGoChat/server/public/model.BuildNumber=$(BUILD_NUMBER)"
+LDFLAGS += -X "git.biggo.com/Funmula/BigGoChat/server/public/model.BuildDate=$(BUILD_DATE)"
+LDFLAGS += -X "git.biggo.com/Funmula/BigGoChat/server/public/model.BuildHash=$(BUILD_HASH)"
+LDFLAGS += -X "git.biggo.com/Funmula/BigGoChat/server/public/model.BuildHashEnterprise=$(BUILD_HASH)"
+LDFLAGS += -X "git.biggo.com/Funmula/BigGoChat/server/public/model.BuildEnterpriseReady=$(BUILD_ENTERPRISE_READY)"
 
 GO_MAJOR_VERSION = $(shell $(GO) version | cut -c 14- | cut -d' ' -f1 | cut -d'.' -f1)
 GO_MINOR_VERSION = $(shell $(GO) version | cut -c 14- | cut -d' ' -f1 | cut -d'.' -f2)
@@ -134,20 +131,23 @@ TEMPLATES_DIR=templates
 
 # Plugins Packages
 PLUGIN_PACKAGES ?= $(PLUGIN_PACKAGES:)
-PLUGIN_PACKAGES += mattermost-plugin-calls-v0.27.0
-PLUGIN_PACKAGES += mattermost-plugin-github-v2.2.0
-PLUGIN_PACKAGES += mattermost-plugin-gitlab-v1.9.0
+PLUGIN_PACKAGES += mattermost-plugin-calls-v0.29.2
+PLUGIN_PACKAGES += mattermost-plugin-github-v2.3.0
+PLUGIN_PACKAGES += mattermost-plugin-gitlab-v1.9.1
 PLUGIN_PACKAGES += mattermost-plugin-jira-v4.1.1
-PLUGIN_PACKAGES += mattermost-plugin-playbooks-v1.39.3
+PLUGIN_PACKAGES += mattermost-plugin-playbooks-v1.40.0
 PLUGIN_PACKAGES += mattermost-plugin-nps-v1.3.3
 PLUGIN_PACKAGES += mattermost-plugin-servicenow-v2.3.4
 PLUGIN_PACKAGES += mattermost-plugin-zoom-v1.8.0
-PLUGIN_PACKAGES += mattermost-plugin-ai-v0.6.3
+PLUGIN_PACKAGES += mattermost-plugin-ai-v0.8.3
 PLUGIN_PACKAGES += mattermost-plugin-jitsi-v2.0.1
 PLUGIN_PACKAGES += focalboard-v8.0.0
+PLUGIN_PACKAGES += mattermost-plugin-user-survey-v1.1.1
 
 
 ALL_PACKAGES=$(TE_PACKAGES)
+
+CONFIG_FILE_PATH ?= ./config/config.json
 
 all: run ## Alias for 'run'.
 
@@ -164,8 +164,8 @@ include config.mk
 include build/*.mk
 include public/Makefile
 
-LDFLAGS += -X "git.biggo.com/Funmula/mattermost-funmula/server/public/model.MockCWS=$(MM_ENABLE_CWS_MOCK)"
-LDFLAGS += -X "git.biggo.com/Funmula/mattermost-funmula/server/public/model.MattermostGiphySdkKey=$(MM_GIPHY_SDK_KEY)"
+LDFLAGS += -X "git.biggo.com/Funmula/BigGoChat/server/public/model.MockCWS=$(MM_ENABLE_CWS_MOCK)"
+LDFLAGS += -X "git.biggo.com/Funmula/BigGoChat/server/public/model.MattermostGiphySdkKey=$(MM_GIPHY_SDK_KEY)"
 
 RUN_IN_BACKGROUND ?=
 ifeq ($(RUN_SERVER_IN_BACKGROUND),true)
@@ -271,8 +271,8 @@ prepackaged-plugins: ## Populate the prepackaged-plugins directory.
 	@echo Downloading prepackaged plugins: $(PLUGIN_PACKAGES)
 	mkdir -p prepackaged_plugins
 	@cd prepackaged_plugins && for plugin_package in $(PLUGIN_PACKAGES) ; do \
-		curl -f -O -L https://plugins-store.test.mattermost.com/release/$$plugin_package.tar.gz; \
-		curl -f -O -L https://plugins-store.test.mattermost.com/release/$$plugin_package.tar.gz.sig; \
+		curl -f -O -L https://plugins.releases.mattermost.com/release/$$plugin_package.tar.gz; \
+		curl -f -O -L https://plugins.releases.mattermost.com/release/$$plugin_package.tar.gz.sig; \
 	done
 
 prepackaged-binaries: ## Populate the prepackaged-binaries to the bin directory
@@ -368,7 +368,7 @@ platform-mocks: ## Creates mocks for platform interfaces.
 
 mmctl-mocks: ## Creates mocks for mmctl
 	$(GO) install github.com/golang/mock/mockgen@v1.6.0
-	$(GOBIN)/mockgen -destination=cmd/mmctl/mocks/client_mock.go -copyright_file=cmd/mmctl/mocks/copyright.txt -package=mocks git.biggo.com/Funmula/mattermost-funmula/server/v8/cmd/mmctl/client Client
+	$(GOBIN)/mockgen -destination=cmd/mmctl/mocks/client_mock.go -copyright_file=cmd/mmctl/mocks/copyright.txt -package=mocks git.biggo.com/Funmula/BigGoChat/server/v8/cmd/mmctl/client Client
 
 pluginapi: ## Generates api and hooks glue code for plugins
 	cd ./public && $(GO) generate $(GOFLAGS) ./plugin
@@ -416,7 +416,6 @@ else
 	@echo Running only TE tests
 endif
 
-test-server-race: export MM_SERVER_PATH := $(MM_SERVER_PATH)
 test-server-race: export GOTESTSUM_FORMAT := $(GOTESTSUM_FORMAT)
 test-server-race: export GOTESTSUM_JUNITFILE := $(GOTESTSUM_JUNITFILE)
 test-server-race: export GOTESTSUM_JSONFILE := $(GOTESTSUM_JSONFILE)
@@ -435,7 +434,6 @@ ifneq ($(IS_CI),true)
   endif
 endif
 
-test-server: export MM_SERVER_PATH := $(MM_SERVER_PATH)
 test-server: export GOTESTSUM_FORMAT := $(GOTESTSUM_FORMAT)
 test-server: export GOTESTSUM_JUNITFILE := $(GOTESTSUM_JUNITFILE)
 test-server: export GOTESTSUM_JSONFILE := $(GOTESTSUM_JSONFILE)
@@ -450,7 +448,13 @@ ifneq ($(IS_CI),true)
   endif
 endif
 
-test-server-quick: export MM_SERVER_PATH := $(MM_SERVER_PATH)
+test-server-ee: export GOTESTSUM_FORMAT := $(GOTESTSUM_FORMAT)
+test-server-ee: export GOTESTSUM_JUNITFILE := $(GOTESTSUM_JUNITFILE)
+test-server-ee: export GOTESTSUM_JSONFILE := $(GOTESTSUM_JSONFILE)
+test-server-ee: check-prereqs-enterprise start-docker gotestsum ## Runs EE tests.
+	@echo Running only EE tests
+	$(GOBIN)/gotestsum --packages="$(EE_PACKAGES)" -- $(GOFLAGS) -timeout=20m
+
 test-server-quick: export GOTESTSUM_FORMAT := $(GOTESTSUM_FORMAT)
 test-server-quick: export GOTESTSUM_JUNITFILE := $(GOTESTSUM_JUNITFILE)
 test-server-quick: export GOTESTSUM_JSONFILE := $(GOTESTSUM_JSONFILE)
@@ -494,7 +498,6 @@ inject-test-data: # add test data to the local instance.
 	@echo Login with a regular account username=user-1 password=SampleUs@r-1
 	@echo ========================================================================
 
-test-mmctl-unit: export MM_SERVER_PATH := $(MM_SERVER_PATH)
 test-mmctl-unit: export GOTESTSUM_FORMAT := $(GOTESTSUM_FORMAT)
 test-mmctl-unit: export GOTESTSUM_JUNITFILE := $(GOTESTSUM_JUNITFILE)
 test-mmctl-unit: export GOTESTSUM_JSONFILE := $(GOTESTSUM_JSONFILE)
@@ -502,7 +505,6 @@ test-mmctl-unit: gotestsum generated
 	@echo Running mmctl unit tests
 	$(GOBIN)/gotestsum --packages="$(MMCTL_PACKAGES)" -- -tags 'unit $(MMCTL_BUILD_TAGS)' $(MMCTL_TESTFLAGS)
 
-test-mmctl-e2e: export MM_SERVER_PATH := $(MM_SERVER_PATH)
 test-mmctl-e2e: export GOTESTSUM_FORMAT := $(GOTESTSUM_FORMAT)
 test-mmctl-e2e: export GOTESTSUM_JUNITFILE := $(GOTESTSUM_JUNITFILE)
 test-mmctl-e2e: export GOTESTSUM_JSONFILE := $(GOTESTSUM_JSONFILE)
@@ -510,7 +512,6 @@ test-mmctl-e2e: gotestsum start-docker generated
 	@echo Running mmctl e2e tests
 	$(GOBIN)/gotestsum --packages="$(MMCTL_PACKAGES)" -- -tags 'e2e $(MMCTL_BUILD_TAGS)' $(MMCTL_TESTFLAGS)
 
-test-mmctl: export MM_SERVER_PATH := $(MM_SERVER_PATH)
 test-mmctl: export GOTESTSUM_FORMAT := $(GOTESTSUM_FORMAT)
 test-mmctl: export GOTESTSUM_JUNITFILE := $(GOTESTSUM_JUNITFILE)
 test-mmctl: export GOTESTSUM_JSONFILE := $(GOTESTSUM_JSONFILE)
@@ -518,7 +519,6 @@ test-mmctl: gotestsum start-docker generated
 	@echo Running all mmctl tests
 	$(GOBIN)/gotestsum --packages="$(MMCTL_PACKAGES)" -- -tags 'unit e2e $(MMCTL_BUILD_TAGS)' $(MMCTL_TESTFLAGS)
 
-test-mmctl-coverage: export MM_SERVER_PATH := $(MM_SERVER_PATH)
 test-mmctl-coverage: export GOTESTSUM_FORMAT := $(GOTESTSUM_FORMAT)
 test-mmctl-coverage: export GOTESTSUM_JUNITFILE := $(GOTESTSUM_JUNITFILE)
 test-mmctl-coverage: export GOTESTSUM_JSONFILE := $(GOTESTSUM_JSONFILE)
@@ -550,21 +550,21 @@ run-server: setup-go-work prepackaged-binaries validate-go-version start-docker 
 debug-server: start-docker ## Compile and start server using delve.
 	mkdir -p $(BUILD_WEBAPP_DIR)/channels/dist/files
 	$(DELVE) debug $(PLATFORM_FILES) --build-flags="-ldflags '\
-		-X git.biggo.com/Funmula/mattermost-funmula/server/public/model.BuildNumber=$(BUILD_NUMBER)\
-		-X \"git.biggo.com/Funmula/mattermost-funmula/server/public/model.BuildDate=$(BUILD_DATE)\"\
-		-X git.biggo.com/Funmula/mattermost-funmula/server/public/model.BuildHash=$(BUILD_HASH)\
-		-X git.biggo.com/Funmula/mattermost-funmula/server/public/model.BuildHashEnterprise=$(BUILD_HASH)\
-		-X git.biggo.com/Funmula/mattermost-funmula/server/public/model.BuildEnterpriseReady=$(BUILD_ENTERPRISE_READY)'\
+		-X git.biggo.com/Funmula/BigGoChat/server/public/model.BuildNumber=$(BUILD_NUMBER)\
+		-X \"git.biggo.com/Funmula/BigGoChat/server/public/model.BuildDate=$(BUILD_DATE)\"\
+		-X git.biggo.com/Funmula/BigGoChat/server/public/model.BuildHash=$(BUILD_HASH)\
+		-X git.biggo.com/Funmula/BigGoChat/server/public/model.BuildHashEnterprise=$(BUILD_HASH)\
+		-X git.biggo.com/Funmula/BigGoChat/server/public/model.BuildEnterpriseReady=$(BUILD_ENTERPRISE_READY)'\
 		-tags '$(BUILD_TAGS)'"
 
 debug-server-headless: start-docker ## Debug server from within an IDE like VSCode or IntelliJ.
 	mkdir -p $(BUILD_WEBAPP_DIR)/channels/dist/files
 	$(DELVE) debug --headless --listen=:2345 --api-version=2 --accept-multiclient $(PLATFORM_FILES) --build-flags="-ldflags '\
-		-X git.biggo.com/Funmula/mattermost-funmula/server/public/model.BuildNumber=$(BUILD_NUMBER)\
-		-X \"git.biggo.com/Funmula/mattermost-funmula/server/public/model.BuildDate=$(BUILD_DATE)\"\
-		-X git.biggo.com/Funmula/mattermost-funmula/server/public/model.BuildHash=$(BUILD_HASH)\
-		-X git.biggo.com/Funmula/mattermost-funmula/server/public/model.BuildHashEnterprise=$(BUILD_HASH)\
-		-X git.biggo.com/Funmula/mattermost-funmula/server/public/model.BuildEnterpriseReady=$(BUILD_ENTERPRISE_READY)'\
+		-X git.biggo.com/Funmula/BigGoChat/server/public/model.BuildNumber=$(BUILD_NUMBER)\
+		-X \"git.biggo.com/Funmula/BigGoChat/server/public/model.BuildDate=$(BUILD_DATE)\"\
+		-X git.biggo.com/Funmula/BigGoChat/server/public/model.BuildHash=$(BUILD_HASH)\
+		-X git.biggo.com/Funmula/BigGoChat/server/public/model.BuildHashEnterprise=$(BUILD_HASH)\
+		-X git.biggo.com/Funmula/BigGoChat/server/public/model.BuildEnterpriseReady=$(BUILD_ENTERPRISE_READY)'\
 		-tags '$(BUILD_TAGS)'"
 
 run-cli: start-docker ## Runs CLI.
@@ -636,38 +636,39 @@ run-job-server: ## Runs the background job server.
 config-ldap: ## Configures LDAP.
 	@echo Setting up configuration for local LDAP
 
-	@sed -i'' -e 's|"LdapServer": ".*"|"LdapServer": "localhost"|g' ../config/config.json
-	@sed -i'' -e 's|"BaseDN": ".*"|"BaseDN": "dc=mm,dc=test,dc=com"|g' ../config/config.json
-	@sed -i'' -e 's|"BindUsername": ".*"|"BindUsername": "cn=admin,dc=mm,dc=test,dc=com"|g' ../config/config.json
-	@sed -i'' -e 's|"BindPassword": ".*"|"BindPassword": "mostest"|g' ../config/config.json
-	@sed -i'' -e 's|"UserFilter": ".*"|"UserFilter": ""|g' ../config/config.json
-	@sed -i'' -e 's|"GroupFilter": ".*"|"GroupFilter": ""|g' ../config/config.json
-	@sed -i'' -e 's|"GuestFilter": ".*"|"GuestFilter": ""|g' ../config/config.json
-	@sed -i'' -e 's|"FirstNameAttribute": ".*"|"FirstNameAttribute": "cn"|g' ../config/config.json
-	@sed -i'' -e 's|"LastNameAttribute": ".*"|"LastNameAttribute": "sn"|g' ../config/config.json
-	@sed -i'' -e 's|"NicknameAttribute": ".*"|"NicknameAttribute": "cn"|g' ../config/config.json
-	@sed -i'' -e 's|"PositionAttribute": ".*"|"PositionAttribute": "title"|g' ../config/config.json
-	@sed -i'' -e 's|"EmailAttribute": ".*"|"EmailAttribute": "mail"|g' ../config/config.json
-	@sed -i'' -e 's|"UsernameAttribute": ".*"|"UsernameAttribute": "uid"|g' ../config/config.json
-	@sed -i'' -e 's|"IdAttribute": ".*"|"IdAttribute": "uid"|g' ../config/config.json
-	@sed -i'' -e 's|"LoginIdAttribute": ".*"|"LoginIdAttribute": "uid"|g' ../config/config.json
-	@sed -i'' -e 's|"GroupDisplayNameAttribute": ".*"|"GroupDisplayNameAttribute": "cn"|g' ../config/config.json
-	@sed -i'' -e 's|"GroupIdAttribute": ".*"|"GroupIdAttribute": "entryUUID"|g' ../config/config.json
+	# Check if jq is installed
+	@jq --version > /dev/null 2>&1 || (echo "jq is not installed. Please install jq to continue." && exit 1)
+
+	TMPDIR=$(mktemp -d)
+	jq --slurp '.[0] * .[1]' ${CONFIG_FILE_PATH} build/docker/keycloak/ldap.mmsettings.json > ${TMPDIR}/config.json
+	cp ${TMPDIR}/config.json ${CONFIG_FILE_PATH}
+	rm ${TMPDIR}/config.json
 
 config-saml: ## Configures SAML.
 	@echo Setting up configuration for local SAML with keycloak, please ensure your keycloak is running on http://localhost:8484
 
-	@cp build/docker/keycloak/keycloak.crt ../config/saml-idp.crt
+	# Check if jq is installed
+	@jq --version > /dev/null 2>&1 || (echo "jq is not installed. Please install jq to continue." && exit 1)
 
-	@sed -i'' -e 's|"Verify": true|"Verify": false|g' ../config/config.json
-	@sed -i'' -e 's|"Encrypt": true|"Encrypt": false|g' ../config/config.json
-	@sed -i'' -e 's|"SignRequest": true|"SignRequest": false|g' ../config/config.json
-	@sed -i'' -e 's|"IdpURL": ".*"|"IdpURL": "http://localhost:8484/realms/mattermost/protocol/saml"|g' ../config/config.json
-	@sed -i'' -e 's|"IdpDescriptorURL": ".*"|"IdpDescriptorURL": "http://localhost:8484/realms/mattermost"|g' ../config/config.json
-	@sed -i'' -e 's|"IdpMetadataURL": ".*"|"IdpMetadataURL": "http://localhost:8484/realms/mattermost/protocol/saml/descriptor"|g' ../config/config.json
-	@sed -i'' -e 's|"ServiceProviderIdentifier": ".*"|"ServiceProviderIdentifier": "mattermost"|g' ../config/config.json
-	@sed -i'' -e 's|"AssertionConsumerServiceURL": ".*"|"AssertionConsumerServiceURL": "http://localhost:8065/login/sso/saml"|g' ../config/config.json
-	@sed -i'' -e 's|"IdpCertificateFile": ".*"|"IdpCertificateFile": "saml-idp.crt"|g' ../config/config.json
+	@cp build/docker/keycloak/keycloak.crt ./config/saml-idp.crt
+
+	TMPDIR=$(mktemp -d)
+	jq --slurp '.[0] * .[1]' ${CONFIG_FILE_PATH} build/docker/keycloak/saml.mmsettings.json > ${TMPDIR}/config.json
+	cp ${TMPDIR}/config.json ${CONFIG_FILE_PATH}
+	rm ${TMPDIR}/config.json
+
+config-openid: ## Configures OpenID.
+	@echo Setting up configuration for local OpenID with keycloak, please ensure your keycloak is running on http://localhost:8484
+
+	# Check if jq is installed
+	@jq --version > /dev/null 2>&1 || (echo "jq is not installed. Please install jq to continue." && exit 1)
+
+	TMPDIR=$(mktemp -d)
+	jq --slurp '.[0] * .[1]' ${CONFIG_FILE_PATH} build/docker/keycloak/openid.mmsettings.json > ${TMPDIR}/config.json
+	cp ${TMPDIR}/config.json ${CONFIG_FILE_PATH}
+	rm ${TMPDIR}/config.json
+
+	@echo Finished setting up configuration for local OpenID with keycloak
 
 config-reset: ## Resets the config/config.json file to the default production values.
 	@echo Resetting configuration to production default
@@ -728,7 +729,7 @@ endif
 
 vet: ## Run mattermost go vet specific checks
 	$(GO) install github.com/mattermost/mattermost-govet/v2@new
-	$(GO) vet -vettool=$(GOBIN)/mattermost-govet -structuredLogging -inconsistentReceiverName -emptyStrCmp -tFatal -configtelemetry -errorAssertions -license -inconsistentReceiverName.ignore=session_serial_gen.go,team_member_serial_gen.go,user_serial_gen.go ./...
+	$(GO) vet -vettool=$(GOBIN)/mattermost-govet -license -structuredLogging -inconsistentReceiverName -inconsistentReceiverName.ignore=session_serial_gen.go,team_member_serial_gen.go,user_serial_gen.go,utils_serial_gen.go -emptyStrCmp -tFatal -configtelemetry -errorAssertions ./...
  ifeq ($(BUILD_ENTERPRISE_READY),true)
   ifneq ($(MM_NO_ENTERPRISE_LINT),true)
 	$(GO) vet -vettool=$(GOBIN)/mattermost-govet -structuredLogging -inconsistentReceiverName -emptyStrCmp -tFatal -configtelemetry -enterpriseLicense $(BUILD_ENTERPRISE_DIR)/...
@@ -743,7 +744,7 @@ vet-api: ## Run mattermost go vet to verify api4 documentation, currently not pa
 	make -C ../api build
 	./scripts/vet-api-check.sh
 
-SERIAL_GEN=public/model/session_serial_gen.go public/model/user_serial_gen.go public/model/team_member_serial_gen.go
+SERIAL_GEN=public/model/utils_serial_gen.go public/model/session_serial_gen.go public/model/user_serial_gen.go public/model/team_member_serial_gen.go
 public/model/%_serial_gen.go: public/model/%.go
 	$(GOBIN)/msgp -file=$< -tests=false -o=$@
 	@echo "$$LICENSE_HEADER" > tmp.go
@@ -824,4 +825,4 @@ test-migration:
 # test-it: export GOTESTSUM_JUNITFILE := $(GOTESTSUM_JUNITFILE)
 # test-it: export GOTESTSUM_JSONFILE := $(GOTESTSUM_JSONFILE)
 # test-it: test-server-pre
-# 	$(GOBIN)/gotestsum  --rerun-fails=0 --packages="git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/api4" -- $(GOFLAGS)-timeout=90m -run TestCreateBot/create_bot_with_permissions
+# 	$(GOBIN)/gotestsum  --rerun-fails=0 --packages="git.biggo.com/Funmula/BigGoChat/server/v8/channels/api4" -- $(GOFLAGS)-timeout=90m -run TestCreateBot/create_bot_with_permissions

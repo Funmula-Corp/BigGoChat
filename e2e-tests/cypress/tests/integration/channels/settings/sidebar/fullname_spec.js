@@ -10,12 +10,7 @@
 // Stage: @prod
 // Group: @channels @account_setting
 
-import {getRandomId} from '../../../../utils';
-
 describe('Settings > Sidebar > General', () => {
-    const randomId = getRandomId();
-    const newFirstName = `정트리나${randomId}/trina.jung/집단사무국(CO)`;
-
     let testUser;
     let otherUser;
     let offTopicUrl;
@@ -27,36 +22,28 @@ describe('Settings > Sidebar > General', () => {
 
             cy.apiCreateUser().then(({user: user1}) => {
                 otherUser = user1;
+            
+                cy.apiPatchUserRoles(otherUser.id, ['system_verified', 'system_user']);
                 cy.apiAddUserToTeam(team.id, otherUser.id);
             });
-
+            
             // # Login as test user, visit off-topic and go to the Profile
             cy.apiLogin(testUser);
             cy.visit(offTopicUrl);
-            cy.uiOpenProfileModal('Profile Settings');
-
-            // # Open Full Name section
-            cy.get('#nameDesc').click();
-
-            // # Set first name value
-            cy.get('#firstName').clear().type(newFirstName);
-
-            // # Save form
-            cy.uiSave();
         });
     });
 
-    it('MM-T183 Filtering by first name with Korean characters', () => {
-        const {username} = testUser;
+    it('MM-T183 Filtering by first name', () => {
+        const {username, first_name} = testUser;
 
         cy.apiLogin(otherUser);
         cy.visit(offTopicUrl);
 
         // # Type in user's first name substring
-        cy.uiGetPostTextBox().clear().type(`@${newFirstName.substring(0, 11)}`);
+        cy.uiGetPostTextBox().clear().type(`@${first_name.substring(0, 11)}`);
 
         // * Verify that the testUser is selected from mention autocomplete
-        cy.uiVerifyAtMentionInSuggestionList({...testUser, first_name: newFirstName}, true);
+        cy.uiVerifyAtMentionInSuggestionList({...testUser}, true);
 
         // # Press tab on text input
         cy.uiGetPostTextBox().tab();

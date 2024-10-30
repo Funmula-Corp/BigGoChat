@@ -6,7 +6,7 @@ package jobs_test
 import (
 	"testing"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/testlib"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/testlib"
 )
 
 var mainHelper *testlib.MainHelper

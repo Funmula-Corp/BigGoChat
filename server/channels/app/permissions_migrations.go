@@ -8,9 +8,9 @@ import (
 	"net/http"
 	"strings"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store/sqlstore"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/store"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/store/sqlstore"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
 )
 
 type permissionTransformation struct {
@@ -931,7 +931,7 @@ func (a *App) getAddAuthenticationSubsectionPermissions() (permissionsMap, error
 	return transformations, nil
 }
 
-// This migration fixes https://git.biggo.com/Funmula/mattermost-funmula-server/issues/17642 where this particular ancillary permission was forgotten during the initial migrations
+// This migration fixes https://git.biggo.com/Funmula/BigGoChat-server/issues/17642 where this particular ancillary permission was forgotten during the initial migrations
 func (a *App) getAddTestEmailAncillaryPermission() (permissionsMap, error) {
 	transformations := []permissionTransformation{}
 
@@ -1154,6 +1154,40 @@ func (a *App) getAddChannelBookmarksPermissionsMigration() (permissionsMap, erro
 	return transformations, nil
 }
 
+func (a *App) getAddManageJobAncillaryPermissionsMigration() (permissionsMap, error) {
+	transformations := []permissionTransformation{}
+
+	transformations = append(transformations, permissionTransformation{
+		On:  permissionExists(model.PermissionSysconsoleWriteAuthenticationLdap.Id),
+		Add: []string{model.PermissionManageLdapSyncJob.Id},
+	})
+
+	transformations = append(transformations, permissionTransformation{
+		On:  permissionExists(model.PermissionSysconsoleWriteComplianceDataRetentionPolicy.Id),
+		Add: []string{model.PermissionManageDataRetentionJob.Id},
+	})
+
+	transformations = append(transformations, permissionTransformation{
+		On:  permissionExists(model.PermissionSysconsoleWriteExperimentalBleve.Id),
+		Add: []string{model.PermissionManagePostBleveIndexesJob.Id},
+	})
+
+	transformations = append(transformations, permissionTransformation{
+		On:  permissionExists(model.PermissionSysconsoleWriteComplianceComplianceExport.Id),
+		Add: []string{model.PermissionManageComplianceExportJob.Id},
+	})
+
+	transformations = append(transformations, permissionTransformation{
+		On: permissionExists(model.PermissionSysconsoleWriteEnvironmentElasticsearch.Id),
+		Add: []string{
+			model.PermissionManageElasticsearchPostIndexingJob.Id,
+			model.PermissionManageElasticsearchPostAggregationJob.Id,
+		},
+	})
+
+	return transformations, nil
+}
+
 // DoPermissionsMigrations execute all the permissions migrations need by the current version.
 func (a *App) DoPermissionsMigrations() error {
 	return a.Srv().doPermissionsMigrations()
@@ -1200,6 +1234,7 @@ func (s *Server) doPermissionsMigrations() error {
 		{Key: model.MigrationKeyAddIPFilteringPermissions, Migration: a.getAddIPFilterPermissionsMigration},
 		{Key: model.MigrationKeyAddOutgoingOAuthConnectionsPermissions, Migration: a.getAddOutgoingOAuthConnectionsPermissions},
 		{Key: model.MigrationKeyAddChannelBookmarksPermissions, Migration: a.getAddChannelBookmarksPermissionsMigration},
+		{Key: model.MigrationKeyAddManageJobAncillaryPermissions, Migration: a.getAddManageJobAncillaryPermissionsMigration},
 	}
 
 	roles, err := s.Store().Role().GetAll()

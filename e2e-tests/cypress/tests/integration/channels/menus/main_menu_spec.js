@@ -21,7 +21,8 @@ describe('Main menu', () => {
         });
     });
 
-    it('MM-T711_1 - Click on menu item should toggle the menu', () => {
+    // BigGoChat does not have a feature to open the profile modal
+    it.skip('MM-T711_1 - Click on menu item should toggle the menu', () => {
         cy.apiLogin(testUser);
         cy.visit(`/${testTeam.name}/channels/town-square`);
 

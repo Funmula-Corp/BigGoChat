@@ -17,13 +17,13 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin/plugintest/mock"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/i18n"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/utils/testutils"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/einterfaces/mocks"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/shared/mail"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/public/plugin/plugintest/mock"
+	"git.biggo.com/Funmula/BigGoChat/server/public/shared/i18n"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/app"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/utils/testutils"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/einterfaces/mocks"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/platform/shared/mail"
 )
 
 func TestCreateTeam(t *testing.T) {
@@ -48,7 +48,7 @@ func TestCreateTeam(t *testing.T) {
 
 		rteam.Id = ""
 		_, resp, err = client.CreateTeam(context.Background(), rteam)
-		CheckErrorID(t, err, "app.team.save.existing.app_error")
+		CheckErrorID(t, err, "store.sql_team.save_team.existing.app_error")
 		CheckBadRequestStatus(t, resp)
 
 		rteam.Name = ""
@@ -1091,6 +1091,11 @@ func TestRegenerateTeamInviteId(t *testing.T) {
 	assert.NotEqual(t, team.InviteId, rteam.InviteId)
 	assert.NotEqual(t, team.InviteId, "")
 	assert.Equal(t, rteam.Email, "")
+
+	manager := th.SystemManagerClient
+	th.RemovePermissionFromRole(model.PermissionInviteUser.Id, model.SystemManagerRoleId)
+	_, _, err = manager.RegenerateTeamInviteId(context.Background(), team.Id)
+	require.Error(t, err)
 }
 
 func TestSoftDeleteTeam(t *testing.T) {

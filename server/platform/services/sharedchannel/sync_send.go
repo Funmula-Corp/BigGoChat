@@ -8,11 +8,11 @@ import (
 	"fmt"
 	"time"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/services/remotecluster"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/i18n"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/platform/services/remotecluster"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/public/shared/i18n"
+	"git.biggo.com/Funmula/BigGoChat/server/public/shared/mlog"
+	"git.biggo.com/Funmula/BigGoChat/server/public/shared/request"
 )
 
 type syncTask struct {
@@ -258,7 +258,7 @@ func (scs *Service) processTask(task syncTask) error {
 			InChannel:     task.channelID,
 			OnlyConfirmed: true,
 		}
-		remotes, err := scs.server.GetStore().RemoteCluster().GetAll(filter)
+		remotes, err := scs.server.GetStore().RemoteCluster().GetAll(0, 999999, filter)
 		if err != nil {
 			return err
 		}
@@ -270,7 +270,7 @@ func (scs *Service) processTask(task syncTask) error {
 		filter = model.RemoteClusterQueryFilter{
 			RequireOptions: model.BitflagOptionAutoInvited,
 		}
-		remotesAutoInvited, err := scs.server.GetStore().RemoteCluster().GetAll(filter)
+		remotesAutoInvited, err := scs.server.GetStore().RemoteCluster().GetAll(0, 999999, filter)
 		if err != nil {
 			return err
 		}
@@ -322,7 +322,7 @@ func (scs *Service) handlePostError(postId string, task syncTask, rc *model.Remo
 	}
 
 	// this post failed as part of a group of posts. Retry as an individual post.
-	post, err := scs.server.GetStore().Post().GetSingle(postId, true)
+	post, err := scs.server.GetStore().Post().GetSingle(request.EmptyContext(scs.server.Log()), postId, true)
 	if err != nil {
 		scs.server.Log().Log(mlog.LvlSharedChannelServiceError, "error fetching post for sync retry",
 			mlog.String("remote", rc.DisplayName),

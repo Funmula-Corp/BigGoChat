@@ -13,7 +13,9 @@ describe('Cookie with Subpath', () => {
     let testUser;
     let townsquareLink;
 
-    before(() => {
+    before(function() {
+        // BigGoChat does not use the subpaths feature
+        this.skip();
         cy.shouldRunWithSubpath();
         cy.shouldNotRunOnCloudEdition();
 

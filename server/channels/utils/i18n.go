@@ -5,20 +5,15 @@ package utils
 
 import (
 	"fmt"
-	"os"
-	"path/filepath"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/utils/fileutils"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/i18n"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/utils/fileutils"
+	"git.biggo.com/Funmula/BigGoChat/server/public/shared/i18n"
 )
 
 // TranslationsPreInit loads translations from filesystem if they are not
 // loaded already and assigns english while loading server config.
 func TranslationsPreInit() error {
 	translationsDir := "i18n"
-	if mattermostPath := os.Getenv("MM_SERVER_PATH"); mattermostPath != "" {
-		translationsDir = filepath.Join(mattermostPath, "i18n")
-	}
 
 	i18nDirectory, found := fileutils.FindDirRelBinary(translationsDir)
 	if !found {

@@ -16,7 +16,9 @@ import {getAdminAccount} from '../../../support/env';
 describe('Subpath Direct Message Search', () => {
     let testTeam;
 
-    before(() => {
+    before(function() {
+        // BigGoChat does not use the subpaths feature
+        this.skip();
         cy.shouldRunWithSubpath();
 
         cy.apiInitSetup().then(({team, user}) => {

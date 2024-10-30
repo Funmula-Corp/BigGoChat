@@ -11,9 +11,9 @@ import (
 	"strings"
 	"time"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app/imports"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/app"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/app/imports"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
 
 	"github.com/icrowley/fake"
 )

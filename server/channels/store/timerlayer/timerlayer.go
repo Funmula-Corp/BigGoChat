@@ -10,10 +10,10 @@ import (
 	"context"
 	"time"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/einterfaces"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/public/shared/request"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/store"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/einterfaces"
 )
 
 type TimerLayer struct {
@@ -1215,10 +1215,10 @@ func (s *TimerLayerChannelStore) GetAllChannelMemberIdsByChannelId(id string) ([
 	return result, err
 }
 
-func (s *TimerLayerChannelStore) GetAllChannelMembersForUser(userID string, allowFromCache bool, includeDeleted bool) (map[string]*model.AllChannelMember, error) {
+func (s *TimerLayerChannelStore) GetAllChannelMembersForUser(ctx request.CTX, userID string, allowFromCache bool, includeDeleted bool) (map[string]*model.AllChannelMember, error) {
 	start := time.Now()
 
-	result, err := s.ChannelStore.GetAllChannelMembersForUser(userID, allowFromCache, includeDeleted)
+	result, err := s.ChannelStore.GetAllChannelMembersForUser(ctx, userID, allowFromCache, includeDeleted)
 
 	elapsed := float64(time.Since(start)) / float64(time.Second)
 	if s.Root.Metrics != nil {
@@ -2648,10 +2648,10 @@ func (s *TimerLayerChannelStore) UpdateMemberNotifyProps(channelID string, userI
 	return result, err
 }
 
-func (s *TimerLayerChannelStore) UpdateMembersRole(channelID string, userIDs []string) error {
+func (s *TimerLayerChannelStore) UpdateMembersRole(channelID string, userIDs []string) ([]*model.ChannelMember, error) {
 	start := time.Now()
 
-	err := s.ChannelStore.UpdateMembersRole(channelID, userIDs)
+	result, err := s.ChannelStore.UpdateMembersRole(channelID, userIDs)
 
 	elapsed := float64(time.Since(start)) / float64(time.Second)
 	if s.Root.Metrics != nil {
@@ -2661,7 +2661,7 @@ func (s *TimerLayerChannelStore) UpdateMembersRole(channelID string, userIDs []s
 		}
 		s.Root.Metrics.ObserveStoreMethodDuration("ChannelStore.UpdateMembersRole", success, elapsed)
 	}
-	return err
+	return result, err
 }
 
 func (s *TimerLayerChannelStore) UpdateMultipleMembers(members []*model.ChannelMember) ([]*model.ChannelMember, error) {
@@ -5013,6 +5013,22 @@ func (s *TimerLayerJobStore) GetAllByTypeAndStatus(c request.CTX, jobType string
 	return result, err
 }
 
+func (s *TimerLayerJobStore) GetAllByTypeAndStatusPage(c request.CTX, jobType []string, status string, offset int, limit int) ([]*model.Job, error) {
+	start := time.Now()
+
+	result, err := s.JobStore.GetAllByTypeAndStatusPage(c, jobType, status, offset, limit)
+
+	elapsed := float64(time.Since(start)) / float64(time.Second)
+	if s.Root.Metrics != nil {
+		success := "false"
+		if err == nil {
+			success = "true"
+		}
+		s.Root.Metrics.ObserveStoreMethodDuration("JobStore.GetAllByTypeAndStatusPage", success, elapsed)
+	}
+	return result, err
+}
+
 func (s *TimerLayerJobStore) GetAllByTypePage(c request.CTX, jobType string, offset int, limit int) ([]*model.Job, error) {
 	start := time.Now()
 
@@ -6404,10 +6420,10 @@ func (s *TimerLayerPostStore) GetRepliesForExport(parentID string) ([]*model.Rep
 	return result, err
 }
 
-func (s *TimerLayerPostStore) GetSingle(id string, inclDeleted bool) (*model.Post, error) {
+func (s *TimerLayerPostStore) GetSingle(rctx request.CTX, id string, inclDeleted bool) (*model.Post, error) {
 	start := time.Now()
 
-	result, err := s.PostStore.GetSingle(id, inclDeleted)
+	result, err := s.PostStore.GetSingle(rctx, id, inclDeleted)
 
 	elapsed := float64(time.Since(start)) / float64(time.Second)
 	if s.Root.Metrics != nil {
@@ -7331,10 +7347,10 @@ func (s *TimerLayerRemoteClusterStore) Get(remoteClusterId string) (*model.Remot
 	return result, err
 }
 
-func (s *TimerLayerRemoteClusterStore) GetAll(filter model.RemoteClusterQueryFilter) ([]*model.RemoteCluster, error) {
+func (s *TimerLayerRemoteClusterStore) GetAll(offset int, limit int, filter model.RemoteClusterQueryFilter) ([]*model.RemoteCluster, error) {
 	start := time.Now()
 
-	result, err := s.RemoteClusterStore.GetAll(filter)
+	result, err := s.RemoteClusterStore.GetAll(offset, limit, filter)
 
 	elapsed := float64(time.Since(start)) / float64(time.Second)
 	if s.Root.Metrics != nil {
@@ -9106,22 +9122,6 @@ func (s *TimerLayerTeamStore) GetAll() ([]*model.Team, error) {
 	return result, err
 }
 
-func (s *TimerLayerTeamStore) GetAllTeamsByEmail(email string) ([]*model.Team, error) {
-	start := time.Now()
-
-	result, err := s.TeamStore.GetAllTeamsByEmail(email)
-
-	elapsed := float64(time.Since(start)) / float64(time.Second)
-	if s.Root.Metrics != nil {
-		success := "false"
-		if err == nil {
-			success = "true"
-		}
-		s.Root.Metrics.ObserveStoreMethodDuration("TeamStore.GetAllTeamsByEmail", success, elapsed)
-	}
-	return result, err
-}
-
 func (s *TimerLayerTeamStore) GetAllForExportAfter(limit int, afterID string) ([]*model.TeamForExport, error) {
 	start := time.Now()
 
@@ -9182,6 +9182,22 @@ func (s *TimerLayerTeamStore) GetAllTeamListing() ([]*model.Team, error) {
 			success = "true"
 		}
 		s.Root.Metrics.ObserveStoreMethodDuration("TeamStore.GetAllTeamListing", success, elapsed)
+	}
+	return result, err
+}
+
+func (s *TimerLayerTeamStore) GetAllTeamsByEmail(email string) ([]*model.Team, error) {
+	start := time.Now()
+
+	result, err := s.TeamStore.GetAllTeamsByEmail(email)
+
+	elapsed := float64(time.Since(start)) / float64(time.Second)
+	if s.Root.Metrics != nil {
+		success := "false"
+		if err == nil {
+			success = "true"
+		}
+		s.Root.Metrics.ObserveStoreMethodDuration("TeamStore.GetAllTeamsByEmail", success, elapsed)
 	}
 	return result, err
 }
@@ -9793,10 +9809,10 @@ func (s *TimerLayerTeamStore) UpdateMember(rctx request.CTX, member *model.TeamM
 	return result, err
 }
 
-func (s *TimerLayerTeamStore) UpdateMembersRole(teamID string, userIDs []string) error {
+func (s *TimerLayerTeamStore) UpdateMembersRole(teamID string, adminIDs []string) ([]*model.TeamMember, error) {
 	start := time.Now()
 
-	err := s.TeamStore.UpdateMembersRole(teamID, userIDs)
+	result, err := s.TeamStore.UpdateMembersRole(teamID, adminIDs)
 
 	elapsed := float64(time.Since(start)) / float64(time.Second)
 	if s.Root.Metrics != nil {
@@ -9806,7 +9822,7 @@ func (s *TimerLayerTeamStore) UpdateMembersRole(teamID string, userIDs []string)
 		}
 		s.Root.Metrics.ObserveStoreMethodDuration("TeamStore.UpdateMembersRole", success, elapsed)
 	}
-	return err
+	return result, err
 }
 
 func (s *TimerLayerTeamStore) UpdateMultipleMembers(members []*model.TeamMember) ([]*model.TeamMember, error) {
@@ -10703,10 +10719,10 @@ func (s *TimerLayerUserStore) GetAllProfiles(options *model.UserGetOptions) ([]*
 	return result, err
 }
 
-func (s *TimerLayerUserStore) GetAllProfilesInChannel(ctx context.Context, channelID string, allowFromCache bool) (map[string]*model.User, error) {
+func (s *TimerLayerUserStore) GetAllProfilesInChannel(rctx context.Context, channelID string, allowFromCache bool) (map[string]*model.User, error) {
 	start := time.Now()
 
-	result, err := s.UserStore.GetAllProfilesInChannel(ctx, channelID, allowFromCache)
+	result, err := s.UserStore.GetAllProfilesInChannel(rctx, channelID, allowFromCache)
 
 	elapsed := float64(time.Since(start)) / float64(time.Second)
 	if s.Root.Metrics != nil {
@@ -10923,6 +10939,22 @@ func (s *TimerLayerUserStore) GetMany(ctx context.Context, ids []string) ([]*mod
 			success = "true"
 		}
 		s.Root.Metrics.ObserveStoreMethodDuration("UserStore.GetMany", success, elapsed)
+	}
+	return result, err
+}
+
+func (s *TimerLayerUserStore) GetMfaUsedTimestamps(userID string) ([]int, error) {
+	start := time.Now()
+
+	result, err := s.UserStore.GetMfaUsedTimestamps(userID)
+
+	elapsed := float64(time.Since(start)) / float64(time.Second)
+	if s.Root.Metrics != nil {
+		success := "false"
+		if err == nil {
+			success = "true"
+		}
+		s.Root.Metrics.ObserveStoreMethodDuration("UserStore.GetMfaUsedTimestamps", success, elapsed)
 	}
 	return result, err
 }
@@ -11546,6 +11578,22 @@ func (s *TimerLayerUserStore) SearchWithoutTeam(term string, options *model.User
 		s.Root.Metrics.ObserveStoreMethodDuration("UserStore.SearchWithoutTeam", success, elapsed)
 	}
 	return result, err
+}
+
+func (s *TimerLayerUserStore) StoreMfaUsedTimestamps(userID string, ts []int) error {
+	start := time.Now()
+
+	err := s.UserStore.StoreMfaUsedTimestamps(userID, ts)
+
+	elapsed := float64(time.Since(start)) / float64(time.Second)
+	if s.Root.Metrics != nil {
+		success := "false"
+		if err == nil {
+			success = "true"
+		}
+		s.Root.Metrics.ObserveStoreMethodDuration("UserStore.StoreMfaUsedTimestamps", success, elapsed)
+	}
+	return err
 }
 
 func (s *TimerLayerUserStore) Update(rctx request.CTX, user *model.User, allowRoleUpdate bool) (*model.UserUpdate, error) {

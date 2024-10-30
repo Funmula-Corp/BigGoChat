@@ -6,9 +6,9 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin/plugintest"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/pluginapi"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/public/plugin/plugintest"
+	"git.biggo.com/Funmula/BigGoChat/server/public/pluginapi"
 )
 
 func TestCreateUser(t *testing.T) {
@@ -91,6 +91,35 @@ func TestGetUsers(t *testing.T) {
 		api.On("GetUsers", options).Return(nil, newAppError())
 
 		actualUsers, err := client.User.List(options)
+		require.EqualError(t, err, "here: id, an error occurred")
+		assert.Nil(t, actualUsers)
+	})
+}
+
+func TestListByUserIDs(t *testing.T) {
+	t.Run("success", func(t *testing.T) {
+		api := &plugintest.API{}
+		defer api.AssertExpectations(t)
+		client := pluginapi.NewClient(api, &plugintest.Driver{})
+
+		userIDs := []string{"123"}
+		expectedUsers := []*model.User{{Id: "123", Username: "test"}}
+		api.On("GetUsersByIds", userIDs).Return(expectedUsers, nil)
+
+		actualUsers, err := client.User.ListByUserIDs(userIDs)
+		require.NoError(t, err)
+		assert.Equal(t, expectedUsers, actualUsers)
+	})
+
+	t.Run("failure", func(t *testing.T) {
+		api := &plugintest.API{}
+		defer api.AssertExpectations(t)
+		client := pluginapi.NewClient(api, &plugintest.Driver{})
+
+		userIDs := []string{"123"}
+		api.On("GetUsersByIds", userIDs).Return(nil, newAppError())
+
+		actualUsers, err := client.User.ListByUserIDs(userIDs)
 		require.EqualError(t, err, "here: id, an error occurred")
 		assert.Nil(t, actualUsers)
 	})

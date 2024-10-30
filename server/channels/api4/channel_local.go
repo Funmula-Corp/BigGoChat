@@ -7,10 +7,10 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/audit"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/app"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/audit"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/public/shared/mlog"
 )
 
 func (api *API) InitChannelLocal() {
@@ -176,7 +176,7 @@ func localAddChannelMember(c *Context, w http.ResponseWriter, r *http.Request) {
 	audit.AddEventParameter(auditRec, "post_root_id", postRootId)
 
 	if ok && len(postRootId) == 26 {
-		rootPost, err := c.App.GetSinglePost(postRootId, false)
+		rootPost, err := c.App.GetSinglePost(c.AppContext, postRootId, false)
 		if err != nil {
 			c.Err = err
 			return

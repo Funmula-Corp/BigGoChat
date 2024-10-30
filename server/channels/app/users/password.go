@@ -9,7 +9,7 @@ import (
 
 	"golang.org/x/crypto/bcrypt"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
 )
 
 func CheckUserPassword(user *model.User, password string) error {
@@ -18,16 +18,6 @@ func CheckUserPassword(user *model.User, password string) error {
 	}
 
 	return nil
-}
-
-// HashPassword generates a hash using the bcrypt.GenerateFromPassword
-func HashPassword(password string) string {
-	hash, err := bcrypt.GenerateFromPassword([]byte(password), 10)
-	if err != nil {
-		panic(err)
-	}
-
-	return string(hash)
 }
 
 func ComparePassword(hash string, password string) error {

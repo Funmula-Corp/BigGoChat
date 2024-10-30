@@ -19,7 +19,9 @@ describe('Autocomplete with Elasticsearch - Users', () => {
     let testUsers;
     let testTeam;
 
-    before(() => {
+    before(function() {
+        // Mattermost close source feature
+        this.skip();
         cy.shouldNotRunOnCloudEdition();
 
         // * Check if server has license for Elasticsearch

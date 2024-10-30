@@ -4,8 +4,8 @@
 package einterfaces
 
 import (
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/public/shared/request"
 )
 
 type LdapInterface interface {
@@ -26,5 +26,5 @@ type LdapInterface interface {
 	UpdateProfilePictureIfNecessary(request.CTX, model.User, model.Session)
 	GetADLdapIdFromSAMLId(c request.CTX, authData string) string
 	GetSAMLIdFromADLdapId(c request.CTX, authData string) string
-	GetVendorNameAndVendorVersion(rctx request.CTX) (string, string)
+	GetVendorNameAndVendorVersion(rctx request.CTX) (string, string, error)
 }

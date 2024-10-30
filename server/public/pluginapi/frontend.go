@@ -1,8 +1,8 @@
 package pluginapi
 
 import (
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/public/plugin"
 )
 
 // FrontendService exposes methods to interact with the frontend.

@@ -23,7 +23,9 @@ context('ldap', () => {
 
     let testSettings;
 
-    before(() => {
+    before(function() {
+        // BigGoChat does not support LDAP, SAML, and Keycloak features
+        this.skip();
         // * Check if server has license for LDAP
         cy.apiRequireLicenseForFeature('LDAP');
 

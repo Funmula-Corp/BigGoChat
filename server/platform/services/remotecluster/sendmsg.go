@@ -17,8 +17,8 @@ import (
 
 	"github.com/wiggin77/merror"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/public/shared/mlog"
 )
 
 type SendMsgResultFunc func(msg model.RemoteClusterMsg, rc *model.RemoteCluster, resp *Response, err error)
@@ -41,7 +41,7 @@ func (rcs *Service) BroadcastMsg(ctx context.Context, msg model.RemoteClusterMsg
 	filter := model.RemoteClusterQueryFilter{
 		Topic: msg.Topic,
 	}
-	list, err := rcs.server.GetStore().RemoteCluster().GetAll(filter)
+	list, err := rcs.server.GetStore().RemoteCluster().GetAll(0, 999999, filter)
 	if err != nil {
 		return err
 	}

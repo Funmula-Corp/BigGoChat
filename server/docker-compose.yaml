@@ -53,6 +53,13 @@ services:
     extends:
         file: build/docker-compose.common.yml
         service: elasticsearch
+  opensearch:
+    container_name: mattermost-opensearch
+    ports:
+      - "9201:9201"
+    extends:
+        file: build/docker-compose.common.yml
+        service: opensearch
   dejavu:
     container_name: mattermost-dejavu
     ports:
@@ -109,6 +116,20 @@ services:
     extends:
         file: build/docker-compose.common.yml
         service: searchengine
+  loki:
+    container_name: mattermost-loki
+    ports:
+      - "3100:3100"
+    extends:
+        file: build/docker-compose.common.yml
+        service: loki
+  promtail:
+    container_name: mattermost-promtail
+    ports:
+      - "3180:3180"
+    extends:
+        file: build/docker-compose.common.yml
+        service: promtail
 
   start_dependencies:
     image: mattermost/mattermost-wait-for-dep:latest
@@ -121,13 +142,16 @@ services:
       - inbucket
       - openldap
       - elasticsearch
+      - opensearch
       - prometheus
       - grafana
       - neo4j
       - elasticsearch8
       - searchindexer
       - searchengine
-    command: postgres:5432 mysql:3306 minio:9000 inbucket:9001 openldap:389 elasticsearch:9200 prometheus:9090 grafana:3000 elasticsearch8:9201 searchindexer:2112 searchengine:2112 neo4j:7474
+      - loki
+      - promtail
+    command: postgres:5432 mysql:3306 minio:9000 inbucket:9001 openldap:389 elasticsearch:9200 opensearch:9201 prometheus:9090 grafana:3000 elasticsearch8:9201 searchindexer:2112 searchengine:2112 neo4j:7474 loki:3100 promtail:3180
 
   leader:
     build:

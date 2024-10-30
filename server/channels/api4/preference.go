@@ -7,9 +7,9 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/audit"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/audit"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/public/shared/mlog"
 )
 
 const maxUpdatePreferences = 100
@@ -117,7 +117,7 @@ func updatePreferences(c *Context, w http.ResponseWriter, r *http.Request) {
 
 	for _, pref := range preferences {
 		if pref.Category == model.PreferenceCategoryFlaggedPost {
-			post, err := c.App.GetSinglePost(pref.Name, false)
+			post, err := c.App.GetSinglePost(c.AppContext, pref.Name, false)
 			if err != nil {
 				c.SetInvalidParam("preference.name")
 				return

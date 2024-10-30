@@ -18,8 +18,8 @@ import (
 	"testing"
 	"time"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store/storetest/mocks"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/store"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/store/storetest/mocks"
 	"github.com/stretchr/testify/mock"
 
 	"github.com/dyatlov/go-opengraph/opengraph"
@@ -27,11 +27,11 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app/platform"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/utils/testutils"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/services/httpservice"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/services/imageproxy"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/public/shared/httpservice"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/app/platform"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/utils/testutils"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/platform/services/imageproxy"
 )
 
 func TestPreparePostListForClient(t *testing.T) {

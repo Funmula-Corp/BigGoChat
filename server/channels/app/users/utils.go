@@ -6,7 +6,7 @@ package users
 import (
 	"strings"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
 )
 
 // CheckUserDomain checks that a user's email domain matches a list of space-delimited domains as a string.
@@ -42,7 +42,7 @@ func (us *UserService) sanitizeProfiles(users []*model.User, asAdmin bool) []*mo
 func (us *UserService) SanitizeProfile(user *model.User, asAdmin bool) {
 	options := us.GetSanitizeOptions(asAdmin)
 
-	user.SanitizeProfile(options)
+	user.SanitizeProfile(options, asAdmin)
 }
 
 func (us *UserService) GetSanitizeOptions(asAdmin bool) map[string]bool {

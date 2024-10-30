@@ -1,9 +1,9 @@
 package pluginapi_test
 
 import (
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/pluginapi"
+	"git.biggo.com/Funmula/BigGoChat/server/public/pluginapi"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
+	"git.biggo.com/Funmula/BigGoChat/server/public/plugin"
 )
 
 type Plugin struct {

@@ -3,7 +3,7 @@ package panel
 import (
 	"errors"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/pluginapi"
+	"git.biggo.com/Funmula/BigGoChat/server/public/pluginapi"
 )
 
 type Store interface {

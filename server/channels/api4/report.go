@@ -10,8 +10,8 @@ import (
 	"strconv"
 	"time"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/public/shared/mlog"
 )
 
 func (api *API) InitReports() {
@@ -21,7 +21,7 @@ func (api *API) InitReports() {
 }
 
 func getUsersForReporting(c *Context, w http.ResponseWriter, r *http.Request) {
-	if !(c.IsSystemAdmin()) {
+	if !c.App.SessionHasPermissionTo(*c.AppContext.Session(), model.PermissionSysconsoleReadUserManagementUsers) {
 		c.SetPermissionError(model.PermissionSysconsoleReadUserManagementUsers)
 		return
 	}
@@ -52,7 +52,7 @@ func getUsersForReporting(c *Context, w http.ResponseWriter, r *http.Request) {
 }
 
 func getUserCountForReporting(c *Context, w http.ResponseWriter, r *http.Request) {
-	if !(c.IsSystemAdmin()) {
+	if !c.App.SessionHasPermissionTo(*c.AppContext.Session(), model.PermissionSysconsoleReadUserManagementUsers) {
 		c.SetPermissionError(model.PermissionSysconsoleReadUserManagementUsers)
 		return
 	}
@@ -76,7 +76,7 @@ func getUserCountForReporting(c *Context, w http.ResponseWriter, r *http.Request
 
 func startUsersBatchExport(c *Context, w http.ResponseWriter, r *http.Request) {
 	if !(c.IsSystemAdmin()) {
-		c.SetPermissionError(model.PermissionSysconsoleReadUserManagementUsers)
+		c.SetPermissionError(model.PermissionManageSystem)
 		return
 	}
 

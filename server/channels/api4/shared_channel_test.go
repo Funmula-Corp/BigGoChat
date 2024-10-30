@@ -14,7 +14,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
 )
 
 var (
@@ -108,11 +108,10 @@ func TestGetRemoteClusterById(t *testing.T) {
 
 	// create a remote cluster
 	rc := &model.RemoteCluster{
-		RemoteId:     model.NewId(),
-		Name:         "Test1",
-		RemoteTeamId: model.NewId(),
-		SiteURL:      model.NewId(),
-		CreatorId:    model.NewId(),
+		RemoteId:  model.NewId(),
+		Name:      "Test1",
+		SiteURL:   model.NewId(),
+		CreatorId: model.NewId(),
 	}
 	rc, appErr := th.App.AddRemoteCluster(rc)
 	require.Nil(t, appErr)

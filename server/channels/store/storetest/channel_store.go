@@ -19,11 +19,11 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/timezones"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/utils"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/public/shared/request"
+	"git.biggo.com/Funmula/BigGoChat/server/public/shared/timezones"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/store"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/utils"
 )
 
 type SqlStore interface {
@@ -3651,27 +3651,27 @@ func testChannelStoreGetChannels(t *testing.T, rctx request.CTX, ss store.Store)
 	require.Equal(t, o2.Id, list[1].Id, "missing channel")
 	require.Equal(t, o3.Id, list[2].Id, "missing channel")
 
-	ids, err := ss.Channel().GetAllChannelMembersForUser(m1.UserId, false, false)
+	ids, err := ss.Channel().GetAllChannelMembersForUser(rctx, m1.UserId, false, false)
 	require.NoError(t, err)
 	_, ok := ids[o1.Id]
 	require.True(t, ok, "missing channel")
 
-	ids2, err := ss.Channel().GetAllChannelMembersForUser(m1.UserId, true, false)
+	ids2, err := ss.Channel().GetAllChannelMembersForUser(rctx, m1.UserId, true, false)
 	require.NoError(t, err)
 	_, ok = ids2[o1.Id]
 	require.True(t, ok, "missing channel")
 
-	ids3, err := ss.Channel().GetAllChannelMembersForUser(m1.UserId, true, false)
+	ids3, err := ss.Channel().GetAllChannelMembersForUser(rctx, m1.UserId, true, false)
 	require.NoError(t, err)
 	_, ok = ids3[o1.Id]
 	require.True(t, ok, "missing channel")
 
-	ids4, err := ss.Channel().GetAllChannelMembersForUser(m1.UserId, true, true)
+	ids4, err := ss.Channel().GetAllChannelMembersForUser(rctx, m1.UserId, true, true)
 	require.NoError(t, err)
 	_, ok = ids4[o1.Id]
 	require.True(t, ok, "missing channel")
 
-	ids5, err := ss.Channel().GetAllChannelMembersForUser(model.NewId(), true, true)
+	ids5, err := ss.Channel().GetAllChannelMembersForUser(rctx, model.NewId(), true, true)
 	require.NoError(t, err)
 	require.True(t, len(ids5) == 0)
 
@@ -3859,6 +3859,7 @@ func testChannelStoreGetAllChannels(t *testing.T, rctx request.CTX, ss store.Sto
 	c1.DisplayName = "Channel1" + model.NewId()
 	c1.Name = NewTestId()
 	c1.Type = model.ChannelTypeOpen
+	c1.GroupConstrained = model.NewPointer(true)
 	_, nErr := ss.Channel().Save(rctx, &c1, -1)
 	require.NoError(t, nErr)
 
@@ -3944,6 +3945,19 @@ func testChannelStoreGetAllChannels(t *testing.T, rctx request.CTX, ss store.Sto
 	list, nErr = ss.Channel().GetAllChannels(0, 10, store.ChannelSearchOpts{NotAssociatedToGroup: group.Id})
 	require.NoError(t, nErr)
 	assert.Len(t, list, 1)
+	assert.Equal(t, c3.Id, list[0].Id)
+
+	// GroupConstrained
+	list, nErr = ss.Channel().GetAllChannels(0, 10, store.ChannelSearchOpts{GroupConstrained: true})
+	require.NoError(t, nErr)
+	require.Len(t, list, 1)
+	assert.Equal(t, c1.Id, list[0].Id)
+
+	// ExcludeGroupConstrained
+	list, nErr = ss.Channel().GetAllChannels(0, 10, store.ChannelSearchOpts{ExcludeGroupConstrained: true})
+	require.NoError(t, nErr)
+	require.Len(t, list, 1)
+	assert.Equal(t, c3.Id, list[0].Id)
 
 	// Exclude channel names
 	list, nErr = ss.Channel().GetAllChannels(0, 10, store.ChannelSearchOpts{ExcludeChannelNames: []string{c1.Name}})

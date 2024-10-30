@@ -12,7 +12,7 @@ package commands
 
 import (
 	// Enterprise Deps
-	_ "git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/utils/testutils"
+	_ "git.biggo.com/Funmula/BigGoChat/server/v8/channels/utils/testutils"
 	_ "github.com/gorilla/handlers"
 	_ "github.com/hako/durafmt"
 	_ "github.com/hashicorp/memberlist"
@@ -23,5 +23,4 @@ import (
 	_ "github.com/prometheus/client_golang/prometheus/collectors"
 	_ "github.com/prometheus/client_golang/prometheus/promhttp"
 	_ "github.com/tylerb/graceful"
-	_ "gopkg.in/olivere/elastic.v6"
 )

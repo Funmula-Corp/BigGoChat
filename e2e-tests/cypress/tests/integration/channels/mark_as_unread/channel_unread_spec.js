@@ -51,14 +51,14 @@ describe('channel unread posts', () => {
                 }
             });
 
-            cy.apiLogin(testUser);
+            cy.apiLogin(testUser, {}, true);
             cy.visit(`/${team.name}/channels/town-square`);
         });
     });
 
     it('MM-T246 Mark Post as Unread', () => {
         // # Login as other user
-        cy.apiLogin(otherUser);
+        cy.apiLogin(otherUser, {}, true);
 
         // # Switch to channelA
         switchToChannel(channelA);
@@ -95,7 +95,7 @@ describe('channel unread posts', () => {
 
     it('MM-T256 Mark unread before a page of message in Channel', () => {
         // # Login as other user
-        cy.apiLogin(otherUser);
+        cy.apiLogin(otherUser, {}, true);
 
         // # Switch to channelA
         switchToChannel(channelA);
@@ -128,7 +128,7 @@ describe('channel unread posts', () => {
 
     it('MM-T259 Mark as Unread channel remains unread when receiving new message', () => {
         // # Login as other user
-        cy.apiLogin(otherUser);
+        cy.apiLogin(otherUser, {}, true);
 
         // # Switch to channelA
         switchToChannel(channelA);

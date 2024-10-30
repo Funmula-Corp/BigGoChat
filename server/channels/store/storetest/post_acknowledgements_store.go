@@ -8,9 +8,9 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/store"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/public/shared/request"
 )
 
 func TestPostAcknowledgementsStore(t *testing.T, rctx request.CTX, ss store.Store, s SqlStore) {
@@ -56,7 +56,7 @@ func testPostAcknowledgementsStoreSave(t *testing.T, rctx request.CTX, ss store.
 		_, err := ss.PostAcknowledgement().Save(post.Id, userId1, 0)
 		require.NoError(t, err)
 
-		post, err = ss.Post().GetSingle(post.Id, false)
+		post, err = ss.Post().GetSingle(rctx, post.Id, false)
 		require.NoError(t, err)
 		require.Greater(t, post.UpdateAt, oldUpdateAt)
 	})

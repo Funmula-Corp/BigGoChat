@@ -15,9 +15,9 @@ import (
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/cmd/mmctl/printer"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/cmd/mmctl/printer"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
 )
 
 func (s *MmctlUnitTestSuite) TestImportListAvailableCmdF() {
@@ -163,7 +163,7 @@ func (s *MmctlUnitTestSuite) TestImportJobListCmdF() {
 
 		s.client.
 			EXPECT().
-			GetJobsByType(context.TODO(), model.JobTypeImportProcess, 0, perPage).
+			GetJobs(context.TODO(), model.JobTypeImportProcess, "", 0, perPage).
 			Return(mockJobs, &model.Response{}, nil).
 			Times(1)
 
@@ -196,7 +196,7 @@ func (s *MmctlUnitTestSuite) TestImportJobListCmdF() {
 
 		s.client.
 			EXPECT().
-			GetJobsByType(context.TODO(), model.JobTypeImportProcess, 0, perPage).
+			GetJobs(context.TODO(), model.JobTypeImportProcess, "", 0, perPage).
 			Return(mockJobs, &model.Response{}, nil).
 			Times(1)
 

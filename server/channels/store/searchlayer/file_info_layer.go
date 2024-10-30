@@ -4,11 +4,11 @@
 package searchlayer
 
 import (
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/services/searchengine"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/public/shared/mlog"
+	"git.biggo.com/Funmula/BigGoChat/server/public/shared/request"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/store"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/platform/services/searchengine"
 )
 
 type SearchFileInfoStore struct {
@@ -23,7 +23,7 @@ func (s SearchFileInfoStore) indexFile(rctx request.CTX, file *model.FileInfo) {
 				if file.PostId == "" {
 					return
 				}
-				post, postErr := s.rootStore.Post().GetSingle(file.PostId, false)
+				post, postErr := s.rootStore.Post().GetSingle(rctx, file.PostId, false)
 				if postErr != nil {
 					rctx.Logger().Error("Couldn't get post for file for SearchEngine indexing.", mlog.String("post_id", file.PostId), mlog.String("search_engine", engineCopy.GetName()), mlog.String("file_info_id", file.Id), mlog.Err(postErr))
 					return

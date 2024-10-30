@@ -4,8 +4,8 @@
 package wsapi
 
 import (
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/public/shared/mlog"
 )
 
 func (api *API) InitSystem() {
@@ -36,7 +36,7 @@ func (api *API) websocketNotificationAck(req *model.WebSocketRequest) (map[strin
 	)
 
 	// Count metrics for websocket acks
-	api.App.CountNotificationAck(model.NotificationTypeWebsocket)
+	api.App.CountNotificationAck(model.NotificationTypeWebsocket, model.NotificationNoPlatform)
 
 	status := req.Data["status"]
 	reason := req.Data["reason"]
@@ -57,6 +57,7 @@ func (api *API) websocketNotificationAck(req *model.WebSocketRequest) (map[strin
 		notificationStatus,
 		model.NotificationTypeWebsocket,
 		notificationReason,
+		model.NotificationNoPlatform,
 	)
 
 	return nil, nil

@@ -19,15 +19,15 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
-	oauthgitlab "git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app/oauthproviders/gitlab"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app/users"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
-	storemocks "git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store/storetest/mocks"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/utils/testutils"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/einterfaces"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/einterfaces/mocks"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/public/shared/request"
+	oauthgitlab "git.biggo.com/Funmula/BigGoChat/server/v8/channels/app/oauthproviders/gitlab"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/app/users"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/store"
+	storemocks "git.biggo.com/Funmula/BigGoChat/server/v8/channels/store/storetest/mocks"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/utils/testutils"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/einterfaces"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/einterfaces/mocks"
 )
 
 func TestCreateOAuthUser(t *testing.T) {
@@ -286,8 +286,8 @@ func TestCreateUser(t *testing.T) {
 			package main
 
 			import (
-				"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
-				"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+				"git.biggo.com/Funmula/BigGoChat/server/public/plugin"
+				"git.biggo.com/Funmula/BigGoChat/server/public/model"
 			)
 
 			type MyPlugin struct {
@@ -1209,6 +1209,153 @@ func TestInvalidatePasswordRecoveryTokens(t *testing.T) {
 	})
 }
 
+func TestPasswordChangeSessionTermination(t *testing.T) {
+	th := Setup(t).InitBasic()
+	defer th.TearDown()
+
+	t.Run("user-initiated password change with termination enabled", func(t *testing.T) {
+		th.App.UpdateConfig(func(c *model.Config) {
+			*c.ServiceSettings.TerminateSessionsOnPasswordChange = true
+		})
+
+		session, err := th.App.CreateSession(th.Context, &model.Session{
+			UserId: th.BasicUser2.Id,
+			Roles:  model.SystemUserRoleId,
+		})
+		require.Nil(t, err)
+
+		session2, err := th.App.CreateSession(th.Context, &model.Session{
+			UserId: th.BasicUser2.Id,
+			Roles:  model.SystemUserRoleId,
+		})
+		require.Nil(t, err)
+
+		th.Context.Session().UserId = th.BasicUser2.Id
+		th.Context.Session().Id = session.Id
+
+		err = th.App.UpdatePassword(th.Context, th.BasicUser2, "Password2")
+		require.Nil(t, err)
+
+		session, err = th.App.GetSession(session.Token)
+		require.Nil(t, err)
+		require.False(t, session.IsExpired())
+
+		session2, err = th.App.GetSession(session2.Token)
+		require.NotNil(t, err)
+		require.Nil(t, session2)
+
+		// Cleanup
+		err = th.App.UpdatePassword(th.Context, th.BasicUser2, "Password1")
+		require.Nil(t, err)
+		th.Context.Session().UserId = ""
+		th.Context.Session().Id = ""
+	})
+
+	t.Run("user-initiated password change with termination disabled", func(t *testing.T) {
+		th.App.UpdateConfig(func(c *model.Config) {
+			*c.ServiceSettings.TerminateSessionsOnPasswordChange = false
+		})
+
+		session, err := th.App.CreateSession(th.Context, &model.Session{
+			UserId: th.BasicUser2.Id,
+			Roles:  model.SystemUserRoleId,
+		})
+		require.Nil(t, err)
+
+		session2, err := th.App.CreateSession(th.Context, &model.Session{
+			UserId: th.BasicUser2.Id,
+			Roles:  model.SystemUserRoleId,
+		})
+		require.Nil(t, err)
+
+		th.Context.Session().UserId = th.BasicUser2.Id
+		th.Context.Session().Id = session.Id
+
+		err = th.App.UpdatePassword(th.Context, th.BasicUser2, "Password2")
+		require.Nil(t, err)
+
+		session, err = th.App.GetSession(session.Token)
+		require.Nil(t, err)
+		require.False(t, session.IsExpired())
+
+		session2, err = th.App.GetSession(session2.Token)
+		require.Nil(t, err)
+		require.False(t, session2.IsExpired())
+
+		// Cleanup
+		err = th.App.UpdatePassword(th.Context, th.BasicUser2, "Password1")
+		require.Nil(t, err)
+		th.Context.Session().UserId = ""
+		th.Context.Session().Id = ""
+	})
+
+	t.Run("admin-initiated password change with termination enabled", func(t *testing.T) {
+		th.App.UpdateConfig(func(c *model.Config) {
+			*c.ServiceSettings.TerminateSessionsOnPasswordChange = true
+		})
+
+		session, err := th.App.CreateSession(th.Context, &model.Session{
+			UserId: th.BasicUser2.Id,
+			Roles:  model.SystemUserRoleId,
+		})
+		require.Nil(t, err)
+
+		session2, err := th.App.CreateSession(th.Context, &model.Session{
+			UserId: th.BasicUser2.Id,
+			Roles:  model.SystemUserRoleId,
+		})
+		require.Nil(t, err)
+
+		err = th.App.UpdatePassword(th.Context, th.BasicUser2, "Password2")
+		require.Nil(t, err)
+
+		session, err = th.App.GetSession(session.Token)
+		require.NotNil(t, err)
+		require.Nil(t, session)
+
+		session2, err = th.App.GetSession(session2.Token)
+		require.NotNil(t, err)
+		require.Nil(t, session2)
+
+		// Cleanup
+		err = th.App.UpdatePassword(th.Context, th.BasicUser2, "Password1")
+		require.Nil(t, err)
+	})
+
+	t.Run("admin-initiated password change with termination disabled", func(t *testing.T) {
+		th.App.UpdateConfig(func(c *model.Config) {
+			*c.ServiceSettings.TerminateSessionsOnPasswordChange = false
+		})
+
+		session, err := th.App.CreateSession(th.Context, &model.Session{
+			UserId: th.BasicUser2.Id,
+			Roles:  model.SystemUserRoleId,
+		})
+		require.Nil(t, err)
+
+		session2, err := th.App.CreateSession(th.Context, &model.Session{
+			UserId: th.BasicUser2.Id,
+			Roles:  model.SystemUserRoleId,
+		})
+		require.Nil(t, err)
+
+		err = th.App.UpdatePassword(th.Context, th.BasicUser2, "Password2")
+		require.Nil(t, err)
+
+		session, err = th.App.GetSession(session.Token)
+		require.Nil(t, err)
+		require.False(t, session.IsExpired())
+
+		session2, err = th.App.GetSession(session2.Token)
+		require.Nil(t, err)
+		require.False(t, session2.IsExpired())
+
+		// Cleanup
+		err = th.App.UpdatePassword(th.Context, th.BasicUser2, "Password1")
+		require.Nil(t, err)
+	})
+}
+
 func TestGetViewUsersRestrictions(t *testing.T) {
 	th := Setup(t).InitBasic()
 	defer th.TearDown()
@@ -1704,6 +1851,10 @@ func TestUpdateUserRolesWithUser(t *testing.T) {
 	_, err = th.App.UpdateUserRolesWithUser(th.Context, user, "does not exist", false)
 	require.NotNil(t, err)
 
+	//Test reset to User role
+	user, err = th.App.UpdateUserRolesWithUser(th.Context, user, model.SystemUserRoleId, false)
+	require.Nil(t, err)
+	assert.Equal(t, user.Roles, model.SystemUserRoleId)
 }
 
 func TestUpdateUserRolesWithUserAndVerifiedStatus(t *testing.T) {
@@ -1788,6 +1939,44 @@ func TestUpdateUserRolesWithUserAndVerifiedStatus(t *testing.T) {
 		require.False(t, cm.SchemeVerified)
 		require.True(t, cm.SchemeUser)
 	}
+}
+
+func TestUpdateLastAdminUserRolesWithUser(t *testing.T) {
+	// InitBasic is used to let the first CreateUser call not be
+	// a system_admin
+	th := Setup(t).InitBasic()
+	defer th.TearDown()
+
+	t.Run("Cannot remove if only admin", func(t *testing.T) {
+		// Attempt to downgrade sysadmin.
+		user, appErr := th.App.UpdateUserRolesWithUser(th.Context, th.SystemAdminUser, model.SystemUserRoleId, false)
+		require.NotNil(t, appErr)
+		require.Nil(t, user)
+	})
+
+	t.Run("Cannot remove if only non-Bot admin", func(t *testing.T) {
+		bot := th.CreateBot()
+		user, appErr := th.App.UpdateUserRoles(th.Context, bot.UserId, model.SystemUserRoleId+" "+model.SystemAdminRoleId, false)
+		require.Nil(t, appErr)
+		require.NotNil(t, user)
+
+		// Attempt to downgrade sysadmin.
+		user, appErr = th.App.UpdateUserRolesWithUser(th.Context, th.SystemAdminUser, model.SystemUserRoleId, false)
+		require.NotNil(t, appErr)
+		require.Nil(t, user)
+	})
+
+	t.Run("Can remove if not only non-Bot admin", func(t *testing.T) {
+		systemAdminUser2 := th.CreateUser()
+		user, appErr := th.App.UpdateUserRoles(th.Context, systemAdminUser2.Id, model.SystemUserRoleId+" "+model.SystemAdminRoleId, false)
+		require.Nil(t, appErr)
+		require.NotNil(t, user)
+
+		// Attempt to downgrade sysadmin.
+		user, appErr = th.App.UpdateUserRolesWithUser(th.Context, th.SystemAdminUser, model.SystemUserRoleId, false)
+		require.Nil(t, appErr)
+		require.NotNil(t, user)
+	})
 }
 
 func TestDeactivateMfa(t *testing.T) {

@@ -4,8 +4,8 @@ import (
 	"bytes"
 	"io"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/public/plugin"
 )
 
 // UserService exposes methods to manipulate users.
@@ -45,6 +45,15 @@ func (u *UserService) GetByUsername(username string) (*model.User, error) {
 // Minimum server version: 5.10
 func (u *UserService) List(options *model.UserGetOptions) ([]*model.User, error) {
 	users, appErr := u.api.GetUsers(options)
+
+	return users, normalizeAppErr(appErr)
+}
+
+// ListByUserIDs gets users by their IDs.
+//
+// Minimum server version: 9.8
+func (u *UserService) ListByUserIDs(userIDs []string) ([]*model.User, error) {
+	users, appErr := u.api.GetUsersByIds(userIDs)
 
 	return users, normalizeAppErr(appErr)
 }

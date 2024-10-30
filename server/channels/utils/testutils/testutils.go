@@ -14,9 +14,9 @@ import (
 	"strconv"
 	"time"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/utils"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/utils"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/utils/fileutils"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/utils/fileutils"
 )
 
 func ReadTestFile(name string) ([]byte, error) {

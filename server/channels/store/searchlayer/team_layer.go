@@ -4,9 +4,9 @@
 package searchlayer
 
 import (
-	model "git.biggo.com/Funmula/mattermost-funmula/server/public/model"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
-	store "git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
+	model "git.biggo.com/Funmula/BigGoChat/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/public/shared/request"
+	store "git.biggo.com/Funmula/BigGoChat/server/v8/channels/store"
 )
 
 type SearchTeamStore struct {

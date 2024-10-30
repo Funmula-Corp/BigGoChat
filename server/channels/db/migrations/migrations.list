@@ -240,6 +240,8 @@ channels/db/migrations/mysql/000120_create_channelbookmarks_table.down.sql
 channels/db/migrations/mysql/000120_create_channelbookmarks_table.up.sql
 channels/db/migrations/mysql/000121_remove_true_up_review_history.down.sql
 channels/db/migrations/mysql/000121_remove_true_up_review_history.up.sql
+channels/db/migrations/mysql/000122_preferences_value_length.down.sql
+channels/db/migrations/mysql/000122_preferences_value_length.up.sql
 channels/db/migrations/mysql/000123_create_blocklist.down.sql
 channels/db/migrations/mysql/000123_create_blocklist.up.sql
 channels/db/migrations/mysql/000123_remove_upload_file_permission.down.sql
@@ -254,6 +256,8 @@ channels/db/migrations/mysql/000126_alter_channelmembers_add_exclude_permission.
 channels/db/migrations/mysql/000126_alter_channelmembers_add_exclude_permission.up.sql
 channels/db/migrations/mysql/000127_alter_team_add_creatorid.down.sql
 channels/db/migrations/mysql/000127_alter_team_add_creatorid.up.sql
+channels/db/migrations/mysql/000127_add_mfa_used_ts_to_users.down.sql
+channels/db/migrations/mysql/000127_add_mfa_used_ts_to_users.up.sql
 channels/db/migrations/postgres/000001_create_teams.down.sql
 channels/db/migrations/postgres/000001_create_teams.up.sql
 channels/db/migrations/postgres/000002_create_team_members.down.sql
@@ -494,6 +498,8 @@ channels/db/migrations/postgres/000120_create_channelbookmarks_table.down.sql
 channels/db/migrations/postgres/000120_create_channelbookmarks_table.up.sql
 channels/db/migrations/postgres/000121_remove_true_up_review_history.down.sql
 channels/db/migrations/postgres/000121_remove_true_up_review_history.up.sql
+channels/db/migrations/postgres/000122_preferences_value_length.down.sql
+channels/db/migrations/postgres/000122_preferences_value_length.up.sql
 channels/db/migrations/postgres/000123_create_blackuser.down.sql
 channels/db/migrations/postgres/000123_create_blackuser.up.sql
 channels/db/migrations/postgres/000123_remove_upload_file_permission.down.sql
@@ -508,3 +514,5 @@ channels/db/migrations/postgres/000126_alter_channelmembers_add_exclude_permissi
 channels/db/migrations/postgres/000126_alter_channelmembers_add_exclude_permission.up.sql
 channels/db/migrations/postgres/000127_alter_team_add_creatorid.down.sql
 channels/db/migrations/postgres/000127_alter_team_add_creatorid.up.sql
+channels/db/migrations/postgres/000127_add_mfa_used_ts_to_users.down.sql
+channels/db/migrations/postgres/000127_add_mfa_used_ts_to_users.up.sql

@@ -15,10 +15,10 @@ import (
 	"strconv"
 	"strings"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/i18n"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/public/shared/i18n"
+	"git.biggo.com/Funmula/BigGoChat/server/public/shared/mlog"
+	"git.biggo.com/Funmula/BigGoChat/server/public/shared/request"
 )
 
 type PluginAPI struct {
@@ -244,6 +244,10 @@ func (api *PluginAPI) DeleteUser(userID string) *model.AppError {
 
 func (api *PluginAPI) GetUsers(options *model.UserGetOptions) ([]*model.User, *model.AppError) {
 	return api.app.GetUsersFromProfiles(options)
+}
+
+func (api *PluginAPI) GetUsersByIds(usersID []string) ([]*model.User, *model.AppError) {
+	return api.app.GetUsers(usersID)
 }
 
 func (api *PluginAPI) GetUser(userID string) (*model.User, *model.AppError) {
@@ -704,7 +708,7 @@ func (api *PluginAPI) GetPostThread(postID string) (*model.PostList, *model.AppE
 }
 
 func (api *PluginAPI) GetPost(postID string) (*model.Post, *model.AppError) {
-	post, appErr := api.app.GetSinglePost(postID, false)
+	post, appErr := api.app.GetSinglePost(api.ctx, postID, false)
 	if post != nil {
 		post = post.ForPlugin()
 	}

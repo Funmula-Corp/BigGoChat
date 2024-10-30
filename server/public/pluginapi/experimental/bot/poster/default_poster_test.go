@@ -7,10 +7,10 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin/plugintest"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/pluginapi"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/pluginapi/experimental/bot/poster/mock_import"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/public/plugin/plugintest"
+	"git.biggo.com/Funmula/BigGoChat/server/public/pluginapi"
+	"git.biggo.com/Funmula/BigGoChat/server/public/pluginapi/experimental/bot/poster/mock_import"
 )
 
 const (

@@ -17,13 +17,13 @@ import (
 
 	sq "github.com/mattermost/squirrel"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store/searchlayer"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/utils"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/einterfaces"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/store"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/store/searchlayer"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/utils"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/einterfaces"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/public/shared/mlog"
+	"git.biggo.com/Funmula/BigGoChat/server/public/shared/request"
 )
 
 // Regex to get quoted strings
@@ -859,7 +859,7 @@ func (s *SqlPostStore) Get(ctx context.Context, id string, opts model.GetPostsOp
 	return pl, nil
 }
 
-func (s *SqlPostStore) GetSingle(id string, inclDeleted bool) (*model.Post, error) {
+func (s *SqlPostStore) GetSingle(rctx request.CTX, id string, inclDeleted bool) (*model.Post, error) {
 	query := s.getQueryBuilder().
 		Select("p.*").
 		From("Posts p").
@@ -881,7 +881,7 @@ func (s *SqlPostStore) GetSingle(id string, inclDeleted bool) (*model.Post, erro
 	}
 
 	var post model.Post
-	err = s.GetReplicaX().Get(&post, queryString, args...)
+	err = s.DBXFromContext(rctx.Context()).Get(&post, queryString, args...)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, store.NewErrNotFound("Post", id)
@@ -1171,7 +1171,7 @@ func (s *SqlPostStore) prepareThreadedResponse(posts []*postWithExtra, extended,
 			return nil, err
 		}
 		for _, user := range users {
-			user.SanitizeProfile(sanitizeOptions)
+			user.SanitizeProfile(sanitizeOptions, false)
 			usersMap[user.Id] = user
 		}
 	} else {
@@ -2502,7 +2502,7 @@ func (s *SqlPostStore) GetPostsBatchForIndexing(startTime int64, startPostID str
 	//     (CreateAt, Id) > (?, ?)
 	// The wrong choice for any of the two databases makes the query go from
 	// milliseconds to dozens of seconds.
-	// More information in: https://git.biggo.com/Funmula/mattermost-funmula/pull/26517
+	// More information in: https://git.biggo.com/Funmula/BigGoChat/pull/26517
 	// and https://community.mattermost.com/core/pl/ui5dz96shinetb8nq83myggbma
 	if s.DriverName() == model.DatabaseDriverMysql {
 		query := `SELECT

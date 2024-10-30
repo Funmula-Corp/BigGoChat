@@ -7,13 +7,12 @@ import (
 	"bytes"
 	"html/template"
 	"io"
-	"os"
 	"path/filepath"
 	"sync"
 
 	"github.com/fsnotify/fsnotify"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/utils/fileutils"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/utils/fileutils"
 )
 
 // Container represents a set of templates that can be render
@@ -33,12 +32,7 @@ type Data struct {
 }
 
 func GetTemplateDirectory() (string, bool) {
-	templatesDir := "templates"
-	if mattermostPath := os.Getenv("MM_SERVER_PATH"); mattermostPath != "" {
-		templatesDir = filepath.Join(mattermostPath, templatesDir)
-	}
-
-	return fileutils.FindDir(templatesDir)
+	return fileutils.FindDir("templates")
 }
 
 // NewFromTemplates creates a new templates container using a

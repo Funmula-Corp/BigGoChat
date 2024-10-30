@@ -43,6 +43,7 @@ describe('Search', () => {
         cy.focused().tab();
         cy.focused().tab();
         cy.focused().tab();
+        cy.focused().tab();
 
         //* now the popup should be closed
         cy.get('#searchbar-help-popup').should('not.be.visible');

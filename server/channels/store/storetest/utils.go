@@ -4,7 +4,7 @@
 package storetest
 
 import (
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
 )
 
 // This function has a copy of it in app/helper_test

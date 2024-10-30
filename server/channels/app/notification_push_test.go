@@ -17,13 +17,13 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app/platform"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store/storetest/mocks"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/testlib"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/config"
-	fmocks "git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/shared/filestore/mocks"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/i18n"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/public/shared/i18n"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/app/platform"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/store/storetest/mocks"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/testlib"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/config"
+	fmocks "git.biggo.com/Funmula/BigGoChat/server/v8/platform/shared/filestore/mocks"
 )
 
 func TestDoesNotifyPropsAllowPushNotification(t *testing.T) {
@@ -1641,6 +1641,10 @@ func BenchmarkPushNotificationThroughput(b *testing.B) {
 	mockStore.On("Session").Return(&mockSessionStore)
 	mockStore.On("Preference").Return(&mockPreferenceStore)
 	mockStore.On("GetDBSchemaVersion").Return(1, nil)
+
+	mockThreadStore := mocks.ThreadStore{}
+	mockThreadStore.On("GetTotalUnreadMentions", mock.AnythingOfType("string"), mock.AnythingOfType("string"), mock.Anything).Return(int64(3), nil)
+	mockStore.On("Thread").Return(&mockThreadStore)
 
 	// create 50 users, each having 2 sessions.
 	type userSession struct {

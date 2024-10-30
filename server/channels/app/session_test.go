@@ -15,7 +15,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
 )
 
 func TestGetSessionIdleTimeoutInMinutes(t *testing.T) {
@@ -370,11 +370,10 @@ func TestGetRemoteClusterSession(t *testing.T) {
 	remoteID := model.NewId()
 
 	rc := model.RemoteCluster{
-		RemoteId:     remoteID,
-		RemoteTeamId: model.NewId(),
-		Name:         "test",
-		Token:        token,
-		CreatorId:    model.NewId(),
+		RemoteId:  remoteID,
+		Name:      "test",
+		Token:     token,
+		CreatorId: model.NewId(),
 	}
 
 	_, err := th.GetSqlStore().RemoteCluster().Save(&rc)

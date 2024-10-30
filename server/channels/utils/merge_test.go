@@ -11,7 +11,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/utils"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/utils"
 )
 
 // Test merging maps alone. This isolates the complexity of merging maps from merging maps recursively in
@@ -1096,6 +1096,18 @@ func TestMergeWithVeryComplexStruct(t *testing.T) {
 		base.Struct1.Pi = newInt(937)
 		base.Struct1p.UI = 734
 		base.Struct1.Struct2.Sli = []int{123123, 1243123}
+
+		merged, err := mergeTestStructs(base, patch)
+		require.NoError(t, err)
+
+		assert.NotEqual(t, base, *merged)
+		assert.Equal(t, patch, *merged)
+	})
+
+	t.Run("blank string in patch overwrites base string b/c empty string is not nil", func(t *testing.T) {
+		setupStructs(t)
+
+		patch.S = ""
 
 		merged, err := mergeTestStructs(base, patch)
 		require.NoError(t, err)

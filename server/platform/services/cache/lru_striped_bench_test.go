@@ -11,7 +11,7 @@ import (
 
 	"github.com/cespare/xxhash/v2"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/services/cache"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/platform/services/cache"
 )
 
 const (

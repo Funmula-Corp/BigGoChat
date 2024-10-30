@@ -14,9 +14,9 @@ import (
 	"strconv"
 	"strings"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/audit"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/public/shared/mlog"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/audit"
 )
 
 const (
@@ -414,6 +414,10 @@ func regenerateTeamInviteId(c *Context, w http.ResponseWriter, r *http.Request) 
 
 	if !c.App.SessionHasPermissionToTeam(*c.AppContext.Session(), c.Params.TeamId, model.PermissionManageTeam) {
 		c.SetPermissionError(model.PermissionManageTeam)
+		return
+	}
+	if !c.App.SessionHasPermissionToTeam(*c.AppContext.Session(), c.Params.TeamId, model.PermissionInviteUser) {
+		c.SetPermissionError(model.PermissionInviteUser)
 		return
 	}
 

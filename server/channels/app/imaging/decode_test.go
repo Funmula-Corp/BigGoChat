@@ -9,7 +9,7 @@ import (
 	"sync"
 	"testing"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/utils/fileutils"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/utils/fileutils"
 
 	"github.com/stretchr/testify/require"
 )

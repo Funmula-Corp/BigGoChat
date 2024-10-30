@@ -6,11 +6,11 @@ package searchlayer
 import (
 	"sync/atomic"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/services/searchengine"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/store"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/platform/services/searchengine"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/public/shared/mlog"
+	"git.biggo.com/Funmula/BigGoChat/server/public/shared/request"
 )
 
 type SearchStore struct {
@@ -90,7 +90,7 @@ func (s *SearchStore) indexUser(rctx request.CTX, user *model.User) {
 					userTeamsIds = append(userTeamsIds, team.Id)
 				}
 
-				userChannelMembers, err := s.Channel().GetAllChannelMembersForUser(user.Id, false, true)
+				userChannelMembers, err := s.Channel().GetAllChannelMembersForUser(rctx, user.Id, false, true)
 				if err != nil {
 					rctx.Logger().Error("Encountered error indexing user", mlog.String("user_id", user.Id), mlog.String("search_engine", engineCopy.GetName()), mlog.Err(err))
 					return

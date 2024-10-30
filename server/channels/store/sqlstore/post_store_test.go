@@ -8,8 +8,8 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store/searchtest"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store/storetest"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/store/searchtest"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/store/storetest"
 )
 
 func TestPostStore(t *testing.T) {

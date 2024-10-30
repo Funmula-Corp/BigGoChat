@@ -10,8 +10,8 @@ import (
 	"fmt"
 	"log"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/public/shared/mlog"
 )
 
 func init() {
@@ -1661,6 +1661,35 @@ func (s *apiRPCServer) GetUsers(args *Z_GetUsersArgs, returns *Z_GetUsersReturns
 		returns.A, returns.B = hook.GetUsers(args.A)
 	} else {
 		return encodableError(fmt.Errorf("API GetUsers called but not implemented."))
+	}
+	return nil
+}
+
+type Z_GetUsersByIdsArgs struct {
+	A []string
+}
+
+type Z_GetUsersByIdsReturns struct {
+	A []*model.User
+	B *model.AppError
+}
+
+func (g *apiRPCClient) GetUsersByIds(userIDs []string) ([]*model.User, *model.AppError) {
+	_args := &Z_GetUsersByIdsArgs{userIDs}
+	_returns := &Z_GetUsersByIdsReturns{}
+	if err := g.client.Call("Plugin.GetUsersByIds", _args, _returns); err != nil {
+		log.Printf("RPC call to GetUsersByIds API failed: %s", err.Error())
+	}
+	return _returns.A, _returns.B
+}
+
+func (s *apiRPCServer) GetUsersByIds(args *Z_GetUsersByIdsArgs, returns *Z_GetUsersByIdsReturns) error {
+	if hook, ok := s.impl.(interface {
+		GetUsersByIds(userIDs []string) ([]*model.User, *model.AppError)
+	}); ok {
+		returns.A, returns.B = hook.GetUsersByIds(args.A)
+	} else {
+		return encodableError(fmt.Errorf("API GetUsersByIds called but not implemented."))
 	}
 	return nil
 }

@@ -8,14 +8,20 @@ import (
 	"strconv"
 	"time"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/public/shared/mlog"
+	"git.biggo.com/Funmula/BigGoChat/server/public/shared/request"
 )
 
 func (ps *PlatformService) ReturnSessionToPool(session *model.Session) {
 	if session != nil {
 		session.Id = ""
+		// All existing prop fields are cleared once the session is retrieved from the pool.
+		// To speed up that process, clear the props here to avoid doing that in the hot path.
+		//
+		// If the request handler spawns a goroutine that uses the session, it might race with this code.
+		// In that case, the handler should copy the session and use the copy in the goroutine.
+		clear(session.Props)
 		ps.sessionPool.Put(session)
 	}
 }
@@ -70,7 +76,7 @@ func (ps *PlatformService) ClearAllUsersSessionCacheLocal() {
 }
 
 func (ps *PlatformService) ClearUserSessionCache(userID string) {
-	ps.ClearUserSessionCacheLocal(userID)
+	ps.ClearSessionCacheForUserSkipClusterSend(userID)
 
 	if ps.clusterIFace != nil {
 		msg := &model.ClusterMessage{

@@ -16,14 +16,14 @@ import (
 	"strings"
 	"sync"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app/imports"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app/teams"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app/users"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/utils"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/public/shared/mlog"
+	"git.biggo.com/Funmula/BigGoChat/server/public/shared/request"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/app/imports"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/app/teams"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/app/users"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/store"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/utils"
 )
 
 // -- Bulk Import Functions --
@@ -555,6 +555,12 @@ func (a *App) importUser(rctx request.CTX, data *imports.UserImportData, dryRun 
 			}
 		} else {
 			user.UpdateMentionKeysFromUsername("")
+		}
+	}
+
+	if data.CustomStatus != nil {
+		if err := user.SetCustomStatus(data.CustomStatus); err != nil {
+			return model.NewAppError("importUser", "app.import.custom_status.error", nil, "", http.StatusBadRequest).Wrap(err)
 		}
 	}
 
@@ -1319,7 +1325,7 @@ func compareFilesContent(fileA, fileB io.Reader, bufSize int64) (bool, error) {
 		// (BenchmarkCompareFilesContent) and it showed to provide
 		// a good compromise between processing speed and allocated memory,
 		// especially in the common case of the readers being part of an S3 stored ZIP file.
-		// See https://git.biggo.com/Funmula/mattermost-funmula/pull/26629 for full context.
+		// See https://git.biggo.com/Funmula/BigGoChat/pull/26629 for full context.
 		bufSize = 1024 * 1024 * 2 // 2MB
 	}
 

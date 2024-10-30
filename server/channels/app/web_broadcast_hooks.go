@@ -8,8 +8,8 @@ import (
 	"fmt"
 	"slices"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app/platform"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/app/platform"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
 	"github.com/pkg/errors"
 )
 
@@ -139,7 +139,7 @@ func incrementWebsocketCounter(wc *platform.WebConn) {
 		return
 	}
 
-	wc.Platform.Metrics().IncrementNotificationCounter(model.NotificationTypeWebsocket)
+	wc.Platform.Metrics().IncrementNotificationCounter(model.NotificationTypeWebsocket, model.NotificationNoPlatform)
 }
 
 // getTypedArg returns a correctly typed hook argument with the given key, reinterpreting the type using JSON encoding

@@ -15,9 +15,9 @@ import (
 	sq "github.com/mattermost/squirrel"
 	"github.com/pkg/errors"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/store"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/public/shared/request"
 )
 
 const (
@@ -314,6 +314,26 @@ func (jss SqlJobStore) GetAllByStatus(c request.CTX, status string) ([]*model.Jo
 	}
 
 	return statuses, nil
+}
+
+func (jss SqlJobStore) GetAllByTypeAndStatusPage(c request.CTX, jobType []string, status string, offset int, limit int) ([]*model.Job, error) {
+	query, args, err := jss.getQueryBuilder().
+		Select("*").
+		From("Jobs").
+		Where(sq.Eq{"Type": jobType, "Status": status}).
+		OrderBy("CreateAt DESC").
+		Limit(uint64(limit)).
+		Offset(uint64(offset)).ToSql()
+	if err != nil {
+		return nil, errors.Wrap(err, "job_tosql")
+	}
+
+	jobs := []*model.Job{}
+	if err = jss.GetReplicaX().Select(&jobs, query, args...); err != nil {
+		return nil, errors.Wrapf(err, "failed to find Jobs with type=%s and status=%s", strings.Join(jobType, ","), status)
+	}
+
+	return jobs, nil
 }
 
 func (jss SqlJobStore) GetNewestJobByStatusAndType(status string, jobType string) (*model.Job, error) {

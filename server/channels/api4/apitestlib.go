@@ -23,18 +23,18 @@ import (
 	"github.com/minio/minio-go/v7/pkg/credentials"
 	"github.com/stretchr/testify/require"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin/plugintest/mock"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store/storetest/mocks"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/testlib"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/web"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/wsapi"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/config"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/services/searchengine"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/public/plugin/plugintest/mock"
+	"git.biggo.com/Funmula/BigGoChat/server/public/shared/mlog"
+	"git.biggo.com/Funmula/BigGoChat/server/public/shared/request"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/app"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/store"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/store/storetest/mocks"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/testlib"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/web"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/wsapi"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/config"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/platform/services/searchengine"
 )
 
 type TestHelper struct {
@@ -1151,6 +1151,11 @@ func CheckCreatedStatus(tb testing.TB, resp *model.Response) {
 	checkHTTPStatus(tb, resp, http.StatusCreated)
 }
 
+func CheckNoContentStatus(tb testing.TB, resp *model.Response) {
+	tb.Helper()
+	checkHTTPStatus(tb, resp, http.StatusNoContent)
+}
+
 func CheckForbiddenStatus(tb testing.TB, resp *model.Response) {
 	tb.Helper()
 	checkHTTPStatus(tb, resp, http.StatusForbidden)
@@ -1169,6 +1174,11 @@ func CheckNotFoundStatus(tb testing.TB, resp *model.Response) {
 func CheckBadRequestStatus(tb testing.TB, resp *model.Response) {
 	tb.Helper()
 	checkHTTPStatus(tb, resp, http.StatusBadRequest)
+}
+
+func CheckUnprocessableEntityStatus(tb testing.TB, resp *model.Response) {
+	tb.Helper()
+	checkHTTPStatus(tb, resp, http.StatusUnprocessableEntity)
 }
 
 func CheckNotImplementedStatus(tb testing.TB, resp *model.Response) {

@@ -3,12 +3,12 @@ package pluginapi_test
 import (
 	"testing"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin/plugintest"
+	"git.biggo.com/Funmula/BigGoChat/server/public/plugin/plugintest"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/pluginapi"
+	"git.biggo.com/Funmula/BigGoChat/server/public/pluginapi"
 )
 
 func TestLogrus(t *testing.T) {

@@ -14,7 +14,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
 )
 
 const CustomDefaultsEnvVar = "MM_CUSTOM_DEFAULTS_PATH"

@@ -13,13 +13,13 @@ import (
 	"strings"
 	"time"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/audit"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/utils"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/utils/fileutils"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/i18n"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/app"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/audit"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/utils"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/utils/fileutils"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/public/shared/i18n"
+	"git.biggo.com/Funmula/BigGoChat/server/public/shared/mlog"
 )
 
 func (w *Web) InitOAuth() {
@@ -339,7 +339,45 @@ func completeOAuth(c *Context, w http.ResponseWriter, r *http.Request) {
 	} else if action == model.OAuthActionSSOToEmail {
 		redirectURL = app.GetProtocol(r) + "://" + r.Host + "/claim?email=" + url.QueryEscape(props["email"])
 	} else {
-		session, err := c.App.DoLogin(c.AppContext, w, r, user, "", isMobile, false, false)
+		desktopToken := ""
+		if val, ok := props["desktop_token"]; ok {
+			desktopToken = val
+		}
+
+		// If it's a desktop login we generate a token and redirect to another endpoint to handle session creation
+		if desktopToken != "" {
+			serverToken, serverTokenErr := c.App.GenerateAndSaveDesktopToken(time.Now().Unix(), user)
+			if serverTokenErr != nil {
+				serverTokenErr.Translate(c.AppContext.T)
+				c.LogErrorByCode(serverTokenErr)
+				renderError(serverTokenErr)
+				return
+			}
+
+			queryString := map[string]string{
+				"client_token": desktopToken,
+				"server_token": *serverToken,
+			}
+			if val, ok := props["redirect_to"]; ok {
+				queryString["redirect_to"] = val
+			}
+			if strings.HasPrefix(desktopToken, "dev-") {
+				queryString["isDesktopDev"] = "true"
+			}
+
+			redirectURL = utils.AppendQueryParamsToURL(c.GetSiteURLHeader()+"/login/desktop", queryString)
+
+			auditRec.Success()
+			c.LogAudit("success")
+
+			w.Header().Set("Content-Type", "text/html; charset=utf-8")
+			http.Redirect(w, r, redirectURL, http.StatusTemporaryRedirect)
+			return
+		}
+
+		isOAuthUser := user.IsOAuthUser()
+
+		session, err := c.App.DoLogin(c.AppContext, w, r, user, "", isMobile, isOAuthUser, false)
 		if err != nil {
 			err.Translate(c.AppContext.T)
 			c.Logger.Error(err.Error())
@@ -372,34 +410,6 @@ func completeOAuth(c *Context, w http.ResponseWriter, r *http.Request) {
 		}
 		// For web
 		c.App.AttachSessionCookies(c.AppContext, w, r)
-
-		desktopToken := ""
-		if val, ok := props["desktop_token"]; ok {
-			desktopToken = val
-		}
-
-		if desktopToken != "" {
-			serverToken, serverTokenErr := c.App.GenerateAndSaveDesktopToken(time.Now().Unix(), user)
-			if serverTokenErr != nil {
-				serverTokenErr.Translate(c.AppContext.T)
-				c.LogErrorByCode(serverTokenErr)
-				renderError(serverTokenErr)
-				return
-			}
-
-			queryString := map[string]string{
-				"client_token": desktopToken,
-				"server_token": *serverToken,
-			}
-			if val, ok := props["redirect_to"]; ok {
-				queryString["redirect_to"] = val
-			}
-			if strings.HasPrefix(desktopToken, "dev-") {
-				queryString["isDesktopDev"] = "true"
-			}
-
-			redirectURL = utils.AppendQueryParamsToURL(c.GetSiteURLHeader()+"/login/desktop", queryString)
-		}
 	}
 
 	auditRec.Success()

@@ -125,7 +125,8 @@ describe('Manage Members', () => {
         });
     });
 
-    it('MM-T2338 Remove a team member and ensure they can rejoin with invite link', () => {
+    // BigGoChat does not support user invitation via link
+    it.skip('MM-T2338 Remove a team member and ensure they can rejoin with invite link', () => {
         promoteToChannelOrTeamAdmin(testUser.id, testTeam.id, 'teams');
 
         // # Create a new user

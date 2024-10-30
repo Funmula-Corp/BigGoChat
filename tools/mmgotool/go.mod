@@ -1,4 +1,4 @@
-module git.biggo.com/Funmula/mattermost-funmula/tools/mmgotool
+module git.biggo.com/Funmula/BigGoChat/tools/mmgotool
 
 go 1.21
 

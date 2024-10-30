@@ -10,7 +10,7 @@ import (
 
 	"github.com/cespare/xxhash/v2"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
 )
 
 // LRUStriped keeps LRU caches in buckets in order to lower mutex contention.

@@ -16,10 +16,10 @@ import (
 	"github.com/pkg/errors"
 	"gopkg.in/yaml.v2"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/config"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/public/shared/mlog"
+	"git.biggo.com/Funmula/BigGoChat/server/public/shared/request"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/config"
 )
 
 const (
@@ -41,10 +41,11 @@ func (a *App) GenerateSupportPacket(c request.CTX, options *model.SupportPacketO
 		"cpu profile":     a.createCPUProfile,
 		"heap profile":    a.createHeapProfile,
 		"goroutines":      a.createGoroutineProfile,
+		"metadata":        a.createSupportPacketMetadata,
 	}
 
 	if options.IncludeLogs {
-		functions["mattermost log"] = a.getMattermostLog
+		functions["mattermost log"] = a.GetMattermostLog
 		functions["notification log"] = a.getNotificationsLog
 	}
 
@@ -123,8 +124,19 @@ func (a *App) generateSupportPacketYaml(c request.CTX) (*model.FileData, error) 
 	/* LDAP */
 
 	var vendorName, vendorVersion string
-	if ldapInterface := a.Ldap(); ldapInterface != nil {
-		vendorName, vendorVersion = ldapInterface.GetVendorNameAndVendorVersion(c)
+	ldap := a.Ldap()
+	if ldap != nil {
+		vendorName, vendorVersion, err = ldap.GetVendorNameAndVendorVersion(c)
+		if err != nil {
+			rErr = multierror.Append(errors.Wrap(err, "error while getting LDAP vendor info"))
+		}
+
+		if vendorName == "" {
+			vendorName = "unknown"
+		}
+		if vendorVersion == "" {
+			vendorVersion = "unknown"
+		}
 	}
 
 	/* Elastic Search */
@@ -316,7 +328,7 @@ func (a *App) getNotificationsLog(_ request.CTX) (*model.FileData, error) {
 	return fileData, nil
 }
 
-func (a *App) getMattermostLog(_ request.CTX) (*model.FileData, error) {
+func (a *App) GetMattermostLog(ctx request.CTX) (*model.FileData, error) {
 	if !*a.Config().LogSettings.EnableFile {
 		return nil, errors.New("Unable to retrieve mattermost.log because LogSettings: EnableFile is set to false")
 	}
@@ -393,6 +405,24 @@ func (a *App) createGoroutineProfile(_ request.CTX) (*model.FileData, error) {
 	fileData := &model.FileData{
 		Filename: "goroutines",
 		Body:     b.Bytes(),
+	}
+	return fileData, nil
+}
+
+func (a *App) createSupportPacketMetadata(_ request.CTX) (*model.FileData, error) {
+	metadata, err := model.GeneratePacketMetadata(model.SupportPacketType, a.TelemetryId(), a.License(), nil)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to generate packet metadata")
+	}
+
+	b, err := yaml.Marshal(metadata)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to marshal packet metadata into yaml")
+	}
+
+	fileData := &model.FileData{
+		Filename: model.PacketMetadataFileName,
+		Body:     b,
 	}
 	return fileData, nil
 }

@@ -21,11 +21,12 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/vmihailenco/msgpack/v5"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/i18n"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/public/plugin"
+	"git.biggo.com/Funmula/BigGoChat/server/public/shared/i18n"
+	"git.biggo.com/Funmula/BigGoChat/server/public/shared/mlog"
+	"git.biggo.com/Funmula/BigGoChat/server/public/shared/request"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/store/sqlstore"
 )
 
 const (
@@ -60,15 +61,17 @@ type pluginWSPostedHook struct {
 }
 
 type WebConnConfig struct {
-	WebSocket    *websocket.Conn
-	Session      model.Session
-	TFunc        i18n.TranslateFunc
-	Locale       string
-	ConnectionID string
-	Active       bool
-	ReuseCount   int
-	OriginClient string
-	PostedAck    bool
+	WebSocket     *websocket.Conn
+	Session       model.Session
+	TFunc         i18n.TranslateFunc
+	Locale        string
+	ConnectionID  string
+	Active        bool
+	ReuseCount    int
+	OriginClient  string
+	PostedAck     bool
+	RemoteAddress string
+	XForwardedFor string
 
 	// These aren't necessary to be exported to api layer.
 	sequence         int
@@ -120,6 +123,10 @@ type WebConn struct {
 
 	// The client type behind the connection (i.e. web, desktop or mobile)
 	originClient string
+	// The remote address from the original HTTP Upgrade request
+	remoteAddress string
+	// The X-Forwarded-For HTTP header value from the origina HTTP Upgrade request
+	xForwardedFor string
 
 	activeChannelID                 atomic.Value
 	activeTeamID                    atomic.Value
@@ -187,15 +194,6 @@ func (ps *PlatformService) PopulateWebConnConfig(s *model.Session, cfg *WebConnC
 
 // NewWebConn returns a new WebConn instance.
 func (ps *PlatformService) NewWebConn(cfg *WebConnConfig, suite SuiteIFace, runner HookRunner) *WebConn {
-	userID := cfg.Session.UserId
-	session := cfg.Session
-	if cfg.Session.UserId != "" {
-		ps.Go(func() {
-			ps.SetStatusOnline(userID, false)
-			ps.UpdateLastActivityAtIfNeeded(session)
-		})
-	}
-
 	// Disable TCP_NO_DELAY for higher throughput
 	var tcpConn *net.TCPConn
 	switch conn := cfg.WebSocket.UnderlyingConn().(type) {
@@ -244,10 +242,26 @@ func (ps *PlatformService) NewWebConn(cfg *WebConnConfig, suite SuiteIFace, runn
 		lastLogTimeSlow:    time.Now(),
 		lastLogTimeFull:    time.Now(),
 		originClient:       cfg.OriginClient,
+		remoteAddress:      cfg.RemoteAddress,
+		xForwardedFor:      cfg.XForwardedFor,
 	}
-	wc.Active.Store(cfg.Active)
 
 	wc.SetSession(&cfg.Session)
+	userID := cfg.Session.UserId
+	if userID != "" {
+		// UpdateLastActivityAtIfNeeded might block if the Hub is busy.
+		// Create a goroutine to avoid blocking the creation of the websocket connection.
+		ps.Go(func() {
+			ps.SetStatusOnline(userID, false)
+			session := wc.GetSession()
+			if session != nil {
+				ps.UpdateLastActivityAtIfNeeded(*session)
+			}
+		})
+	}
+
+	wc.Active.Store(cfg.Active)
+
 	wc.SetSessionToken(cfg.Session.Token)
 	wc.SetSessionExpiresAt(cfg.Session.ExpiresAt)
 	wc.SetConnectionID(cfg.ConnectionID)
@@ -379,6 +393,8 @@ func (wc *WebConn) GetSession() *model.Session {
 
 // SetSession sets the session of the connection.
 func (wc *WebConn) SetSession(v *model.Session) {
+	// Clone the session first as WebConn takes ownership of the object
+	// and the web.Hub will return it to the [sync.Pool] once the WebConn gets removed.
 	if v != nil {
 		v = v.DeepCopy()
 	}
@@ -477,6 +493,12 @@ func (wc *WebConn) readPump() {
 		if session := wc.GetSession(); session != nil {
 			clonedReq.Session.Id = session.Id
 		}
+
+		if clonedReq.Data == nil {
+			clonedReq.Data = map[string]any{}
+		}
+		clonedReq.Data[model.WebSocketRemoteAddr] = wc.remoteAddress
+		clonedReq.Data[model.WebSocketXForwardedFor] = wc.xForwardedFor
 
 		wc.pluginPosted <- pluginWSPostedHook{wc.GetConnectionID(), wc.UserId, clonedReq}
 	}
@@ -895,7 +917,12 @@ func (wc *WebConn) ShouldSendEvent(msg *model.WebSocketEvent) bool {
 		}
 
 		if wc.allChannelMembers == nil {
-			result, err := wc.Platform.Store.Channel().GetAllChannelMembersForUser(wc.UserId, false, false)
+			result, err := wc.Platform.Store.Channel().GetAllChannelMembersForUser(
+				sqlstore.RequestContextWithMaster(request.EmptyContext(wc.Platform.logger)),
+				wc.UserId,
+				false,
+				false,
+			)
 			if err != nil {
 				mlog.Error("webhub.shouldSendEvent.", mlog.Err(err))
 				return false

@@ -8,7 +8,7 @@ import (
 	"io"
 	"net/http"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
 )
 
 // APIs for self-hosted workspaces to communicate with the backing customer & payments system.

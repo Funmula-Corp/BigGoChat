@@ -12,8 +12,8 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/utils"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/utils"
 )
 
 func TestUpdateAssetsSubpathFromConfig(t *testing.T) {
@@ -110,7 +110,7 @@ func TestUpdateAssetsSubpath(t *testing.T) {
 				baseCSS,
 				baseManifestJSON,
 				"/subpath",
-				fmt.Errorf("failed to find 'Content-Security-Policy' meta tag to rewrite"),
+				fmt.Errorf("failed to update root.html: %w", fmt.Errorf("failed to find 'Content-Security-Policy' meta tag to rewrite")),
 				contentSecurityPolicyNotFoundHTML,
 				baseCSS,
 				baseManifestJSON,
@@ -121,7 +121,7 @@ func TestUpdateAssetsSubpath(t *testing.T) {
 				baseCSS,
 				baseManifestJSON,
 				"/subpath",
-				fmt.Errorf("failed to find 'Content-Security-Policy' meta tag to rewrite"),
+				fmt.Errorf("failed to update root.html: %w", fmt.Errorf("failed to find 'Content-Security-Policy' meta tag to rewrite")),
 				contentSecurityPolicyNotFound2HTML,
 				baseCSS,
 				baseManifestJSON,

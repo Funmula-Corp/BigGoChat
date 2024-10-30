@@ -11,10 +11,10 @@ import (
 	"strconv"
 	"strings"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/services/remotecluster"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/public/shared/mlog"
+	"git.biggo.com/Funmula/BigGoChat/server/public/shared/request"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/platform/services/remotecluster"
 )
 
 var (
@@ -356,7 +356,7 @@ func (scs *Service) upsertSyncPost(post *model.Post, targetChannel *model.Channe
 	post.RemoteId = model.NewString(rc.RemoteId)
 	rctx := request.EmptyContext(scs.server.Log())
 
-	rpost, err := scs.server.GetStore().Post().GetSingle(post.Id, true)
+	rpost, err := scs.server.GetStore().Post().GetSingle(rctx, post.Id, true)
 	if err != nil {
 		if _, ok := err.(errNotFound); !ok {
 			return nil, fmt.Errorf("error checking sync post: %w", err)
@@ -389,7 +389,7 @@ func (scs *Service) upsertSyncPost(post *model.Post, targetChannel *model.Channe
 		}
 	} else if post.DeleteAt > 0 {
 		// delete post
-		rpost, appErr = scs.app.DeletePost(request.EmptyContext(scs.server.Log()), post.Id, post.UserId)
+		rpost, appErr = scs.app.DeletePost(rctx, post.Id, post.UserId)
 		if appErr == nil {
 			scs.server.Log().Log(mlog.LvlSharedChannelServiceDebug, "Deleted sync post",
 				mlog.String("post_id", post.Id),
@@ -426,7 +426,8 @@ func (scs *Service) upsertSyncReaction(reaction *model.Reaction, targetChannel *
 
 	// check that the reaction's post is in the target channel. This ensures the reaction can only be associated with a post
 	// that is in a channel shared with the remote.
-	post, err := scs.server.GetStore().Post().GetSingle(reaction.PostId, true)
+	rctx := request.EmptyContext(scs.server.Log())
+	post, err := scs.server.GetStore().Post().GetSingle(rctx, reaction.PostId, true)
 	if err != nil {
 		return nil, fmt.Errorf("error fetching post for reaction sync: %w", err)
 	}

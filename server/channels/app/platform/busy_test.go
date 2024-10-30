@@ -10,8 +10,8 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/einterfaces"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/einterfaces"
 )
 
 func TestBusySet(t *testing.T) {
@@ -24,11 +24,11 @@ func TestBusySet(t *testing.T) {
 
 	require.False(t, busy.IsBusy())
 
-	busy.Set(time.Millisecond * 500)
+	busy.Set(5 * time.Second)
 	require.True(t, busy.IsBusy())
 	require.True(t, compareBusyState(t, busy, cluster.Busy))
 
-	// should automatically expire after 500ms.
+	// should automatically expire after 5s.
 	require.Eventually(t, isNotBusy, time.Second*15, time.Millisecond*100)
 	// allow a moment for cluster to sync.
 	require.Eventually(t, func() bool { return compareBusyState(t, busy, cluster.Busy) }, time.Second*15, time.Millisecond*20)

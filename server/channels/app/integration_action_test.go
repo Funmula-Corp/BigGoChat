@@ -17,7 +17,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
 )
 
 // Test for MM-13598 where an invalid integration URL was causing a crash
@@ -530,7 +530,7 @@ func TestPostActionProps(t *testing.T) {
 	require.Nil(t, err)
 	assert.True(t, len(clientTriggerId) == 26)
 
-	newPost, nErr := th.App.Srv().Store().Post().GetSingle(post.Id, false)
+	newPost, nErr := th.App.Srv().Store().Post().GetSingle(th.Context, post.Id, false)
 	require.NoError(t, nErr)
 
 	assert.True(t, newPost.IsPinned)
@@ -596,8 +596,8 @@ func TestSubmitInteractiveDialog(t *testing.T) {
 			"net/http"
 			"encoding/json"
 
-			"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
-			"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+			"git.biggo.com/Funmula/BigGoChat/server/public/plugin"
+			"git.biggo.com/Funmula/BigGoChat/server/public/model"
 		)
 
 		type MyPlugin struct {
@@ -887,8 +887,8 @@ func TestPostActionRelativePluginURL(t *testing.T) {
 			"net/http"
 			"encoding/json"
 
-			"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
-			"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+			"git.biggo.com/Funmula/BigGoChat/server/public/plugin"
+			"git.biggo.com/Funmula/BigGoChat/server/public/model"
 		)
 
 		type MyPlugin struct {
@@ -1089,7 +1089,7 @@ func TestDoPluginRequest(t *testing.T) {
 			"reflect"
 			"sort"
 
-			"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
+			"git.biggo.com/Funmula/BigGoChat/server/public/plugin"
 		)
 
 		type MyPlugin struct {

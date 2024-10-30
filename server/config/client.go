@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"strings"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
 )
 
 // GenerateClientConfig renders the given configuration for a client.
@@ -97,6 +97,7 @@ func GenerateClientConfig(c *model.Config, telemetryID string, license *model.Li
 
 	props["DisableRefetchingOnBrowserFocus"] = strconv.FormatBool(*c.ExperimentalSettings.DisableRefetchingOnBrowserFocus)
 	props["DisableWakeUpReconnectHandler"] = strconv.FormatBool(*c.ExperimentalSettings.DisableWakeUpReconnectHandler)
+	props["UsersStatusAndProfileFetchingPollIntervalMilliseconds"] = strconv.FormatInt(*c.ExperimentalSettings.UsersStatusAndProfileFetchingPollIntervalMilliseconds, 10)
 
 	// Set default values for all options that require a license.
 	props["ExperimentalEnableAuthenticationTransfer"] = "true"
@@ -293,6 +294,7 @@ func GenerateLimitedClientConfig(c *model.Config, telemetryID string, license *m
 	props["AppDownloadLink"] = *c.NativeAppSettings.AppDownloadLink
 	props["AndroidAppDownloadLink"] = *c.NativeAppSettings.AndroidAppDownloadLink
 	props["IosAppDownloadLink"] = *c.NativeAppSettings.IosAppDownloadLink
+	props["MobileExternalBrowser"] = strconv.FormatBool(*c.NativeAppSettings.MobileExternalBrowser)
 
 	props["DiagnosticId"] = telemetryID
 	props["TelemetryId"] = telemetryID

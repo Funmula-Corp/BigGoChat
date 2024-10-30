@@ -16,6 +16,7 @@ import {getRandomId} from '../../../utils';
 describe('Archived channels', () => {
     let testTeam;
     let testUser;
+    let testAdmin;
 
     before(() => {
         cy.apiUpdateConfig({
@@ -24,13 +25,18 @@ describe('Archived channels', () => {
             },
         });
 
-        cy.apiInitSetup().then(({team, user}) => {
+        cy.apiInitSetup({promoteNewUserAsAdmin: true}).then(({team, user}) => {
             testTeam = team;
-            testUser = user;
+            testAdmin = user;
+
+            cy.apiCreateUser().then(({user}) => {
+                testUser = user;
+                cy.apiAddUserToTeam(team.id, testUser.id);
+            });
         });
     });
-
-    it('MM-T1682 Join an archived public channel by selecting a permalink to one of its posts', () => {
+    
+    it('MM-T1682-1 User cannot join an archived public channel by selecting a permalink to one of its posts', () => {
         // # Log in as another user
         cy.apiAdminLogin();
 
@@ -52,19 +58,56 @@ describe('Archived channels', () => {
 
                 // # Log out and back in as the test user
                 cy.apiLogin(testUser);
+                cy.reload();
+
+                // * Verify that we've logged in as the test user
+                verifyUsername(testUser.username);
 
                 // # Visit the permalink
                 cy.visit(permalink);
 
+                cy.findByText('Permalink belongs to a deleted message or to a channel to which you do not have access.').should('be.visible');
+                cy.visit('/');
+            });
+        });
+    });
+
+    it('MM-T1682-2 Admin can join an archived public channel by selecting a permalink to one of its posts', () => {
+        // # Log in as another user
+        cy.apiAdminLogin();
+
+        // # Create a new channel
+        cy.apiCreateChannel(testTeam.id, 'channel', 'channel').then(({channel}) => {
+            // # Make a post in the new channel and get a permalink for it
+            cy.postMessageAs({
+                sender: getAdminAccount(),
+                message: 'post',
+                channelId: channel.id,
+            }).then((post) => {
+                const permalink = `/${testTeam.name}/pl/${post.id}`;
+
+                // # Visit the channel
+                cy.visit(`/${testTeam.name}/channels/${channel.name}`);
+
+                // # Archive the channel
+                cy.uiArchiveChannel();
+
+                // # Log out and back in as the test user
+                cy.apiLogin(testAdmin);
+                cy.reload();
+
                 // * Verify that we've logged in as the test user
-                verifyUsername(testUser.username);
+                verifyUsername(testAdmin.username);
+
+                // # Visit the permalink
+                cy.visit(permalink);
 
                 verifyViewingArchivedChannel(channel);
             });
         });
     });
 
-    it('MM-T1683 Join an archived channel by selecting a link to channel', () => {
+    it('MM-T1683-1 User cannot join an archived channel by selecting a link to channel', () => {
         // # Log in as another user
         cy.apiAdminLogin();
 
@@ -73,7 +116,7 @@ describe('Archived channels', () => {
             const channelLink = `/${testTeam.name}/channels/${channel.name}`;
 
             // # Visit the channel and archive it
-            cy.visit(`/${testTeam.name}/channels/${channel.name}`);
+            cy.visit(channelLink);
             cy.uiArchiveChannel();
 
             // # Visit off-topic
@@ -91,12 +134,55 @@ describe('Archived channels', () => {
 
             // # Log out and back in as the test user
             cy.apiLogin(testUser);
+            cy.reload();
 
             // # Visit off-topic
             cy.visit(`/${testTeam.name}/channels/off-topic`);
 
             // * Verify that we've logged in as the test user
             verifyUsername(testUser.username);
+
+            // * Verify that the link exists and then click on it
+            cy.contains('a', linkText).should('be.visible').click();
+
+            cy.get('.loading__content', { timeout: 5000 }).should('be.visible');
+        });
+    });
+
+    it('MM-T1683-2 Admin can join an archived channel by selecting a link to channel', () => {
+        // # Log in as another user
+        cy.apiAdminLogin();
+
+        // # Create a new channel
+        cy.apiCreateChannel(testTeam.id, 'channel', 'channel').then(({channel}) => {
+            const channelLink = `/${testTeam.name}/channels/${channel.name}`;
+
+            // # Visit the channel and archive it
+            cy.visit(channelLink);
+            cy.uiArchiveChannel();
+
+            // # Visit off-topic
+            cy.visit(`/${testTeam.name}/channels/off-topic`);
+
+            // # Make a post linking to the archived channel
+            const linkText = `link ${getRandomId()}`;
+            cy.getCurrentChannelId().then((currentChannelId) => {
+                cy.postMessageAs({
+                    sender: getAdminAccount(),
+                    message: `This is a link: [${linkText}](${channelLink})`,
+                    channelId: currentChannelId,
+                });
+            });
+
+            // # Log out and back in as the test user
+            cy.apiLogin(testAdmin);
+            cy.reload();
+
+            // # Visit off-topic
+            cy.visit(`/${testTeam.name}/channels/off-topic`);
+
+            // * Verify that we've logged in as the test user
+            verifyUsername(testAdmin.username);
 
             // * Verify that the link exists and then click on it
             cy.contains('a', linkText).should('be.visible').click();

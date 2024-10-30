@@ -12,7 +12,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
 )
 
 func TestPluginDeadlock(t *testing.T) {
@@ -24,8 +24,8 @@ func TestPluginDeadlock(t *testing.T) {
 			package main
 
 			import (
-				"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
-				"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+				"git.biggo.com/Funmula/BigGoChat/server/public/plugin"
+				"git.biggo.com/Funmula/BigGoChat/server/public/model"
 			)
 
 			type MyPlugin struct {
@@ -112,8 +112,8 @@ func TestPluginDeadlock(t *testing.T) {
 			package main
 
 			import (
-				"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
-				"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+				"git.biggo.com/Funmula/BigGoChat/server/public/plugin"
+				"git.biggo.com/Funmula/BigGoChat/server/public/model"
 			)
 
 			type MyPlugin struct {
@@ -147,8 +147,8 @@ func TestPluginDeadlock(t *testing.T) {
 			package main
 
 			import (
-				"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
-				"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+				"git.biggo.com/Funmula/BigGoChat/server/public/plugin"
+				"git.biggo.com/Funmula/BigGoChat/server/public/model"
 			)
 
 			type MyPlugin struct {
@@ -218,8 +218,8 @@ func TestPluginDeadlock(t *testing.T) {
 			package main
 
 			import (
-				"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
-				"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+				"git.biggo.com/Funmula/BigGoChat/server/public/plugin"
+				"git.biggo.com/Funmula/BigGoChat/server/public/model"
 			)
 
 			type MyPlugin struct {

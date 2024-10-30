@@ -10,15 +10,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
 )
-
-func TestComparePassword(t *testing.T) {
-	hash := HashPassword("Test")
-
-	assert.NoError(t, ComparePassword(hash, "Test"), "Passwords don't match")
-	assert.Error(t, ComparePassword(hash, "Test2"), "Passwords should not have matched")
-}
 
 func TestIsPasswordValidWithSettings(t *testing.T) {
 	for name, tc := range map[string]struct {

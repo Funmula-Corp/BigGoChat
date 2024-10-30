@@ -13,7 +13,7 @@ import {buildQueryString} from './helpers';
 // https://api.mattermost.com/#tag/users
 // *****************************************************************************
 
-Cypress.Commands.add('apiLogin', (user, requestOptions = {}) => {
+Cypress.Commands.add('apiLogin', (user, requestOptions = {}, reload = false) => {
     return cy.request({
         headers: {'X-Requested-With': 'XMLHttpRequest'},
         url: '/api/v4/users/login',
@@ -26,6 +26,10 @@ Cypress.Commands.add('apiLogin', (user, requestOptions = {}) => {
         }
 
         if (response.status === 200) {
+            if (reload) {
+                cy.reload();
+            }
+
             return cy.wrap({
                 user: {
                     ...response.body,

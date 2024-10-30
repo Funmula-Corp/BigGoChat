@@ -22,8 +22,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/utils/fileutils"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/utils/fileutils"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
 )
 
 func TestGetPing(t *testing.T) {
@@ -398,6 +398,46 @@ func TestGetLogs(t *testing.T) {
 
 	th.Client.Logout(context.Background())
 	_, resp, err = th.Client.GetLogs(context.Background(), 0, 10)
+	require.Error(t, err)
+	CheckUnauthorizedStatus(t, resp)
+}
+
+func TestDownloadLogs(t *testing.T) {
+	th := Setup(t)
+	defer th.TearDown()
+
+	for i := 0; i < 20; i++ {
+		th.TestLogger.Info(strconv.Itoa(i))
+	}
+	err := th.TestLogger.Flush()
+	require.NoError(t, err, "failed to flush log")
+
+	t.Run("Download Logs as system admin", func(t *testing.T) {
+		resData, resp, err2 := th.SystemAdminClient.DownloadLogs(context.Background())
+		require.NoError(t, err2)
+
+		require.Equal(t, "text/plain", resp.Header.Get("Content-Type"))
+		require.Contains(t, resp.Header.Get("Content-Disposition"), "attachment;filename=\"mattermost.log\"")
+
+		bodyString := string(resData)
+		for i := 0; i < 20; i++ {
+			assert.Contains(t, bodyString, fmt.Sprintf(`"msg":"%d"`, i))
+		}
+	})
+
+	th.TestForSystemAdminAndLocal(t, func(t *testing.T, c *model.Client4) {
+		th.App.UpdateConfig(func(cfg *model.Config) { *cfg.ExperimentalSettings.RestrictSystemAdmin = true })
+		_, resp, err2 := th.Client.DownloadLogs(context.Background())
+		require.Error(t, err2)
+		CheckForbiddenStatus(t, resp)
+	})
+
+	_, resp, err := th.Client.DownloadLogs(context.Background())
+	require.Error(t, err)
+	CheckForbiddenStatus(t, resp)
+
+	th.Client.Logout(context.Background())
+	_, resp, err = th.Client.DownloadLogs(context.Background())
 	require.Error(t, err)
 	CheckUnauthorizedStatus(t, resp)
 }

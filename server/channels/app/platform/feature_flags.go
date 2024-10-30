@@ -8,8 +8,8 @@ import (
 	"os"
 	"time"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app/featureflag"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/app/featureflag"
+	"git.biggo.com/Funmula/BigGoChat/server/public/shared/mlog"
 )
 
 // SetupFeatureFlags called on startup and when the cluster leader changes.

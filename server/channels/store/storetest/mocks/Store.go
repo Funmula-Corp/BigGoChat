@@ -7,14 +7,14 @@ package mocks
 import (
 	context "context"
 
-	mlog "git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
+	mlog "git.biggo.com/Funmula/BigGoChat/server/public/shared/mlog"
 	mock "github.com/stretchr/testify/mock"
 
-	model "git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	model "git.biggo.com/Funmula/BigGoChat/server/public/model"
 
 	sql "database/sql"
 
-	store "git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
+	store "git.biggo.com/Funmula/BigGoChat/server/v8/channels/store"
 
 	time "time"
 )

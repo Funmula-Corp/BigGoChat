@@ -4,7 +4,7 @@ import (
 	"log"
 	"time"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
+	"git.biggo.com/Funmula/BigGoChat/server/public/plugin"
 )
 
 func HandleJobOnceCalls(key string, props any) {

@@ -232,6 +232,11 @@ func (z *User) DecodeMsg(dc *msgp.Reader) (err error) {
 			return
 		}
 	}
+	err = z.MfaUsedTimestamps.DecodeMsg(dc)
+	if err != nil {
+		err = msgp.WrapError(err, "MfaUsedTimestamps")
+		return
+	}
 	return
 }
 
@@ -438,6 +443,11 @@ func (z *User) EncodeMsg(en *msgp.Writer) (err error) {
 			return
 		}
 	}
+	err = z.MfaUsedTimestamps.EncodeMsg(en)
+	if err != nil {
+		err = msgp.WrapError(err, "MfaUsedTimestamps")
+		return
+	}
 	return
 }
 
@@ -504,6 +514,11 @@ func (z *User) MarshalMsg(b []byte) (o []byte, err error) {
 		o = msgp.AppendNil(o)
 	} else {
 		o = msgp.AppendString(o, *z.Mobilephone)
+	}
+	o, err = z.MfaUsedTimestamps.MarshalMsg(o)
+	if err != nil {
+		err = msgp.WrapError(err, "MfaUsedTimestamps")
+		return
 	}
 	return
 }
@@ -728,6 +743,11 @@ func (z *User) UnmarshalMsg(bts []byte) (o []byte, err error) {
 			return
 		}
 	}
+	bts, err = z.MfaUsedTimestamps.UnmarshalMsg(bts)
+	if err != nil {
+		err = msgp.WrapError(err, "MfaUsedTimestamps")
+		return
+	}
 	o = bts
 	return
 }
@@ -752,6 +772,7 @@ func (z *User) Msgsize() (s int) {
 	} else {
 		s += msgp.StringPrefixSize + len(*z.Mobilephone)
 	}
+	s += msgp.Int64Size + msgp.BoolSize + msgp.StringPrefixSize + len(z.BotDescription) + msgp.Int64Size + msgp.StringPrefixSize + len(z.TermsOfServiceId) + msgp.Int64Size + msgp.BoolSize + msgp.Int64Size + z.MfaUsedTimestamps.Msgsize()
 	return
 }
 

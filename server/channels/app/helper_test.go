@@ -20,16 +20,16 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store/sqlstore"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store/storetest/mocks"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/testlib"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/config"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/einterfaces"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/public/plugin"
+	"git.biggo.com/Funmula/BigGoChat/server/public/shared/mlog"
+	"git.biggo.com/Funmula/BigGoChat/server/public/shared/request"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/store"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/store/sqlstore"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/store/storetest/mocks"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/testlib"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/config"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/einterfaces"
 )
 
 type TestHelper struct {
@@ -166,6 +166,18 @@ func Setup(tb testing.TB, options ...Option) *TestHelper {
 	mainHelper.PreloadMigrations()
 
 	return setupTestHelper(dbStore, false, true, nil, options, tb)
+}
+
+func SetupEnterprise(tb testing.TB, options ...Option) *TestHelper {
+	if testing.Short() {
+		tb.SkipNow()
+	}
+	dbStore := mainHelper.GetStore()
+	dbStore.DropAllTables()
+	dbStore.MarkSystemRanUnitTests()
+	mainHelper.PreloadMigrations()
+
+	return setupTestHelper(dbStore, true, true, nil, options, tb)
 }
 
 func SetupConfig(tb testing.TB, updateConfig func(cfg *model.Config)) *TestHelper {

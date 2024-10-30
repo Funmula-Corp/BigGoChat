@@ -21,14 +21,14 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/utils/testutils"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/einterfaces/mocks"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/shared/mail"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/public/shared/request"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/app"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/utils/testutils"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/einterfaces/mocks"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/platform/shared/mail"
 
-	_ "git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app/oauthproviders/gitlab"
+	_ "git.biggo.com/Funmula/BigGoChat/server/v8/channels/app/oauthproviders/gitlab"
 )
 
 func TestCreateUser(t *testing.T) {
@@ -199,6 +199,47 @@ func TestCreateUserAudit(t *testing.T) {
 
 	require.Contains(t, string(data), email)
 	require.NotContains(t, string(data), password)
+}
+
+func TestUserLoginAudit(t *testing.T) {
+	logFile, err := os.CreateTemp("", "adv.log")
+	require.NoError(t, err)
+	defer os.Remove(logFile.Name())
+
+	os.Setenv("MM_EXPERIMENTALAUDITSETTINGS_FILEENABLED", "true")
+	os.Setenv("MM_EXPERIMENTALAUDITSETTINGS_FILENAME", logFile.Name())
+	defer os.Unsetenv("MM_EXPERIMENTALAUDITSETTINGS_FILEENABLED")
+	defer os.Unsetenv("MM_EXPERIMENTALAUDITSETTINGS_FILENAME")
+
+	options := []app.Option{app.WithLicense(model.NewTestLicense("advanced_logging"))}
+	th := SetupWithServerOptions(t, options)
+	defer th.TearDown()
+	_, err = th.Client.Logout(context.Background())
+	require.NoError(t, err)
+
+	user, resp, err := th.Client.Login(context.Background(), th.BasicUser.Email, th.BasicUser.Password)
+	require.NoError(t, err)
+	CheckOKStatus(t, resp)
+	assert.Equal(t, th.BasicUser.Id, user.Id)
+
+	sess, resp, err := th.Client.GetSessions(context.Background(), user.Id, "")
+	require.NoError(t, err)
+	CheckOKStatus(t, resp)
+	assert.Len(t, sess, 1)
+	assert.Equal(t, th.BasicUser.Id, sess[0].UserId)
+
+	// Forcing a flush before attempting to read log's content.
+	err = th.Server.Audit.Flush()
+	require.NoError(t, err)
+
+	require.NoError(t, logFile.Sync())
+
+	data, err := io.ReadAll(logFile)
+	require.NoError(t, err)
+	require.NotEmpty(t, data)
+
+	// ensure we are auditing the user_id and session_id
+	require.Contains(t, string(data), fmt.Sprintf("\"event_name\":\"login\",\"status\":\"success\",\"actor\":{\"user_id\":\"%s\",\"session_id\":\"%s\"", user.Id, sess[0].Id))
 }
 
 func TestCreateUserInputFilter(t *testing.T) {
@@ -7805,4 +7846,76 @@ func TestRefreshScheme(t *testing.T) {
 	resp, appErr := th.Client.RefreshScheme(context.Background(), th.BasicUser.Id)
 	require.Error(t, appErr)
 	CheckNotFoundStatus(t, resp)
+}
+
+func TestLoginWithDesktopToken(t *testing.T) {
+	th := Setup(t).InitBasic()
+	defer th.TearDown()
+
+	t.Run("login SAML User with desktop token", func(t *testing.T) {
+		samlUser := th.CreateUserWithAuth(model.UserAuthServiceSaml)
+
+		token, appErr := th.App.GenerateAndSaveDesktopToken(time.Now().Unix(), samlUser)
+		assert.Nil(t, appErr)
+
+		user, _, err := th.Client.LoginWithDesktopToken(context.Background(), *token, "")
+		require.NoError(t, err)
+		assert.Equal(t, samlUser.Id, user.Id)
+
+		sessions, _, err := th.SystemAdminClient.GetSessions(context.Background(), samlUser.Id, "")
+		require.NoError(t, err)
+
+		assert.Len(t, sessions, 1)
+		assert.Equal(t, "true", sessions[0].Props["isSaml"])
+		assert.Equal(t, "false", sessions[0].Props["isOAuthUser"])
+	})
+
+	t.Run("login OAuth User with desktop token", func(t *testing.T) {
+		gitlabUser := th.CreateUserWithAuth(model.UserAuthServiceGitlab)
+
+		token, appErr := th.App.GenerateAndSaveDesktopToken(time.Now().Unix(), gitlabUser)
+		assert.Nil(t, appErr)
+
+		user, _, err := th.Client.LoginWithDesktopToken(context.Background(), *token, "")
+		require.NoError(t, err)
+		assert.Equal(t, gitlabUser.Id, user.Id)
+
+		sessions, _, err := th.SystemAdminClient.GetSessions(context.Background(), gitlabUser.Id, "")
+		require.NoError(t, err)
+
+		assert.Len(t, sessions, 1)
+		assert.Equal(t, "false", sessions[0].Props["isSaml"])
+		assert.Equal(t, "true", sessions[0].Props["isOAuthUser"])
+	})
+
+	t.Run("login email user with desktop token", func(t *testing.T) {
+		// Sleep to avoid rate limit error
+		time.Sleep(time.Second)
+		user := th.CreateUser()
+
+		token, appErr := th.App.GenerateAndSaveDesktopToken(time.Now().Unix(), user)
+		assert.Nil(t, appErr)
+
+		_, resp, err := th.Client.LoginWithDesktopToken(context.Background(), *token, "")
+		require.Error(t, err)
+		CheckUnauthorizedStatus(t, resp)
+	})
+
+	t.Run("invalid desktop token on login", func(t *testing.T) {
+		user := th.CreateUser()
+
+		_, appErr := th.App.GenerateAndSaveDesktopToken(time.Now().Unix(), user)
+		assert.Nil(t, appErr)
+
+		invalidToken := "testinvalidToken"
+		token := &invalidToken
+
+		_, _, err := th.Client.LoginWithDesktopToken(context.Background(), *token, "")
+		require.Error(t, err)
+
+		sessions, _, err := th.SystemAdminClient.GetSessions(context.Background(), user.Id, "")
+		require.NoError(t, err)
+
+		assert.Len(t, sessions, 0)
+	})
 }

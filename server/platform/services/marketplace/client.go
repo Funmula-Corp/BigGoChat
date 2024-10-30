@@ -12,8 +12,8 @@ import (
 
 	"github.com/pkg/errors"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/services/httpservice"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/public/shared/httpservice"
 )
 
 // Client is the programmatic interface to the marketplace server API.

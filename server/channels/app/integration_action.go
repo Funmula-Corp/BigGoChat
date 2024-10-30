@@ -32,11 +32,11 @@ import (
 
 	"github.com/gorilla/mux"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/utils"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/store"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/utils"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/public/shared/mlog"
+	"git.biggo.com/Funmula/BigGoChat/server/public/shared/request"
 )
 
 func (a *App) DoPostActionWithCookie(c request.CTX, postID, actionId, userID, selectedOption string, cookie *model.PostActionCookie) (string, *model.AppError) {
@@ -67,7 +67,7 @@ func (a *App) DoPostActionWithCookie(c request.CTX, postID, actionId, userID, se
 	// Start all queries here for parallel execution
 	pchan := make(chan store.StoreResult[*model.Post], 1)
 	go func() {
-		post, err := a.Srv().Store().Post().GetSingle(postID, false)
+		post, err := a.Srv().Store().Post().GetSingle(c, postID, false)
 		pchan <- store.StoreResult[*model.Post]{Data: post, NErr: err}
 		close(pchan)
 	}()

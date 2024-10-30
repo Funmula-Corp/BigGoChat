@@ -14,7 +14,7 @@ export function getCustomEmoji() {
 
 export function verifyLastPostedEmoji(emojiName, emojiImageFile) {
     cy.getLastPost().find('p').find('span > span').then((imageSpan) => {
-        cy.expect(imageSpan.attr('title')).to.equal(emojiName);
+        cy.expect(imageSpan.attr('alt')).to.equal(emojiName);
 
         // # Filter out the url from the css background property
         // url("https://imageurl") => https://imageurl
@@ -24,6 +24,7 @@ export function verifyLastPostedEmoji(emojiName, emojiImageFile) {
         cy.fixture(emojiImageFile).then((overrideImage) => {
             cy.request({url, encoding: 'base64'}).then((response) => {
                 expect(response.status).to.equal(200);
+                // This BASE64 comparison does not match, and the reason is currently unknown
                 expect(response.body).to.eq(overrideImage);
             });
         });

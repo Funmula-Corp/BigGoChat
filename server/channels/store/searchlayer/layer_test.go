@@ -8,13 +8,13 @@ import (
 	"sync"
 	"testing"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store/searchlayer"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store/sqlstore"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store/storetest"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/testlib"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/services/searchengine"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/store/searchlayer"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/store/sqlstore"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/store/storetest"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/testlib"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/platform/services/searchengine"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/public/shared/mlog"
 	"github.com/stretchr/testify/require"
 )
 

@@ -11,7 +11,7 @@ import (
 	"net/http"
 	timePkg "time"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
 )
 
 type apiTimerLayer struct {
@@ -157,6 +157,13 @@ func (api *apiTimerLayer) GetUsers(options *model.UserGetOptions) ([]*model.User
 	startTime := timePkg.Now()
 	_returnsA, _returnsB := api.apiImpl.GetUsers(options)
 	api.recordTime(startTime, "GetUsers", _returnsB == nil)
+	return _returnsA, _returnsB
+}
+
+func (api *apiTimerLayer) GetUsersByIds(userIDs []string) ([]*model.User, *model.AppError) {
+	startTime := timePkg.Now()
+	_returnsA, _returnsB := api.apiImpl.GetUsersByIds(userIDs)
+	api.recordTime(startTime, "GetUsersByIds", _returnsB == nil)
 	return _returnsA, _returnsB
 }
 

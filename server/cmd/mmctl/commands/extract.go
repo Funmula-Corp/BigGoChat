@@ -9,10 +9,10 @@ import (
 	"strconv"
 	"time"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/cmd/mmctl/client"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/cmd/mmctl/printer"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/cmd/mmctl/client"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/cmd/mmctl/printer"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
 	"github.com/spf13/cobra"
 )
 
@@ -107,7 +107,7 @@ func extractJobShowCmdF(c client.Client, command *cobra.Command, args []string) 
 }
 
 func extractJobListCmdF(c client.Client, command *cobra.Command, args []string) error {
-	return jobListCmdF(c, command, model.JobTypeExtractContent)
+	return jobListCmdF(c, command, model.JobTypeExtractContent, "")
 }
 
 func printExtractContentJob(job *model.Job) {

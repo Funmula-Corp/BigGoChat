@@ -10,9 +10,9 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/store"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/public/shared/request"
 )
 
 func find_bookmark(slice []*model.ChannelBookmarkWithFileInfo, id string) *model.ChannelBookmarkWithFileInfo {
@@ -433,6 +433,11 @@ func testDeleteChannelBookmark(t *testing.T, rctx request.CTX, ss store.Store) {
 
 		err = ss.ChannelBookmark().Delete(bookmark2.Id, true)
 		assert.NoError(t, err)
+
+		_, err = ss.FileInfo().Get(file.Id)
+		assert.Error(t, err)
+		var nfErr *store.ErrNotFound
+		assert.ErrorAs(t, err, &nfErr)
 
 		bookmarks, err := ss.ChannelBookmark().GetBookmarksForChannelSince(channelId, now)
 		assert.NoError(t, err)

@@ -6,8 +6,8 @@ package remotecluster
 import (
 	"fmt"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/public/shared/mlog"
 )
 
 // ReceiveIncomingMsg is called by the Rest API layer, or websocket layer (future), when a Remote Cluster
@@ -62,7 +62,6 @@ func (rcs *Service) ReceiveInviteConfirmation(confirm model.RemoteClusterInvite)
 		return nil, fmt.Errorf("cannot accept invite confirmation for remote %s: %w", confirm.RemoteId, err)
 	}
 
-	rc.RemoteTeamId = confirm.RemoteTeamId
 	rc.SiteURL = confirm.SiteURL
 	rc.RemoteToken = confirm.Token
 

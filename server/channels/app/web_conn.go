@@ -4,8 +4,8 @@
 package app
 
 import (
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app/platform"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/app/platform"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
 )
 
 // PopulateWebConnConfig checks if the connection id already exists in the hub,

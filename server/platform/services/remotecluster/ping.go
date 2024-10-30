@@ -9,8 +9,8 @@ import (
 	"fmt"
 	"time"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/public/shared/mlog"
 )
 
 // PingNow emits a ping immediately without waiting for next ping loop.
@@ -37,7 +37,7 @@ func (rcs *Service) PingNow(rc *model.RemoteCluster) {
 // pingAllNow emits a ping to all remotes immediately without waiting for next ping loop.
 func (rcs *Service) pingAllNow(filter model.RemoteClusterQueryFilter) {
 	// get all remotes, including any previously offline.
-	remotes, err := rcs.server.GetStore().RemoteCluster().GetAll(filter)
+	remotes, err := rcs.server.GetStore().RemoteCluster().GetAll(0, 999999, filter)
 	if err != nil {
 		rcs.server.Log().Log(mlog.LvlRemoteClusterServiceError, "Ping all remote clusters failed (could not get list of remotes)", mlog.Err(err))
 		return

@@ -9,8 +9,8 @@ package commands
 import (
 	"testing"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/api4"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/testlib"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/api4"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/testlib"
 )
 
 func TestMain(m *testing.M) {

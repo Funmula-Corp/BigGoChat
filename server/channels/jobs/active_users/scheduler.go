@@ -6,8 +6,8 @@ package active_users
 import (
 	"time"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/jobs"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/jobs"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
 )
 
 const schedFreq = 10 * time.Minute

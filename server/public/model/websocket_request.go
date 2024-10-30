@@ -4,9 +4,14 @@
 package model
 
 import (
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/i18n"
+	"git.biggo.com/Funmula/BigGoChat/server/public/shared/i18n"
 
 	"github.com/vmihailenco/msgpack/v5"
+)
+
+const (
+	WebSocketRemoteAddr    = "remote_addr"
+	WebSocketXForwardedFor = "x_forwarded_for"
 )
 
 // WebSocketRequest represents a request made to the server through a websocket.

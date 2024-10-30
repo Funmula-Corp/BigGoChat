@@ -27,13 +27,14 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin/utils"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/i18n"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/utils/fileutils"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/einterfaces/mocks"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/public/plugin"
+	"git.biggo.com/Funmula/BigGoChat/server/public/plugin/utils"
+	"git.biggo.com/Funmula/BigGoChat/server/public/shared/i18n"
+	"git.biggo.com/Funmula/BigGoChat/server/public/shared/request"
+	"git.biggo.com/Funmula/BigGoChat/server/v8"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/utils/fileutils"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/einterfaces/mocks"
 )
 
 func getDefaultPluginSettingsSchema() string {
@@ -144,7 +145,7 @@ func TestPublicFilesPathConfiguration(t *testing.T) {
 		package main
 
 		import (
-			"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
+			"git.biggo.com/Funmula/BigGoChat/server/public/plugin"
 		)
 
 		type MyPlugin struct {
@@ -426,6 +427,61 @@ func TestPluginAPIGetUsers(t *testing.T) {
 			})
 			assert.Nil(t, err)
 			assert.Equal(t, testCase.ExpectedUsers, users)
+		})
+	}
+}
+
+func TestPluginAPIGetUsersByIds(t *testing.T) {
+	th := Setup(t).DeleteBots()
+	defer th.TearDown()
+	api := th.SetupPluginAPI()
+
+	user1, err := th.App.CreateUser(th.Context, &model.User{
+		Email:    strings.ToLower(model.NewId()) + "success+test@example.com",
+		Password: "password",
+		Username: "user1" + model.NewId(),
+	})
+	require.Nil(t, err)
+	defer th.App.PermanentDeleteUser(th.Context, user1)
+
+	user2, err := th.App.CreateUser(th.Context, &model.User{
+		Email:    strings.ToLower(model.NewId()) + "success+test@example.com",
+		Password: "password",
+		Username: "user2" + model.NewId(),
+	})
+	require.Nil(t, err)
+	defer th.App.PermanentDeleteUser(th.Context, user2)
+
+	user3, err := th.App.CreateUser(th.Context, &model.User{
+		Email:    strings.ToLower(model.NewId()) + "success+test@example.com",
+		Password: "password",
+		Username: "user3" + model.NewId(),
+	})
+	require.Nil(t, err)
+	defer th.App.PermanentDeleteUser(th.Context, user3)
+
+	testCases := []struct {
+		Description  string
+		requestedIDs []string
+	}{
+		{
+			"no users",
+			[]string{},
+		},
+		{
+			"getting 1 and 3",
+			[]string{user1.Id, user3.Id},
+		},
+	}
+
+	for _, testCase := range testCases {
+		t.Run(testCase.Description, func(t *testing.T) {
+			users, err := api.GetUsersByIds(testCase.requestedIDs)
+			assert.Nil(t, err)
+			assert.Equal(t, len(testCase.requestedIDs), len(users))
+			for _, user := range users {
+				assert.Contains(t, testCase.requestedIDs, user.Id)
+			}
 		})
 	}
 }
@@ -802,9 +858,7 @@ func TestPluginAPILoadPluginConfiguration(t *testing.T) {
 		cfg.PluginSettings.Plugins["testloadpluginconfig"] = pluginJson
 	})
 
-	testFolder, found := fileutils.FindDir("channels/app/plugin_api_tests")
-	require.True(t, found, "Cannot find tests folder")
-	fullPath := path.Join(testFolder, "manual.test_load_configuration_plugin", "main.go")
+	fullPath := filepath.Join(server.GetPackagePath(), "channels", "app", "plugin_api_tests", "manual.test_load_configuration_plugin", "main.go")
 
 	err = pluginAPIHookTest(t, th, fullPath, "testloadpluginconfig", `{"id": "testloadpluginconfig", "server": {"executable": "backend.exe"}, "settings_schema": {
 		"settings": [
@@ -837,9 +891,7 @@ func TestPluginAPILoadPluginConfigurationDefaults(t *testing.T) {
 		cfg.PluginSettings.Plugins["testloadpluginconfig"] = pluginJson
 	})
 
-	testFolder, found := fileutils.FindDir("channels/app/plugin_api_tests")
-	require.True(t, found, "Cannot find tests folder")
-	fullPath := path.Join(testFolder, "manual.test_load_configuration_defaults_plugin", "main.go")
+	fullPath := filepath.Join(server.GetPackagePath(), "channels", "app", "plugin_api_tests", "manual.test_load_configuration_defaults_plugin", "main.go")
 
 	err = pluginAPIHookTest(t, th, fullPath, "testloadpluginconfig", `{
 		"settings": [
@@ -873,7 +925,7 @@ func TestPluginAPIGetPlugins(t *testing.T) {
     package main
 
     import (
-      "git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
+      "git.biggo.com/Funmula/BigGoChat/server/public/plugin"
     )
 
     type MyPlugin struct {
@@ -927,8 +979,7 @@ func TestPluginAPIInstallPlugin(t *testing.T) {
 	defer th.TearDown()
 	api := th.SetupPluginAPI()
 
-	path, _ := fileutils.FindDir("tests")
-	tarData, err := os.ReadFile(filepath.Join(path, "testplugin.tar.gz"))
+	tarData, err := os.ReadFile(filepath.Join(server.GetPackagePath(), "tests", "testplugin.tar.gz"))
 	require.NoError(t, err)
 
 	_, appErr := api.InstallPlugin(bytes.NewReader(tarData), true)
@@ -1004,8 +1055,7 @@ func TestInstallPlugin(t *testing.T) {
 	defer th.TearDown()
 
 	// start an http server to serve plugin's tarball to the test.
-	path, _ := fileutils.FindDir("tests")
-	ts := httptest.NewServer(http.FileServer(http.Dir(path)))
+	ts := httptest.NewServer(http.FileServer(http.Dir(filepath.Join(server.GetPackagePath(), "tests"))))
 	defer ts.Close()
 
 	th.App.UpdateConfig(func(cfg *model.Config) {
@@ -1025,7 +1075,7 @@ func TestInstallPlugin(t *testing.T) {
 
 			"github.com/pkg/errors"
 
-			"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
+			"git.biggo.com/Funmula/BigGoChat/server/public/plugin"
 		)
 
 		type configuration struct {
@@ -1203,15 +1253,14 @@ func pluginAPIHookTest(t *testing.T, th *TestHelper, fileName string, id string,
 
 func TestBasicAPIPlugins(t *testing.T) {
 	defaultSchema := getDefaultPluginSettingsSchema()
-	testFolder, found := fileutils.FindDir("channels/app/plugin_api_tests")
-	require.True(t, found, "Cannot read find app folder")
+	testFolder := filepath.Join(server.GetPackagePath(), "channels", "app", "plugin_api_tests")
 	dirs, err := os.ReadDir(testFolder)
 	require.NoError(t, err, "Cannot read test folder %v", testFolder)
 	for _, dir := range dirs {
 		d := dir.Name()
 		if dir.IsDir() && !strings.HasPrefix(d, "manual.") {
 			t.Run(d, func(t *testing.T) {
-				mainPath := path.Join(testFolder, d, "main.go")
+				mainPath := filepath.Join(testFolder, d, "main.go")
 				_, err := os.Stat(mainPath)
 				require.NoError(t, err, "Cannot find plugin main file at %v", mainPath)
 				th := Setup(t).InitBasic().DeleteBots()
@@ -1541,7 +1590,7 @@ func TestInterpluginPluginHTTP(t *testing.T) {
 		package main
 
 		import (
-			"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
+			"git.biggo.com/Funmula/BigGoChat/server/public/plugin"
 			"bytes"
 			"net/http"
 		)
@@ -1582,8 +1631,8 @@ func TestInterpluginPluginHTTP(t *testing.T) {
 		package main
 
 		import (
-			"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
-			"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+			"git.biggo.com/Funmula/BigGoChat/server/public/plugin"
+			"git.biggo.com/Funmula/BigGoChat/server/public/model"
 			"bytes"
 			"net/http"
 			"io"
@@ -1687,8 +1736,8 @@ func TestAPIMetrics(t *testing.T) {
 	package main
 
 	import (
-		"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
-		"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
+		"git.biggo.com/Funmula/BigGoChat/server/public/model"
+		"git.biggo.com/Funmula/BigGoChat/server/public/plugin"
 	)
 
 	type MyPlugin struct {
@@ -1789,9 +1838,7 @@ func TestPluginHTTPConnHijack(t *testing.T) {
 	th := Setup(t)
 	defer th.TearDown()
 
-	testFolder, found := fileutils.FindDir("channels/app/plugin_api_tests")
-	require.True(t, found, "Cannot find tests folder")
-	fullPath := path.Join(testFolder, "manual.test_http_hijack_plugin", "main.go")
+	fullPath := filepath.Join(server.GetPackagePath(), "channels", "app", "plugin_api_tests", "manual.test_http_hijack_plugin", "main.go")
 
 	pluginCode, err := os.ReadFile(fullPath)
 	require.NoError(t, err)
@@ -1824,9 +1871,7 @@ func TestPluginHTTPUpgradeWebSocket(t *testing.T) {
 	th := Setup(t)
 	defer th.TearDown()
 
-	testFolder, found := fileutils.FindDir("channels/app/plugin_api_tests")
-	require.True(t, found, "Cannot find tests folder")
-	fullPath := path.Join(testFolder, "manual.test_http_upgrade_websocket_plugin", "main.go")
+	fullPath := filepath.Join(server.GetPackagePath(), "channels", "app", "plugin_api_tests", "manual.test_http_upgrade_websocket_plugin", "main.go")
 
 	pluginCode, err := os.ReadFile(fullPath)
 	require.NoError(t, err)
@@ -2072,8 +2117,8 @@ func TestPluginUploadsAPI(t *testing.T) {
 		  "fmt"
 			"bytes"
 
-      "git.biggo.com/Funmula/mattermost-funmula/server/public/model"
-      "git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
+      "git.biggo.com/Funmula/BigGoChat/server/public/model"
+      "git.biggo.com/Funmula/BigGoChat/server/public/plugin"
     )
 
     type TestPlugin struct {
@@ -2374,9 +2419,7 @@ func TestPluginServeMetrics(t *testing.T) {
 		cfg.MetricsSettings.ListenAddress = prevAddress
 	})
 
-	testFolder, found := fileutils.FindDir("channels/app/plugin_api_tests")
-	require.True(t, found, "Cannot find tests folder")
-	fullPath := path.Join(testFolder, "manual.test_serve_metrics_plugin", "main.go")
+	fullPath := filepath.Join(server.GetPackagePath(), "channels", "app", "plugin_api_tests", "manual.test_serve_metrics_plugin", "main.go")
 
 	pluginCode, err := os.ReadFile(fullPath)
 	require.NoError(t, err)
@@ -2438,8 +2481,8 @@ func TestPluginGetChannelsForTeamForUser(t *testing.T) {
 	pluginCode := `
 	package main
 	import (
-		"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
-		"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
+		"git.biggo.com/Funmula/BigGoChat/server/public/model"
+		"git.biggo.com/Funmula/BigGoChat/server/public/plugin"
 		"github.com/pkg/errors"
 	)
 
@@ -2541,8 +2584,8 @@ func TestPluginPatchChannelMembersNotifications(t *testing.T) {
 		pluginCode := `
 			package main
 			import (
-				"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
-				"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+				"git.biggo.com/Funmula/BigGoChat/server/public/plugin"
+				"git.biggo.com/Funmula/BigGoChat/server/public/model"
 			)
 
 			const (
@@ -2610,8 +2653,8 @@ func TestPluginPatchChannelMembersNotifications(t *testing.T) {
 		pluginCode := `
 			package main
 			import (
-				"git.biggo.com/Funmula/mattermost-funmula/server/public/plugin"
-				"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+				"git.biggo.com/Funmula/BigGoChat/server/public/plugin"
+				"git.biggo.com/Funmula/BigGoChat/server/public/model"
 			)
 
 			const (

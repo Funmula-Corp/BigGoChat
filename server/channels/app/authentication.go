@@ -8,11 +8,11 @@ import (
 	"net/http"
 	"strings"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/app/users"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/shared/mfa"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/app/users"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/platform/shared/mfa"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/public/shared/mlog"
+	"git.biggo.com/Funmula/BigGoChat/server/public/shared/request"
 )
 
 type TokenLocation int
@@ -212,7 +212,7 @@ func (a *App) CheckUserMfa(rctx request.CTX, user *model.User, token string) *mo
 		return model.NewAppError("CheckUserMfa", "mfa.mfa_disabled.app_error", nil, "", http.StatusNotImplemented)
 	}
 
-	ok, err := mfa.New(a.Srv().Store().User()).ValidateToken(user.MfaSecret, token)
+	ok, err := mfa.New(a.Srv().Store().User()).ValidateToken(user, token)
 	if err != nil {
 		return model.NewAppError("CheckUserMfa", "mfa.validate_token.authenticate.app_error", nil, "", http.StatusBadRequest).Wrap(err)
 	}

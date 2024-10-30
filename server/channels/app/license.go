@@ -5,17 +5,12 @@ package app
 
 import (
 	"net/http"
-	"time"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/pkg/errors"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
-)
-
-const (
-	JWTDefaultTokenExpiration = 7 * 24 * time.Hour // 7 days of expiration
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/store"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
 )
 
 func (ch *Channels) License() *model.License {

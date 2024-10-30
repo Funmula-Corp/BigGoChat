@@ -18,7 +18,9 @@ describe('Incoming webhook', () => {
     let testChannel;
     let incomingWebhook;
 
-    before(() => {
+    before(function() {
+        // Mattermost close source feature
+        this.skip();
         cy.shouldNotRunOnCloudEdition();
 
         // # Create and visit new channel and create incoming webhook

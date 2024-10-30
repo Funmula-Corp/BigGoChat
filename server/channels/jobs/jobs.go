@@ -11,10 +11,10 @@ import (
 	"strings"
 	"time"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/store"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/public/shared/mlog"
+	"git.biggo.com/Funmula/BigGoChat/server/public/shared/request"
 )
 
 const (
@@ -234,8 +234,9 @@ func (srv *JobServer) HandleJobPanic(logger mlog.LoggerIFace, job *model.Job) {
 		rerr = fmt.Errorf("job panic: %v", r)
 	}
 
-	appErr := srv.SetJobError(job, model.NewAppError("HandleJobPanic", "app.job.update.app_error", nil, "", http.StatusInternalServerError)).Wrap(rerr)
+	appErr := srv.SetJobError(job, model.NewAppError("HandleJobPanic", "app.job.update.app_error", nil, "", http.StatusInternalServerError))
 	if appErr != nil {
+		appErr = appErr.Wrap(rerr)
 		logger.Error("Failed to set the job status to 'failed'", mlog.Err(appErr), mlog.Any("job", job))
 	}
 

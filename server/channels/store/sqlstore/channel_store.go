@@ -7,6 +7,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"slices"
 	"sort"
 	"strconv"
 	"strings"
@@ -15,10 +16,10 @@ import (
 	sq "github.com/mattermost/squirrel"
 	"github.com/pkg/errors"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/einterfaces"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/public/shared/request"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/store"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/einterfaces"
 )
 
 type SqlChannelStore struct {
@@ -1240,6 +1241,15 @@ func (s SqlChannelStore) getAllChannelsQuery(opts store.ChannelSearchOpts, forCo
 		query = query.Where("c.Id NOT IN (SELECT ChannelId FROM GroupChannels WHERE GroupChannels.GroupId = ? AND GroupChannels.DeleteAt = 0)", opts.NotAssociatedToGroup)
 	}
 
+	if opts.GroupConstrained {
+		query = query.Where(sq.Eq{"c.GroupConstrained": true})
+	} else if opts.ExcludeGroupConstrained {
+		query = query.Where(sq.Or{
+			sq.NotEq{"c.GroupConstrained": true},
+			sq.Eq{"c.GroupConstrained": nil},
+		})
+	}
+
 	if len(opts.ExcludeChannelNames) > 0 {
 		query = query.Where(sq.NotEq{"c.Name": opts.ExcludeChannelNames})
 	}
@@ -2216,7 +2226,7 @@ func (s SqlChannelStore) GetMemberForPost(postId string, userId string, includeA
 	return dbMember.ToModel(), nil
 }
 
-func (s SqlChannelStore) GetAllChannelMembersForUser(userId string, allowFromCache bool, includeDeleted bool) (_ map[string]*model.AllChannelMember, err error) {
+func (s SqlChannelStore) GetAllChannelMembersForUser(rctx request.CTX, userId string, allowFromCache bool, includeDeleted bool) (_ map[string]*model.AllChannelMember, err error) {
 	query := s.getQueryBuilder().
 		Select(`
 				ChannelMembers.ChannelId, ChannelMembers.Roles, ChannelMembers.SchemeGuest,
@@ -2245,7 +2255,7 @@ func (s SqlChannelStore) GetAllChannelMembersForUser(userId string, allowFromCac
 		return nil, errors.Wrap(err, "channel_tosql")
 	}
 
-	rows, err := s.GetReplicaX().DB.Query(queryString, args...)
+	rows, err := s.SqlStore.DBXFromContext(rctx.Context()).Query(queryString, args...)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to find ChannelMembers, TeamScheme and ChannelScheme data")
 	}
@@ -4246,27 +4256,76 @@ func (s SqlChannelStore) UserBelongsToChannels(userId string, channelIds []strin
 	return c > 0, nil
 }
 
-// TODO: parameterize userIDs
-func (s SqlChannelStore) UpdateMembersRole(channelID string, userIDs []string) error {
-	sql := fmt.Sprintf(`
-		UPDATE
-			ChannelMembers
-		SET
-			SchemeAdmin = CASE WHEN UserId IN ('%s') THEN
-				TRUE
-			ELSE
-				FALSE
-			END
-		WHERE
-			ChannelId = ?
-			AND (SchemeGuest = false OR SchemeGuest IS NULL)
-			`, strings.Join(userIDs, "', '"))
+// UpdateMembersRole updates all the members of channelID in the adminIDs string array to be admins and sets all other
+// users as not being admin.
+// It returns the list of userIDs whose roles got updated.
+//
+// TODO: parameterize adminIDs
+func (s SqlChannelStore) UpdateMembersRole(channelID string, adminIDs []string) (_ []*model.ChannelMember, err error) {
+	transaction, err := s.GetMasterX().Beginx()
+	if err != nil {
+		return nil, err
+	}
+	defer finalizeTransactionX(transaction, &err)
 
-	if _, err := s.GetMasterX().Exec(sql, channelID); err != nil {
-		return errors.Wrap(err, "failed to update ChannelMembers")
+	// On MySQL it's not possible to update a table and select from it in the same query.
+	// A SELECT and a UPDATE query are needed.
+	// Once we only support PostgreSQL, this can be done in a single query using RETURNING.
+	query, args, err := s.getQueryBuilder().
+		Select("*").
+		From("ChannelMembers").
+		Where(sq.Eq{"ChannelID": channelID}).
+		Where(sq.Or{sq.Eq{"SchemeGuest": false}, sq.Expr("SchemeGuest IS NULL")}).
+		Where(
+			sq.Or{
+				// New admins
+				sq.And{
+					sq.Eq{"SchemeAdmin": false},
+					sq.Eq{"UserId": adminIDs},
+				},
+				// Demoted admins
+				sq.And{
+					sq.Eq{"SchemeAdmin": true},
+					sq.NotEq{"UserId": adminIDs},
+				},
+			},
+		).ToSql()
+	if err != nil {
+		return nil, errors.Wrap(err, "channel_tosql")
 	}
 
-	return nil
+	var updatedMembers []*model.ChannelMember
+	if err = transaction.Select(&updatedMembers, query, args...); err != nil {
+		return nil, errors.Wrap(err, "failed to get list of updated users")
+	}
+
+	// Update SchemeAdmin field as the data from the SQL is not updated yet
+	for _, member := range updatedMembers {
+		if slices.Contains(adminIDs, member.UserId) {
+			member.SchemeAdmin = true
+		} else {
+			member.SchemeAdmin = false
+		}
+	}
+
+	query, args, err = s.getQueryBuilder().
+		Update("ChannelMembers").
+		Set("SchemeAdmin", sq.Case().When(sq.Eq{"UserId": adminIDs}, "true").Else("false")).
+		Where(sq.Eq{"ChannelId": channelID}).
+		Where(sq.Or{sq.Eq{"SchemeGuest": false}, sq.Expr("SchemeGuest IS NULL")}).ToSql()
+	if err != nil {
+		return nil, errors.Wrap(err, "team_tosql")
+	}
+
+	if _, err = transaction.Exec(query, args...); err != nil {
+		return nil, errors.Wrap(err, "failed to update ChannelMembers")
+	}
+
+	if err = transaction.Commit(); err != nil {
+		return nil, errors.Wrap(err, "commit_transaction")
+	}
+
+	return updatedMembers, nil
 }
 
 func (s SqlChannelStore) GroupSyncedChannelCount() (int64, error) {

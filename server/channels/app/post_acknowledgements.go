@@ -8,14 +8,14 @@ import (
 	"errors"
 	"net/http"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/store"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/public/shared/mlog"
+	"git.biggo.com/Funmula/BigGoChat/server/public/shared/request"
 )
 
 func (a *App) SaveAcknowledgementForPost(c request.CTX, postID, userID string) (*model.PostAcknowledgement, *model.AppError) {
-	post, err := a.GetSinglePost(postID, false)
+	post, err := a.GetSinglePost(c, postID, false)
 	if err != nil {
 		return nil, err
 	}
@@ -42,7 +42,7 @@ func (a *App) SaveAcknowledgementForPost(c request.CTX, postID, userID string) (
 	}
 
 	if appErr := a.ResolvePersistentNotification(c, post, userID); appErr != nil {
-		a.CountNotificationReason(model.NotificationStatusError, model.NotificationTypeWebsocket, model.NotificationReasonResolvePersistentNotificationError)
+		a.CountNotificationReason(model.NotificationStatusError, model.NotificationTypeWebsocket, model.NotificationReasonResolvePersistentNotificationError, model.NotificationNoPlatform)
 		a.NotificationsLog().Error("Error resolving persistent notification",
 			mlog.String("sender_id", userID),
 			mlog.String("post_id", post.RootId),
@@ -62,7 +62,7 @@ func (a *App) SaveAcknowledgementForPost(c request.CTX, postID, userID string) (
 }
 
 func (a *App) DeleteAcknowledgementForPost(c request.CTX, postID, userID string) *model.AppError {
-	post, err := a.GetSinglePost(postID, false)
+	post, err := a.GetSinglePost(c, postID, false)
 	if err != nil {
 		return err
 	}

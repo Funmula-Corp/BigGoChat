@@ -6,9 +6,9 @@ package localcachelayer
 import (
 	"bytes"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/request"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/store"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/public/shared/request"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/store"
 )
 
 type LocalCacheChannelStore struct {
@@ -268,7 +268,7 @@ func (s LocalCacheChannelStore) GetMany(ids []string, allowFromCache bool) (mode
 	return append(foundChannels, channels...), nil
 }
 
-func (s LocalCacheChannelStore) GetAllChannelMembersForUser(userId string, allowFromCache bool, includeDeleted bool) (map[string]*model.AllChannelMember, error) {
+func (s LocalCacheChannelStore) GetAllChannelMembersForUser(ctx request.CTX, userId string, allowFromCache bool, includeDeleted bool) (map[string]*model.AllChannelMember, error) {
 	cache_key := userId
 	if includeDeleted {
 		cache_key += "_deleted"
@@ -280,7 +280,7 @@ func (s LocalCacheChannelStore) GetAllChannelMembersForUser(userId string, allow
 		}
 	}
 
-	ids, err := s.ChannelStore.GetAllChannelMembersForUser(userId, allowFromCache, includeDeleted)
+	ids, err := s.ChannelStore.GetAllChannelMembersForUser(ctx, userId, allowFromCache, includeDeleted)
 	if err != nil {
 		return nil, err
 	}

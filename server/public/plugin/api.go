@@ -9,7 +9,7 @@ import (
 
 	plugin "github.com/hashicorp/go-plugin"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
 )
 
 // The API can be used to retrieve data or perform actions on behalf of the plugin. Most methods
@@ -134,6 +134,12 @@ type API interface {
 	// @tag User
 	// Minimum server version: 5.10
 	GetUsers(options *model.UserGetOptions) ([]*model.User, *model.AppError)
+
+	// GetUsersByIds gets a list of users by their IDs.
+	//
+	// @tag User
+	// Minimum server version: 9.8
+	GetUsersByIds(userIDs []string) ([]*model.User, *model.AppError)
 
 	// GetUser gets a user.
 	//

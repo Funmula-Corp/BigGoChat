@@ -9,10 +9,10 @@ import (
 	"io"
 	"os"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/cmd/mmctl/client"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/cmd/mmctl/printer"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/cmd/mmctl/client"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/cmd/mmctl/printer"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
 	"github.com/spf13/cobra"
 )
 
@@ -270,7 +270,7 @@ func exportDownloadCmdF(c client.Client, command *cobra.Command, args []string) 
 }
 
 func exportJobListCmdF(c client.Client, command *cobra.Command, args []string) error {
-	return jobListCmdF(c, command, model.JobTypeExportProcess)
+	return jobListCmdF(c, command, model.JobTypeExportProcess, "")
 }
 
 func exportJobShowCmdF(c client.Client, command *cobra.Command, args []string) error {

@@ -19,9 +19,9 @@ import (
 	"github.com/golang/freetype"
 	"github.com/golang/freetype/truetype"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/channels/utils/fileutils"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/shared/filestore"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/utils/fileutils"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/platform/shared/filestore"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
 	xfont "golang.org/x/image/font"
 	"golang.org/x/image/math/fixed"
 )

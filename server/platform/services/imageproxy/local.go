@@ -19,7 +19,7 @@ import (
 	"strings"
 	"time"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
+	"git.biggo.com/Funmula/BigGoChat/server/public/shared/mlog"
 )
 
 var imageContentTypes = []string{
@@ -40,8 +40,6 @@ var msgNotAllowed = "requested URL is not allowed"
 var ErrLocalRequestFailed = Error{errors.New("imageproxy.LocalBackend: failed to request proxied image")}
 
 type LocalBackend struct {
-	proxy *ImageProxy
-
 	client  *http.Client
 	baseURL *url.URL
 }
@@ -57,15 +55,14 @@ func (e URLError) Error() string {
 }
 
 func makeLocalBackend(proxy *ImageProxy) *LocalBackend {
-	baseURL, err := url.Parse(*proxy.ConfigService.Config().ServiceSettings.SiteURL)
-	if err != nil {
-		mlog.Warn("Failed to set base URL for image proxy. Relative image links may not work.", mlog.Err(err))
+	baseURL := proxy.siteURL
+	if baseURL == nil {
+		mlog.Warn("Failed to set base URL for image proxy. Relative image links may not work.")
 	}
 
 	client := proxy.HTTPService.MakeClient(false)
 
 	return &LocalBackend{
-		proxy:   proxy,
 		client:  client,
 		baseURL: baseURL,
 	}
