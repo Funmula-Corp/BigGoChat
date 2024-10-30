@@ -6,9 +6,9 @@ import (
 	"net/http"
 	"net/url"
 
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/model"
-	"git.biggo.com/Funmula/mattermost-funmula/server/public/shared/mlog"
-	"git.biggo.com/Funmula/mattermost-funmula/server/v8/platform/services/searchengine/biggoengine/cfg"
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/public/shared/mlog"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/platform/services/searchengine/biggoengine/cfg"
 )
 
 func (be *BiggoEngine) SearchTeams(userId string, searchParams []*model.SearchParams, page, perPage int) (result []string, total int64, aErr *model.AppError) {

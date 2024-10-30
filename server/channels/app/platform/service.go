@@ -27,6 +27,7 @@ import (
 	"git.biggo.com/Funmula/BigGoChat/server/v8/einterfaces"
 	"git.biggo.com/Funmula/BigGoChat/server/v8/platform/services/cache"
 	"git.biggo.com/Funmula/BigGoChat/server/v8/platform/services/searchengine"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/platform/services/searchengine/biggoengine"
 	"git.biggo.com/Funmula/BigGoChat/server/v8/platform/shared/filestore"
 )
 

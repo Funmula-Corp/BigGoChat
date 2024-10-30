@@ -7,9 +7,9 @@ import (
 	"errors"
 	"net/http"
 
-	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/store"
 	"git.biggo.com/Funmula/BigGoChat/server/public/model"
 	"git.biggo.com/Funmula/BigGoChat/server/public/shared/request"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/store"
 )
 
 func (a *App) GetJob(c request.CTX, id string) (*model.Job, *model.AppError) {
@@ -115,8 +115,6 @@ func (a *App) SessionHasPermissionToManageJob(session model.Session, job *model.
 	var permission *model.Permission
 
 	switch job.Type {
-	case model.JobTypeBlevePostIndexing:
-		permission = model.PermissionManagePostBleveIndexesJob
 	case model.JobTypeDataRetention:
 		permission = model.PermissionManageDataRetentionJob
 	case model.JobTypeMessageExport:

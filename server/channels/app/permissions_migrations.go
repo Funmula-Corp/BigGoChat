@@ -8,9 +8,9 @@ import (
 	"net/http"
 	"strings"
 
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
 	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/store"
 	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/store/sqlstore"
-	"git.biggo.com/Funmula/BigGoChat/server/public/model"
 )
 
 type permissionTransformation struct {
@@ -1165,11 +1165,6 @@ func (a *App) getAddManageJobAncillaryPermissionsMigration() (permissionsMap, er
 	transformations = append(transformations, permissionTransformation{
 		On:  permissionExists(model.PermissionSysconsoleWriteComplianceDataRetentionPolicy.Id),
 		Add: []string{model.PermissionManageDataRetentionJob.Id},
-	})
-
-	transformations = append(transformations, permissionTransformation{
-		On:  permissionExists(model.PermissionSysconsoleWriteExperimentalBleve.Id),
-		Add: []string{model.PermissionManagePostBleveIndexesJob.Id},
 	})
 
 	transformations = append(transformations, permissionTransformation{
