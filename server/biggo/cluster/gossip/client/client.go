@@ -2,6 +2,7 @@ package client
 
 import (
 	"fmt"
+	"time"
 
 	"git.biggo.com/Funmula/BigGoChat/server/v8/biggo/cluster/proto"
 	"google.golang.org/grpc"
@@ -13,6 +14,9 @@ func NewClusterConnection(hostname string, port int32) (*grpc.ClientConn, error)
 	return grpc.NewClient(
 		fmt.Sprintf("%s:%d", hostname, port),
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithConnectParams(grpc.ConnectParams{
+			MinConnectTimeout: time.Second,
+		}),
 	)
 }
 

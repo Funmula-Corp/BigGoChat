@@ -127,7 +127,7 @@ func (p *BiggoCluster) GetPluginStatuses() (model.PluginStatuses, *model.AppErro
 }
 
 func (p *BiggoCluster) ConfigChanged(previousConfig *model.Config, newConfig *model.Config, sendToOtherServer bool) *model.AppError {
-	if !sendToOtherServer {
+	if !sendToOtherServer || !p.IsLeader() {
 		return nil
 	}
 

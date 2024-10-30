@@ -35,8 +35,8 @@ func (p *BiggoCluster) Call(callback func(client gossip.ClusterClient, node *mod
 				connectionErrorsMutex.Lock()
 				defer connectionErrorsMutex.Unlock()
 				connectionErrors = append(
-					connectionErrors,
-					fmt.Errorf("[cluster](%s:%d) connection error: %v", hostname, port, err))
+					connectionErrors, fmt.Errorf("[cluster](%s:%d) connection error: %v", hostname, port, err),
+				)
 			} else {
 				defer connection.Close()
 				callback(gossip.NewClusterClient(connection), cluster[idx])

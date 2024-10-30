@@ -2,17 +2,21 @@ package cluster
 
 import (
 	"bytes"
+	"context"
 	"crypto/md5"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"os"
+	"sync/atomic"
 
 	"git.biggo.com/Funmula/BigGoChat/server/public/model"
 	"git.biggo.com/Funmula/BigGoChat/server/public/shared/mlog"
 	"git.biggo.com/Funmula/BigGoChat/server/v8/biggo/cluster/gossip"
 	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/app/platform"
 	"git.biggo.com/Funmula/BigGoChat/server/v8/einterfaces"
+	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/rest"
 )
 
 func New(platformService *platform.PlatformService) *BiggoCluster {
@@ -40,8 +44,12 @@ func New(platformService *platform.PlatformService) *BiggoCluster {
 }
 
 type BiggoCluster struct {
+	CancelVote              context.CancelFunc
 	ClusterDiscoveryService *platform.ClusterDiscoveryService
 	GossipServer            *gossip.ClusterServer
+	KubeConfig              *rest.Config
+	KubeClient              *kubernetes.Clientset
+	Leader                  atomic.Bool
 	PlatformService         *platform.PlatformService
 }
 
@@ -58,7 +66,7 @@ func (p *BiggoCluster) HealthScore() int {
 }
 
 func (p *BiggoCluster) IsLeader() bool {
-	return true
+	return p.Leader.Load()
 }
 
 func (p *BiggoCluster) RegisterClusterMessageHandler(event model.ClusterEvent, callback einterfaces.ClusterMessageHandler) {
@@ -71,6 +79,9 @@ func (p *BiggoCluster) StartInterNodeCommunication() {
 	if p.ClusterDiscoveryService != nil {
 		if err := p.GossipServer.Start(uint16(p.ClusterDiscoveryService.GossipPort)); err == nil {
 			p.ClusterDiscoveryService.Start()
+			if p.KubeConfig, err = p.getKubeConfig(); err == nil {
+				go p.JoinVote(p.GetClusterId(), "biggochat-leader", "default")
+			}
 		}
 	}
 }
@@ -78,6 +89,10 @@ func (p *BiggoCluster) StartInterNodeCommunication() {
 func (p *BiggoCluster) StopInterNodeCommunication() {
 	if p.ClusterDiscoveryService != nil {
 		p.ClusterDiscoveryService.Stop()
+		if p.CancelVote != nil {
+			p.CancelVote()
+			p.CancelVote = nil
+		}
 	}
 }
 
