@@ -10,8 +10,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/store/sqlstore"
 	"git.biggo.com/Funmula/BigGoChat/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/store/sqlstore"
 )
 
 func TestGetJob(t *testing.T) {
@@ -55,11 +55,11 @@ func TestSessionHasPermissionToCreateJob(t *testing.T) {
 		PermissionRequired *model.Permission
 	}{
 		{
-			Job:                jobs[1],
+			Job:                jobs[0],
 			PermissionRequired: model.PermissionCreateDataRetentionJob,
 		},
 		{
-			Job:                jobs[2],
+			Job:                jobs[1],
 			PermissionRequired: model.PermissionCreateComplianceExportJob,
 		},
 	}
