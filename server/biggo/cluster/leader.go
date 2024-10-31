@@ -2,7 +2,6 @@ package cluster
 
 import (
 	"context"
-	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -84,19 +83,14 @@ func (p *BiggoCluster) UpdateService() {
 		return
 	}
 
-	if services != nil {
-		for idx := range services.Items {
-			for key := range services.Items[idx].Spec.Selector {
-				if strings.Contains(services.Items[idx].Spec.Selector[key], "pod-name") {
-					services.Items[idx].Spec.Selector[key] = hostname
-					if _, err = p.KubeClient.CoreV1().Services(namespace).Update(ctx, &services.Items[idx], metav1.UpdateOptions{}); err != nil {
-						mlog.Error("cluster.leader.service.update", mlog.Err(err))
-						return
-					}
+	for idx := range services.Items {
+		for key := range services.Items[idx].Spec.Selector {
+			if strings.Contains(key, "pod-name") {
+				services.Items[idx].Spec.Selector[key] = hostname
+				if _, err = p.KubeClient.CoreV1().Services(namespace).Update(ctx, &services.Items[idx], metav1.UpdateOptions{}); err != nil {
+					mlog.Error("cluster.leader.service.update", mlog.Err(err))
 				}
 			}
 		}
-	} else {
-		mlog.Error("cluster.leader.service.update", mlog.Err(fmt.Errorf("no service found")))
 	}
 }
