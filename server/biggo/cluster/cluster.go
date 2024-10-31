@@ -76,11 +76,14 @@ func (p *BiggoCluster) RegisterClusterMessageHandler(event model.ClusterEvent, c
 }
 
 func (p *BiggoCluster) StartInterNodeCommunication() {
+	p.LoadConfigFromDB()
 	if p.ClusterDiscoveryService != nil {
 		if err := p.GossipServer.Start(uint16(p.ClusterDiscoveryService.GossipPort)); err == nil {
 			p.ClusterDiscoveryService.Start()
 			if p.KubeConfig, err = p.getKubeConfig(); err == nil {
 				go p.JoinVote(p.GetClusterId(), "biggochat-leader", "default")
+			} else {
+				p.Leader.Swap(true)
 			}
 		}
 	}
@@ -137,3 +140,53 @@ func (p *BiggoCluster) GetMyClusterInfo() *model.ClusterInfo {
 
 // unknown
 func (p *BiggoCluster) NotifyMsg(buf []byte) {}
+
+// attempt to load the config form teh database (called by the cluster member on join)
+func (p *BiggoCluster) LoadConfigFromDB() {
+	const settingName string = "SystemConfigFile"
+	var (
+		err     error
+		setting *model.System
+	)
+
+	if setting, err = p.PlatformService.Store.System().GetByName(settingName); err != nil {
+		mlog.Error("cluster.config.load.error", mlog.Err(err))
+		return
+	}
+
+	buffer := bytes.NewBuffer([]byte(setting.Value))
+	if err = json.NewDecoder(buffer).Decode(p.PlatformService.Config()); err != nil {
+		mlog.Error("cluster.config.decoder.error", mlog.Err(err))
+		return
+	}
+
+	if _, _, appErr := p.PlatformService.SaveConfig(p.PlatformService.Config(), false); appErr != nil {
+		mlog.Error("cluster.config.save.error", mlog.Err(appErr))
+		return
+	}
+}
+
+// persist config to the database (should only be called by the cluster-leader)
+func (p *BiggoCluster) SaveConfigToDB() {
+	const settingName string = "SystemConfigFile"
+	var (
+		err     error
+		setting *model.System
+	)
+
+	buffer := bytes.NewBuffer([]byte{})
+	if err = json.NewEncoder(buffer).Encode(p.PlatformService.Config()); err != nil {
+		mlog.Error("cluster.config.encoder.error", mlog.Err(err))
+		return
+	}
+
+	if setting, err = p.PlatformService.Store.System().GetByName(settingName); err != nil {
+		setting = &model.System{Name: settingName}
+	}
+
+	setting.Value = buffer.String()
+	if err = p.PlatformService.Store.System().SaveOrUpdate(setting); err != nil {
+		mlog.Error("cluster.config.save.error", mlog.Err(err))
+		return
+	}
+}
