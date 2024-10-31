@@ -38,7 +38,7 @@ func main() {
 		"grafana":            3000,
 		"neo4j":              7474,
 		"elasticsearch8":     9201,
-		"searchindexer":      8080,
+		"searchindexer":      2112,
 		"searchengine":       8080,
 		"loki":               3100,
 		"promtail":           3180,
