@@ -1,11 +1,6 @@
-# [![Mattermost logo](https://user-images.githubusercontent.com/7205829/137170381-fe86eef0-bccc-4fdd-8e92-b258884ebdd7.png)](https://mattermost.com)
+BigGo Chat is an open source platform for secure collaboration across the entire software development lifecycle. This repo is the primary source for core development on the BigGo Chat platform; it's written in Go and React and runs as a single Linux binary with MySQL or PostgreSQL.
 
-[Mattermost](https://mattermost.com) is an open source platform for secure collaboration across the entire software development lifecycle. This repo is the primary source for core development on the Mattermost platform; it's written in Go and React and runs as a single Linux binary with MySQL or PostgreSQL. A new compiled version is released under an MIT license every month on the 16th.
-
-[Deploy Mattermost on-premises](https://mattermost.com/deploy/?utm_source=github-mattermost-server-readme), or [try it for free in the cloud](https://mattermost.com/sign-up/?utm_source=github-mattermost-server-readme).
-
-<img width="1006" alt="mattermost user interface" src="https://user-images.githubusercontent.com/7205829/136107976-7a894c9e-290a-490d-8501-e5fdbfc3785a.png">
-
+<!--
 Learn more about the following use cases with Mattermost:
 
 - [DevSecOps](https://mattermost.com/solutions/use-cases/devops/?utm_source=github-mattermost-server-readme)
@@ -17,19 +12,23 @@ Other useful resources:
 - [Download and Install Mattermost](https://docs.mattermost.com/guides/deployment.html) - Install, setup, and configure your own Mattermost instance.
 - [Product documentation](https://docs.mattermost.com/) - Learn how to run a Mattermost instance and take advantage of all the features.
 - [Developer documentation](https://developers.mattermost.com/) - Contribute code to Mattermost or build an integration via APIs, Webhooks, slash commands, Apps, and plugins.
+ -->
 
 Table of contents
 =================
 
+<!--
 - [Install Mattermost](#install-mattermost)
 - [Native mobile and desktop apps](#native-mobile-and-desktop-apps)
 - [Get security bulletins](#get-security-bulletins)
 - [Get involved](#get-involved)
 - [Learn more](#learn-more)
+-->
+
 - [License](#license)
-- [Get the latest news](#get-the-latest-news)
 - [Contributing](#contributing)
 
+<!--
 ## Install Mattermost
 
 - [Download and Install Mattermost Self-Hosted](https://docs.mattermost.com/guides/deployment.html) - Deploy a Mattermost Self-hosted instance in minutes via Docker, Ubuntu, or tar.
@@ -74,9 +73,13 @@ Receive notifications of critical security updates. The sophistication of online
 - [See who's using Mattermost](https://mattermost.com/customers/)
 - [Browse over 700 Mattermost integrations](https://mattermost.com/marketplace/)
 
+-->
+
 ## License
 
 See the [LICENSE file](LICENSE.txt) for license rights and limitations.
+
+<!--
 
 ## Get the latest news
 
@@ -89,9 +92,8 @@ See the [LICENSE file](LICENSE.txt) for license rights and limitations.
 - **IRC** - Join the #matterbridge channel on [Freenode](https://freenode.net/) (thanks to [matterircd](https://github.com/42wim/matterircd)).
 - **YouTube** -  Subscribe to [Mattermost](https://www.youtube.com/@MattermostHQ).
 
+-->
+
 ## Contributing
 
-[![Small Image](https://img.shields.io/badge/Contribute%20with-Gitpod-908a85?logo=gitpod)](https://gitpod.io/#https://github.com/mattermost/mattermost)
-
 Please see [CONTRIBUTING.md](./CONTRIBUTING.md).
-[Join the Mattermost Contributors server](https://community.mattermost.com/signup_user_complete/?id=codoy5s743rq5mk18i7u5ksz7e) to join community discussions about contributions, development, and more.
