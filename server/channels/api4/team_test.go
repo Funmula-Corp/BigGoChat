@@ -378,14 +378,20 @@ func TestGetTeam(t *testing.T) {
 
 	th.LoginBasic()
 	// AllowInviteOpen is false and team is open, and user is not on team
-	_, resp, err := client.GetTeam(context.Background(), rteam2.Id, "")
-	require.Error(t, err)
-	CheckForbiddenStatus(t, resp)
+	team, resp, err := client.GetTeam(context.Background(), rteam2.Id, "")
+	require.Nil(t, err)
+	CheckOKStatus(t, resp)
+	require.Equal(t, "", team.Email)
+	require.Equal(t, "", team.CreatorId)
+	require.Equal(t, "", team.InviteId)
 
 	// AllowInviteOpen is true and team is invite, and user is not on team
-	_, resp, err = client.GetTeam(context.Background(), rteam3.Id, "")
-	require.Error(t, err)
-	CheckForbiddenStatus(t, resp)
+	team, resp, err = client.GetTeam(context.Background(), rteam3.Id, "")
+	require.Nil(t, err)
+	CheckOKStatus(t, resp)
+	require.Equal(t, "", team.Email)
+	require.Equal(t, "", team.CreatorId)
+	require.Equal(t, "", team.InviteId)
 
 	client.Logout(context.Background())
 	_, resp, err = client.GetTeam(context.Background(), team.Id, "")
@@ -1559,14 +1565,20 @@ func TestGetTeamByName(t *testing.T) {
 
 	th.LoginBasic()
 	// AllowInviteOpen is false and team is open, and user is not on team
-	_, resp, err = th.Client.GetTeamByName(context.Background(), rteam2.Name, "")
-	require.Error(t, err)
-	CheckForbiddenStatus(t, resp)
+	team, resp, err = th.Client.GetTeamByName(context.Background(), rteam2.Name, "")
+	require.Nil(t, err)
+	CheckOKStatus(t, resp)
+	require.Equal(t, "", team.Email)
+	require.Equal(t, "", team.CreatorId)
+	require.Equal(t, "", team.InviteId)
 
 	// AllowInviteOpen is true and team is invite only, and user is not on team
-	_, resp, err = th.Client.GetTeamByName(context.Background(), rteam3.Name, "")
-	require.Error(t, err)
-	CheckForbiddenStatus(t, resp)
+	team, resp, err = th.Client.GetTeamByName(context.Background(), rteam3.Name, "")
+	require.Nil(t, err)
+	CheckOKStatus(t, resp)
+	require.Equal(t, "", team.Email)
+	require.Equal(t, "", team.CreatorId)
+	require.Equal(t, "", team.InviteId)
 }
 
 func TestGetTeamByNameSanitization(t *testing.T) {

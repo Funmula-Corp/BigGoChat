@@ -1947,10 +1947,12 @@ func (a *App) SanitizeTeam(session model.Session, team *model.Team) *model.Team 
 	}
 	email := team.Email
 	inviteId := team.InviteId
+	creatorId := team.CreatorId
 	team.Sanitize()
 
 	if manageTeamPermission {
 		team.Email = email
+		team.CreatorId = creatorId
 	}
 	if inviteUserPermission {
 		team.InviteId = inviteId
