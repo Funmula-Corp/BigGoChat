@@ -145,13 +145,13 @@ services:
       - opensearch
       - prometheus
       - grafana
-      - neo4j
       - elasticsearch8
-      - searchindexer
+      - neo4j
       - searchengine
+      - searchindexer
       - loki
       - promtail
-    command: postgres:5432 mysql:3306 minio:9000 inbucket:9001 openldap:389 elasticsearch:9200 opensearch:9201 prometheus:9090 grafana:3000 elasticsearch8:9201 searchindexer:2112 searchengine:2112 neo4j:7474 loki:3100 promtail:3180
+    command: postgres:5432 mysql:3306 minio:9000 inbucket:9001 openldap:389 elasticsearch:9200 opensearch:9201 prometheus:9090 grafana:3000 neo4j:7474 elasticsearch8:9201 searchindexer:2112 searchengine:2112 loki:3100 promtail:3180
 
   leader:
     build:
