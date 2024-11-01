@@ -226,7 +226,7 @@ func TestEnsureBot(t *testing.T) {
 		api := plugintest.NewAPI(t)
 		client := NewClient(api, &plugintest.Driver{})
 
-		api.On("GetServerVersion").Return("5.9.0")
+		api.On("GetMMVersion").Return("5.9.0")
 
 		_, err := client.Bot.ensureBot(m, nil)
 		require.Error(t, err)
@@ -243,7 +243,7 @@ func TestEnsureBot(t *testing.T) {
 
 			expectedBotID := model.NewId()
 
-			api.On("GetServerVersion").Return("5.10.0")
+			api.On("GetMMVersion").Return("5.10.0")
 			api.On("EnsureBotUser", testbot).Return(expectedBotID, nil)
 			botID, err := client.Bot.ensureBot(m, testbot)
 
@@ -267,7 +267,7 @@ func TestEnsureBot(t *testing.T) {
 			api.On("GetBundlePath").Return("", nil)
 			api.On("EnsureBotUser", testbot).Return(expectedBotID, nil)
 			api.On("SetProfileImage", expectedBotID, profileImageBytes).Return(nil)
-			api.On("GetServerVersion").Return("5.10.0")
+			api.On("GetMMVersion").Return("5.10.0")
 
 			botID, err := client.Bot.ensureBot(m, testbot, ProfileImagePath(profileImageFile.Name()))
 			require.NoError(t, err)
@@ -284,7 +284,7 @@ func TestEnsureBot(t *testing.T) {
 
 			api.On("EnsureBotUser", testbot).Return(expectedBotID, nil)
 			api.On("SetProfileImage", expectedBotID, profileImageBytes).Return(nil)
-			api.On("GetServerVersion").Return("5.10.0")
+			api.On("GetMMVersion").Return("5.10.0")
 
 			botID, err := client.Bot.ensureBot(m, testbot, ProfileImageBytes(profileImageBytes))
 			require.NoError(t, err)
@@ -301,7 +301,7 @@ func TestEnsureBot(t *testing.T) {
 
 			api.On("EnsureBotUser", testbot).Return(expectedBotID, nil)
 			api.On("SetProfileImage", expectedBotID, profileImageBytes).Return(nil)
-			api.On("GetServerVersion").Return("5.10.0")
+			api.On("GetMMVersion").Return("5.10.0")
 
 			botID, err := client.Bot.ensureBot(m, testbot, ProfileImagePath("does not exist"), ProfileImageBytes(profileImageBytes))
 			require.NoError(t, err)
@@ -336,7 +336,7 @@ func TestEnsureBot(t *testing.T) {
 				DisplayName: expectedBotDisplayName,
 				Description: expectedBotDescription,
 			}
-			api.On("GetServerVersion").Return("5.10.0")
+			api.On("GetMMVersion").Return("5.10.0")
 			api.On("EnsureBotUser", updatedTestBot).Return(expectedBotID, nil)
 			api.On("GetBundlePath").Return("", nil)
 			api.On("SetProfileImage", expectedBotID, profileImageBytes).Return(nil)
@@ -367,7 +367,7 @@ func TestEnsureBot(t *testing.T) {
 			api.On("EnsureBotUser", testbot).Return(expectedBotID, nil)
 			api.On("GetBundlePath").Return("", nil)
 			api.On("SetProfileImage", expectedBotID, profileImageBytes).Return(nil)
-			api.On("GetServerVersion").Return("5.10.0")
+			api.On("GetMMVersion").Return("5.10.0")
 
 			botID, err := client.Bot.ensureBot(m, testbot, ProfileImagePath(profileImageFile.Name()))
 			require.NoError(t, err)
