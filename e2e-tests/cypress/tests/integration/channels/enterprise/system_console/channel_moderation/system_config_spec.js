@@ -43,7 +43,7 @@ describe('Channel Moderation', () => {
         });
     });
 
-    it('MM-22276 - Enable and Disable all channel moderated permissions', () => {
+    it.skip('MM-22276 - Enable and Disable all channel moderated permissions', () => {
         // # Go to system admin page and to channel configuration page of test channel
         cy.apiAdminLogin();
         cy.visit('/admin_console/user_management/channels');

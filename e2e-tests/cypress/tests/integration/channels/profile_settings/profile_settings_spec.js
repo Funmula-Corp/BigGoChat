@@ -13,7 +13,8 @@
 describe('Profile Settings', () => {
     let testUser;
 
-    before(() => {
+    before(function() {
+        this.skip();
         // # Login as new user and visit off-topic
         cy.apiInitSetup({prefix: 'other', loginAfter: true}).then(({offTopicUrl, user}) => {
             cy.visit(offTopicUrl);

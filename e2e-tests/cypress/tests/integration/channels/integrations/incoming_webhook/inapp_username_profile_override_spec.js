@@ -168,6 +168,6 @@ function verifyProfilePopover(owner, username, iconUrl) {
         cy.get('.Avatar').should('have.attr', 'src', iconUrl);
 
         // * Verify that it matches with correct footer
-        cy.get('.popover__row').should('be.visible').and('have.text', `This post was created by an integration from @${owner.username}`);
+        cy.get('.user-popover__bottom-row-container').should('be.visible').and('have.text', `This post was created by an integration from @${owner.username}`);
     });
 }
