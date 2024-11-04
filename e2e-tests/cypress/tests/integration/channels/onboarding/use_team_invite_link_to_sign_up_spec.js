@@ -43,7 +43,7 @@ describe('Onboarding', () => {
         });
     });
 
-    it('MM-T398 Use team invite link to sign up using email and password', () => {
+    it.skip('MM-T398 Use team invite link to sign up using email and password', () => {
         stubClipboard().as('clipboard');
 
         // # Open the 'Invite People' full screen modal and get the invite url

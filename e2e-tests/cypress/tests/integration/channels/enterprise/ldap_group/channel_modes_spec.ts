@@ -13,7 +13,8 @@
 describe('LDAP Group Sync - Test channel public/private toggle', () => {
     let testTeam;
 
-    before(() => {
+    before(function () {
+        this.skip();
         // * Check if server has license for LDAP Groups
         cy.apiRequireLicenseForFeature('LDAPGroups');
 

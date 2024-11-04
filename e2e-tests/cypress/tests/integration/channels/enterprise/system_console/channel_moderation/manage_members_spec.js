@@ -42,7 +42,9 @@ describe('MM-23102 - Channel Moderation - Manage Members', () => {
     let testTeam;
     let testChannel;
 
-    before(() => {
+    before(function () {
+        // we don't support channel moderator for now.
+        this.skip();
         // * Check if server has license
         cy.apiRequireLicense();
     });

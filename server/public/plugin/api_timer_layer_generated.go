@@ -139,6 +139,13 @@ func (api *apiTimerLayer) GetTelemetryId() string {
 	return _returnsA
 }
 
+func (api *apiTimerLayer) GetMMVersion() string {
+	startTime := timePkg.Now()
+	_returnsA := api.apiImpl.GetMMVersion()
+	api.recordTime(startTime, "GetMMVersion", true)
+	return _returnsA
+}
+
 func (api *apiTimerLayer) CreateUser(user *model.User) (*model.User, *model.AppError) {
 	startTime := timePkg.Now()
 	_returnsA, _returnsB := api.apiImpl.CreateUser(user)

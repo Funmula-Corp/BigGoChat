@@ -1579,6 +1579,33 @@ func (s *apiRPCServer) GetTelemetryId(args *Z_GetTelemetryIdArgs, returns *Z_Get
 	return nil
 }
 
+type Z_GetMMVersionArgs struct {
+}
+
+type Z_GetMMVersionReturns struct {
+	A string
+}
+
+func (g *apiRPCClient) GetMMVersion() string {
+	_args := &Z_GetMMVersionArgs{}
+	_returns := &Z_GetMMVersionReturns{}
+	if err := g.client.Call("Plugin.GetMMVersion", _args, _returns); err != nil {
+		log.Printf("RPC call to GetMMVersion API failed: %s", err.Error())
+	}
+	return _returns.A
+}
+
+func (s *apiRPCServer) GetMMVersion(args *Z_GetMMVersionArgs, returns *Z_GetMMVersionReturns) error {
+	if hook, ok := s.impl.(interface {
+		GetMMVersion() string
+	}); ok {
+		returns.A = hook.GetMMVersion()
+	} else {
+		return encodableError(fmt.Errorf("API GetMMVersion called but not implemented."))
+	}
+	return nil
+}
+
 type Z_CreateUserArgs struct {
 	A *model.User
 }
