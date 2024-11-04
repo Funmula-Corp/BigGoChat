@@ -1943,6 +1943,24 @@ func (_m *API) GetLicense() *model.License {
 	return r0
 }
 
+// GetMMVersion provides a mock function with given fields:
+func (_m *API) GetMMVersion() string {
+	ret := _m.Called()
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetMMVersion")
+	}
+
+	var r0 string
+	if rf, ok := ret.Get(0).(func() string); ok {
+		r0 = rf()
+	} else {
+		r0 = ret.Get(0).(string)
+	}
+
+	return r0
+}
+
 // GetOAuthApp provides a mock function with given fields: appID
 func (_m *API) GetOAuthApp(appID string) (*model.OAuthApp, *model.AppError) {
 	ret := _m.Called(appID)

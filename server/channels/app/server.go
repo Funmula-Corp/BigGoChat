@@ -75,7 +75,6 @@ import (
 	"git.biggo.com/Funmula/BigGoChat/server/v8/platform/services/sharedchannel"
 	"git.biggo.com/Funmula/BigGoChat/server/v8/platform/services/telemetry"
 	"git.biggo.com/Funmula/BigGoChat/server/v8/platform/services/tracing"
-	"git.biggo.com/Funmula/BigGoChat/server/v8/platform/services/upgrader"
 	"git.biggo.com/Funmula/BigGoChat/server/v8/platform/shared/filestore"
 	"git.biggo.com/Funmula/BigGoChat/server/v8/platform/shared/mail"
 	"git.biggo.com/Funmula/BigGoChat/server/v8/platform/shared/templates"
@@ -532,9 +531,10 @@ func (s *Server) runJobs() {
 		runDNDStatusExpireJob(appInstance)
 		runPostReminderJob(appInstance)
 	})
-	s.Go(func() {
-		runSecurityJob(s)
-	})
+	// disable security update check for now
+	// s.Go(func() {
+	// 	runSecurityJob(s)
+	// })
 	s.Go(func() {
 		firstRun, err := s.getFirstServerRunTimestamp()
 		if err != nil {
@@ -786,10 +786,6 @@ func (s *Server) Shutdown() {
 }
 
 func (s *Server) Restart() error {
-	percentage, err := s.UpgradeToE0Status()
-	if err != nil || percentage != 100 {
-		return errors.Wrap(err, "unable to restart because the system has not been upgraded")
-	}
 	s.Shutdown()
 
 	argv0, err := exec.LookPath(os.Args[0])
@@ -803,23 +799,6 @@ func (s *Server) Restart() error {
 
 	mlog.Info("Restarting server")
 	return syscall.Exec(argv0, os.Args, os.Environ())
-}
-
-func (s *Server) CanIUpgradeToE0() error {
-	return upgrader.CanIUpgradeToE0()
-}
-
-func (s *Server) UpgradeToE0() error {
-	if err := upgrader.UpgradeToE0(); err != nil {
-		return err
-	}
-	upgradedFromTE := &model.System{Name: model.SystemUpgradedFromTeId, Value: "true"}
-	s.Store().System().Save(upgradedFromTE)
-	return nil
-}
-
-func (s *Server) UpgradeToE0Status() (int64, error) {
-	return upgrader.UpgradeToE0Status()
 }
 
 // Go creates a goroutine, but maintains a record of it to ensure that execution completes before
