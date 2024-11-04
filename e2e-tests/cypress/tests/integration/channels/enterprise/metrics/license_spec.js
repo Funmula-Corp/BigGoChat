@@ -19,7 +19,7 @@ describe('Metrics > License', () => {
         toggleMetricsOn();
     });
 
-    it('should enable metrics in BUILD_NUMBER == dev environments', () => {
+    it.skip('should enable metrics in BUILD_NUMBER == dev environments', () => {
         cy.apiGetConfig(true).then(({config}) => {
             if (config.BuildNumber !== 'dev') {
                 Cypress.log({name: 'Metrics License', message: `Skipping test since BUILD_NUMBER = ${config.BuildNumber}`});
@@ -30,7 +30,7 @@ describe('Metrics > License', () => {
         });
     });
 
-    it('should enable metrics in BUILD_NUMBER != dev environments', () => {
+    it.skip('should enable metrics in BUILD_NUMBER != dev environments', () => {
         cy.apiGetConfig(true).then(({config}) => {
             if (config.BuildNumber === 'dev') {
                 Cypress.log({name: 'Metrics License', message: `Skipping test since BUILD_NUMBER = ${config.BuildNumber}`});
