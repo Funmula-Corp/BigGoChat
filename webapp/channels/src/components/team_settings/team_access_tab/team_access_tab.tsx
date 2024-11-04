@@ -124,16 +124,19 @@ const AccessTab = ({closeModal, collapseModal, hasChangeTabError, hasChanges, se
                         </h4>
                     </div>
                     <div className='modal-access-tab-content user-settings'>
+                        {/* Funmula/BigGoChat/issues/266 remove
                         {team.group_constrained ?
                             undefined :
-                            <AllowedDomainsSelect
-                                allowedDomains={allowedDomains}
-                                setAllowedDomains={setAllowedDomains}
-                                setHasChanges={setHasChanges}
-                                setSaveChangesPanelState={setSaveChangesPanelState}
-                            />
-                        }
-                        <div className='divider-light'/>
+                            <>
+                                <AllowedDomainsSelect
+                                    allowedDomains={allowedDomains}
+                                    setAllowedDomains={setAllowedDomains}
+                                    setHasChanges={setHasChanges}
+                                    setSaveChangesPanelState={setSaveChangesPanelState}
+                                />
+                                <div className='divider-light'/>
+                            </>
+                        } */}
                         <OpenInvite
                             isGroupConstrained={team.group_constrained}
                             allowOpenInvite={allowOpenInvite}
