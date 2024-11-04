@@ -26,7 +26,8 @@ describe('MM-23102 - Channel Moderation - Create Posts', () => {
     let testTeam;
     let testChannel;
 
-    before( function () {
+    before(function () {
+        // we don't support channel moderator for now.
         this.skip();
         // * Check if server has license
         cy.apiRequireLicense();
