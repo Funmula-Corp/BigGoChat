@@ -25,6 +25,7 @@ describe('Messaging', () => {
 
             cy.apiCreateUser().then(({user: user1}) => {
                 sender = user1;
+                cy.apiPatchUserRoles(sender.id, ['system_verified']);
                 cy.apiAddUserToTeam(testTeam.id, sender.id).then(() => {
                     cy.apiAddUserToChannel(testChannel.id, sender.id);
                 });

@@ -27,6 +27,7 @@ describe('Message permalink', () => {
 
             cy.apiCreateUser().then(({user: user1}) => {
                 otherUser = user1;
+                cy.apiPatchUserRoles(otherUser.id, ['system_verified']);
 
                 cy.apiAddUserToTeam(testTeam.id, otherUser.id).then(() => {
                     cy.apiAddUserToChannel(testChannel.id, otherUser.id);
@@ -35,6 +36,7 @@ describe('Message permalink', () => {
 
             cy.apiCreateUser({prefix: 'notinchannel'}).then(({user: user1}) => {
                 notInChannelUser = user1;
+                cy.apiPatchUserRoles(notInChannelUser.id, ['system_verified']);
                 cy.apiAddUserToTeam(testTeam.id, notInChannelUser.id);
             });
         });
@@ -206,6 +208,7 @@ describe('Message permalink', () => {
         // # Create a temporary user
         cy.apiCreateUser({prefix: 'temp'}).then(({user: user1}) => {
             tempUser = user1;
+            cy.apiPatchUserRoles(tempUser.id, ['system_verified']);
             cy.apiAddUserToTeam(testTeam.id, tempUser.id);
 
             // # Login as the other user
@@ -255,6 +258,7 @@ describe('Message permalink', () => {
         // # Create a temporary user
         cy.apiCreateUser({prefix: 'temp'}).then(({user: user1}) => {
             tempUser = user1;
+            cy.apiPatchUserRoles(tempUser.id, ['system_verified']);
             cy.apiAddUserToTeam(testTeam.id, tempUser.id);
             cy.apiAddUserToChannel(privateChannel.id, tempUser.id);
 

@@ -22,7 +22,9 @@ describe('Settings', () => {
 
     const ldapUser = ldapUsers['test-1'];
 
-    before(() => {
+    before(function () {
+        // We have no plan to support ldap/saml now.
+        this.skip();
         cy.apiInitSetup().then(({user}) => {
             mfaUser = user;
 
@@ -33,9 +35,10 @@ describe('Settings', () => {
             });
 
             // * Check if server has license for LDAP
-            cy.apiRequireLicenseForFeature('LDAP');
+            // skip LDAP for now
+            // cy.apiRequireLicenseForFeature('LDAP');
 
-            return cy.apiSyncLDAPUser({ldapUser});
+            // return cy.apiSyncLDAPUser({ldapUser});
         }).then(() => {
             return cy.apiCreateUser();
         }).then(({user: user2}) => {
@@ -81,12 +84,12 @@ describe('Settings', () => {
         cy.get('a.back').click();
 
         // # Type ldap user
-        cy.findByPlaceholderText('Search users').clear().type(ldapUser.username).wait(TIMEOUTS.TWO_SEC);
+        // cy.findByPlaceholderText('Search users').clear().type(ldapUser.username).wait(TIMEOUTS.TWO_SEC);
 
         // * Verify sign-in method from user profile
-        cy.get('.displayName').click();
-        cy.get('.AdminUserCard__body > :nth-child(4) > span:nth-child(3)').should('have.text', 'LDAP');
-        cy.get('a.back').click();
+        // cy.get('.displayName').click();
+        // cy.get('.AdminUserCard__body > :nth-child(4) > span:nth-child(3)').should('have.text', 'LDAP');
+        // cy.get('a.back').click();
 
         // # Type mfa user
         cy.findByPlaceholderText('Search users').clear().type(mfaUser.username).wait(TIMEOUTS.TWO_SEC);

@@ -27,6 +27,7 @@ describe('Integrations', () => {
             // # Create a second user
             cy.apiCreateUser().then(({user: user2}) => {
                 secondUser = user2;
+                cy.apiPatchUserRoles(secondUser.id, ['system_verified']);
             });
 
             // # Login as the new user

@@ -31,6 +31,7 @@ describe('Archived channels', () => {
 
             cy.apiCreateUser().then(({user}) => {
                 testUser = user;
+                cy.apiPatchUserRoles(user.id, ["system_verified"]);
                 cy.apiAddUserToTeam(team.id, testUser.id);
             });
         });

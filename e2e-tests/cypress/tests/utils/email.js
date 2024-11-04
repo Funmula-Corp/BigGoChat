@@ -37,7 +37,7 @@ export function getJoinEmailTemplate(sender, userEmail, team, isGuest = false) {
         'Mattermost is a flexible, open source messaging platform that enables secure team collaboration.',
         'Learn more ( mattermost.com )',
         '',
-        '© 2022 Mattermost, Inc. 530 Lytton Avenue, Second floor, Palo Alto, CA, 94301',
+        '© 2024 BigGo'
     ];
 }
 

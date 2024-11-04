@@ -17,11 +17,15 @@ import {getAdminAccount} from '../../../support/env';
 describe('Permalink message edit', () => {
     let testTeam;
     let testChannel;
+    let testAdmin;
 
     before(() => {
         cy.apiInitSetup().then(({team, channel}) => {
             testTeam = team;
             testChannel = channel;
+        });
+        cy.apiCreateCustomAdmin().then(({sysadmin}) => {
+            testAdmin = sysadmin;
         });
     });
 
@@ -55,11 +59,7 @@ describe('Permalink message edit', () => {
 
                     // # Logout and login as sysadmin
                     cy.apiLogout().wait(TIMEOUTS.ONE_SEC).then(() => {
-                        cy.apiLogin(getAdminAccount());
-
-                        // # Leave private channel 1 & 2 to test the prompts
-                        gotoChannel(testTeam, channel1);
-                        cy.leaveTeam();
+                        cy.apiLogin(testAdmin);
 
                         // # Go to channel 1 from url
                         cy.visit(`/${testTeam.name}/channels/${channel1.name}`);
