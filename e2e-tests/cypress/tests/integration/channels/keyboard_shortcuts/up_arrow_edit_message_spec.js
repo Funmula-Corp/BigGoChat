@@ -26,6 +26,7 @@ describe('Keyboard Shortcuts', () => {
 
             cy.apiCreateUser({prefix: 'other'}).then(({user: user1}) => {
                 otherUser = user1;
+                cy.apiPatchUserRoles(otherUser.id, ['system_verified']);
 
                 cy.apiAddUserToTeam(testTeam.id, otherUser.id).then(() => {
                     cy.apiAddUserToChannel(testChannel.id, otherUser.id);

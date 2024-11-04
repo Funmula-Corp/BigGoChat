@@ -40,6 +40,8 @@ describe('Join an open team from a direct message link', () => {
             cy.apiCreateUser().then(({user}) => {
                 testUserInOpenTeam = user;
 
+                cy.apiPatchUserRoles(user.id, ["system_verified"]);
+
                 // # Add user to open team
                 cy.apiAddUserToTeam(openTeam.id, testUserInOpenTeam.id);
 

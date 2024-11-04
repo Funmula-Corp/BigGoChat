@@ -16,7 +16,9 @@ describe('channel groups', () => {
     const groups = [];
     let testTeam;
 
-    before(() => {
+    before(function () {
+        // we don't support LDAP
+        this.skip();
         cy.apiRequireLicenseForFeature('LDAP');
 
         // # Link 2 groups

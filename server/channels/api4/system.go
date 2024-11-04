@@ -15,14 +15,11 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/pkg/errors"
-
-	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/audit"
-	"git.biggo.com/Funmula/BigGoChat/server/v8/platform/services/cache"
-	"git.biggo.com/Funmula/BigGoChat/server/v8/platform/services/upgrader"
-	"git.biggo.com/Funmula/BigGoChat/server/v8/platform/shared/web"
 	"git.biggo.com/Funmula/BigGoChat/server/public/model"
 	"git.biggo.com/Funmula/BigGoChat/server/public/shared/mlog"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/audit"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/platform/services/cache"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/platform/shared/web"
 )
 
 const (
@@ -64,8 +61,6 @@ func (api *API) InitSystem() {
 	api.BaseRoutes.APIRoot.Handle("/server_busy", api.APISessionRequired(setServerBusy)).Methods("POST")
 	api.BaseRoutes.APIRoot.Handle("/server_busy", api.APISessionRequired(getServerBusyExpires)).Methods("GET")
 	api.BaseRoutes.APIRoot.Handle("/server_busy", api.APISessionRequired(clearServerBusy)).Methods("DELETE")
-	api.BaseRoutes.APIRoot.Handle("/upgrade_to_enterprise", api.APISessionRequired(upgradeToEnterprise)).Methods("POST")
-	api.BaseRoutes.APIRoot.Handle("/upgrade_to_enterprise/status", api.APISessionRequired(upgradeToEnterpriseStatus)).Methods("GET")
 	api.BaseRoutes.APIRoot.Handle("/restart", api.APISessionRequired(restart)).Methods("POST")
 	api.BaseRoutes.System.Handle("/notices/{team_id:[A-Za-z0-9]+}", api.APISessionRequired(getProductNotices)).Methods("GET")
 	api.BaseRoutes.System.Handle("/notices/view", api.APISessionRequired(updateViewedProductNotices)).Methods("PUT")
@@ -790,90 +785,6 @@ func getServerBusyExpires(c *Context, w http.ResponseWriter, r *http.Request) {
 	if _, err := w.Write(sbsJSON); err != nil {
 		c.Logger.Warn("Error while writing response", mlog.Err(err))
 	}
-}
-
-func upgradeToEnterprise(c *Context, w http.ResponseWriter, r *http.Request) {
-	auditRec := c.MakeAuditRecord("upgradeToEnterprise", audit.Fail)
-	defer c.LogAuditRec(auditRec)
-
-	if !c.App.SessionHasPermissionTo(*c.AppContext.Session(), model.PermissionManageSystem) {
-		c.SetPermissionError(model.PermissionManageSystem)
-		return
-	}
-
-	if model.BuildEnterpriseReady == "true" {
-		c.Err = model.NewAppError("upgradeToEnterprise", "api.upgrade_to_enterprise.already-enterprise.app_error", nil, "", http.StatusTooManyRequests)
-		return
-	}
-
-	percentage, _ := c.App.Srv().UpgradeToE0Status()
-
-	if percentage > 0 {
-		c.Err = model.NewAppError("upgradeToEnterprise", "api.upgrade_to_enterprise.app_error", nil, "", http.StatusTooManyRequests)
-		return
-	}
-	if percentage == 100 {
-		c.Err = model.NewAppError("upgradeToEnterprise", "api.upgrade_to_enterprise.already-done.app_error", nil, "", http.StatusTooManyRequests)
-		return
-	}
-
-	if err := c.App.Srv().CanIUpgradeToE0(); err != nil {
-		var ipErr *upgrader.InvalidPermissions
-		var iaErr *upgrader.InvalidArch
-		switch {
-		case errors.As(err, &ipErr):
-			params := map[string]any{
-				"MattermostUsername": ipErr.MattermostUsername,
-				"FileUsername":       ipErr.FileUsername,
-				"Path":               ipErr.Path,
-			}
-			if ipErr.ErrType == "invalid-user-and-permission" {
-				c.Err = model.NewAppError("upgradeToEnterprise", "api.upgrade_to_enterprise.invalid-user-and-permission.app_error", params, "", http.StatusForbidden).Wrap(err)
-			} else if ipErr.ErrType == "invalid-user" {
-				c.Err = model.NewAppError("upgradeToEnterprise", "api.upgrade_to_enterprise.invalid-user.app_error", params, "", http.StatusForbidden).Wrap(err)
-			} else if ipErr.ErrType == "invalid-permission" {
-				c.Err = model.NewAppError("upgradeToEnterprise", "api.upgrade_to_enterprise.invalid-permission.app_error", params, "", http.StatusForbidden).Wrap(err)
-			}
-		case errors.As(err, &iaErr):
-			c.Err = model.NewAppError("upgradeToEnterprise", "api.upgrade_to_enterprise.system_not_supported.app_error", nil, "", http.StatusForbidden).Wrap(err)
-		default:
-			c.Err = model.NewAppError("upgradeToEnterprise", "api.upgrade_to_enterprise.generic_error.app_error", nil, "", http.StatusForbidden).Wrap(err)
-		}
-		return
-	}
-
-	c.App.Srv().Go(func() {
-		c.App.Srv().UpgradeToE0()
-	})
-
-	auditRec.Success()
-	w.WriteHeader(http.StatusAccepted)
-	ReturnStatusOK(w)
-}
-
-func upgradeToEnterpriseStatus(c *Context, w http.ResponseWriter, r *http.Request) {
-	if !c.App.SessionHasPermissionTo(*c.AppContext.Session(), model.PermissionManageSystem) {
-		c.SetPermissionError(model.PermissionManageSystem)
-		return
-	}
-
-	percentage, err := c.App.Srv().UpgradeToE0Status()
-	var s map[string]any
-	if err != nil {
-		var isErr *upgrader.InvalidSignature
-		switch {
-		case errors.As(err, &isErr):
-			appErr := model.NewAppError("upgradeToEnterpriseStatus", "api.upgrade_to_enterprise_status.app_error", nil, "", http.StatusBadRequest).Wrap(isErr)
-			s = map[string]any{"percentage": 0, "error": appErr.Message}
-		default:
-			appErr := model.NewAppError("upgradeToEnterpriseStatus", "api.upgrade_to_enterprise_status.signature.app_error", nil, "", http.StatusBadRequest).Wrap(err)
-			s = map[string]any{"percentage": 0, "error": appErr.Message}
-		}
-	} else {
-		s = map[string]any{"percentage": percentage, "error": nil}
-	}
-
-	w.Write([]byte(model.StringInterfaceToJSON(s)))
 }
 
 func restart(c *Context, w http.ResponseWriter, r *http.Request) {

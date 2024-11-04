@@ -533,7 +533,7 @@ func TestGetMarketplacePlugins(t *testing.T) {
 			serverVersion, ok := req.URL.Query()["server_version"]
 			require.True(t, ok)
 			require.Len(t, serverVersion, 1)
-			require.Equal(t, model.CurrentVersion, serverVersion[0])
+			require.Equal(t, model.MMVersion, serverVersion[0])
 			require.NotEqual(t, 0, len(serverVersion[0]))
 
 			res.WriteHeader(http.StatusOK)
@@ -1457,7 +1457,7 @@ func TestInstallMarketplacePlugin(t *testing.T) {
 		testServer := httptest.NewServer(http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
 			serverVersion := req.URL.Query().Get("server_version")
 			require.NotEmpty(t, serverVersion)
-			require.Equal(t, model.CurrentVersion, serverVersion)
+			require.Equal(t, model.MMVersion, serverVersion)
 			res.WriteHeader(http.StatusOK)
 			json, err := json.Marshal([]*model.MarketplacePlugin{samplePlugins[1]})
 			require.NoError(t, err)
@@ -1502,7 +1502,7 @@ func TestInstallMarketplacePlugin(t *testing.T) {
 		testServer := httptest.NewServer(http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
 			serverVersion := req.URL.Query().Get("server_version")
 			require.NotEmpty(t, serverVersion)
-			require.Equal(t, model.CurrentVersion, serverVersion)
+			require.Equal(t, model.MMVersion, serverVersion)
 			res.WriteHeader(http.StatusOK)
 			json, err := json.Marshal([]*model.MarketplacePlugin{samplePlugins[1]})
 			require.NoError(t, err)
@@ -1742,7 +1742,7 @@ func TestInstallMarketplacePluginPrepackagedDisabled(t *testing.T) {
 			testServer := httptest.NewServer(http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
 				serverVersion := req.URL.Query().Get("server_version")
 				require.NotEmpty(t, serverVersion)
-				require.Equal(t, model.CurrentVersion, serverVersion)
+				require.Equal(t, model.MMVersion, serverVersion)
 				res.WriteHeader(http.StatusOK)
 
 				var out []byte
@@ -1914,7 +1914,7 @@ func TestInstallMarketplacePluginPrepackagedDisabled(t *testing.T) {
 			testServer := httptest.NewServer(http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
 				serverVersion := req.URL.Query().Get("server_version")
 				require.NotEmpty(t, serverVersion)
-				require.Equal(t, model.CurrentVersion, serverVersion)
+				require.Equal(t, model.MMVersion, serverVersion)
 
 				mPlugins := []*model.MarketplacePlugin{samplePlugins[0]}
 				require.Empty(t, mPlugins[0].Signature)

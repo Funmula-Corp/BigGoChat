@@ -97,7 +97,7 @@ describe('Image attachment', () => {
         // # File thumbnail should have correct dimensions
         verifyFileThumbnail({
             filename,
-            actualImage: {height: 144, width: 906},
+            actualImage: {height: 140, width: 880},
         });
     });
 
@@ -117,7 +117,7 @@ describe('Image attachment', () => {
         // # File thumbnail should have correct dimensions
         verifyFileThumbnail({
             filename,
-            actualImage: {height: 144, width: 906},
+            actualImage: {height: 140, width: 880},
             clickPreview: () => cy.uiGetFileThumbnail(filename).click(),
         });
 

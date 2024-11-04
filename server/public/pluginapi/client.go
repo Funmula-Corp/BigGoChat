@@ -67,7 +67,7 @@ func NewClient(api plugin.API, driver plugin.Driver) *Client {
 }
 
 func ensureServerVersion(api plugin.API, required string) error {
-	serverVersion := api.GetServerVersion()
+	serverVersion := api.GetMMVersion()
 	currentVersion := semver.MustParse(serverVersion)
 	requiredVersion := semver.MustParse(required)
 

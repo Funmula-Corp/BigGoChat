@@ -269,7 +269,7 @@ func checkMinServerVersion(pluginInfo *model.BundleInfo) error {
 		return nil
 	}
 
-	fulfilled, err := pluginInfo.Manifest.MeetMinServerVersion(model.CurrentVersion)
+	fulfilled, err := pluginInfo.Manifest.MeetMinServerVersion(model.MMVersion)
 	if err != nil {
 		return fmt.Errorf("%v: %v", err.Error(), pluginInfo.Manifest.Id)
 	}

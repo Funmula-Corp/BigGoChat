@@ -13,6 +13,9 @@ import (
 // It should be maintained in chronological order with most current
 // release at the front of the list.
 var versions = []string{
+	"9.11.4",
+	"9.11.3",
+	"9.11.2",
 	"9.11.1",
 	"9.11.0",
 	"9.10.0",
@@ -128,7 +131,10 @@ var versions = []string{
 	"0.5.0",
 }
 
-var CurrentVersion string// = versions[0]
+var biggo_versions []string = []string{"0.9.0"}
+
+var CurrentVersion string
+var MMVersion string = versions[0]
 var BuildNumber string
 var BuildDate string
 var BuildHash string
@@ -138,7 +144,7 @@ var versionsWithoutHotFixes []string
 
 func init() {
 	if CurrentVersion == "" {
-		CurrentVersion = versions[0]
+		CurrentVersion = biggo_versions[0]
 	}
 	versionsWithoutHotFixes = make([]string, 0, len(versions))
 	seen := make(map[string]string)

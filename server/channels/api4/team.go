@@ -169,11 +169,6 @@ func getTeam(c *Context, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if (!team.AllowOpenInvite || team.Type != model.TeamOpen) && !c.App.SessionHasPermissionToTeam(*c.AppContext.Session(), team.Id, model.PermissionViewTeam) {
-		c.SetPermissionError(model.PermissionViewTeam)
-		return
-	}
-
 	c.App.SanitizeTeam(*c.AppContext.Session(), team)
 	if err := json.NewEncoder(w).Encode(team); err != nil {
 		c.Logger.Warn("Error while writing response", mlog.Err(err))
@@ -189,11 +184,6 @@ func getTeamByName(c *Context, w http.ResponseWriter, r *http.Request) {
 	team, err := c.App.GetTeamByName(c.Params.TeamName)
 	if err != nil {
 		c.Err = err
-		return
-	}
-
-	if (!team.AllowOpenInvite || team.Type != model.TeamOpen) && !c.App.SessionHasPermissionToTeam(*c.AppContext.Session(), team.Id, model.PermissionViewTeam) {
-		c.SetPermissionError(model.PermissionViewTeam)
 		return
 	}
 
