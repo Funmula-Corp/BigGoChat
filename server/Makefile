@@ -529,6 +529,7 @@ validate-go-version: gen-serialized ## Validates the installed version of go aga
 build-templates: ## Compile all mjml email templates
 	cd $(TEMPLATES_DIR) && $(MAKE) build
 
+run-server: export MM_SERVICESETTINGS_ENABLELOCALMODE := true
 run-server: setup-go-work prepackaged-binaries validate-go-version start-docker client ## Starts the server.
 	@echo Running mattermost for development
 

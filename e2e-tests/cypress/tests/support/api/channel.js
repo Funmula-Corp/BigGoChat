@@ -172,6 +172,15 @@ Cypress.Commands.add('apiRemoveUserFromChannel', (channelId, userId) => {
     });
 });
 
+Cypress.Commands.add('apiUpdateChannelScheme', (channelId, schemeId) => {
+    return cy.request({
+        headers: {'X-Requested-With': 'XMLHttpRequest'},
+        url: `/api/v4/channels/${channelId}/scheme`,
+        method: 'PUT',
+        body: {scheme_id: schemeId},
+    });
+});
+
 Cypress.Commands.add('apiCreateArchivedChannel', (name, displayName, type = 'O', teamId, messages = [], user) => {
     return cy.apiCreateChannel(teamId, name, displayName, type).then(({channel}) => {
         Cypress._.forEach(messages, (message) => {
