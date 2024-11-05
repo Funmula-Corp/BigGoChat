@@ -336,3 +336,13 @@ func (me SqlSessionStore) Cleanup(expiryTime int64, batchSize int64) error {
 
 	return nil
 }
+
+func (me SqlSessionStore) DropDeviceId(deviceId string) error {
+	query := "UPDATE Sessions SET DeviceId = '' WHERE DeviceId = ?"
+
+	_, err := me.GetMasterX().Exec(query, deviceId)
+	if err != nil {
+		return errors.Wrapf(err, "failed to update Session with deviceId=%s", deviceId)
+	}
+	return nil
+}

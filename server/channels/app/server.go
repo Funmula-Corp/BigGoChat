@@ -309,6 +309,7 @@ func NewServer(options ...Option) (*Server, error) {
 	}
 	if strings.HasPrefix(notificationServer, "amqp://") {
 		s.pushNotificationAMQPClient = amqp.MakeAMQPClient(notificationServer, exchanges)
+		s.pushNotificationAMQPClient.Consume(pushProxyResponseExchange, model.PushStatusRemove, pushProxyResponseRemovedQueue, s.removeSessionDeviceId)
 	}
 
 	s.platform.AddConfigListener(func(prev, curr *model.Config) {
@@ -317,6 +318,7 @@ func NewServer(options ...Option) (*Server, error) {
 		if enableAMQP && s.pushNotificationAMQPClient == nil {
 			// create client
 			s.pushNotificationAMQPClient = amqp.MakeAMQPClient(newNotificationServer, exchanges)
+			s.pushNotificationAMQPClient.Consume(pushProxyResponseExchange, model.PushStatusRemove, pushProxyResponseRemovedQueue, s.removeSessionDeviceId)
 		} else if enableAMQP {
 			// switch server
 			s.pushNotificationAMQPClient.SwitchToNewServer(newNotificationServer)

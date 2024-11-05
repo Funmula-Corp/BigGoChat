@@ -10305,6 +10305,27 @@ func (s *RetryLayerSessionStore) Cleanup(expiryTime int64, batchSize int64) erro
 
 }
 
+func (s *RetryLayerSessionStore) DropDeviceId(deviceId string) error {
+
+	tries := 0
+	for {
+		err := s.SessionStore.DropDeviceId(deviceId)
+		if err == nil {
+			return nil
+		}
+		if !isRepeatableError(err) {
+			return err
+		}
+		tries++
+		if tries >= 3 {
+			err = errors.Wrap(err, "giving up after 3 consecutive repeatable transaction failures")
+			return err
+		}
+		timepkg.Sleep(100 * timepkg.Millisecond)
+	}
+
+}
+
 func (s *RetryLayerSessionStore) Get(c request.CTX, sessionIDOrToken string) (*model.Session, error) {
 
 	tries := 0

@@ -9026,6 +9026,24 @@ func (s *OpenTracingLayerSessionStore) Cleanup(expiryTime int64, batchSize int64
 	return err
 }
 
+func (s *OpenTracingLayerSessionStore) DropDeviceId(deviceId string) error {
+	origCtx := s.Root.Store.Context()
+	span, newCtx := tracing.StartSpanWithParentByContext(s.Root.Store.Context(), "SessionStore.DropDeviceId")
+	s.Root.Store.SetContext(newCtx)
+	defer func() {
+		s.Root.Store.SetContext(origCtx)
+	}()
+
+	defer span.Finish()
+	err := s.SessionStore.DropDeviceId(deviceId)
+	if err != nil {
+		span.LogFields(spanlog.Error(err))
+		ext.Error.Set(span, true)
+	}
+
+	return err
+}
+
 func (s *OpenTracingLayerSessionStore) Get(c request.CTX, sessionIDOrToken string) (*model.Session, error) {
 	origCtx := s.Root.Store.Context()
 	span, newCtx := tracing.StartSpanWithParentByContext(s.Root.Store.Context(), "SessionStore.Get")
