@@ -63,10 +63,16 @@ func createPost(c *Context, w http.ResponseWriter, r *http.Request) {
 	defer c.LogAuditRecWithLevel(auditRec, app.LevelContent)
 	audit.AddEventParameterAuditable(auditRec, "post", &post)
 
+	channel, err := c.App.GetChannel(c.AppContext, post.ChannelId)
+	if err != nil {
+		c.Err = err
+		return
+	}
+
 	hasPermission := false
 	if c.App.SessionHasPermissionToChannel(c.AppContext, *c.AppContext.Session(), post.ChannelId, model.PermissionCreatePost) {
 		hasPermission = true
-	} else if channel, err := c.App.GetChannel(c.AppContext, post.ChannelId); err == nil {
+	} else {
 		// Temporary permission check method until advanced permissions, please do not copy
 		if channel.Type == model.ChannelTypeOpen && c.App.SessionHasPermissionToTeam(*c.AppContext.Session(), channel.TeamId, model.PermissionCreatePostPublic) {
 			hasPermission = true
@@ -76,6 +82,40 @@ func createPost(c *Context, w http.ResponseWriter, r *http.Request) {
 	if !hasPermission {
 		c.SetPermissionError(model.PermissionCreatePost)
 		return
+	} else if channel.Type == model.ChannelTypeDirect {
+		user, err := c.App.GetUser(c.AppContext.Session().UserId)
+		if err != nil {	
+			c.Err = err
+			return
+		}
+		if !user.IsVerified() && !user.IsBot && !user.IsSystemAdmin() {
+			members, err := c.App.GetChannelMembersPage(c.AppContext, post.ChannelId, 0, 2)
+			if err != nil {
+				c.Err = err
+				return
+			}
+			if len(members) == 2 {
+				var otherMember model.ChannelMember
+				for _, member := range members {
+					if member.UserId != user.Id {
+						otherMember = member
+						break
+					}
+				}
+				pref, prefErr := c.App.GetPreferenceByCategoryAndNameForUser(c.AppContext, otherMember.UserId, model.PreferenceCategoryPrivacySettings, model.PreferenceNameAllowUnverifiedMessage)
+				acceptsDM := false
+				if prefErr == nil {
+					if parseErr := json.Unmarshal([]byte(pref.Value), &acceptsDM); parseErr != nil {
+						c.Err = model.NewAppError("createPost", "api.unmarshal_error", nil, "", http.StatusBadRequest).Wrap(parseErr)
+						return
+					}
+				}
+				if !acceptsDM {
+					c.Err = model.NewAppError("createPost", "api.channel.create_post.direct_channel.user_restricted_error", nil, "", http.StatusForbidden)
+					return
+				}
+			}
+		}
 	}
 	if *c.App.Config().ServiceSettings.ExperimentalEnableHardenedMode {
 		if reservedProps := post.ContainsIntegrationsReservedProps(); len(reservedProps) > 0 && !c.AppContext.Session().IsIntegration() {

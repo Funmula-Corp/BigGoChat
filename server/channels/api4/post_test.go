@@ -210,12 +210,12 @@ func TestCreatePost(t *testing.T) {
 	post.ChannelId = "junk"
 	_, resp, err = client.CreatePost(context.Background(), post)
 	require.Error(t, err)
-	CheckForbiddenStatus(t, resp)
+	CheckNotFoundStatus(t, resp)
 
 	post.ChannelId = model.NewId()
 	_, resp, err = client.CreatePost(context.Background(), post)
 	require.Error(t, err)
-	CheckForbiddenStatus(t, resp)
+	CheckNotFoundStatus(t, resp)
 
 	r, err := client.DoAPIPost(context.Background(), "/posts", "garbage")
 	require.Error(t, err)
@@ -1097,6 +1097,7 @@ func TestCreatePostAll(t *testing.T) {
 	CheckForbiddenStatus(t, resp)
 
 	th.App.UpdateUserRoles(th.Context, ruser.Id, model.SystemUserRoleId+" "+model.SystemPostAllRoleId, false)
+	th.App.MarkUserVerified(th.Context, ruser.Id)
 	th.App.Srv().InvalidateAllCaches()
 
 	client.Login(context.Background(), user.Email, user.Password)
