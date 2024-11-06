@@ -2548,6 +2548,8 @@ func TestPostAfterRoleUpdate(t *testing.T) {
 		Message:   "test",
 	})
 	require.Error(t, err)
+
+	// non-system_verified user can't post in direct channel opened by other user
 	_, _, err = testClient.CreatePost(context.Background(), &model.Post{
 		UserId:    testUser.Id,
 		ChannelId: directChannel.Id,
@@ -2555,22 +2557,40 @@ func TestPostAfterRoleUpdate(t *testing.T) {
 	})
 	require.Error(t, err)
 
+	// non-system_verified user can't open a direct channel
+	_, _, err = testClient.CreateDirectChannel(context.Background(), th.BasicUser.Id, testUser.Id)
+	require.Error(t, err)
+
 	th.App.UpdateUserRoles(th.Context, testUser.Id, model.SystemUserRoleId+" "+model.SystemVerifiedRoleId, true)
 	testUser, _, err = th.Client.GetUser(context.Background(), testUser.Id, "")
 	require.NoError(t, err)
 	require.Contains(t, testUser.Roles, model.SystemVerifiedRoleId)
+
+	// system_verified user can post in town-square channel
 	_, _, err = testClient.CreatePost(context.Background(), &model.Post{
 		UserId:    testUser.Id,
 		ChannelId: th.BasicChannel.Id,
 		Message:   "test",
 	})
 	require.NoError(t, err)
-	_, resp, err := testClient.CreatePost(context.Background(), &model.Post{
+
+	// system_verified user can post in direct channel opened by other user
+	_, _, err = testClient.CreatePost(context.Background(), &model.Post{
 		UserId:    testUser.Id,
 		ChannelId: directChannel.Id,
 		Message:   "test",
 	})
-	require.NoError(t, err, resp)
+	require.NoError(t, err)
+
+	// system_verified user can open a direct channel and post in it
+	directChannel2, _, err := testClient.CreateDirectChannel(context.Background(), th.BasicUser.Id, testUser.Id)
+	require.NoError(t, err)
+	_, _, err = testClient.CreatePost(context.Background(), &model.Post{
+		UserId:    testUser.Id,
+		ChannelId: directChannel2.Id,
+		Message:   "test",
+	})
+	require.NoError(t, err)
 }
 
 func assertExpectedWebsocketEvent(t *testing.T, client *model.WebSocketClient, event model.WebsocketEventType, test func(*model.WebSocketEvent)) {
