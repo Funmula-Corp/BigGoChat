@@ -140,6 +140,9 @@ func (a *App) AddUserBlockUser(rctx request.CTX, userId string, blockedId string
 	if userId == blockedId {
 		return nil, model.NewAppError("AddUserBlockUser", "app.user.add_blocklist.add_self.app_err", nil, "", http.StatusBadRequest)
 	}
+	if _, err := a.Srv().Store().User().Get(rctx.Context(), userId); err != nil {
+		return nil, model.NewAppError("AddUserBlockUser", MissingAccountError, nil, "", http.StatusBadRequest).Wrap(err)
+	}
 	if _, err := a.Srv().Store().User().Get(rctx.Context(), blockedId); err != nil {
 		return nil, model.NewAppError("AddUserBlockUser", MissingAccountError, nil, "", http.StatusBadRequest).Wrap(err)
 	}
