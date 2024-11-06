@@ -88,7 +88,7 @@ func createPost(c *Context, w http.ResponseWriter, r *http.Request) {
 			c.Err = err
 			return
 		}
-		if !user.IsVerified() && !user.IsBot {
+		if !user.IsVerified() && !user.IsBot && !user.IsSystemAdmin() {
 			members, err := c.App.GetChannelMembersPage(c.AppContext, post.ChannelId, 0, 2)
 			if err != nil {
 				c.Err = err
