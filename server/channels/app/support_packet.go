@@ -16,10 +16,10 @@ import (
 	"github.com/pkg/errors"
 	"gopkg.in/yaml.v2"
 
-	"git.biggo.com/Funmula/BigGoChat/server/v8/config"
 	"git.biggo.com/Funmula/BigGoChat/server/public/model"
 	"git.biggo.com/Funmula/BigGoChat/server/public/shared/mlog"
 	"git.biggo.com/Funmula/BigGoChat/server/public/shared/request"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/config"
 )
 
 const (
@@ -215,10 +215,6 @@ func (a *App) generateSupportPacketYaml(c request.CTX) (*model.FileData, error) 
 	if err != nil {
 		rErr = multierror.Append(errors.Wrap(err, "error while getting ES post aggregation jobs"))
 	}
-	blevePostIndexingJobs, err := a.Srv().Store().Job().GetAllByTypePage(c, model.JobTypeBlevePostIndexing, 0, 2)
-	if err != nil {
-		rErr = multierror.Append(errors.Wrap(err, "error while getting bleve post indexing jobs"))
-	}
 	ldapSyncJobs, err := a.Srv().Store().Job().GetAllByTypePage(c, model.JobTypeLdapSync, 0, 2)
 	if err != nil {
 		rErr = multierror.Append(errors.Wrap(err, "error while getting LDAP sync jobs"))
@@ -278,7 +274,6 @@ func (a *App) generateSupportPacketYaml(c request.CTX) (*model.FileData, error) 
 		MessageExportJobs:          messageExportJobs,
 		ElasticPostIndexingJobs:    elasticPostIndexingJobs,
 		ElasticPostAggregationJobs: elasticPostAggregationJobs,
-		BlevePostIndexingJobs:      blevePostIndexingJobs,
 		LdapSyncJobs:               ldapSyncJobs,
 		MigrationJobs:              migrationJobs,
 	}

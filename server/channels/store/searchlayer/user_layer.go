@@ -9,11 +9,11 @@ import (
 
 	"github.com/pkg/errors"
 
-	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/store"
-	"git.biggo.com/Funmula/BigGoChat/server/v8/platform/services/searchengine"
 	"git.biggo.com/Funmula/BigGoChat/server/public/model"
 	"git.biggo.com/Funmula/BigGoChat/server/public/shared/mlog"
 	"git.biggo.com/Funmula/BigGoChat/server/public/shared/request"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/store"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/platform/services/searchengine"
 )
 
 type SearchUserStore struct {
@@ -38,19 +38,9 @@ func (s *SearchUserStore) deleteUserIndex(rctx request.CTX, user *model.User) {
 func (s *SearchUserStore) Search(rctx request.CTX, teamId, term string, options *model.UserSearchOptions) ([]*model.User, error) {
 	for _, engine := range s.rootStore.searchEngine.GetActiveEngines() {
 		if engine.IsSearchEnabled() {
-			listOfAllowedChannels, nErr := s.getListOfAllowedChannels(teamId, "", options.ViewRestrictions)
-			if nErr != nil {
-				rctx.Logger().Warn("Encountered error on Search.", mlog.String("search_engine", engine.GetName()), mlog.Err(nErr))
-				continue
-			}
-
-			if listOfAllowedChannels != nil && len(listOfAllowedChannels) == 0 {
-				return []*model.User{}, nil
-			}
-
 			sanitizedTerm := sanitizeSearchTerm(term)
 
-			usersIds, err := engine.SearchUsersInTeam(teamId, listOfAllowedChannels, sanitizedTerm, options)
+			usersIds, err := engine.SearchUsers("", sanitizedTerm, 0, 50)
 			if err != nil {
 				rctx.Logger().Warn("Encountered error on Search", mlog.String("search_engine", engine.GetName()), mlog.Err(err))
 				continue
@@ -102,15 +92,15 @@ func (s *SearchUserStore) PermanentDelete(rctx request.CTX, userId string) error
 	return err
 }
 
-func (s *SearchUserStore) autocompleteUsersInChannelByEngine(engine searchengine.SearchEngineInterface, teamId, channelId, term string, options *model.UserSearchOptions) (*model.UserAutocompleteInChannel, error) {
+func (s *SearchUserStore) autocompleteUsersInChannelByEngine(engine searchengine.SearchEngineInterface, _, channelId, term string, options *model.UserSearchOptions) (*model.UserAutocompleteInChannel, error) {
 	var err *model.AppError
 	uchanIds := []string{}
 	nuchanIds := []string{}
 	sanitizedTerm := sanitizeSearchTerm(term)
 	if channelId != "" && options.ListOfAllowedChannels != nil && !strings.Contains(strings.Join(options.ListOfAllowedChannels, "."), channelId) {
-		nuchanIds, err = engine.SearchUsersInTeam(teamId, options.ListOfAllowedChannels, sanitizedTerm, options)
+		nuchanIds, err = engine.SearchUsers("", sanitizedTerm, 0, 50)
 	} else {
-		uchanIds, nuchanIds, err = engine.SearchUsersInChannel(teamId, channelId, options.ListOfAllowedChannels, sanitizedTerm, options)
+		uchanIds, nuchanIds, err = engine.SearchUsersInChannel("", channelId, sanitizedTerm, 0, 50)
 	}
 	if err != nil {
 		return nil, err

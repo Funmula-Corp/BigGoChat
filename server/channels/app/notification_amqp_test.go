@@ -497,3 +497,44 @@ func TestSendPushToPushProxyPriorityAMQP(t *testing.T) {
 	require.Len(t, headers, 1)
 	require.Equal(t, model.PostPriorityUrgent, (*headers[0])["priority"])
 }
+
+func TestSendPushToPushProxyResponseRemoveAMQP(t *testing.T) {
+	th := SetupWithStoreMock(t)
+	defer th.TearDown()
+
+	mockStore := th.App.Srv().Store().(*mocks.Store)
+	mockPostStore := mocks.PostStore{}
+	mockPostStore.On("GetMaxPostSize").Return(65535, nil)
+	mockSessionStore := mocks.SessionStore{}
+	mockSessionStore.On("DropDeviceId", mock.AnythingOfType("string")).Return(nil)
+	mockSystemStore := mocks.SystemStore{}
+	mockSystemStore.On("GetByName", "UpgradedFromTE").Return(&model.System{Name: "UpgradedFromTE", Value: "false"}, nil)
+	mockSystemStore.On("GetByName", "InstallationDate").Return(&model.System{Name: "InstallationDate", Value: "10"}, nil)
+	mockSystemStore.On("GetByName", "FirstServerRunTimestamp").Return(&model.System{Name: "FirstServerRunTimestamp", Value: "10"}, nil)
+
+	mockStore.On("Post").Return(&mockPostStore)
+	mockStore.On("System").Return(&mockSystemStore)
+	mockStore.On("Session").Return(&mockSessionStore)
+	mockStore.On("GetDBSchemaVersion").Return(1, nil)
+
+	th.App.UpdateConfig(func(cfg *model.Config) {
+		*cfg.EmailSettings.PushNotificationAMQPServer = testAMQPServer
+	})
+
+	deviceId := "testDeviceId"
+	response := model.NewRemovePushResponse()
+	response[model.PushStatusDeviceId] = deviceId
+
+	body, err := json.Marshal(response)
+	require.Nil(t, err)
+
+	err = th.App.Srv().pushNotificationAMQPClient.Publish(amqp.AMQPMessage{
+		Exchange: pushProxyResponseExchange,
+		Key:      model.PushStatusRemove,
+		Body:     body,
+	})
+	require.Nil(t, err)
+
+	time.Sleep(2 * time.Second)
+	mockSessionStore.AssertCalled(t, "DropDeviceId", mock.Anything)
+}

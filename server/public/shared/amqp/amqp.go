@@ -18,6 +18,8 @@ const (
 
 var (
 	numWorker = runtime.NumCPU() * 8
+
+	ErrNilHandler = errors.New("handler is nil")
 )
 
 type Cmd int
@@ -95,12 +97,22 @@ type AMQPMessage struct {
 	Body     []byte
 }
 
+type DeliveryHandler = func([]byte) error
+
+type Consumer struct {
+	exchange string
+	key      string
+	queue    string
+	handler  DeliveryHandler
+}
+
 type AMQPClient struct {
 	url       string
 	client    *amqp.Connection
 	ctx       context.Context // root context
 	cancel    func()          // root cancel
 	queue     chan AMQPMessage
+	consumer  chan *Consumer
 	cmd       chan Cmd
 	exchanges []Exchange
 }
@@ -117,6 +129,7 @@ func MakeAMQPClient(url string, exchanges []Exchange) *AMQPClient {
 		url: url,
 		// buffer already in PushNotificationsHub
 		queue:     make(chan AMQPMessage),
+		consumer:  make(chan *Consumer),
 		ctx:       ctx,
 		cancel:    cancel,
 		cmd:       make(chan Cmd),
@@ -142,6 +155,28 @@ func (a *AMQPClient) Publish(message AMQPMessage) error {
 	}
 }
 
+// consumer register
+func (client *AMQPClient) Consume(exchange, key, queue string, handler DeliveryHandler) error {
+	if handler == nil {
+		return ErrNilHandler
+	}
+
+	consumer := &Consumer{
+		exchange: exchange,
+		key:      key,
+		queue:    queue,
+		handler:  handler,
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), amqpTimeOut)
+	defer cancel()
+	select {
+	case client.consumer <- consumer:
+		return nil
+	case <-ctx.Done():
+		return ctx.Err()
+	}
+}
+
 // **unsafe** expose channel for other usage
 func (a *AMQPClient) Channel() (*amqp.Channel, error) {
 	return a.client.Channel()
@@ -163,13 +198,14 @@ func (a *AMQPClient) SwitchToNewServer(url string) error {
 }
 
 func (a *AMQPClient) supervisor() {
+	var err error
+	var notifyClose chan *amqp.Error
 	// startup
-	client, notifyClose, err := Connect(a.ctx, a.url)
+	a.client, notifyClose, err = Connect(a.ctx, a.url)
 	if err != nil {
 		// only root cancel can cause err
 		return
 	}
-	a.client = client
 
 	createWorkers := func(ctx context.Context, c int) (func(), <-chan error) {
 		sub, cancel := context.WithCancel(context.WithValue(ctx, amqpExchanges, a.exchanges))
@@ -202,6 +238,8 @@ func (a *AMQPClient) supervisor() {
 			if cmd == commandReconnect {
 				a.client.Close()
 			}
+		case consumer := <-a.consumer:
+			newConsumer(a.ctx, a.client, consumer, a.consumer)
 		case <-workerErr:
 			// ...
 		case <-a.ctx.Done():
@@ -292,4 +330,68 @@ func publish(ctx context.Context, channel *amqp.Channel, message AMQPMessage) (b
 	defer cancel()
 
 	return confirm.WaitContext(sub)
+}
+
+func consume(deliveryChan <-chan amqp.Delivery, handler DeliveryHandler) error {
+	for delivery := range deliveryChan {
+		err := handler(delivery.Body)
+		if err != nil {
+			delivery.Nack(false, true)
+			return err
+		}
+		delivery.Ack(false)
+	}
+
+	return nil
+}
+
+func newConsumer(ctx context.Context, conn *amqp.Connection, consumer *Consumer, ch chan<- *Consumer) {
+	var deliveryChan <-chan amqp.Delivery
+	_, chClose, err := getChannel(ctx, conn, func(c *amqp.Channel) error {
+		// declare exchange queue binding
+		err := c.ExchangeDeclare(consumer.exchange, amqp.ExchangeTopic, true, false, false, false, nil)
+		if err != nil {
+			return err
+		}
+
+		_, err = c.QueueDeclare(consumer.queue, true, false, false, false, nil)
+		if err != nil {
+			return err
+		}
+
+		err = c.QueueBind(consumer.queue, consumer.key, consumer.exchange, false, nil)
+		if err != nil {
+			return err
+		}
+
+		deliveryChan, err = c.Consume(consumer.queue, "", false, false, false, false, nil)
+
+		return err
+	})
+	if err != nil {
+		if errors.Is(err, context.Canceled) {
+			return
+		}
+		// restart Consumer
+		ch <- consumer
+		return
+	}
+
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case <-chClose:
+			mlog.Error("AMQP consumer failed", mlog.Err(err))
+			// restart Consumer
+			ch <- consumer
+			return
+		default:
+			// run until error return
+			err = consume(deliveryChan, consumer.handler)
+			if err != nil {
+				mlog.Error("AMQP consumer handler failed", mlog.Err(err))
+			}
+		}
+	}
 }

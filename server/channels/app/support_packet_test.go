@@ -119,7 +119,6 @@ func TestGenerateSupportPacketYaml(t *testing.T) {
 		assert.Empty(t, packet.MessageExportJobs)
 		assert.Empty(t, packet.ElasticPostIndexingJobs)
 		assert.Empty(t, packet.ElasticPostAggregationJobs)
-		assert.Empty(t, packet.BlevePostIndexingJobs)
 		assert.Empty(t, packet.LdapSyncJobs)
 		assert.Empty(t, packet.MigrationJobs)
 	})

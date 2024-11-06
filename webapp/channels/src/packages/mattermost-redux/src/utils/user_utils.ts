@@ -167,13 +167,15 @@ export function nameSuggestionsForUser(user: UserProfile): string[] {
     profileSuggestions.push(first, last, full);
     profileSuggestions.push((user.nickname || '').toLowerCase());
     profileSuggestions.push((user.position || '').toLowerCase());
-    const email = (user.email || '').toLowerCase();
-    profileSuggestions.push(email);
+    //const email = (user.email || '').toLowerCase();
+    //profileSuggestions.push(email);
+    //const mobilephone = (user.mobilephone || '').toLowerCase();
+    //profileSuggestions.push(mobilephone);
 
-    const split = email.split('@');
-    if (split.length > 1) {
-        profileSuggestions.push(split[1]);
-    }
+    //const split = email.split('@');
+    //if (split.length > 1) {
+    //    profileSuggestions.push(split[1]);
+    //}
     return profileSuggestions;
 }
 
@@ -187,6 +189,12 @@ export function filterProfilesStartingWithTerm(users: UserProfile[], term: strin
     return users.filter((user: UserProfile) => {
         if (!user) {
             return false;
+        }
+        if ((user.email || '').toLowerCase() === trimmedTerm) {
+            return true;
+        }
+        if ((user.mobilephone || '').toLowerCase() === trimmedTerm) {
+            return true;
         }
 
         const profileSuggestions = nameSuggestionsForUser(user);
@@ -204,6 +212,12 @@ export function filterProfilesMatchingWithTerm(users: UserProfile[], term: strin
     return users.filter((user: UserProfile) => {
         if (!user) {
             return false;
+        }
+        if ((user.email || '').toLowerCase() === trimmedTerm) {
+            return true;
+        }
+        if ((user.mobilephone || '').toLowerCase() === trimmedTerm) {
+            return true;
         }
 
         const profileSuggestions = nameSuggestionsForUser(user);

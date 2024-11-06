@@ -70,8 +70,6 @@ import (
 	"git.biggo.com/Funmula/BigGoChat/server/v8/platform/services/awsmeter"
 	"git.biggo.com/Funmula/BigGoChat/server/v8/platform/services/cache"
 	"git.biggo.com/Funmula/BigGoChat/server/v8/platform/services/remotecluster"
-	"git.biggo.com/Funmula/BigGoChat/server/v8/platform/services/searchengine/bleveengine"
-	"git.biggo.com/Funmula/BigGoChat/server/v8/platform/services/searchengine/bleveengine/indexer"
 	"git.biggo.com/Funmula/BigGoChat/server/v8/platform/services/sharedchannel"
 	"git.biggo.com/Funmula/BigGoChat/server/v8/platform/services/telemetry"
 	"git.biggo.com/Funmula/BigGoChat/server/v8/platform/services/tracing"
@@ -309,6 +307,7 @@ func NewServer(options ...Option) (*Server, error) {
 	}
 	if strings.HasPrefix(notificationServer, "amqp://") {
 		s.pushNotificationAMQPClient = amqp.MakeAMQPClient(notificationServer, exchanges)
+		s.pushNotificationAMQPClient.Consume(pushProxyResponseExchange, model.PushStatusRemove, pushProxyResponseRemovedQueue, s.removeSessionDeviceId)
 	}
 
 	s.platform.AddConfigListener(func(prev, curr *model.Config) {
@@ -317,6 +316,7 @@ func NewServer(options ...Option) (*Server, error) {
 		if enableAMQP && s.pushNotificationAMQPClient == nil {
 			// create client
 			s.pushNotificationAMQPClient = amqp.MakeAMQPClient(newNotificationServer, exchanges)
+			s.pushNotificationAMQPClient.Consume(pushProxyResponseExchange, model.PushStatusRemove, pushProxyResponseRemovedQueue, s.removeSessionDeviceId)
 		} else if enableAMQP {
 			// switch server
 			s.pushNotificationAMQPClient.SwitchToNewServer(newNotificationServer)
@@ -1464,12 +1464,6 @@ func (s *Server) initJobs() {
 		builder := jobsLdapSyncInterface(New(ServerConnector(s.Channels())))
 		s.Jobs.RegisterJobType(model.JobTypeLdapSync, builder.MakeWorker(), builder.MakeScheduler())
 	}
-
-	s.Jobs.RegisterJobType(
-		model.JobTypeBlevePostIndexing,
-		indexer.MakeWorker(s.Jobs, s.platform.SearchEngine.BleveEngine.(*bleveengine.BleveEngine)),
-		nil,
-	)
 
 	s.Jobs.RegisterJobType(
 		model.JobTypeMigrations,

@@ -74,7 +74,6 @@ const (
 	TrackConfigDisplay           = "config_display"
 	TrackConfigGuestAccounts     = "config_guest_accounts"
 	TrackConfigImageProxy        = "config_image_proxy"
-	TrackConfigBleve             = "config_bleve"
 	TrackConfigExport            = "config_export"
 	TrackConfigWrangler          = "config_wrangler"
 	TrackFeatureFlags            = "config_feature_flags"
@@ -870,13 +869,6 @@ func (ts *TelemetryService) trackConfig() {
 		"image_proxy_type":                     *cfg.ImageProxySettings.ImageProxyType,
 		"isdefault_remote_image_proxy_url":     isDefault(*cfg.ImageProxySettings.RemoteImageProxyURL, ""),
 		"isdefault_remote_image_proxy_options": isDefault(*cfg.ImageProxySettings.RemoteImageProxyOptions, ""),
-	})
-
-	ts.SendTelemetry(TrackConfigBleve, map[string]any{
-		"enable_indexing":          *cfg.BleveSettings.EnableIndexing,
-		"enable_searching":         *cfg.BleveSettings.EnableSearching,
-		"enable_autocomplete":      *cfg.BleveSettings.EnableAutocomplete,
-		"bulk_indexing_batch_size": *cfg.BleveSettings.BatchSize,
 	})
 
 	ts.SendTelemetry(TrackConfigExport, map[string]any{

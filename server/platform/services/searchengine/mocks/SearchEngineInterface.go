@@ -557,9 +557,9 @@ func (_m *SearchEngineInterface) RefreshIndexes(rctx request.CTX) *model.AppErro
 	return r0
 }
 
-// SearchChannels provides a mock function with given fields: teamId, userID, term, isGuest
-func (_m *SearchEngineInterface) SearchChannels(teamId string, userID string, term string, isGuest bool) ([]string, *model.AppError) {
-	ret := _m.Called(teamId, userID, term, isGuest)
+// SearchChannels provides a mock function with given fields: teamId, userID, term, isGuest, page, perPage
+func (_m *SearchEngineInterface) SearchChannels(teamId string, userID string, term string, isGuest bool, page int, perPage int) ([]string, *model.AppError) {
+	ret := _m.Called(teamId, userID, term, isGuest, page, perPage)
 
 	if len(ret) == 0 {
 		panic("no return value specified for SearchChannels")
@@ -567,19 +567,19 @@ func (_m *SearchEngineInterface) SearchChannels(teamId string, userID string, te
 
 	var r0 []string
 	var r1 *model.AppError
-	if rf, ok := ret.Get(0).(func(string, string, string, bool) ([]string, *model.AppError)); ok {
-		return rf(teamId, userID, term, isGuest)
+	if rf, ok := ret.Get(0).(func(string, string, string, bool, int, int) ([]string, *model.AppError)); ok {
+		return rf(teamId, userID, term, isGuest, page, perPage)
 	}
-	if rf, ok := ret.Get(0).(func(string, string, string, bool) []string); ok {
-		r0 = rf(teamId, userID, term, isGuest)
+	if rf, ok := ret.Get(0).(func(string, string, string, bool, int, int) []string); ok {
+		r0 = rf(teamId, userID, term, isGuest, page, perPage)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]string)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(string, string, string, bool) *model.AppError); ok {
-		r1 = rf(teamId, userID, term, isGuest)
+	if rf, ok := ret.Get(1).(func(string, string, string, bool, int, int) *model.AppError); ok {
+		r1 = rf(teamId, userID, term, isGuest, page, perPage)
 	} else {
 		if ret.Get(1) != nil {
 			r1 = ret.Get(1).(*model.AppError)
@@ -589,9 +589,9 @@ func (_m *SearchEngineInterface) SearchChannels(teamId string, userID string, te
 	return r0, r1
 }
 
-// SearchFiles provides a mock function with given fields: channels, searchParams, page, perPage
-func (_m *SearchEngineInterface) SearchFiles(channels model.ChannelList, searchParams []*model.SearchParams, page int, perPage int) ([]string, *model.AppError) {
-	ret := _m.Called(channels, searchParams, page, perPage)
+// SearchFiles provides a mock function with given fields: userId, searchParams, page, perPage
+func (_m *SearchEngineInterface) SearchFiles(userId string, searchParams []*model.SearchParams, page int, perPage int) ([]string, *model.AppError) {
+	ret := _m.Called(userId, searchParams, page, perPage)
 
 	if len(ret) == 0 {
 		panic("no return value specified for SearchFiles")
@@ -599,19 +599,19 @@ func (_m *SearchEngineInterface) SearchFiles(channels model.ChannelList, searchP
 
 	var r0 []string
 	var r1 *model.AppError
-	if rf, ok := ret.Get(0).(func(model.ChannelList, []*model.SearchParams, int, int) ([]string, *model.AppError)); ok {
-		return rf(channels, searchParams, page, perPage)
+	if rf, ok := ret.Get(0).(func(string, []*model.SearchParams, int, int) ([]string, *model.AppError)); ok {
+		return rf(userId, searchParams, page, perPage)
 	}
-	if rf, ok := ret.Get(0).(func(model.ChannelList, []*model.SearchParams, int, int) []string); ok {
-		r0 = rf(channels, searchParams, page, perPage)
+	if rf, ok := ret.Get(0).(func(string, []*model.SearchParams, int, int) []string); ok {
+		r0 = rf(userId, searchParams, page, perPage)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]string)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(model.ChannelList, []*model.SearchParams, int, int) *model.AppError); ok {
-		r1 = rf(channels, searchParams, page, perPage)
+	if rf, ok := ret.Get(1).(func(string, []*model.SearchParams, int, int) *model.AppError); ok {
+		r1 = rf(userId, searchParams, page, perPage)
 	} else {
 		if ret.Get(1) != nil {
 			r1 = ret.Get(1).(*model.AppError)
@@ -621,9 +621,9 @@ func (_m *SearchEngineInterface) SearchFiles(channels model.ChannelList, searchP
 	return r0, r1
 }
 
-// SearchPosts provides a mock function with given fields: channels, searchParams, page, perPage
-func (_m *SearchEngineInterface) SearchPosts(channels model.ChannelList, searchParams []*model.SearchParams, page int, perPage int) ([]string, model.PostSearchMatches, *model.AppError) {
-	ret := _m.Called(channels, searchParams, page, perPage)
+// SearchPosts provides a mock function with given fields: userId, searchParams, page, perPage
+func (_m *SearchEngineInterface) SearchPosts(userId string, searchParams []*model.SearchParams, page int, perPage int) ([]string, model.PostSearchMatches, *model.AppError) {
+	ret := _m.Called(userId, searchParams, page, perPage)
 
 	if len(ret) == 0 {
 		panic("no return value specified for SearchPosts")
@@ -632,27 +632,27 @@ func (_m *SearchEngineInterface) SearchPosts(channels model.ChannelList, searchP
 	var r0 []string
 	var r1 model.PostSearchMatches
 	var r2 *model.AppError
-	if rf, ok := ret.Get(0).(func(model.ChannelList, []*model.SearchParams, int, int) ([]string, model.PostSearchMatches, *model.AppError)); ok {
-		return rf(channels, searchParams, page, perPage)
+	if rf, ok := ret.Get(0).(func(string, []*model.SearchParams, int, int) ([]string, model.PostSearchMatches, *model.AppError)); ok {
+		return rf(userId, searchParams, page, perPage)
 	}
-	if rf, ok := ret.Get(0).(func(model.ChannelList, []*model.SearchParams, int, int) []string); ok {
-		r0 = rf(channels, searchParams, page, perPage)
+	if rf, ok := ret.Get(0).(func(string, []*model.SearchParams, int, int) []string); ok {
+		r0 = rf(userId, searchParams, page, perPage)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]string)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(model.ChannelList, []*model.SearchParams, int, int) model.PostSearchMatches); ok {
-		r1 = rf(channels, searchParams, page, perPage)
+	if rf, ok := ret.Get(1).(func(string, []*model.SearchParams, int, int) model.PostSearchMatches); ok {
+		r1 = rf(userId, searchParams, page, perPage)
 	} else {
 		if ret.Get(1) != nil {
 			r1 = ret.Get(1).(model.PostSearchMatches)
 		}
 	}
 
-	if rf, ok := ret.Get(2).(func(model.ChannelList, []*model.SearchParams, int, int) *model.AppError); ok {
-		r2 = rf(channels, searchParams, page, perPage)
+	if rf, ok := ret.Get(2).(func(string, []*model.SearchParams, int, int) *model.AppError); ok {
+		r2 = rf(userId, searchParams, page, perPage)
 	} else {
 		if ret.Get(2) != nil {
 			r2 = ret.Get(2).(*model.AppError)
@@ -662,9 +662,80 @@ func (_m *SearchEngineInterface) SearchPosts(channels model.ChannelList, searchP
 	return r0, r1, r2
 }
 
-// SearchUsersInChannel provides a mock function with given fields: teamId, channelId, restrictedToChannels, term, options
-func (_m *SearchEngineInterface) SearchUsersInChannel(teamId string, channelId string, restrictedToChannels []string, term string, options *model.UserSearchOptions) ([]string, []string, *model.AppError) {
-	ret := _m.Called(teamId, channelId, restrictedToChannels, term, options)
+// SearchTeams provides a mock function with given fields: userId, searchParams, page, perPage
+func (_m *SearchEngineInterface) SearchTeams(userId string, searchParams []*model.SearchParams, page int, perPage int) ([]string, int64, *model.AppError) {
+	ret := _m.Called(userId, searchParams, page, perPage)
+
+	if len(ret) == 0 {
+		panic("no return value specified for SearchTeams")
+	}
+
+	var r0 []string
+	var r1 int64
+	var r2 *model.AppError
+	if rf, ok := ret.Get(0).(func(string, []*model.SearchParams, int, int) ([]string, int64, *model.AppError)); ok {
+		return rf(userId, searchParams, page, perPage)
+	}
+	if rf, ok := ret.Get(0).(func(string, []*model.SearchParams, int, int) []string); ok {
+		r0 = rf(userId, searchParams, page, perPage)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]string)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(string, []*model.SearchParams, int, int) int64); ok {
+		r1 = rf(userId, searchParams, page, perPage)
+	} else {
+		r1 = ret.Get(1).(int64)
+	}
+
+	if rf, ok := ret.Get(2).(func(string, []*model.SearchParams, int, int) *model.AppError); ok {
+		r2 = rf(userId, searchParams, page, perPage)
+	} else {
+		if ret.Get(2) != nil {
+			r2 = ret.Get(2).(*model.AppError)
+		}
+	}
+
+	return r0, r1, r2
+}
+
+// SearchUsers provides a mock function with given fields: userId, term, page, perPage
+func (_m *SearchEngineInterface) SearchUsers(userId string, term string, page int, perPage int) ([]string, *model.AppError) {
+	ret := _m.Called(userId, term, page, perPage)
+
+	if len(ret) == 0 {
+		panic("no return value specified for SearchUsers")
+	}
+
+	var r0 []string
+	var r1 *model.AppError
+	if rf, ok := ret.Get(0).(func(string, string, int, int) ([]string, *model.AppError)); ok {
+		return rf(userId, term, page, perPage)
+	}
+	if rf, ok := ret.Get(0).(func(string, string, int, int) []string); ok {
+		r0 = rf(userId, term, page, perPage)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]string)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(string, string, int, int) *model.AppError); ok {
+		r1 = rf(userId, term, page, perPage)
+	} else {
+		if ret.Get(1) != nil {
+			r1 = ret.Get(1).(*model.AppError)
+		}
+	}
+
+	return r0, r1
+}
+
+// SearchUsersInChannel provides a mock function with given fields: userId, channelId, term, page, perPage
+func (_m *SearchEngineInterface) SearchUsersInChannel(userId string, channelId string, term string, page int, perPage int) ([]string, []string, *model.AppError) {
+	ret := _m.Called(userId, channelId, term, page, perPage)
 
 	if len(ret) == 0 {
 		panic("no return value specified for SearchUsersInChannel")
@@ -673,27 +744,27 @@ func (_m *SearchEngineInterface) SearchUsersInChannel(teamId string, channelId s
 	var r0 []string
 	var r1 []string
 	var r2 *model.AppError
-	if rf, ok := ret.Get(0).(func(string, string, []string, string, *model.UserSearchOptions) ([]string, []string, *model.AppError)); ok {
-		return rf(teamId, channelId, restrictedToChannels, term, options)
+	if rf, ok := ret.Get(0).(func(string, string, string, int, int) ([]string, []string, *model.AppError)); ok {
+		return rf(userId, channelId, term, page, perPage)
 	}
-	if rf, ok := ret.Get(0).(func(string, string, []string, string, *model.UserSearchOptions) []string); ok {
-		r0 = rf(teamId, channelId, restrictedToChannels, term, options)
+	if rf, ok := ret.Get(0).(func(string, string, string, int, int) []string); ok {
+		r0 = rf(userId, channelId, term, page, perPage)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]string)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(string, string, []string, string, *model.UserSearchOptions) []string); ok {
-		r1 = rf(teamId, channelId, restrictedToChannels, term, options)
+	if rf, ok := ret.Get(1).(func(string, string, string, int, int) []string); ok {
+		r1 = rf(userId, channelId, term, page, perPage)
 	} else {
 		if ret.Get(1) != nil {
 			r1 = ret.Get(1).([]string)
 		}
 	}
 
-	if rf, ok := ret.Get(2).(func(string, string, []string, string, *model.UserSearchOptions) *model.AppError); ok {
-		r2 = rf(teamId, channelId, restrictedToChannels, term, options)
+	if rf, ok := ret.Get(2).(func(string, string, string, int, int) *model.AppError); ok {
+		r2 = rf(userId, channelId, term, page, perPage)
 	} else {
 		if ret.Get(2) != nil {
 			r2 = ret.Get(2).(*model.AppError)
@@ -701,38 +772,6 @@ func (_m *SearchEngineInterface) SearchUsersInChannel(teamId string, channelId s
 	}
 
 	return r0, r1, r2
-}
-
-// SearchUsersInTeam provides a mock function with given fields: teamId, restrictedToChannels, term, options
-func (_m *SearchEngineInterface) SearchUsersInTeam(teamId string, restrictedToChannels []string, term string, options *model.UserSearchOptions) ([]string, *model.AppError) {
-	ret := _m.Called(teamId, restrictedToChannels, term, options)
-
-	if len(ret) == 0 {
-		panic("no return value specified for SearchUsersInTeam")
-	}
-
-	var r0 []string
-	var r1 *model.AppError
-	if rf, ok := ret.Get(0).(func(string, []string, string, *model.UserSearchOptions) ([]string, *model.AppError)); ok {
-		return rf(teamId, restrictedToChannels, term, options)
-	}
-	if rf, ok := ret.Get(0).(func(string, []string, string, *model.UserSearchOptions) []string); ok {
-		r0 = rf(teamId, restrictedToChannels, term, options)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]string)
-		}
-	}
-
-	if rf, ok := ret.Get(1).(func(string, []string, string, *model.UserSearchOptions) *model.AppError); ok {
-		r1 = rf(teamId, restrictedToChannels, term, options)
-	} else {
-		if ret.Get(1) != nil {
-			r1 = ret.Get(1).(*model.AppError)
-		}
-	}
-
-	return r0, r1
 }
 
 // Start provides a mock function with given fields:

@@ -117,6 +117,7 @@ func createPost(c *Context, w http.ResponseWriter, r *http.Request) {
 			}
 		}
 	}
+
 	if *c.App.Config().ServiceSettings.ExperimentalEnableHardenedMode {
 		if reservedProps := post.ContainsIntegrationsReservedProps(); len(reservedProps) > 0 && !c.AppContext.Session().IsIntegration() {
 			c.SetInvalidParamWithDetails("props", fmt.Sprintf("Cannot use props reserved for integrations. props: %v", reservedProps))

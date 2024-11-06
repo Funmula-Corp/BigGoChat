@@ -36,6 +36,10 @@ func main() {
 		"keycloak":           8080,
 		"prometheus":         9090,
 		"grafana":            3000,
+		"elasticsearch8":     9201,
+		"neo4j":              7474,
+		"searchengine":       2112,
+		"searchindexer":      2112,
 		"loki":               3100,
 		"promtail":           3180,
 		"mysql-read-replica": 3306, // FIXME: not recognizing the successfully running service on port 3307.

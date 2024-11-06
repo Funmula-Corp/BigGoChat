@@ -1972,7 +1972,7 @@ func (us SqlUserStore) GetUsersBatchForIndexing(startTime int64, startFileID str
 	userMap := map[string]*model.UserForIndexing{}
 	for _, user := range users {
 		var mobilephone string
-		if user.Mobilephone != nil{
+		if user.Mobilephone != nil {
 			mobilephone = *user.Mobilephone
 		}
 

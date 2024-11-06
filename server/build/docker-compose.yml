@@ -28,10 +28,6 @@ services:
     extends:
         file: docker-compose.common.yml
         service: elasticsearch
-  opensearch:
-    extends:
-        file: docker-compose.common.yml
-        service: opensearch
   dejavu:
     extends:
         file: docker-compose.common.yml
@@ -48,6 +44,22 @@ services:
     extends:
         file: docker-compose.common.yml
         service: grafana
+  neo4j:
+    extends:
+        file: docker-compose.common.yml
+        service: neo4j
+  elasticsearch8:
+    extends:
+        file: docker-compose.common.yml
+        service: elasticsearch8
+  searchindexer:
+    extends:
+        file: docker-compose.common.yml
+        service: searchindexer
+  searchengine:
+    extends:
+        file: docker-compose.common.yml
+        service: searchengine
   loki:
     extends:
         file: docker-compose.common.yml
@@ -68,8 +80,11 @@ services:
       - inbucket
       - openldap
       - elasticsearch
-      - opensearch
-    command: postgres:5432 mysql:3306 minio:9000 inbucket:9001 openldap:389 elasticsearch:9200 opensearch:9201
+      - neo4j
+      - elasticsearch8
+      - searchengine
+      - searchindexer
+    command: postgres:5432 mysql:3306 minio:9000 inbucket:9001 openldap:389 elasticsearch:9200 neo4j:7474 elasticsearch8:9201 searchindexer:2112 searchengine:2112
 
 networks:
   mm-test:

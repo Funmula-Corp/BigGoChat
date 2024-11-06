@@ -61,6 +61,24 @@ func (_m *SessionStore) Cleanup(expiryTime int64, batchSize int64) error {
 	return r0
 }
 
+// DropDeviceId provides a mock function with given fields: deviceId
+func (_m *SessionStore) DropDeviceId(deviceId string) error {
+	ret := _m.Called(deviceId)
+
+	if len(ret) == 0 {
+		panic("no return value specified for DropDeviceId")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(string) error); ok {
+		r0 = rf(deviceId)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // Get provides a mock function with given fields: c, sessionIDOrToken
 func (_m *SessionStore) Get(c request.CTX, sessionIDOrToken string) (*model.Session, error) {
 	ret := _m.Called(c, sessionIDOrToken)

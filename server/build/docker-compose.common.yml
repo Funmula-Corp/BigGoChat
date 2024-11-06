@@ -166,3 +166,48 @@ services:
     command: -config.file=/etc/promtail/docker-config.yaml
     networks:
       - mm-test
+  neo4j:
+    image: "neo4j:5.22.0-community"
+    networks:
+      - mm-test
+    environment:
+      NEO4J_AUTH: none
+      NEO4J_PLUGINS: '["apoc","apoc-extended"]'
+  searchindexer:
+    image: "docker.dev.cloud.biggo.com/test/search-indexer:dev"
+    networks:
+      - mm-test
+    command:
+      - /bin/indexer
+      - -post
+      - -file
+      - -channel
+      - -user
+      - -team
+      - -restart
+      - -debug
+  searchengine:
+    image: "docker.dev.cloud.biggo.com/test/search-engine:dev"
+    networks:
+      - mm-test
+    command:
+      - /bin/engine
+      - -debug
+  elasticsearch8:
+    image: "elasticsearch:8.15.1"
+    networks:
+      - mm-test
+    environment:
+      http.host: "0.0.0.0"
+      http.port: 9201
+      http.cors.enabled: "true"
+      http.cors.allow-origin: "http://localhost:1358,http://127.0.0.1:1358"
+      http.cors.allow-headers: "X-Requested-With,X-Auth-Token,Content-Type,Content-Length,Authorization"
+      http.cors.allow-credentials: "true"
+      transport.host: "127.0.0.1"
+      ES_JAVA_OPTS: "-Xms512m -Xmx512m"
+      xpack.license.self_generated.type: "trial"
+      xpack.security.http.ssl.enabled: "false"
+      xpack.security.enabled: "false"
+      discovery.type: "single-node"
+      ELASTIC_PASSWORD: "elasticsearch"

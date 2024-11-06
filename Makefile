@@ -12,7 +12,7 @@ build-package:
 build-docker:
 	cd server/build && \
 	cp -r ../dist packages && \
-	docker build -t docker.dev.cloud.biggo.com/test/mattermost:development .
+	docker build -t docker.dev.cloud.biggo.com/test/mattermost:searchengine .
 
 build-server:
 	cd server && $(MAKE) build
@@ -22,6 +22,9 @@ build-webapp:
 
 clean-docker:
 	cd server && $(MAKE) clean-docker
+
+debug-headless:
+	cd server && $(MAKE) debug-server-headless
 
 run: run-server run-client
 
@@ -51,7 +54,7 @@ restart-client:
 	cd server && $(MAKE) restart-client
 
 build-full: build-server build-package build-docker
-	docker push docker.dev.cloud.biggo.com/test/mattermost:development
+	docker push docker.dev.cloud.biggo.com/test/mattermost:searchengine
 
 build-drone-docker-image:
 	docker build --tag docker.cloud.biggo.com/droneio/mattermost-funmula-build:latest --file ./Dockerfile.drone .
