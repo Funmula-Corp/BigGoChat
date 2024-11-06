@@ -210,12 +210,12 @@ func TestCreatePost(t *testing.T) {
 	post.ChannelId = "junk"
 	_, resp, err = client.CreatePost(context.Background(), post)
 	require.Error(t, err)
-	CheckForbiddenStatus(t, resp)
+	CheckNotFoundStatus(t, resp)
 
 	post.ChannelId = model.NewId()
 	_, resp, err = client.CreatePost(context.Background(), post)
 	require.Error(t, err)
-	CheckForbiddenStatus(t, resp)
+	CheckNotFoundStatus(t, resp)
 
 	r, err := client.DoAPIPost(context.Background(), "/posts", "garbage")
 	require.Error(t, err)
@@ -1097,6 +1097,7 @@ func TestCreatePostAll(t *testing.T) {
 	CheckForbiddenStatus(t, resp)
 
 	th.App.UpdateUserRoles(th.Context, ruser.Id, model.SystemUserRoleId+" "+model.SystemPostAllRoleId, false)
+	th.App.MarkUserVerified(th.Context, ruser.Id)
 	th.App.Srv().InvalidateAllCaches()
 
 	client.Login(context.Background(), user.Email, user.Password)
@@ -4475,4 +4476,52 @@ func TestDirectChannelDeletePost(t *testing.T) {
 	resp, err = client.DeletePost(context.Background(), rpost.Id)
 	require.Error(t, err)
 	CheckForbiddenStatus(t, resp)
+}
+
+func TestCreatePostUserRestricted(t *testing.T) {
+	th := Setup(t).InitBasic()
+	defer th.TearDown()
+	client := th.Client
+
+	unverifiedUser := th.CreateUser()
+	channel, _, err := client.CreateDirectChannel(context.Background(), th.BasicUser.Id, unverifiedUser.Id)
+	require.NoError(t, err)
+
+	// post with verified user
+	post := &model.Post{
+		ChannelId: channel.Id,
+		Message:   "should post this message",
+		UserId:    th.BasicUser.Id,
+	}
+	_, resp, err := client.CreatePost(context.Background(), post)
+	require.NoError(t, err)
+	CheckCreatedStatus(t, resp)
+
+	// login as unverified user
+	client.Login(context.Background(), unverifiedUser.Email, unverifiedUser.Password)
+
+	// post with unverified user
+	post = &model.Post{
+		ChannelId: channel.Id,
+		Message:   "should not post this message",
+		UserId:    unverifiedUser.Id,
+	}
+	_, resp, err = client.CreatePost(context.Background(), post)
+	require.Error(t, err)
+	CheckForbiddenStatus(t, resp)
+
+	// allow unverified messages
+	pref := model.Preference{
+		UserId: th.BasicUser.Id,
+		Category: model.PreferenceCategoryPrivacySettings,
+		Name: model.PreferenceNameAllowUnverifiedMessage,
+		Value: "true",
+	}
+	appErr := th.App.UpdatePreferences(th.Context, th.BasicUser.Id, model.Preferences{pref})
+	require.Nil(t, appErr)
+
+	// post with unverified user
+	_, resp, err = client.CreatePost(context.Background(), post)
+	require.NoError(t, err)
+	CheckCreatedStatus(t, resp)
 }
