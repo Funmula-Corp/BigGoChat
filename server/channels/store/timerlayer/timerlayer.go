@@ -8131,6 +8131,22 @@ func (s *TimerLayerSessionStore) Cleanup(expiryTime int64, batchSize int64) erro
 	return err
 }
 
+func (s *TimerLayerSessionStore) DropDeviceId(deviceId string) error {
+	start := time.Now()
+
+	err := s.SessionStore.DropDeviceId(deviceId)
+
+	elapsed := float64(time.Since(start)) / float64(time.Second)
+	if s.Root.Metrics != nil {
+		success := "false"
+		if err == nil {
+			success = "true"
+		}
+		s.Root.Metrics.ObserveStoreMethodDuration("SessionStore.DropDeviceId", success, elapsed)
+	}
+	return err
+}
+
 func (s *TimerLayerSessionStore) Get(c request.CTX, sessionIDOrToken string) (*model.Session, error) {
 	start := time.Now()
 

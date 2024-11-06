@@ -9,6 +9,7 @@ const (
 	PushStatusFail     = "FAIL"
 	PushStatusRemove   = "REMOVE"
 	PushStatusErrorMsg = "error"
+	PushStatusDeviceId = "deviceId"
 )
 
 type PushResponse map[string]string

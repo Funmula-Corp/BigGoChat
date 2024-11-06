@@ -13,6 +13,9 @@ const (
 	pushProxyAMQPExchange  = "chat.pushNotification"
 	sendToPushProxyAMQPKey = "send_push"
 	ackToPushProxyAMQPKey  = "ack"
+
+	pushProxyResponseExchange = "chat.pushResponse"
+	pushProxyResponseRemovedQueue = "chat.deviceIdRemoved"
 )
 
 func (a *App) rawSendToPushProxyAMQP(msg *model.PushNotification) (model.PushResponse, error) {
@@ -66,4 +69,20 @@ func (a *App) SendAckToPushProxyAMQP(ack *model.PushNotificationAck) error {
 		Key:      ackToPushProxyAMQPKey,
 		Body:     ackJSON,
 	})
+}
+
+// remove deviceid from sessions
+func (s *Server) removeSessionDeviceId(data []byte) error {
+	mlog.Info("incoming message")
+	var response model.PushResponse
+	if err := json.Unmarshal(data, &response); err != nil {
+		mlog.Error("decode response failed", mlog.Err(err))
+		return nil
+	}
+	if deviceId, ok := response[model.PushStatusDeviceId]; ok {
+		if err := s.Store().Session().DropDeviceId(deviceId); err != nil {
+			mlog.Error("drop deviceId from session failed", mlog.Err(err))
+		}
+	}
+	return nil
 }

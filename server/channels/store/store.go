@@ -517,6 +517,7 @@ type SessionStore interface {
 	UpdateProps(session *model.Session) error
 	AnalyticsSessionCount() (int64, error)
 	Cleanup(expiryTime int64, batchSize int64) error
+	DropDeviceId(deviceId string) error
 }
 
 type AuditStore interface {
