@@ -50,6 +50,11 @@ func TestUserBlockUser(t *testing.T) {
 	_, resp7, err7 := client.ListUserBlockUsers(context.Background(), th.BasicUser2.Id)
 	require.Error(t, err7)
 	CheckForbiddenStatus(t, resp7)
+
+	// test invalid user id
+	_, resp8, err8 := client.AddUserBlockUser(context.Background(), th.BasicUser.Id, model.NewId())
+	require.Error(t, err8)
+	CheckBadRequestStatus(t, resp8)
 }
 
 func TestUserBlockUserPost(t *testing.T) {
