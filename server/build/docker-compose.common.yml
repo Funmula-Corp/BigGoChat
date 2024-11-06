@@ -2,11 +2,6 @@ version: '2.4'
 services:
   mysql:
     image: "mysql/mysql-server:8.0.32"
-    deploy:
-      resources:
-        limits:
-          cpus: '0.5'
-          memory: 256M
     restart: always
     networks:
       - mm-test
@@ -25,11 +20,6 @@ services:
       - ./docker/mysql.conf.d/source.cnf:/etc/mysql/conf.d/mysql.cnf
   mysql-read-replica:
     image: "mysql/mysql-server:8.0.32"
-    deploy:
-      resources:
-        limits:
-          cpus: '0.5'
-          memory: 256M
     restart: always
     networks:
       - mm-test
@@ -53,11 +43,6 @@ services:
       - ./docker/mysql.conf.d/replica.cnf:/etc/mysql/conf.d/mysql.cnf
   postgres:
     image: "postgres:11"
-    deploy:
-      resources:
-        limits:
-          cpus: '1'
-          memory: 1024M
     restart: always
     networks:
       - mm-test
@@ -75,11 +60,6 @@ services:
       retries: 3
   minio:
     image: "minio/minio:RELEASE.2024-06-22T05-26-45Z"
-    deploy:
-      resources:
-        limits:
-          cpus: '0.5'
-          memory: 256M
     command: "server /data"
     networks:
       - mm-test
@@ -89,11 +69,6 @@ services:
       MINIO_KMS_SECRET_KEY: my-minio-key:OSMM+vkKUTCvQs9YL/CVMIMt43HFhkUpqJxTmGl6rYw=
   inbucket:
     image: "inbucket/inbucket:stable"
-    deploy:
-      resources:
-        limits:
-          cpus: '0.5'
-          memory: 256M
     restart: always
     environment:
       INBUCKET_WEB_ADDR: "0.0.0.0:9001"
@@ -103,11 +78,6 @@ services:
       - mm-test
   openldap:
     image: "osixia/openldap:1.4.0"
-    deploy:
-      resources:
-        limits:
-          cpus: '0.5'
-          memory: 256M
     restart: always
     networks:
       - mm-test
@@ -118,11 +88,6 @@ services:
       LDAP_ADMIN_PASSWORD: "mostest"
   elasticsearch:
     image: "mattermostdevelopment/mattermost-elasticsearch:8.9.0"
-    deploy:
-      resources:
-        limits:
-          cpus: '1'
-          memory: 1024M
     networks:
       - mm-test
     environment:
@@ -203,11 +168,6 @@ services:
       - mm-test
   neo4j:
     image: "neo4j:5.22.0-community"
-    deploy:
-      resources:
-        limits:
-          cpus: '1'
-          memory: 1024M
     networks:
       - mm-test
     environment:
@@ -215,11 +175,6 @@ services:
       NEO4J_PLUGINS: '["apoc","apoc-extended"]'
   searchindexer:
     image: "docker.dev.cloud.biggo.com/test/search-indexer:dev"
-    deploy:
-      resources:
-        limits:
-          cpus: '1'
-          memory: 256M
     networks:
       - mm-test
     command:
@@ -233,11 +188,6 @@ services:
       - -debug
   searchengine:
     image: "docker.dev.cloud.biggo.com/test/search-engine:dev"
-    deploy:
-      resources:
-        limits:
-          cpus: '1'
-          memory: 256M
     networks:
       - mm-test
     command:
@@ -245,11 +195,6 @@ services:
       - -debug
   elasticsearch8:
     image: "elasticsearch:8.15.1"
-    deploy:
-      resources:
-        limits:
-          cpus: '1'
-          memory: 1024M
     networks:
       - mm-test
     environment:
