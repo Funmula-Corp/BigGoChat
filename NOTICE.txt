@@ -1,11 +1,11 @@
-Mattermost Server
+BigGo Chat Server
 
-©2015-present Mattermost,Inc. All Rights Reserved. See LICENSE for license information.
+©2015-present Funmula,Inc. All Rights Reserved. See LICENSE for license information.
 
 NOTICES:
 --------
 
-This document includes a list of open source components used in Mattermost Server, including those that have been modified.
+This document includes a list of open source components used in BigGo Chat Server, including those that have been modified.
 
 --------
 
@@ -5888,7 +5888,7 @@ OTHER DEALINGS IN THE SOFTWARE.
 
 This product contains 'hako/durafmt' by Wesley Hill.
 
-:clock8:  Better time duration formatting in Go! 
+:clock8:  Better time duration formatting in Go!
 
 * HOMEPAGE:
   * https://github.com/hako/durafmt
@@ -12564,7 +12564,7 @@ Apache License
 
 Version 2.0, January 2004
 
-http://www.apache.org/licenses/ 
+http://www.apache.org/licenses/
 
 TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
 
