@@ -55,6 +55,10 @@ func TestUserBlockUser(t *testing.T) {
 	_, resp8, err8 := client.AddUserBlockUser(context.Background(), th.BasicUser.Id, model.NewId())
 	require.Error(t, err8)
 	CheckBadRequestStatus(t, resp8)
+
+	_, resp9, err9 := th.SystemAdminClient.AddUserBlockUser(context.Background(), model.NewId(), th.BasicUser.Id)
+	require.Error(t, err9)
+	CheckBadRequestStatus(t, resp9)
 }
 
 func TestUserBlockUserPost(t *testing.T) {
