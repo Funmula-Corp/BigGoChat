@@ -1942,7 +1942,6 @@ func (us SqlUserStore) GetUsersBatchForIndexing(startTime int64, startFileID str
 				sq.Eq{"c.Type": model.ChannelTypeOpen},
 				sq.Eq{"c.Type": model.ChannelTypeDirect},
 				sq.Eq{"c.Type": model.ChannelTypeGroup},
-				sq.Eq{"c.Type": model.ChannelTypePrivate},
 			},
 		}).
 		ToSql()
