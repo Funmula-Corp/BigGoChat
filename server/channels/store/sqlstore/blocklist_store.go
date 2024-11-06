@@ -203,7 +203,7 @@ func (s *SqlBlocklistStore) SaveTeamBlockUser(blockUser *model.TeamBlockUser) (*
 	}
 
 	if _, err := transaction.Exec(sql, args...); err != nil {
-		if IsUniqueConstraintError(err, []string{"Name", "team_block_users_key"}) {
+		if IsUniqueConstraintError(err, []string{"Name", "teamblockusers_pkey"}) {
 			dup := model.TeamBlockUser{}
 			if serr := s.GetMasterX().Get(&dup, "SELECT * FROM TeamBlockUsers WHERE TeamId = ? AND BlockedId = ?", blockUser.TeamId, blockUser.BlockedId); serr != nil {
 				return nil, errors.Wrapf(serr, "error while retrieving existing team block user %s %s", blockUser.TeamId, blockUser.BlockedId)
@@ -354,7 +354,7 @@ func (s *SqlBlocklistStore) SaveChannelBlockUser(blockUser *model.ChannelBlockUs
 		return nil, errors.Wrapf(err, "failed to delete blocked user %s from channel %s", blockUser.BlockedId, blockUser.ChannelId)
 	}
 	if _, err := transaction.Exec(sql, args...); err != nil {
-		if IsUniqueConstraintError(err, []string{"Name", "channel_block_users_key"}) {
+		if IsUniqueConstraintError(err, []string{"Name", "channelblockusers_pkey"}) {
 			dup := model.ChannelBlockUser{}
 			if serr := s.GetMasterX().Get(&dup, "SELECT * FROM ChannelBlockUsers WHERE ChannelId = ? AND BlockedId = ?", blockUser.ChannelId, blockUser.BlockedId); serr != nil {
 				return nil, errors.Wrapf(serr, "error while retrieving existing channel block user %s %s", blockUser.ChannelId, blockUser.BlockedId)
@@ -501,7 +501,7 @@ func (s *SqlBlocklistStore) SaveUserBlockUser(userBlockUser *model.UserBlockUser
 		return nil, errors.Wrap(err, "save_user_block_user_tosql")
 	}
 	if _, err = transaction.Exec(sql, args...); err != nil {
-		if IsUniqueConstraintError(err, []string{"Name", "user_block_users_key"}) {
+		if IsUniqueConstraintError(err, []string{"Name", "userblockusers_pkey"}) {
 			dup := model.UserBlockUser{}
 			if serr := s.GetMasterX().Get(&dup, "SELECT * FROM UserBlockUsers WHERE UserId = ? AND BlockedId = ?", userBlockUser.UserId, userBlockUser.BlockedId); serr != nil {
 				return nil, errors.Wrapf(serr, "error while retrieving existing user block user %s %s", userBlockUser.UserId, userBlockUser.BlockedId)

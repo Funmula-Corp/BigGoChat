@@ -2,6 +2,7 @@ package api4
 
 import (
 	"context"
+	"net/http"
 	"testing"
 
 	"git.biggo.com/Funmula/BigGoChat/server/public/model"
@@ -23,6 +24,10 @@ func TestUserBlockUser(t *testing.T) {
 	CheckCreatedStatus(t, resp1)
 	assert.Equal(t, ubu1.BlockedId, th.BasicUser2.Id)
 	assert.Equal(t, ubu1.UserId, th.BasicUser.Id)
+
+	_, resp2, err2 := client.AddUserBlockUser(context.Background(), th.BasicUser.Id, th.BasicUser2.Id)
+	require.Error(t, err2)
+	checkHTTPStatus(t, resp2, http.StatusConflict)
 
 	ubul2, resp2, err2 := client.ListUserBlockUsers(context.Background(), th.BasicUser.Id)
 	require.NoError(t, err2)
@@ -50,6 +55,15 @@ func TestUserBlockUser(t *testing.T) {
 	_, resp7, err7 := client.ListUserBlockUsers(context.Background(), th.BasicUser2.Id)
 	require.Error(t, err7)
 	CheckForbiddenStatus(t, resp7)
+
+	// test invalid user id
+	_, resp8, err8 := client.AddUserBlockUser(context.Background(), th.BasicUser.Id, model.NewId())
+	require.Error(t, err8)
+	CheckBadRequestStatus(t, resp8)
+
+	_, resp9, err9 := th.SystemAdminClient.AddUserBlockUser(context.Background(), model.NewId(), th.BasicUser.Id)
+	require.Error(t, err9)
+	CheckBadRequestStatus(t, resp9)
 }
 
 func TestUserBlockUserPost(t *testing.T) {
@@ -162,6 +176,10 @@ func TestChannelBlockUser(t *testing.T) {
 	assert.Equal(t, cbu1.BlockedId, th.BasicUser2.Id)
 	assert.Equal(t, cbu1.ChannelId, th.BasicChannel.Id)
 	assert.Equal(t, cbu1.CreateBy, th.BasicUser.Id)
+
+	_, resp2, err2 := client.AddChannelBlockUser(context.Background(), th.BasicChannel.Id, th.BasicUser2.Id)
+	require.Error(t, err2)
+	checkHTTPStatus(t, resp2, http.StatusConflict)
 
 	cbul2, resp2, err2 := client.ListChannelBlockUsers(context.Background(), th.BasicChannel.Id)
 	require.NoError(t, err2)
@@ -380,6 +398,10 @@ func TestTeamBlockUserChannel(t *testing.T) {
 	require.Equal(t, cbu1.BlockedId, th.BasicUser.Id)
 	require.Equal(t, cbu1.TeamId, th.BasicTeam.Id)
 	require.Equal(t, cbu1.CreateBy, th.SystemAdminUser.Id)
+
+	_, resp2, err2 := sysAdmClient.AddTeamBlockUser(th.Context.Context(), th.BasicTeam.Id, th.BasicUser.Id)
+	require.Error(t, err2)
+	checkHTTPStatus(t, resp2, http.StatusConflict)
 
 	boolTrue := true
 	teamPatch := model.TeamPatch{
