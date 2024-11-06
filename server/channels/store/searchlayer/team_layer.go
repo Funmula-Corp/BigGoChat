@@ -34,6 +34,11 @@ func (s SearchTeamStore) AnalyticsTeamCount(opts *model.TeamSearch) (int64, erro
 }
 
 func (s SearchTeamStore) GetAllPage(offset int, limit int, opts *model.TeamSearch) ([]*model.Team, error) {
+	if limit <= 0 {
+		// result with limit smaller than 0 is empty
+		return []*model.Team{}, nil
+	}
+
 	var (
 		page    int = offset / limit
 		perPage int = limit
