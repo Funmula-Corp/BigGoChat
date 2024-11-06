@@ -99,6 +99,38 @@ services:
     extends:
         file: build/docker-compose.common.yml
         service: grafana
+  neo4j:
+    restart: 'no'
+    container_name: mattermost-neo4j
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+    extends:
+        file: build/docker-compose.common.yml
+        service: neo4j
+  elasticsearch8:
+    restart: 'no'
+    container_name: mattermost-elasticsearch8
+    ports:
+      - "9201:9201"
+      - "9301:9301"
+    extends:
+        file: build/docker-compose.common.yml
+        service: elasticsearch8
+  searchindexer:
+    restart: 'no'
+    container_name: mattermost-searchindexer
+    extends:
+        file: build/docker-compose.common.yml
+        service: searchindexer
+  searchengine:
+    restart: 'no'
+    container_name: mattermost-searchengine
+    ports:
+      - "8080:8080"
+    extends:
+        file: build/docker-compose.common.yml
+        service: searchengine
   loki:
     container_name: mattermost-loki
     ports:

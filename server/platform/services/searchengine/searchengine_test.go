@@ -6,8 +6,8 @@ package searchengine
 import (
 	"testing"
 
-	"git.biggo.com/Funmula/BigGoChat/server/v8/platform/services/searchengine/mocks"
 	"git.biggo.com/Funmula/BigGoChat/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/platform/services/searchengine/mocks"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -21,21 +21,13 @@ func TestActiveEngine(t *testing.T) {
 	esMock.On("IsActive").Return(true)
 	esMock.On("GetName").Return("elasticsearch")
 
-	bleveMock := &mocks.SearchEngineInterface{}
-	bleveMock.On("IsActive").Return(true)
-	bleveMock.On("IsIndexingEnabled").Return(true)
-	bleveMock.On("GetName").Return("bleve")
-
 	assert.Equal(t, "database", b.ActiveEngine())
 
 	b.ElasticsearchEngine = esMock
 	assert.Equal(t, "elasticsearch", b.ActiveEngine())
 
 	b.ElasticsearchEngine = nil
-	b.BleveEngine = bleveMock
-	assert.Equal(t, "bleve", b.ActiveEngine())
 
-	b.BleveEngine = nil
 	*b.cfg.SqlSettings.DisableDatabaseSearch = true
 
 	assert.Equal(t, "none", b.ActiveEngine())

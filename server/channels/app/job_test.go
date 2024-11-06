@@ -10,8 +10,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/store/sqlstore"
 	"git.biggo.com/Funmula/BigGoChat/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/store/sqlstore"
 )
 
 func TestGetJob(t *testing.T) {
@@ -40,11 +40,6 @@ func TestSessionHasPermissionToCreateJob(t *testing.T) {
 	jobs := []model.Job{
 		{
 			Id:       model.NewId(),
-			Type:     model.JobTypeBlevePostIndexing,
-			CreateAt: 1000,
-		},
-		{
-			Id:       model.NewId(),
 			Type:     model.JobTypeDataRetention,
 			CreateAt: 999,
 		},
@@ -61,14 +56,10 @@ func TestSessionHasPermissionToCreateJob(t *testing.T) {
 	}{
 		{
 			Job:                jobs[0],
-			PermissionRequired: model.PermissionCreatePostBleveIndexesJob,
-		},
-		{
-			Job:                jobs[1],
 			PermissionRequired: model.PermissionCreateDataRetentionJob,
 		},
 		{
-			Job:                jobs[2],
+			Job:                jobs[1],
 			PermissionRequired: model.PermissionCreateComplianceExportJob,
 		},
 	}
@@ -100,19 +91,8 @@ func TestSessionHasPermissionToCreateJob(t *testing.T) {
 	ctx := sqlstore.WithMaster(context.Background())
 	role, _ := th.App.GetRoleByName(ctx, model.SystemReadOnlyAdminRoleId)
 
-	role.Permissions = append(role.Permissions, model.PermissionCreatePostBleveIndexesJob.Id)
-
 	_, err := th.App.UpdateRole(role)
 	require.Nil(t, err)
-
-	// Now system read only admin should have ability to create a Belve Post Index job but not the others
-	for _, testCase := range testCases {
-		hasPermission, permissionRequired := th.App.SessionHasPermissionToCreateJob(session, &testCase.Job)
-		expectedHasPermission := testCase.Job.Type == model.JobTypeBlevePostIndexing
-		assert.Equal(t, expectedHasPermission, hasPermission)
-		require.NotNil(t, permissionRequired)
-		assert.Equal(t, testCase.PermissionRequired.Id, permissionRequired.Id)
-	}
 
 	role.Permissions = append(role.Permissions, model.PermissionCreateDataRetentionJob.Id)
 	role.Permissions = append(role.Permissions, model.PermissionCreateComplianceExportJob.Id)
