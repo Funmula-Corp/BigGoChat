@@ -34,6 +34,7 @@ describe('Leave an archived channel', () => {
             testUser = user;
 
             cy.apiCreateUser({prefix: 'second'}).then(({user: second}) => {
+                cy.apiPatchUserRoles(user.id, ["system_verified"])
                 cy.apiAddUserToTeam(testTeam.id, second.id);
             });
             cy.visit(`/${team.name}/channels/${testChannel.name}`);

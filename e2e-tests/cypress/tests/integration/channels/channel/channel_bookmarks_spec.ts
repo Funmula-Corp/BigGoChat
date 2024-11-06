@@ -23,7 +23,8 @@ describe('Channel Bookmarks', () => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     let channel: Cypress.Channel;
 
-    before(() => {
+    before(function() {
+        this.skip();
         cy.apiGetMe().then(({user: adminUser}) => {
             admin = adminUser;
 

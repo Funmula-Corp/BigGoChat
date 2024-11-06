@@ -44,12 +44,14 @@ describe('Move Thread', () => {
             testTeam = team;
 
             // # enable CRT for the user
+            cy.apiPatchUserRoles(user.id, ['system_verified', 'system_admin']);
             cy.apiSaveCRTPreference(user.id, 'on');
 
             // # Create another user
             return cy.apiCreateUser({prefix: 'second_'});
         }).then(({user}) => {
             user2 = user;
+            cy.apiPatchUserRoles(user2.id, ['system_verified']);
 
             // # Add other user to team
             return cy.apiAddUserToTeam(testTeam.id, user2.id);
@@ -179,7 +181,9 @@ describe('Move Thread', () => {
             });
 
             // # Cleanup
-            cy.apiDeletePost(id);
+            // need more permission to delete post.
+            // it's not a big deal for now.
+            // cy.apiDeletePost(id);
         });
     };
 

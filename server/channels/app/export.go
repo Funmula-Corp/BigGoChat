@@ -208,7 +208,7 @@ func (a *App) exportVersion(writer io.Writer) *model.AppError {
 	version := 1
 
 	info := &imports.VersionInfoImportData{
-		Generator: "mattermost-server",
+		Generator: "biggo-server",
 		Version:   fmt.Sprintf("%s (%s, enterprise: %s)", model.CurrentVersion, model.BuildHash, model.BuildEnterpriseReady),
 		Created:   time.Now().Format(time.RFC3339Nano),
 	}

@@ -25,7 +25,9 @@ describe('Channel Moderation', () => {
     let testTeam;
     let testChannel;
 
-    before(() => {
+    before(function () {
+        // we don't support channel moderator for now.
+        this.skip();
         // * Check if server has license
         cy.apiRequireLicense();
 
@@ -43,7 +45,7 @@ describe('Channel Moderation', () => {
         });
     });
 
-    it('MM-22276 - Enable and Disable all channel moderated permissions', () => {
+    it.skip('MM-22276 - Enable and Disable all channel moderated permissions', () => {
         // # Go to system admin page and to channel configuration page of test channel
         cy.apiAdminLogin();
         cy.visit('/admin_console/user_management/channels');

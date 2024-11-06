@@ -93,7 +93,7 @@ type API interface {
 	// Minimum server version: 5.10
 	IsEnterpriseReady() bool
 
-	// GetServerVersion return the current Mattermost server version
+	// GetServerVersion return the current BigChat server version
 	//
 	// @tag Server
 	// Minimum server version: 5.4
@@ -116,6 +116,12 @@ type API interface {
 	// @tag Server
 	// Minimum server version: 5.28
 	GetTelemetryId() string
+
+	// GetMMVersion returns the current Mattermost server version for plugins that are compatible with Mattermost
+	//
+	// @tag Server
+	// Minimum server version: BigGoChat-0.9.0
+	GetMMVersion() string
 
 	// CreateUser creates a user.
 	//

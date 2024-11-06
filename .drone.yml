@@ -26,12 +26,12 @@ steps:
   image: docker.dev.cloud.biggo.com/test/plugin-docker
   settings:
     username:
-      from_secret: droneio-dev-docker-user
+      from_secret: droneio-dev-docker-user-chat
     password:
-      from_secret: droneio-dev-docker-secret
-    cache_from: docker.dev.cloud.biggo.com/mattermost/mattermost:development
+      from_secret: droneio-dev-docker-secret-chat
+    cache_from: docker.dev.cloud.biggo.com/biggo-chat/biggo-chat:development
     registry: docker.dev.cloud.biggo.com
-    repo: docker.dev.cloud.biggo.com/mattermost/mattermost
+    repo: docker.dev.cloud.biggo.com/biggo-chat/biggo-chat
     dockerfile: server/build/Dockerfile
     context: server/build
     tags:
@@ -63,12 +63,12 @@ steps:
   image: docker.dev.cloud.biggo.com/test/plugin-docker
   settings:
     username:
-      from_secret: droneio-dev-docker-user
+      from_secret: droneio-dev-docker-user-chat
     password:
-      from_secret: droneio-dev-docker-secret
-    cache_from: docker.dev.cloud.biggo.com/mattermost/mattermost:cache
+      from_secret: droneio-dev-docker-secret-chat
+    cache_from: docker.dev.cloud.biggo.com/biggo-chat/biggo-chat:cache
     registry: docker.dev.cloud.biggo.com
-    repo: docker.dev.cloud.biggo.com/mattermost/mattermost
+    repo: docker.dev.cloud.biggo.com/biggo-chat/biggo-chat
     dockerfile: server/build/Dockerfile
     context: server/build
     tags:
@@ -88,7 +88,7 @@ steps:
     helmStagingBranch: staging
     helmReleaseBranch: release
     helmRepo: "https://git.biggo.com/Funmula/helm-repo.git"
-    image: "docker.dev.cloud.biggo.com/mattermost/mattermost"
+    image: "docker.dev.cloud.biggo.com/biggo-chat/biggo-chat"
 
 ---
 kind: pipeline
@@ -116,12 +116,12 @@ steps:
   image: docker.dev.cloud.biggo.com/test/plugin-docker
   settings:
     username:
-      from_secret: droneio-dev-docker-user
+      from_secret: droneio-dev-docker-user-chat
     password:
-      from_secret: droneio-dev-docker-secret
-    cache_from: docker.dev.cloud.biggo.com/mattermost/mattermost:nightly
+      from_secret: droneio-dev-docker-secret-chat
+    cache_from: docker.dev.cloud.biggo.com/biggo-chat/biggo-chat:nightly
     registry: docker.dev.cloud.biggo.com
-    repo: docker.dev.cloud.biggo.com/mattermost/mattermost
+    repo: docker.dev.cloud.biggo.com/biggo-chat/biggo-chat
     dockerfile: server/build/Dockerfile
     context: server/build
     tags:

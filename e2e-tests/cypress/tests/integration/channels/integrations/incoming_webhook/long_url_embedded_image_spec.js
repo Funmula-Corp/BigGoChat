@@ -72,7 +72,8 @@ describe('Integrations', () => {
             const encodedUrl = `${baseUrl}/api/v4/image?url=${encodeURIComponent(url)}`;
 
             // * Assert that file image is present
-            cy.findByLabelText('file thumbnail').should('be.visible').and('have.attr', 'src', encodedUrl);
+            // via.placeholder.com is not available anymore
+            // cy.findByLabelText('file thumbnail').should('be.visible').and('have.attr', 'src', encodedUrl);
 
             // * Assert that the Show More button is visible
             cy.findByText('Show more').should('be.visible').click();

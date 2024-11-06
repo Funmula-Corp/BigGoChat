@@ -2522,6 +2522,57 @@ func TestUpdateUserRoles(t *testing.T) {
 	})
 }
 
+func TestPostAfterRoleUpdate(t *testing.T) {
+	th := Setup(t).InitBasic()
+	defer th.TearDown()
+	testClient := th.CreateClient()
+	testClient2 := th.CreateClient()
+	testUser := th.CreateUser()
+	require.NotContains(t, testUser.Roles, model.SystemVerifiedRoleId)
+	appErr := th.App.AddUserToTeamByTeamId(th.Context, th.BasicTeam.Id, testUser)
+	require.Nil(t, appErr)
+	_, appErr = th.App.AddChannelMember(th.Context, testUser.Id, th.BasicChannel, app.ChannelMemberOpts{})
+	require.Nil(t, appErr)
+
+	testClient2.Login(context.Background(), th.BasicUser2.Email, th.BasicUser2.Password)
+	directChannel, _, err := testClient2.CreateDirectChannel(context.Background(), th.BasicUser2.Id, testUser.Id)
+	// directChannel, appErr := th.App.GetOrCreateDirectChannel(th.Context, testUser.Id, th.BasicUser.Id)
+	require.Nil(t, err)
+	require.NotNil(t, directChannel)
+
+	testClient.Login(context.Background(), testUser.Email, testUser.Password)
+
+	_, _, err = testClient.CreatePost(context.Background(), &model.Post{
+		UserId:    testUser.Id,
+		ChannelId: th.BasicChannel.Id,
+		Message:   "test",
+	})
+	require.Error(t, err)
+	_, _, err = testClient.CreatePost(context.Background(), &model.Post{
+		UserId:    testUser.Id,
+		ChannelId: directChannel.Id,
+		Message:   "test",
+	})
+	require.Error(t, err)
+
+	th.App.UpdateUserRoles(th.Context, testUser.Id, model.SystemUserRoleId+" "+model.SystemVerifiedRoleId, true)
+	testUser, _, err = th.Client.GetUser(context.Background(), testUser.Id, "")
+	require.NoError(t, err)
+	require.Contains(t, testUser.Roles, model.SystemVerifiedRoleId)
+	_, _, err = testClient.CreatePost(context.Background(), &model.Post{
+		UserId:    testUser.Id,
+		ChannelId: th.BasicChannel.Id,
+		Message:   "test",
+	})
+	require.NoError(t, err)
+	_, resp, err := testClient.CreatePost(context.Background(), &model.Post{
+		UserId:    testUser.Id,
+		ChannelId: directChannel.Id,
+		Message:   "test",
+	})
+	require.NoError(t, err, resp)
+}
+
 func assertExpectedWebsocketEvent(t *testing.T, client *model.WebSocketClient, event model.WebsocketEventType, test func(*model.WebSocketEvent)) {
 	for {
 		select {

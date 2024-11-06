@@ -221,5 +221,11 @@ declare namespace Cypress {
          * @param {string} name - name of converted channel
          */
         apiConvertGMToPrivateChannel(channelId: string, teamId: string, displayName: string, name: string): Chainable;
+
+        /**
+         * Update the scheme of a channel.
+         * special scheme id: biggosyyyyyyyyyyyyyyyyyyyd
+         */
+        apiUpdateChannelScheme(channelId: string, schemeId: string): Chainable<Record<string, any>>;
     }
 }

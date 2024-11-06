@@ -140,6 +140,10 @@ func (api *PluginAPI) GetServerVersion() string {
 	return model.CurrentVersion
 }
 
+func (api *PluginAPI) GetMMVersion() string {
+	return model.MMVersion
+}
+
 func (api *PluginAPI) GetSystemInstallDate() (int64, *model.AppError) {
 	return api.app.Srv().Platform().GetSystemInstallDate()
 }
