@@ -34,6 +34,9 @@ func (a *App) AddTeamBlockUser(rctx request.CTX, teamId string, blockedId string
 		}
 	}
 	if saved, err := a.Srv().Store().Blocklist().SaveTeamBlockUser(&newTBU); err != nil {
+		if saved != nil {
+			return nil, model.NewAppError("AddTeamBlockUser", "app.team.add_blocklist.add.app_error", nil, "", http.StatusConflict)
+		}
 		return nil, model.NewAppError("AddTeamBlockUser", "app.team.add_blocklist.add.app_error", nil, "", http.StatusInternalServerError).Wrap(err)
 	} else {
 		a.InvalidateCacheForUser(blockedId)
@@ -93,6 +96,9 @@ func (a *App) AddChannelBlockUser(rctx request.CTX, channelId string, blockedId 
 		return nil, model.NewAppError("AddChanelBlockUser", "app.channel.add_blocklist.channel_admin.app_err", nil, "", http.StatusBadRequest)
 	}
 	if saved, err := a.Srv().Store().Blocklist().SaveChannelBlockUser(&newCBU); err != nil {
+		if saved != nil {
+			return nil, model.NewAppError("AddChannelBlockUser", "app.channel.add_blocklist.add.app_error", nil, "", http.StatusConflict)
+		}
 		return nil, model.NewAppError("AddChannelBlockUser", "app.channel.add_blocklist.add.app_error", nil, "", http.StatusInternalServerError).Wrap(err)
 	} else {
 		a.InvalidateCacheForUser(blockedId)
@@ -147,6 +153,9 @@ func (a *App) AddUserBlockUser(rctx request.CTX, userId string, blockedId string
 		return nil, model.NewAppError("AddUserBlockUser", MissingAccountError, nil, "", http.StatusBadRequest).Wrap(err)
 	}
 	if saved, err := a.Srv().Store().Blocklist().SaveUserBlockUser(&newUBU); err != nil {
+		if saved != nil {
+			return nil, model.NewAppError("AddUserBlockUser", "app.user.add_blocklist.save.app_error", nil, "", http.StatusConflict)
+		}
 		return nil, model.NewAppError("AddUserBlockUser", "app.user.add_blocklist.save.app_error", nil, "", http.StatusInternalServerError).Wrap(err)
 	} else {
 		a.InvalidateCacheForUser(blockedId)
