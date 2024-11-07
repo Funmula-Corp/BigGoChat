@@ -9256,7 +9256,7 @@ func (c *Client4) GetCachedSessions(ctx context.Context, userId string) ([]*Sess
 }
 
 func (c *Client4) GetCachedAllChannelMembersForUser(ctx context.Context, userId string, includeDeleted bool) (map[string]*AllChannelMember, *Response, error) {
-	res, err := c.DoAPIGet(ctx, c.userRoute(userId)+"/channel_members/cached", fmt.Sprintf("include_deleted=%v", includeDeleted))
+	res, err := c.DoAPIGet(ctx, c.userRoute(userId)+"/channel_members/cached" + fmt.Sprintf("?include_deleted=%v", includeDeleted), "")
 	if err != nil {
 		return nil, BuildResponse(res), err
 	}

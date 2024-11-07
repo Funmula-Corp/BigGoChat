@@ -8023,10 +8023,9 @@ func TestGetCachedAllChannelMembersForUser(t *testing.T) {
 	CheckCreatedStatus(t, resp)
 
 	// refresh cache
-	_, err = th.App.Srv().Store().Channel().GetAllChannelMembersForUser(th.Context, user.Id, true, false)
-	require.NoError(t, err)
+	th.App.HasPermissionToChannel(th.Context, user.Id, th.BasicChannel.Id, model.PermissionReadChannel)
 
-	members, resp, err := th.LocalClient.GetCachedAllChannelMembersForUser(context.Background(), user.Id, false)
+	members, resp, err := th.LocalClient.GetCachedAllChannelMembersForUser(context.Background(), user.Id, true)
 	require.NoError(t, err)
 	CheckOKStatus(t, resp)
 	require.Len(t, members, 2)

@@ -33,7 +33,7 @@ var CacheUserChannelMembersCmd = &cobra.Command{
 }
 
 func init() {
-	CacheUserChannelMembersCmd.Flags().BoolP("include-deleted", "d", false, "include deleted channel members")
+	CacheUserChannelMembersCmd.Flags().BoolP("include-deleted", "d", true, "include deleted channel members")
 
 	CacheUserCmd.AddCommand(
 		CacheUserSessionsCmd,
