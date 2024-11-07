@@ -236,6 +236,7 @@ func GenerateLimitedClientConfig(c *model.Config, telemetryID string, license *m
 	props := make(map[string]string)
 
 	props["Version"] = model.CurrentVersion
+	props["MMVersion"] = model.MMVersion
 	props["BuildNumber"] = model.BuildNumber
 	props["BuildDate"] = model.BuildDate
 	props["BuildHash"] = model.BuildHash

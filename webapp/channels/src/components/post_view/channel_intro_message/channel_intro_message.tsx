@@ -14,8 +14,8 @@ import {isChannelMuted} from 'mattermost-redux/utils/channel_utils';
 
 import AddGroupsToTeamModal from 'components/add_groups_to_team_modal';
 import ChannelNotificationsModal from 'components/channel_notifications_modal';
-import ChannelIntroPrivateSvg from 'components/common/svg_images_components/channel_intro_private_svg';
-import ChannelIntroPublicSvg from 'components/common/svg_images_components/channel_intro_public_svg';
+import ChannelIntroPrivatePng from 'components/common/png_images_components/channel_intro_private_png';
+import ChannelIntroPublicPng from 'components/common/png_images_components/channel_intro_public_png';
 import ChannelIntroTownSquareSvg from 'components/common/svg_images_components/channel_intro_town_square_svg';
 import EditChannelHeaderModal from 'components/edit_channel_header_modal';
 import FormattedMarkdownMessage from 'components/formatted_markdown_message';
@@ -373,7 +373,7 @@ function createOffTopicIntroMessage(
             id='channelIntro'
             className={'channel-intro ' + centeredIntro}
         >
-            <ChannelIntroPublicSvg/>
+            <ChannelIntroPublicPng/>
             <h2 className='channel-intro__title'>
                 {channel.display_name}
             </h2>
@@ -681,7 +681,7 @@ function createStandardIntroMessage(
             id='channelIntro'
             className={'channel-intro ' + centeredIntro}
         >
-            {isPrivate ? <ChannelIntroPrivateSvg/> : <ChannelIntroPublicSvg/>}
+            {isPrivate ? <ChannelIntroPrivatePng/> : <ChannelIntroPublicPng/>}
             <h2 className='channel-intro__title'>
                 {channel.display_name}
             </h2>
