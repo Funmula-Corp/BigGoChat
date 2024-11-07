@@ -39,7 +39,7 @@ import {LhsItemType, LhsPage} from 'types/store/lhs';
 import ThreadList, {ThreadFilter, FILTER_STORAGE_KEY} from './thread_list';
 import ThreadPane from './thread_pane';
 
-import ChatIllustration from '../common/chat_illustration';
+import NoFollowedThread from '../common/no_followed_thread';
 import {useThreadRouting} from '../hooks';
 import ThreadViewer from '../thread_viewer';
 
@@ -154,7 +154,7 @@ const GlobalThreads = () => {
                     ) : (
                         <NoResultsIndicator
                             expanded={true}
-                            iconGraphic={ChatIllustration}
+                            iconGraphic={NoFollowedThread}
                             title={formatMessage({
                                 id: 'globalThreads.noThreads.title',
                                 defaultMessage: 'No followed threads yet',
@@ -189,7 +189,7 @@ const GlobalThreads = () => {
                     ) : (
                         <NoResultsIndicator
                             expanded={true}
-                            iconGraphic={ChatIllustration}
+                            iconGraphic={NoFollowedThread}
                             title={formatMessage({
                                 id: 'globalThreads.threadPane.unselectedTitle',
                                 defaultMessage: '{numUnread, plural, =0 {Looks like you’re all caught up} other {Catch up on your threads}}',

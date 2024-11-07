@@ -31,8 +31,8 @@ import type {GlobalState} from 'types/store';
 
 import VirtualizedThreadList from './virtualized_thread_list';
 
-import BalloonIllustration from '../../common/balloon_illustration';
 import Button from '../../common/button';
+import NoUnreadThread from '../../common/no_unread_thread';
 import {useThreadRouting} from '../../hooks';
 import MarkAllThreadsAsReadModal from '../mark_all_threads_as_read_modal';
 import type {MarkAllThreadsAsReadModalProps} from '../mark_all_threads_as_read_modal';
@@ -269,7 +269,7 @@ const ThreadList = ({
                 {unread && !someUnread && isEmpty(unreadIds) ? (
                     <NoResultsIndicator
                         expanded={true}
-                        iconGraphic={BalloonIllustration}
+                        iconGraphic={NoUnreadThread}
                         title={formatMessage({
                             id: 'globalThreads.threadList.noUnreadThreads',
                             defaultMessage: 'No unread threads',
