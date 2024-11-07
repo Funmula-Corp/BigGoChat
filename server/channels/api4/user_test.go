@@ -7990,3 +7990,48 @@ func TestLoginWithDesktopToken(t *testing.T) {
 		assert.Len(t, sessions, 0)
 	})
 }
+
+func TestGetCachedSessions(t *testing.T) {
+	th := Setup(t).InitBasic()
+	defer th.TearDown()
+
+	_, resp, err := th.Client.GetCachedSessions(context.Background(), th.BasicUser.Id)
+	require.Error(t, err)
+	CheckNotFoundStatus(t, resp)
+
+	sessions, resp, err := th.LocalClient.GetCachedSessions(context.Background(), th.BasicUser.Id)
+	require.NoError(t, err)
+	CheckOKStatus(t, resp)
+	require.Len(t, sessions, 1)
+	require.Equal(t, th.BasicUser.Id, sessions[0].UserId)
+}
+
+func TestGetCachedAllChannelMembersForUser(t *testing.T) {
+	th := Setup(t).InitBasic()
+	defer th.TearDown()
+
+	_, resp, err := th.Client.GetCachedAllChannelMembersForUser(context.Background(), th.BasicUser.Id, false)
+	require.Error(t, err)
+	CheckNotFoundStatus(t, resp)
+
+	user := th.CreateUser()
+	team := th.CreateTeam()
+	th.LinkUserToTeam(user, team)
+
+	_, resp, err = th.SystemAdminClient.AddTeamMember(context.Background(), team.Id, user.Id)
+	require.NoError(t, err)
+	CheckCreatedStatus(t, resp)
+
+	// refresh cache
+	_, err = th.App.Srv().Store().Channel().GetAllChannelMembersForUser(th.Context, user.Id, true, false)
+	require.NoError(t, err)
+
+	members, resp, err := th.LocalClient.GetCachedAllChannelMembersForUser(context.Background(), user.Id, false)
+	require.NoError(t, err)
+	CheckOKStatus(t, resp)
+	require.Len(t, members, 2)
+
+	for _, member := range members {
+		require.Equal(t, model.ChannelUserRoleId, member.Roles)
+	}
+}

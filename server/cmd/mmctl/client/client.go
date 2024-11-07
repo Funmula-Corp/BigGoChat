@@ -161,4 +161,6 @@ type Client interface {
 	UpdatePreferences(ctx context.Context, userId string, preferences model.Preferences) (*model.Response, error)
 	DeletePreferences(ctx context.Context, userId string, preferences model.Preferences) (*model.Response, error)
 	RefreshScheme(ctx context.Context, userId string) (*model.Response, error)
+	GetCachedSessions(ctx context.Context, userId string) ([]*model.Session, *model.Response, error)
+	GetCachedAllChannelMembersForUser(ctx context.Context, userId string, includeDeleted bool) (map[string]*model.AllChannelMember, *model.Response, error)
 }

@@ -49,6 +49,9 @@ func (api *API) InitUserLocal() {
 
 	api.BaseRoutes.User.Handle("/uploads", api.APILocal(localGetUploadsForUser)).Methods("GET")
 	api.BaseRoutes.User.Handle("/refreshscheme", api.APILocal(localRefreshSchemeForUser)).Methods("POST")
+
+	api.BaseRoutes.User.Handle("/sessions/cached", api.APILocal(localGetCachedSessionsForUser)).Methods("GET")
+	api.BaseRoutes.User.Handle("/channel_members/cached", api.APILocal(localGetCachedAllChannelMembersForUser)).Methods("GET")
 }
 
 func localGetUsers(c *Context, w http.ResponseWriter, r *http.Request) {
@@ -455,4 +458,48 @@ func localRefreshSchemeForUser(c *Context, w http.ResponseWriter, r *http.Reques
 		c.Err = appErr
 		return
 	}
+}
+
+func localGetCachedSessionsForUser(c *Context, w http.ResponseWriter, r *http.Request) {
+	c.RequireUserId()
+	if c.Err != nil {
+		return
+	}
+
+	sessions, err := c.App.Srv().Platform().GetCachedSessions(c.AppContext, c.Params.UserId)
+	if err != nil {
+		c.Err = model.NewAppError("localGetCachedSessionsForUser", "app.session.get_cached_sessions.app_error", nil, "", http.StatusInternalServerError).Wrap(err)
+		return
+	}
+
+	js, err := json.Marshal(sessions)
+	if err != nil {
+		c.Err = model.NewAppError("localGetCachedSessionsForUser", "api.marshal_error", nil, "", http.StatusInternalServerError).Wrap(err)
+		return
+	}
+
+	w.Write(js)
+}
+
+func localGetCachedAllChannelMembersForUser(c *Context, w http.ResponseWriter, r *http.Request) {
+	c.RequireUserId()
+	if c.Err != nil {
+		return
+	}
+
+	includeDeleted, _ := strconv.ParseBool(r.URL.Query().Get("include_deleted"))
+
+	members, err := c.App.Srv().Store().Channel().GetCachedAllChannelMembersForUser(c.Params.UserId, includeDeleted)
+	if err != nil {
+		c.Err = model.NewAppError("localGetCachedAllChannelMembersForUser", "app.channel.get_cached_all_channel_members_for_user.app_error", nil, "", http.StatusInternalServerError).Wrap(err)
+		return
+	}
+
+	js, err := json.Marshal(members)
+	if err != nil {
+		c.Err = model.NewAppError("localGetCachedAllChannelMembersForUser", "api.marshal_error", nil, "", http.StatusInternalServerError).Wrap(err)
+		return
+	}
+
+	w.Write(js)
 }
