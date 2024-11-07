@@ -29,13 +29,13 @@ export function getJoinEmailTemplate(sender, userEmail, team, isGuest = false) {
 
     return [
         `${sender} invited you to join the ${team.display_name} team.`,
-        `${isGuest ? 'You were invited as a guest to collaborate with the team' : 'Start collaborating with your team on Mattermost'}`,
+        `${isGuest ? 'You were invited as a guest to collaborate with the team' : 'Start collaborating with your team on BigGo Chat'}`,
         '',
         `<join-link-check> Join now ( ${baseUrl}/signup_user_complete/?d=${encodeURIComponent(JSON.stringify({display_name: team.display_name.replace(' ', '+'), email: userEmail, name: team.name}))}&t=<actual-token> )`,
         '',
-        'What is Mattermost?',
-        'Mattermost is a flexible, open source messaging platform that enables secure team collaboration.',
-        'Learn more ( mattermost.com )',
+        'What is BigGo Chat?',
+        'Team members can communicate and collaborate anytime, anywhere, to accomplish tasks easily.',
+        '',
         '',
         '© 2024 BigGo'
     ];
