@@ -6,7 +6,8 @@ import React from 'react';
 import type {ReactNode, CSSProperties} from 'react';
 import {FormattedMessage, defineMessages} from 'react-intl';
 
-import {SearchSVG, ChannelSearchSVG, MentionsSVG, SavedMessagesSVG, PinSVG, ChannelFilesSVG, UserGroupsSVG, UserGroupMembersSVG} from 'components/common/svg_images_components';
+import {ChannelFilesPNG, MentionsPNG, PinPNG, SavedMessagesPNG} from 'components/common/png_images_components';
+import {SearchSVG, ChannelSearchSVG, UserGroupsSVG, UserGroupMembersSVG} from 'components/common/svg_images_components';
 
 import {NoResultsVariant, NoResultsLayout} from './types';
 import './no_results_indicator.scss';
@@ -28,12 +29,12 @@ interface Props {
 const iconMap: {[key in NoResultsVariant]: React.ReactNode } = {
     [NoResultsVariant.Search]: <SearchSVG className='no-results__icon'/>,
     [NoResultsVariant.ChannelSearch]: <ChannelSearchSVG className='no-results__icon'/>,
-    [NoResultsVariant.Files]: <ChannelFilesSVG className='no-results__icon'/>,
-    [NoResultsVariant.Mentions]: <MentionsSVG className='no-results__icon'/>,
-    [NoResultsVariant.FlaggedPosts]: <SavedMessagesSVG className='no-results__icon'/>,
-    [NoResultsVariant.PinnedPosts]: <PinSVG className='no-results__icon'/>,
-    [NoResultsVariant.ChannelFiles]: <ChannelFilesSVG className='no-results__icon'/>,
-    [NoResultsVariant.ChannelFilesFiltered]: <ChannelFilesSVG className='no-results__icon'/>,
+    [NoResultsVariant.Files]: <ChannelFilesPNG className='no-results__icon'/>,
+    [NoResultsVariant.Mentions]: <MentionsPNG className='no-results__icon'/>,
+    [NoResultsVariant.FlaggedPosts]: <SavedMessagesPNG className='no-results__icon'/>,
+    [NoResultsVariant.PinnedPosts]: <PinPNG className='no-results__icon'/>,
+    [NoResultsVariant.ChannelFiles]: <ChannelFilesPNG className='no-results__icon'/>,
+    [NoResultsVariant.ChannelFilesFiltered]: <ChannelFilesPNG className='no-results__icon'/>,
     [NoResultsVariant.UserGroups]: <UserGroupsSVG className='no-results__icon'/>,
     [NoResultsVariant.UserGroupMembers]: <UserGroupMembersSVG className='no-results__icon'/>,
     [NoResultsVariant.UserGroupsArchived]: <UserGroupsSVG className='no-results__icon'/>,
