@@ -619,6 +619,7 @@ func TestGetOldClientConfig(t *testing.T) {
 		require.NoError(t, err)
 
 		require.NotEmpty(t, config["Version"], "config not returned correctly")
+		require.NotEmpty(t, config["MMVersion"], "config should return Mattermost version")
 		require.Equal(t, testKey, config["GoogleDeveloperKey"])
 	})
 
@@ -633,6 +634,7 @@ func TestGetOldClientConfig(t *testing.T) {
 		require.NoError(t, err)
 
 		require.NotEmpty(t, config["Version"], "config not returned correctly")
+		require.NotEmpty(t, config["MMVersion"], "config should return Mattermost version")
 		require.Empty(t, config["GoogleDeveloperKey"], "config should be missing developer key")
 	})
 
