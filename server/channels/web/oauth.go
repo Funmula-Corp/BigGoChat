@@ -10,16 +10,17 @@ import (
 	"net/http"
 	"net/url"
 	"path/filepath"
+	"slices"
 	"strings"
 	"time"
 
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/public/shared/i18n"
+	"git.biggo.com/Funmula/BigGoChat/server/public/shared/mlog"
 	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/app"
 	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/audit"
 	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/utils"
 	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/utils/fileutils"
-	"git.biggo.com/Funmula/BigGoChat/server/public/model"
-	"git.biggo.com/Funmula/BigGoChat/server/public/shared/i18n"
-	"git.biggo.com/Funmula/BigGoChat/server/public/shared/mlog"
 )
 
 func (w *Web) InitOAuth() {
@@ -332,6 +333,21 @@ func completeOAuth(c *Context, w http.ResponseWriter, r *http.Request) {
 		c.LogErrorByCode(err)
 		renderError(err)
 		return
+	}
+
+	md := r.URL.Query().Get("md")
+	if slices.Contains[[]string]([]string{"email", "link"}, md) {
+		if inviteId := r.URL.Query().Get("id"); inviteId != "" {
+			if _, err = c.App.AddTeamMemberByInviteId(c.AppContext, inviteId, user.Id); err != nil {
+				err.Translate(c.AppContext.T)
+				c.LogErrorByCode(err)
+			}
+		} else if tokenId := r.URL.Query().Get("t"); tokenId != "" {
+			if _, err = c.App.AddTeamMemberByToken(c.AppContext, user.Id, tokenId); err != nil {
+				err.Translate(c.AppContext.T)
+				c.LogErrorByCode(err)
+			}
+		}
 	}
 
 	if action == model.OAuthActionEmailToSSO {
