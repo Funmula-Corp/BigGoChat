@@ -1479,6 +1479,24 @@ func (s *OpenTracingLayerChannelStore) GetByNamesIncludeDeleted(team_id string, 
 	return result, err
 }
 
+func (s *OpenTracingLayerChannelStore) GetCachedAllChannelMembersForUser(userId string, includeDeleted bool) (map[string]*model.AllChannelMember, error) {
+	origCtx := s.Root.Store.Context()
+	span, newCtx := tracing.StartSpanWithParentByContext(s.Root.Store.Context(), "ChannelStore.GetCachedAllChannelMembersForUser")
+	s.Root.Store.SetContext(newCtx)
+	defer func() {
+		s.Root.Store.SetContext(origCtx)
+	}()
+
+	defer span.Finish()
+	result, err := s.ChannelStore.GetCachedAllChannelMembersForUser(userId, includeDeleted)
+	if err != nil {
+		span.LogFields(spanlog.Error(err))
+		ext.Error.Set(span, true)
+	}
+
+	return result, err
+}
+
 func (s *OpenTracingLayerChannelStore) GetChannelCounts(teamID string, userID string) (*model.ChannelCounts, error) {
 	origCtx := s.Root.Store.Context()
 	span, newCtx := tracing.StartSpanWithParentByContext(s.Root.Store.Context(), "ChannelStore.GetChannelCounts")
