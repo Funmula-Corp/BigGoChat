@@ -18,14 +18,14 @@ import (
 
 	"github.com/pkg/errors"
 
-	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/app/platform"
-	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/store"
-	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/utils"
-	"git.biggo.com/Funmula/BigGoChat/server/v8/einterfaces"
 	"git.biggo.com/Funmula/BigGoChat/server/public/model"
 	"git.biggo.com/Funmula/BigGoChat/server/public/shared/i18n"
 	"git.biggo.com/Funmula/BigGoChat/server/public/shared/mlog"
 	"git.biggo.com/Funmula/BigGoChat/server/public/shared/request"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/app/platform"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/store"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/utils"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/einterfaces"
 )
 
 const (
@@ -785,7 +785,18 @@ func (a *App) GetAuthorizationCode(c request.CTX, w http.ResponseWriter, r *http
 		siteURL = GetProtocol(r) + "://" + r.Host
 	}
 
-	redirectURI := siteURL + "/signup/" + service + "/complete"
+	args := ""
+	for _, key := range []string{"id", "md", "sbr", "d", "t"} {
+		if val := r.URL.Query().Get(key); val != "" {
+			if args == "" {
+				args += "?"
+			} else {
+				args += "&"
+			}
+			args += fmt.Sprintf("%s=%s", key, val)
+		}
+	}
+	redirectURI := siteURL + "/signup/" + service + "/complete" + args
 
 	authURL := endpoint + "?response_type=code&client_id=" + clientId + "&redirect_uri=" + url.QueryEscape(redirectURI) + "&state=" + url.QueryEscape(state)
 
