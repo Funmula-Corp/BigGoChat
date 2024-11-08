@@ -65,84 +65,34 @@ export default class AboutBuildModal extends React.PureComponent<Props, State> {
             );
         }
 
-        let title = (
+        const title = (
             <FormattedMessage
                 id='about.teamEditiont0'
-                defaultMessage='Team Edition'
+                defaultMessage='Pre-Edition'
             />
         );
 
-        let subTitle = (
+        const subTitle = (
             <FormattedMessage
                 id='about.teamEditionSt'
-                defaultMessage='All your team communication in one place, instantly searchable and accessible anywhere.'
+                defaultMessage={'Let\'s continue precious moments together and make life full of meaning.'}
             />
         );
 
-        let learnMore = (
+        const learnMore = (
             <div>
                 <FormattedMessage
                     id='about.teamEditionLearn'
-                    defaultMessage='Join the Mattermost community at '
+                    defaultMessage='BigGo is the open-source software under AGPL 3.0. '
                 />
                 <ExternalLink
                     location='about_build_modal'
-                    href='https://mattermost.com/community/'
+                    href='https://github.com/Funmula-Corp/BigGoChat'
                 >
-                    {'mattermost.com/community/'}
+                    {'https://git.biggo.com/'}
                 </ExternalLink>
             </div>
         );
-
-        let licensee;
-        if (config.BuildEnterpriseReady === 'true') {
-            title = (
-                <FormattedMessage
-                    id='about.teamEditiont1'
-                    defaultMessage='Enterprise Edition'
-                />
-            );
-
-            subTitle = (
-                <FormattedMessage
-                    id='about.enterpriseEditionSt'
-                    defaultMessage='Modern communication from behind your firewall.'
-                />
-            );
-
-            learnMore = (
-                <div>
-                    <FormattedMessage
-                        id='about.enterpriseEditionLearn'
-                        defaultMessage='Learn more about Enterprise Edition at '
-                    />
-                    <ExternalLink
-                        location='about_build_modal'
-                        href='https://mattermost.com/'
-                    >
-                        {'mattermost.com'}
-                    </ExternalLink>
-                </div>
-            );
-
-            if (license.IsLicensed === 'true') {
-                title = (
-                    <FormattedMessage
-                        id='about.enterpriseEditione1'
-                        defaultMessage='Enterprise Edition'
-                    />
-                );
-                licensee = (
-                    <div className='form-group'>
-                        <FormattedMessage
-                            id='about.licensed'
-                            defaultMessage='Licensed to:'
-                        />
-                        <Nbsp/>{license.Company}
-                    </div>
-                );
-            }
-        }
 
         const termsOfService = (
             <ExternalLink
@@ -180,7 +130,8 @@ export default class AboutBuildModal extends React.PureComponent<Props, State> {
             </div>
         );
 
-        const mmversion: string | undefined = config.BuildNumber === 'dev' ? config.BuildNumber : config.Version;
+        const mmversion: string | undefined = config.BuildNumber === 'dev' ? config.BuildNumber : config.MMVersion;
+        const version: string | undefined = config.Version ? config.Version : config.BuildNumber;
 
         return (
             <Modal
@@ -199,7 +150,7 @@ export default class AboutBuildModal extends React.PureComponent<Props, State> {
                         <FormattedMessage
                             id='about.title'
                             values={{
-                                appTitle: config.SiteName || 'Mattermost',
+                                appTitle: config.SiteName || 'BigGo Chat',
                             }}
                             defaultMessage='About {appTitle}'
                         />
@@ -213,7 +164,7 @@ export default class AboutBuildModal extends React.PureComponent<Props, State> {
                         <div>
                             <h3 className='about-modal__title'>
                                 <strong>
-                                    {'Mattermost'} {title}
+                                    {'BigGo Chat'} {title}
                                 </strong>
                             </h3>
                             <p className='about-modal__subtitle pb-2'>
@@ -222,8 +173,17 @@ export default class AboutBuildModal extends React.PureComponent<Props, State> {
                             <div className='form-group less'>
                                 <div data-testid='aboutModalVersion'>
                                     <FormattedMessage
+                                        id='about.bcversion'
+                                        defaultMessage='BigGo Chat Version:'
+                                    />
+                                    <span id='bcversionString'>
+                                        {'\u00a0' + version}
+                                    </span>
+                                </div>
+                                <div data-testid='aboutModalVersion'>
+                                    <FormattedMessage
                                         id='about.version'
-                                        defaultMessage='Mattermost Version:'
+                                        defaultMessage='Based on Mattermost Version:'
                                     />
                                     <span id='versionString'>
                                         {'\u00a0' + mmversion}
@@ -247,61 +207,17 @@ export default class AboutBuildModal extends React.PureComponent<Props, State> {
                                     {'\u00a0' + config.SQLDriverName}
                                 </div>
                             </div>
-                            {licensee}
                         </div>
                     </div>
                     <div className='about-modal__footer'>
                         {learnMore}
                         <div className='form-group'>
-                            <div className='about-modal__copyright'>
-                                <FormattedMessage
-                                    id='about.copyright'
-                                    defaultMessage='Copyright 2015 - {currentYear} Mattermost, Inc. All rights reserved'
-                                    values={{
-                                        currentYear: new Date().getFullYear(),
-                                    }}
-                                />
-                            </div>
                             <div className='about-modal__links'>
                                 {termsOfService}
                                 {' - '}
                                 {privacyPolicy}
                             </div>
                         </div>
-                    </div>
-                    <div className='about-modal__notice form-group pt-3'>
-                        <p>
-                            <FormattedMessage
-                                id='about.notice'
-                                defaultMessage='Mattermost is made possible by the open source software used in our <linkServer>server</linkServer>, <linkDesktop>desktop</linkDesktop> and <linkMobile>mobile</linkMobile> apps.'
-                                values={{
-                                    linkServer: (msg: React.ReactNode) => (
-                                        <ExternalLink
-                                            location='about_build_modal'
-                                            href='https://github.com/mattermost/mattermost-server/blob/master/NOTICE.txt'
-                                        >
-                                            {msg}
-                                        </ExternalLink>
-                                    ),
-                                    linkDesktop: (msg: React.ReactNode) => (
-                                        <ExternalLink
-                                            location='about_build_modal'
-                                            href='https://github.com/mattermost/desktop/blob/master/NOTICE.txt'
-                                        >
-                                            {msg}
-                                        </ExternalLink>
-                                    ),
-                                    linkMobile: (msg: React.ReactNode) => (
-                                        <ExternalLink
-                                            location='about_build_modal'
-                                            href='https://github.com/mattermost/mattermost-mobile/blob/master/NOTICE.txt'
-                                        >
-                                            {msg}
-                                        </ExternalLink>
-                                    ),
-                                }}
-                            />
-                        </p>
                     </div>
                     <div className='about-modal__hash'>
                         <p>

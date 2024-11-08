@@ -189,6 +189,7 @@ export type ClientConfig = {
     TermsOfServiceLink: string;
     TimeBetweenUserTypingUpdatesMilliseconds: string;
     UpgradedFromTE: string;
+    MMVersion: string;
     Version: string;
     WebsocketPort: string;
     WebsocketSecurePort: string;
