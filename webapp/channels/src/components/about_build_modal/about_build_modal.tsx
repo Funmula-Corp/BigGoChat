@@ -89,7 +89,7 @@ export default class AboutBuildModal extends React.PureComponent<Props, State> {
                     location='about_build_modal'
                     href='https://github.com/Funmula-Corp/BigGoChat'
                 >
-                    {'https://git.biggo.com/'}
+                    {'https://github.com/Funmula-Corp/BigGoChat'}
                 </ExternalLink>
             </div>
         );
