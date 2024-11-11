@@ -5,7 +5,7 @@ import React from 'react';
 
 import OSLinux from './image/os_linux.png';
 
-export function OSLinuxPNG(props: React.HTMLAttributes<HTMLSpanElement>) {
+export function PNG(props: React.HTMLAttributes<HTMLSpanElement>) {
     return (
         <span {...props}>
             <img
@@ -16,3 +16,5 @@ export function OSLinuxPNG(props: React.HTMLAttributes<HTMLSpanElement>) {
         </span>
     );
 }
+
+export default PNG;

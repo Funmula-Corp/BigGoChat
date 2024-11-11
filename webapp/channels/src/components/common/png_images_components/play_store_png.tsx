@@ -5,7 +5,7 @@ import React from 'react';
 
 import PlayStore from './image/play_store.png';
 
-export function PlayStorePNG(props: React.HTMLAttributes<HTMLSpanElement>) {
+export function PNG(props: React.HTMLAttributes<HTMLSpanElement>) {
     return (
         <span {...props}>
             <img
@@ -16,3 +16,5 @@ export function PlayStorePNG(props: React.HTMLAttributes<HTMLSpanElement>) {
         </span>
     );
 }
+
+export default PNG;

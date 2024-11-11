@@ -5,7 +5,7 @@ import React from 'react';
 
 import OSAndroid from './image/os_android.png';
 
-export function OSAndroidPNG(props: React.HTMLAttributes<HTMLSpanElement>) {
+export function PNG(props: React.HTMLAttributes<HTMLSpanElement>) {
     return (
         <span {...props}>
             <img
@@ -16,3 +16,5 @@ export function OSAndroidPNG(props: React.HTMLAttributes<HTMLSpanElement>) {
         </span>
     );
 }
+
+export default PNG;
