@@ -5,16 +5,17 @@ import React from 'react';
 
 import AppStore from './image/app_store.png';
 
-export function PNG(props: React.HTMLAttributes<HTMLSpanElement>) {
-    return (
-        <span {...props}>
-            <img
-                width={110}
-                height={36}
-                src={AppStore}
-            />
-        </span>
-    );
+type PngProps = {
+    width?: number;
+    height?: number;
 }
 
-export default PNG;
+const Png = (props: PngProps) => (
+    <img
+        width={props.width ?? '95'}
+        height={props.height ?? '32'}
+        src={AppStore}
+    />
+);
+
+export default Png;

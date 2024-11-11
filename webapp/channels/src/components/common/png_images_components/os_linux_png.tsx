@@ -5,16 +5,17 @@ import React from 'react';
 
 import OSLinux from './image/os_linux.png';
 
-export function PNG(props: React.HTMLAttributes<HTMLSpanElement>) {
-    return (
-        <span {...props}>
-            <img
-                width={48}
-                height={48}
-                src={OSLinux}
-            />
-        </span>
-    );
+type PngProps = {
+    width?: number;
+    height?: number;
 }
 
-export default PNG;
+const Png = (props: PngProps) => (
+    <img
+        width={props.width ?? '48'}
+        height={props.height ?? '48'}
+        src={OSLinux}
+    />
+);
+
+export default Png;
