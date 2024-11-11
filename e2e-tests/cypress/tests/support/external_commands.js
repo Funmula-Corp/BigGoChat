@@ -17,9 +17,9 @@ Cypress.Commands.add('externalSendInvite', (email, teamId) => {
     cy.externalRequest({user: admin, method: 'post', baseUrl, path: `teams/${teamId}/invite/email?graceful=false`, data: {'emails': [email]}});
 });
 
-Cypress.Commands.add('externalPatchUserRoles', (userId, roleNames) => {
+Cypress.Commands.add('externalPatchUserRoles', (userId, roleNames = ['system_user']) => {
     const baseUrl = Cypress.config('baseUrl');
     const admin = getAdminAccount();
 
-    cy.externalRequest({user: admin, method: 'put', baseUrl, path: `users/${userId}/roles`, data: {roles: roleNames = ['system_user'].join(' ')},});
+    cy.externalRequest({user: admin, method: 'put', baseUrl, path: `users/${userId}/roles`, data: {roles: roleNames = roleNames.join(' ')},});
 });
