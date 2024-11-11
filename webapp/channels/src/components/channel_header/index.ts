@@ -10,7 +10,7 @@ import {
     updateChannelNotifyProps,
 } from 'mattermost-redux/actions/channels';
 import {getCustomEmojisInText} from 'mattermost-redux/actions/emojis';
-import {General} from 'mattermost-redux/constants';
+import {General, Permissions} from 'mattermost-redux/constants';
 import {
     getCurrentChannel,
     getMyCurrentChannelMembership,
@@ -48,6 +48,7 @@ import {isFileAttachmentsEnabled} from 'utils/file_utils';
 import type {GlobalState} from 'types/store';
 
 import ChannelHeader from './channel_header';
+import {haveIChannelPermission} from 'mattermost-redux/selectors/entities/roles';
 
 function makeMapStateToProps() {
     const doGetProfilesInChannel = makeGetProfilesInChannel();
@@ -65,6 +66,7 @@ function makeMapStateToProps() {
         let gmMembers;
         let customStatus;
         let lastActivityTimestamp;
+        let isReadOnly = false;
 
         if (channel && channel.type === General.DM_CHANNEL) {
             const dmUserId = getUserIdFromChannelName(user.id, channel.name);
@@ -73,6 +75,8 @@ function makeMapStateToProps() {
             lastActivityTimestamp = dmUser && getLastActivityForUserId(state, dmUser.id);
         } else if (channel && channel.type === General.GM_CHANNEL) {
             gmMembers = doGetProfilesInChannel(state, channel.id);
+        } else if (channel) {
+            isReadOnly = !haveIChannelPermission(state, channel.team_id, channel.id, Permissions.CREATE_POST);
         }
         const stats = getCurrentChannelStats(state);
 
@@ -92,7 +96,7 @@ function makeMapStateToProps() {
             gmMembers,
             rhsState: getRhsState(state),
             rhsOpen: getIsRhsOpen(state),
-            isReadOnly: false,
+            isReadOnly,
             isMuted: isCurrentChannelMuted(state),
             isQuickSwitcherOpen: isModalOpen(state, ModalIdentifiers.QUICK_SWITCH),
             hasGuests: stats ? stats.guest_count > 0 : false,

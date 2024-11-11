@@ -185,10 +185,9 @@ const AdvanceTextEditor = ({
     replyToLastPost,
     caretPosition,
     placeholder,
-    isPhoneVerified,
+    isPhoneVerified: isVerified,
 }: Props) => {
     const readOnlyChannel = !canPost;
-    const isVerified = canPost && isPhoneVerified;
     const {formatMessage} = useIntl();
     const ariaLabelMessageInput = Utils.localizeMessage(
         'accessibility.sections.centerFooter',
