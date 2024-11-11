@@ -9225,3 +9225,29 @@ func (c *Client4) RefreshScheme(ctx context.Context, userId string) (*Response, 
 	}
 	return BuildResponse(res), nil
 }
+
+func (c *Client4) GetCachedSessions(ctx context.Context, userId string) ([]*Session, *Response, error) {
+	res, err := c.DoAPIGet(ctx, c.userRoute(userId)+"/sessions/cached", "")
+	if err != nil {
+		return nil, BuildResponse(res), err
+	}
+	defer closeBody(res)
+	var sessions []*Session
+	if err := json.NewDecoder(res.Body).Decode(&sessions); err != nil {
+		return nil, nil, NewAppError("GetCachedSessions", "api.unmarshal_error", nil, "", http.StatusInternalServerError).Wrap(err)
+	}
+	return sessions, BuildResponse(res), nil
+}
+
+func (c *Client4) GetCachedAllChannelMembersForUser(ctx context.Context, userId string, includeDeleted bool) (map[string]*AllChannelMember, *Response, error) {
+	res, err := c.DoAPIGet(ctx, c.userRoute(userId)+"/channel_members/cached" + fmt.Sprintf("?include_deleted=%v", includeDeleted), "")
+	if err != nil {
+		return nil, BuildResponse(res), err
+	}
+	defer closeBody(res)
+	var members map[string]*AllChannelMember
+	if err := json.NewDecoder(res.Body).Decode(&members); err != nil {
+		return nil, nil, NewAppError("GetCachedAllChannelMembersForUser", "api.unmarshal_error", nil, "", http.StatusInternalServerError).Wrap(err)
+	}
+	return members, BuildResponse(res), nil
+}

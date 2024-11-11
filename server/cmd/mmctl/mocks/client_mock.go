@@ -652,6 +652,38 @@ func (mr *MockClientMockRecorder) GetBotsOrphaned(arg0, arg1, arg2, arg3 interfa
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetBotsOrphaned", reflect.TypeOf((*MockClient)(nil).GetBotsOrphaned), arg0, arg1, arg2, arg3)
 }
 
+// GetCachedAllChannelMembersForUser mocks base method.
+func (m *MockClient) GetCachedAllChannelMembersForUser(arg0 context.Context, arg1 string, arg2 bool) (map[string]*model.AllChannelMember, *model.Response, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetCachedAllChannelMembersForUser", arg0, arg1, arg2)
+	ret0, _ := ret[0].(map[string]*model.AllChannelMember)
+	ret1, _ := ret[1].(*model.Response)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
+}
+
+// GetCachedAllChannelMembersForUser indicates an expected call of GetCachedAllChannelMembersForUser.
+func (mr *MockClientMockRecorder) GetCachedAllChannelMembersForUser(arg0, arg1, arg2 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCachedAllChannelMembersForUser", reflect.TypeOf((*MockClient)(nil).GetCachedAllChannelMembersForUser), arg0, arg1, arg2)
+}
+
+// GetCachedSessions mocks base method.
+func (m *MockClient) GetCachedSessions(arg0 context.Context, arg1 string) ([]*model.Session, *model.Response, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetCachedSessions", arg0, arg1)
+	ret0, _ := ret[0].([]*model.Session)
+	ret1, _ := ret[1].(*model.Response)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
+}
+
+// GetCachedSessions indicates an expected call of GetCachedSessions.
+func (mr *MockClientMockRecorder) GetCachedSessions(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCachedSessions", reflect.TypeOf((*MockClient)(nil).GetCachedSessions), arg0, arg1)
+}
+
 // GetChannel mocks base method.
 func (m *MockClient) GetChannel(arg0 context.Context, arg1, arg2 string) (*model.Channel, *model.Response, error) {
 	m.ctrl.T.Helper()

@@ -69,6 +69,7 @@
 
         .about-modal__footer {
             font-size: 13.5px;
+            white-space: nowrap;
         }
 
         .about-modal__title {
@@ -81,6 +82,8 @@
         }
 
         .about-modal__hash {
+            display: flex;
+            flex-direction: column;
             overflow: hidden;
             font-size: 0.75em;
             opacity: 0.4;
@@ -90,6 +93,10 @@
                 &:first-child {
                     float: left;
                     text-align: left;
+                }
+
+                &:last-child {
+                    margin: 0;
                 }
             }
         }

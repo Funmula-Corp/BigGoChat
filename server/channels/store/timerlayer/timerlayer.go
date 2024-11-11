@@ -1375,6 +1375,22 @@ func (s *TimerLayerChannelStore) GetByNamesIncludeDeleted(team_id string, names 
 	return result, err
 }
 
+func (s *TimerLayerChannelStore) GetCachedAllChannelMembersForUser(userId string, includeDeleted bool) (map[string]*model.AllChannelMember, error) {
+	start := time.Now()
+
+	result, err := s.ChannelStore.GetCachedAllChannelMembersForUser(userId, includeDeleted)
+
+	elapsed := float64(time.Since(start)) / float64(time.Second)
+	if s.Root.Metrics != nil {
+		success := "false"
+		if err == nil {
+			success = "true"
+		}
+		s.Root.Metrics.ObserveStoreMethodDuration("ChannelStore.GetCachedAllChannelMembersForUser", success, elapsed)
+	}
+	return result, err
+}
+
 func (s *TimerLayerChannelStore) GetChannelCounts(teamID string, userID string) (*model.ChannelCounts, error) {
 	start := time.Now()
 

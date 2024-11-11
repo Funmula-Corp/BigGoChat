@@ -832,6 +832,36 @@ func (_m *ChannelStore) GetByNamesIncludeDeleted(team_id string, names []string,
 	return r0, r1
 }
 
+// GetCachedAllChannelMembersForUser provides a mock function with given fields: userId, includeDeleted
+func (_m *ChannelStore) GetCachedAllChannelMembersForUser(userId string, includeDeleted bool) (map[string]*model.AllChannelMember, error) {
+	ret := _m.Called(userId, includeDeleted)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetCachedAllChannelMembersForUser")
+	}
+
+	var r0 map[string]*model.AllChannelMember
+	var r1 error
+	if rf, ok := ret.Get(0).(func(string, bool) (map[string]*model.AllChannelMember, error)); ok {
+		return rf(userId, includeDeleted)
+	}
+	if rf, ok := ret.Get(0).(func(string, bool) map[string]*model.AllChannelMember); ok {
+		r0 = rf(userId, includeDeleted)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(map[string]*model.AllChannelMember)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(string, bool) error); ok {
+		r1 = rf(userId, includeDeleted)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // GetChannelCounts provides a mock function with given fields: teamID, userID
 func (_m *ChannelStore) GetChannelCounts(teamID string, userID string) (*model.ChannelCounts, error) {
 	ret := _m.Called(teamID, userID)

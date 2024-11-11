@@ -312,6 +312,8 @@ type ChannelStore interface {
 	SetShared(channelId string, shared bool) error
 	// GetTeamForChannel returns the team for a given channelID.
 	GetTeamForChannel(channelID string) (*model.Team, error)
+
+	GetCachedAllChannelMembersForUser(userId string, includeDeleted bool) (map[string]*model.AllChannelMember, error)
 }
 
 type ChannelMemberHistoryStore interface {

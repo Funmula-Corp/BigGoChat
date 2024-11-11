@@ -268,3 +268,22 @@ func (ps *PlatformService) RevokeAllSessions(c request.CTX, userID string) error
 
 	return nil
 }
+
+func (ps *PlatformService) GetCachedSessions(c request.CTX, userID string) ([]*model.Session, error) {
+	keys, err := ps.sessionCache.Keys()
+	if err != nil {
+		return nil, err
+	}
+
+	var sessions []*model.Session
+	for _, key := range keys {
+		var session *model.Session
+		if err := ps.sessionCache.Get(key, &session); err == nil {
+			if session.UserId == userID {
+				sessions = append(sessions, session)
+			}
+		}
+	}
+
+	return sessions, nil
+}

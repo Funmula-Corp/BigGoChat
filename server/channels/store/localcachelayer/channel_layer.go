@@ -5,10 +5,12 @@ package localcachelayer
 
 import (
 	"bytes"
+	"errors"
 
 	"git.biggo.com/Funmula/BigGoChat/server/public/model"
 	"git.biggo.com/Funmula/BigGoChat/server/public/shared/request"
 	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/store"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/platform/services/cache"
 )
 
 type LocalCacheChannelStore struct {
@@ -488,4 +490,20 @@ func (s LocalCacheChannelStore) RemoveMembers(rctx request.CTX, channelId string
 	}
 	s.InvalidateMemberCount(channelId)
 	return nil
+}
+
+func (s LocalCacheChannelStore) GetCachedAllChannelMembersForUser(userId string, includeDeleted bool) (map[string]*model.AllChannelMember, error) {
+	cache_key := userId
+	if includeDeleted {
+		cache_key += "_deleted"
+	}
+
+	ids := make(map[string]*model.AllChannelMember)
+	if err := s.rootStore.doStandardReadCache(s.rootStore.channelMembersForUserCache, cache_key, &ids); err != nil {
+		if !errors.Is(err, cache.ErrKeyNotFound) {
+			return nil, err
+		}
+	}
+
+	return ids, nil
 }
