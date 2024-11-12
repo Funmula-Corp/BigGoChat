@@ -123,6 +123,12 @@ type API interface {
 	// Minimum server version: BigGoChat-0.9.0
 	GetMMVersion() string
 
+	// GetBGVersion returns the current BigGoChat server version for plugins that are compatible with BigGoChat
+	//
+	// @tag Server
+	// Minimum server version: BigGoChat-0.9.1
+	GetBGVersion() string
+
 	// CreateUser creates a user.
 	//
 	// @tag User

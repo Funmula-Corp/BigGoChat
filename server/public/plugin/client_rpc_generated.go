@@ -1606,6 +1606,33 @@ func (s *apiRPCServer) GetMMVersion(args *Z_GetMMVersionArgs, returns *Z_GetMMVe
 	return nil
 }
 
+type Z_GetBGVersionArgs struct {
+}
+
+type Z_GetBGVersionReturns struct {
+	A string
+}
+
+func (g *apiRPCClient) GetBGVersion() string {
+	_args := &Z_GetBGVersionArgs{}
+	_returns := &Z_GetBGVersionReturns{}
+	if err := g.client.Call("Plugin.GetBGVersion", _args, _returns); err != nil {
+		log.Printf("RPC call to GetBGVersion API failed: %s", err.Error())
+	}
+	return _returns.A
+}
+
+func (s *apiRPCServer) GetBGVersion(args *Z_GetBGVersionArgs, returns *Z_GetBGVersionReturns) error {
+	if hook, ok := s.impl.(interface {
+		GetBGVersion() string
+	}); ok {
+		returns.A = hook.GetBGVersion()
+	} else {
+		return encodableError(fmt.Errorf("API GetBGVersion called but not implemented."))
+	}
+	return nil
+}
+
 type Z_CreateUserArgs struct {
 	A *model.User
 }

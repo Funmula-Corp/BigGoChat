@@ -146,6 +146,13 @@ func (api *apiTimerLayer) GetMMVersion() string {
 	return _returnsA
 }
 
+func (api *apiTimerLayer) GetBGVersion() string {
+	startTime := timePkg.Now()
+	_returnsA := api.apiImpl.GetBGVersion()
+	api.recordTime(startTime, "GetBGVersion", true)
+	return _returnsA
+}
+
 func (api *apiTimerLayer) CreateUser(user *model.User) (*model.User, *model.AppError) {
 	startTime := timePkg.Now()
 	_returnsA, _returnsB := api.apiImpl.CreateUser(user)
