@@ -15,6 +15,7 @@ import (
 
 	"git.biggo.com/Funmula/BigGoChat/server/public/model"
 	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/app/platform"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/store/storetest/mocks"
 	smocks "git.biggo.com/Funmula/BigGoChat/server/v8/channels/store/storetest/mocks"
 	"git.biggo.com/Funmula/BigGoChat/server/v8/config"
 	emocks "git.biggo.com/Funmula/BigGoChat/server/v8/einterfaces/mocks"
@@ -309,6 +310,11 @@ func TestGenerateSupportPacket(t *testing.T) {
 		mockStore.On("Close").Return(nil)
 		mockStore.On("GetDBSchemaVersion").Return(1, nil)
 		mockStore.On("GetDbVersion", false).Return("1.0.0", nil)
+
+		clusterMockStore := &mocks.ClusterDiscoveryStore{}
+		clusterMockStore.On("GetAll", mock.AnythingOfType("string"), mock.AnythingOfType("string")).Return([]*model.ClusterDiscovery{}, nil)
+		mockStore.On("ClusterDiscovery").Return(clusterMockStore)
+
 		th.App.Srv().SetStore(&mockStore)
 
 		fileDatas := th.App.GenerateSupportPacket(th.Context, &model.SupportPacketOptions{

@@ -724,10 +724,10 @@ func TestCreateDirectChannel(t *testing.T) {
 	CheckForbiddenStatus(t, resp)
 	// allow unverified messages
 	pref := model.Preference{
-		UserId: user1.Id,
+		UserId:   user1.Id,
 		Category: model.PreferenceCategoryPrivacySettings,
-		Name: model.PreferenceNameAllowUnverifiedMessage,
-		Value: "true",
+		Name:     model.PreferenceNameAllowUnverifiedMessage,
+		Value:    "true",
 	}
 	appErr := th.App.UpdatePreferences(th.Context, user1.Id, model.Preferences{pref})
 	require.Nil(t, appErr)
@@ -3499,7 +3499,7 @@ func TestAddChannelMember(t *testing.T) {
 	CheckBadRequestStatus(t, resp)
 
 	th.RemoveUserFromChannel(user, otherChannel)
-	// team admin should able to join the team 
+	// team admin should able to join the team
 	member, resp, err := client.AddChannelMember(context.Background(), otherChannel.Id, user.Id)
 	require.Nil(t, err)
 	CheckCreatedStatus(t, resp)
@@ -4758,6 +4758,11 @@ func TestGetChannelModerations(t *testing.T) {
 		mockStore.On("License").Return(th.App.Srv().Store().License())
 		mockStore.On("Role").Return(th.App.Srv().Store().Role())
 		mockStore.On("Close").Return(nil)
+
+		clusterMockStore := &mocks.ClusterDiscoveryStore{}
+		clusterMockStore.On("GetAll", mock.AnythingOfType("string"), mock.AnythingOfType("string")).Return([]*model.ClusterDiscovery{}, nil)
+		mockStore.On("ClusterDiscovery").Return(clusterMockStore)
+
 		th.App.Srv().SetStore(&mockStore)
 
 		team.SchemeId = &scheme.Id
@@ -4919,6 +4924,11 @@ func TestPatchChannelModerations(t *testing.T) {
 		mockStore.On("License").Return(th.App.Srv().Store().License())
 		mockStore.On("Role").Return(th.App.Srv().Store().Role())
 		mockStore.On("Close").Return(nil)
+
+		clusterMockStore := &mocks.ClusterDiscoveryStore{}
+		clusterMockStore.On("GetAll", mock.AnythingOfType("string"), mock.AnythingOfType("string")).Return([]*model.ClusterDiscovery{}, nil)
+		mockStore.On("ClusterDiscovery").Return(clusterMockStore)
+
 		th.App.Srv().SetStore(&mockStore)
 
 		team.SchemeId = &scheme.Id

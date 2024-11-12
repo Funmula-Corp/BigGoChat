@@ -33,15 +33,15 @@ import (
 )
 
 type TestHelper struct {
-	App          *App
-	Context      *request.Context
-	Server       *Server
-	BasicTeam    *model.Team
-	BasicUser    *model.User
-	BasicUser2   *model.User
+	App             *App
+	Context         *request.Context
+	Server          *Server
+	BasicTeam       *model.Team
+	BasicUser       *model.User
+	BasicUser2      *model.User
 	BasicUnverified *model.User
-	BasicChannel *model.Channel
-	BasicPost    *model.Post
+	BasicChannel    *model.Channel
+	BasicPost       *model.Post
 
 	SystemAdminUser   *model.User
 	LogBuffer         *mlog.Buffer
@@ -219,6 +219,11 @@ func SetupWithStoreMock(tb testing.TB) *TestHelper {
 	emptyMockStore.On("Close").Return(nil)
 	emptyMockStore.On("Status").Return(&statusMock)
 	emptyMockStore.On("Plugin").Return(&pluginMock).Maybe()
+
+	clusterMockStore := &mocks.ClusterDiscoveryStore{}
+	clusterMockStore.On("GetAll", mock.AnythingOfType("string"), mock.AnythingOfType("string")).Return([]*model.ClusterDiscovery{}, nil)
+	emptyMockStore.On("ClusterDiscovery").Return(clusterMockStore)
+
 	th.App.Srv().SetStore(&emptyMockStore)
 
 	return th
@@ -235,6 +240,11 @@ func SetupEnterpriseWithStoreMock(tb testing.TB) *TestHelper {
 	emptyMockStore := mocks.Store{}
 	emptyMockStore.On("Close").Return(nil)
 	emptyMockStore.On("Status").Return(&statusMock)
+
+	clusterMockStore := &mocks.ClusterDiscoveryStore{}
+	clusterMockStore.On("GetAll", mock.AnythingOfType("string"), mock.AnythingOfType("string")).Return([]*model.ClusterDiscovery{}, nil)
+	mockStore.On("ClusterDiscovery").Return(clusterMockStore)
+
 	th.App.Srv().SetStore(&emptyMockStore)
 	return th
 }
