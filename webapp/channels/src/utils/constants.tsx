@@ -1072,8 +1072,8 @@ export const DraggingStateTypes = {
 };
 
 export const AboutLinks = {
-    TERMS_OF_SERVICE: 'https://mattermost.com/pl/terms-of-use/',
-    PRIVACY_POLICY: 'https://mattermost.com/pl/privacy-policy/',
+    TERMS_OF_SERVICE: 'https://biggo.com/official/disclaimers?tag=privacy',
+    PRIVACY_POLICY: 'https://biggo.com/official/disclaimers?tag=privacy',
 };
 
 export const CloudLinks = {
