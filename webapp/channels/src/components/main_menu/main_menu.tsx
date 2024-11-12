@@ -525,11 +525,6 @@ export class MainMenu extends React.PureComponent<Props> {
                             )}
                         />
                     </SystemPermissionGate>
-                    <Menu.Group>
-                        <div className='MainMenu_dropdown-link'>
-                            <LearnAboutTeamsLink/>
-                        </div>
-                    </Menu.Group>
                 </Menu.Group>
                 <Menu.Group>
                     {pluginItems}
