@@ -92,6 +92,7 @@ func (p *BiggoCluster) StartInterNodeCommunication() {
 func (p *BiggoCluster) StopInterNodeCommunication() {
 	if p.ClusterDiscoveryService != nil {
 		p.ClusterDiscoveryService.Stop()
+		p.GossipServer.Stop()
 		if p.CancelVote != nil {
 			p.CancelVote()
 			p.CancelVote = nil

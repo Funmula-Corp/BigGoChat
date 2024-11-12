@@ -8,10 +8,10 @@ import (
 	"fmt"
 	"net/http"
 
-	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/store"
-	"git.biggo.com/Funmula/BigGoChat/server/v8/einterfaces"
 	"git.biggo.com/Funmula/BigGoChat/server/public/model"
 	"git.biggo.com/Funmula/BigGoChat/server/public/shared/mlog"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/store"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/einterfaces"
 )
 
 func (ps *PlatformService) Cluster() einterfaces.ClusterInterface {
@@ -22,7 +22,7 @@ func (ps *PlatformService) NewClusterDiscoveryService() *ClusterDiscoveryService
 	ds := &ClusterDiscoveryService{
 		ClusterDiscovery: model.ClusterDiscovery{},
 		platform:         ps,
-		stop:             make(chan bool),
+		//stop:             make(chan struct{}),
 	}
 
 	return ds

@@ -17,10 +17,13 @@ const (
 type ClusterDiscoveryService struct {
 	model.ClusterDiscovery
 	platform *PlatformService
-	stop     chan bool
+	stop     chan struct{}
 }
 
 func (cds *ClusterDiscoveryService) Start() {
+	if cds.stop == nil {
+		cds.stop = make(chan struct{})
+	}
 	err := cds.platform.Store.ClusterDiscovery().Cleanup()
 	if err != nil {
 		mlog.Warn("ClusterDiscoveryService failed to cleanup the outdated cluster discovery information", mlog.Err(err))
@@ -65,7 +68,9 @@ func (cds *ClusterDiscoveryService) Start() {
 }
 
 func (cds *ClusterDiscoveryService) Stop() {
-	cds.stop <- true
+	if cds.stop != nil {
+		close(cds.stop)
+	}
 }
 
 func (ps *PlatformService) GetClusterId() string {
