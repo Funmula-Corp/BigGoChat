@@ -70,6 +70,7 @@ func (cds *ClusterDiscoveryService) Start() {
 func (cds *ClusterDiscoveryService) Stop() {
 	if cds.stop != nil {
 		close(cds.stop)
+		cds.stop = nil
 	}
 }
 
