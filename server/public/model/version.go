@@ -131,7 +131,7 @@ var versions = []string{
 	"0.5.0",
 }
 
-var biggo_versions []string = []string{"0.9.0"}
+var biggo_versions []string = []string{"0.9.1"}
 
 var CurrentVersion string
 var MMVersion string = versions[0]

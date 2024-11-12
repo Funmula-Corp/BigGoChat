@@ -896,6 +896,24 @@ func (_m *API) ExtendSessionExpiry(sessionID string, newExpiry int64) *model.App
 	return r0
 }
 
+// GetBGVersion provides a mock function with given fields:
+func (_m *API) GetBGVersion() string {
+	ret := _m.Called()
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetBGVersion")
+	}
+
+	var r0 string
+	if rf, ok := ret.Get(0).(func() string); ok {
+		r0 = rf()
+	} else {
+		r0 = ret.Get(0).(string)
+	}
+
+	return r0
+}
+
 // GetBot provides a mock function with given fields: botUserId, includeDeleted
 func (_m *API) GetBot(botUserId string, includeDeleted bool) (*model.Bot, *model.AppError) {
 	ret := _m.Called(botUserId, includeDeleted)

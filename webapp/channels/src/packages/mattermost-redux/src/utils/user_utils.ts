@@ -167,10 +167,10 @@ export function nameSuggestionsForUser(user: UserProfile): string[] {
     profileSuggestions.push(first, last, full);
     profileSuggestions.push((user.nickname || '').toLowerCase());
     profileSuggestions.push((user.position || '').toLowerCase());
-    //const email = (user.email || '').toLowerCase();
-    //profileSuggestions.push(email);
-    //const mobilephone = (user.mobilephone || '').toLowerCase();
-    //profileSuggestions.push(mobilephone);
+    const email = (user.email || '').toLowerCase();
+    profileSuggestions.push(email);
+    const mobilephone = (user.mobilephone || '').toLowerCase();
+    profileSuggestions.push(mobilephone);
 
     //const split = email.split('@');
     //if (split.length > 1) {
@@ -183,6 +183,9 @@ export function filterProfilesStartingWithTerm(users: UserProfile[], term: strin
     const lowercasedTerm = term.toLowerCase();
     let trimmedTerm = lowercasedTerm;
     if (trimmedTerm.startsWith('@')) {
+        trimmedTerm = trimmedTerm.substr(1);
+    }
+    if (trimmedTerm.startsWith('+')) {
         trimmedTerm = trimmedTerm.substr(1);
     }
 
@@ -206,6 +209,9 @@ export function filterProfilesMatchingWithTerm(users: UserProfile[], term: strin
     const lowercasedTerm = term.toLowerCase();
     let trimmedTerm = lowercasedTerm;
     if (trimmedTerm.startsWith('@')) {
+        trimmedTerm = trimmedTerm.substr(1);
+    }
+    if (trimmedTerm.startsWith('+')) {
         trimmedTerm = trimmedTerm.substr(1);
     }
 
