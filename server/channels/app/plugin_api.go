@@ -137,11 +137,17 @@ func (api *PluginAPI) IsEnterpriseReady() bool {
 }
 
 func (api *PluginAPI) GetServerVersion() string {
-	return model.CurrentVersion
+	// return MMVersion for compatibility with existing plugins
+	// call GetBGVersion for BigGo version
+	return model.MMVersion
 }
 
 func (api *PluginAPI) GetMMVersion() string {
 	return model.MMVersion
+}
+
+func (api *PluginAPI) GetBGVersion() string {
+	return model.CurrentVersion
 }
 
 func (api *PluginAPI) GetSystemInstallDate() (int64, *model.AppError) {
