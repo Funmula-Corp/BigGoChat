@@ -17,15 +17,16 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/public/plugin"
+	"git.biggo.com/Funmula/BigGoChat/server/public/plugin/plugintest/mock"
+	"git.biggo.com/Funmula/BigGoChat/server/public/plugin/utils"
+	"git.biggo.com/Funmula/BigGoChat/server/public/shared/mlog"
+	"git.biggo.com/Funmula/BigGoChat/server/public/shared/request"
 	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/app"
 	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/store/localcachelayer"
 	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/store/storetest/mocks"
 	"git.biggo.com/Funmula/BigGoChat/server/v8/config"
-	"git.biggo.com/Funmula/BigGoChat/server/public/model"
-	"git.biggo.com/Funmula/BigGoChat/server/public/plugin"
-	"git.biggo.com/Funmula/BigGoChat/server/public/plugin/utils"
-	"git.biggo.com/Funmula/BigGoChat/server/public/shared/mlog"
-	"git.biggo.com/Funmula/BigGoChat/server/public/shared/request"
 )
 
 var apiClient *model.Client4
@@ -58,6 +59,11 @@ func SetupWithStoreMock(tb testing.TB) *TestHelper {
 	th := setupTestHelper(tb, false, nil)
 	emptyMockStore := mocks.Store{}
 	emptyMockStore.On("Close").Return(nil)
+
+	clusterMockStore := &mocks.ClusterDiscoveryStore{}
+	clusterMockStore.On("GetAll", mock.AnythingOfType("string"), mock.AnythingOfType("string")).Return([]*model.ClusterDiscovery{}, nil)
+	emptyMockStore.On("ClusterDiscovery").Return(clusterMockStore)
+
 	th.App.Srv().SetStore(&emptyMockStore)
 	return th
 }

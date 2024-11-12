@@ -135,5 +135,9 @@ func GetMockStoreForSetupFunctions() *mocks.Store {
 	mockStore.On("GetDBSchemaVersion").Return(1, nil)
 	mockStore.On("Plugin").Return(&pluginStore)
 
+	clusterMockStore := &mocks.ClusterDiscoveryStore{}
+	clusterMockStore.On("GetAll", mock.AnythingOfType("string"), mock.AnythingOfType("string")).Return([]*model.ClusterDiscovery{}, nil)
+	mockStore.On("ClusterDiscovery").Return(clusterMockStore)
+
 	return &mockStore
 }
