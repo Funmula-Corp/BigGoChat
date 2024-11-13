@@ -113,6 +113,14 @@ services:
     extends:
         file: build/docker-compose.common.yml
         service: promtail
+  rabbitmq:
+    container_name: mattermost-rabbitmq
+    restart: 'no'
+    ports:
+      - "5672:5672"
+    extends:
+        file: build/docker-compose.common.yml
+        service: rabbitmq
 
 networks:
   mm-test:
