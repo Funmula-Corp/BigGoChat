@@ -203,10 +203,6 @@ export default class TeamSidebar extends React.PureComponent<Props, State> {
 
     render() {
         const root: Element | null = document.querySelector('#root');
-        if (this.props.myTeams.length <= 1) {
-            root!.classList.remove('multi-teams');
-            return null;
-        }
         root!.classList.add('multi-teams');
 
         const plugins = [];
