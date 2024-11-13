@@ -6,6 +6,7 @@ import {FormattedMessage} from 'react-intl';
 
 import BrowserStore from 'stores/browser_store';
 
+import TransferPageHeadPNG from 'components/common/png_images_components/transfer_page_head_png';
 import FormattedMarkdownMessage from 'components/formatted_markdown_message';
 
 import desktopImg from 'images/deep-linking/deeplinking-desktop-img.png';
@@ -14,6 +15,9 @@ import MattermostLogoSvg from 'images/logo.svg';
 import {LandingPreferenceTypes} from 'utils/constants';
 import * as UserAgent from 'utils/user_agent';
 import * as Utils from 'utils/utils';
+
+import BigGoChatLogo from '../common/svg_images_components/biggo_chat_logo_svg';
+import AppleIconSvg from '../common/svg_images_components/icon_apple_svg';
 
 type Props = {
     defaultTheme: any;
@@ -142,10 +146,19 @@ export default class LinkingLandingPage extends PureComponent<Props, State> {
         const isMobile = UserAgent.isMobile();
 
         if (isMobile) {
+            if (this.state.redirectPage) {
+                return (
+                    <FormattedMessage
+                        id='get_app.systemDialogMessageMobile'
+                        defaultMessage='View in App'
+                    />
+                );
+            }
+
             return (
                 <FormattedMessage
-                    id='get_app.systemDialogMessageMobile'
-                    defaultMessage='View in App'
+                    id='get_app.ifNothingPromptsMobileLink'
+                    defaultMessage='Open BigGo Chat'
                 />
             );
         }
@@ -167,7 +180,7 @@ export default class LinkingLandingPage extends PureComponent<Props, State> {
                 }}
                 onClick={() => {
                     this.setPreference(LandingPreferenceTypes.MATTERMOSTAPP, true);
-                    this.setState({redirectPage: true, navigating: true});
+                    // this.setState({redirectPage: true, navigating: true});
                     if (UserAgent.isMobile()) {
                         if (UserAgent.isAndroidWeb()) {
                             const timeout = setTimeout(() => {
@@ -180,7 +193,7 @@ export default class LinkingLandingPage extends PureComponent<Props, State> {
                         window.location.replace(this.state.nativeLocation);
                     }
                 }}
-                className='btn btn-primary btn-lg get-app__download'
+                className={UserAgent.isMobile() ? 'get-app__download' : 'btn btn-primary btn-lg get-app__download'}
             >
                 {this.renderSystemDialogMessage()}
             </a>
@@ -206,7 +219,14 @@ export default class LinkingLandingPage extends PureComponent<Props, State> {
 
         if (isMobile) {
             return (
-                <img src={mobileImg}/>
+                <>
+                    <div className={`get-app__graphic ${isMobile ? 'mobile' : ''}`}>
+                        <TransferPageHeadPNG/>
+                    </div>
+                    <div className='get-app__graphic-logo'>
+                        <BigGoChatLogo fill='#3F4350'/>
+                    </div>
+                </>
             );
         }
 
@@ -273,6 +293,17 @@ export default class LinkingLandingPage extends PureComponent<Props, State> {
         const downloadLink = this.getDownloadLink();
         const isMobile = UserAgent.isMobile();
 
+        let title;
+        if (this.state.redirectPage || !isMobile) {
+            title = (
+                <FormattedMessage
+                    id='get_app.launching'
+                    tagName='h1'
+                    defaultMessage='Where would you like to view this?'
+                />
+            );
+        }
+
         let openingLink = (
             <FormattedMessage
                 id='get_app.openingLink'
@@ -316,36 +347,32 @@ export default class LinkingLandingPage extends PureComponent<Props, State> {
         }
 
         let viewApp = (
-            <FormattedMessage
-                id='get_app.ifNothingPrompts'
-                defaultMessage='You can view {siteName} in the desktop app or continue in your web browser.'
-                values={{
-                    siteName: this.props.enableCustomBrand ? '' : ' Mattermost',
-                }}
-            />
+            <div className='get-app__alternative'>
+                <FormattedMessage
+                    id='get_app.ifNothingPrompts'
+                    defaultMessage='You can view {siteName} in the desktop app or continue in your web browser.'
+                    values={{
+                        siteName: this.props.enableCustomBrand ? '' : ' BigGo Chat',
+                    }}
+                />
+            </div>
         );
         if (isMobile) {
             viewApp = (
-                <FormattedMessage
-                    id='get_app.ifNothingPromptsMobile'
-                    defaultMessage='You can view {siteName} in the mobile app or continue in your web browser.'
-                    values={{
-                        siteName: this.props.enableCustomBrand ? '' : ' Mattermost',
-                    }}
-                />
+                <div className='get-app__alternative_mobile'>
+                    <FormattedMessage
+                        id='get_app.ifNothingPromptsMobile'
+                        defaultMessage='Have the app already?'
+                    />
+                    {this.renderGoNativeAppMessage()}
+                </div>
             );
         }
 
         return (
             <div className='get-app__launching'>
-                <FormattedMessage
-                    id='get_app.launching'
-                    tagName='h1'
-                    defaultMessage='Where would you like to view this?'
-                />
-                <div className='get-app__alternative'>
-                    {viewApp}
-                </div>
+                {title}
+                {viewApp}
             </div>
         );
     };
@@ -360,46 +387,81 @@ export default class LinkingLandingPage extends PureComponent<Props, State> {
             );
         }
 
+        const isMobile = UserAgent.isMobile();
+
+        let renderBody;
+        if (isMobile) {
+            const downloadLink = this.getDownloadLink();
+            renderBody = (
+                <>
+                    {this.renderDialogHeader()}
+                    <div className='get-app__buttons mobile'>
+                        <a
+                            href={downloadLink}
+                            className='btn btn-primary btn-lg btn-hovered'
+                        >
+                            <AppleIconSvg/>
+                            <FormattedMessage
+                                id='get_app.clickToInstall'
+                                defaultMessage='Click to install BigGo Chat App'
+                            />
+                        </a>
+                    </div>
+                </>
+            );
+        } else {
+            renderBody = (
+                <>
+                    {this.renderDialogHeader()}
+                    <div className='get-app__buttons'>
+                        {this.renderGoNativeAppMessage()}
+                        <a
+                            href={this.state.location}
+                            onMouseDown={() => {
+                                this.setPreference(LandingPreferenceTypes.BROWSER, true);
+                            }}
+                            onClick={() => {
+                                this.setPreference(LandingPreferenceTypes.BROWSER, true);
+                                this.setState({navigating: true});
+                            }}
+                            className='btn btn-tertiary btn-lg'
+                        >
+                            <FormattedMessage
+                                id='get_app.continueToBrowser'
+                                defaultMessage='View in Browser'
+                            />
+                        </a>
+                    </div>
+                    <label className='get-app__preference'>
+                        <input
+                            type='checkbox'
+                            checked={this.state.rememberChecked}
+                            className='get-app__checkbox'
+                            onChange={this.handleChecked}
+                        />
+                        <FormattedMessage
+                            id='get_app.rememberMyPreference'
+                            defaultMessage='Remember my preference'
+                        />
+                    </label>
+                    {this.renderDownloadLinkSection()}
+                </>
+            );
+        }
+
         return (
             <div className='get-app__dialog-body'>
-                {this.renderDialogHeader()}
-                <div className='get-app__buttons'>
-                    {this.renderGoNativeAppMessage()}
-                    <a
-                        href={this.state.location}
-                        onMouseDown={() => {
-                            this.setPreference(LandingPreferenceTypes.BROWSER, true);
-                        }}
-                        onClick={() => {
-                            this.setPreference(LandingPreferenceTypes.BROWSER, true);
-                            this.setState({navigating: true});
-                        }}
-                        className='btn btn-tertiary btn-lg'
-                    >
-                        <FormattedMessage
-                            id='get_app.continueToBrowser'
-                            defaultMessage='View in Browser'
-                        />
-                    </a>
-                </div>
-                <label className='get-app__preference'>
-                    <input
-                        type='checkbox'
-                        checked={this.state.rememberChecked}
-                        className='get-app__checkbox'
-                        onChange={this.handleChecked}
-                    />
-                    <FormattedMessage
-                        id='get_app.rememberMyPreference'
-                        defaultMessage='Remember my preference'
-                    />
-                </label>
-                {this.renderDownloadLinkSection()}
+                {renderBody}
             </div>
         );
     };
 
     renderHeader = () => {
+        const isMobile = UserAgent.isMobile();
+        if (!this.state.redirectPage && isMobile) {
+            return null;
+        }
+
         let header = (
             <div className='get-app__header'>
                 <img
@@ -444,10 +506,8 @@ export default class LinkingLandingPage extends PureComponent<Props, State> {
         return (
             <div className='get-app'>
                 {this.renderHeader()}
-                <div className='get-app__dialog'>
-                    <div
-                        className={`get-app__graphic ${isMobile ? 'mobile' : ''}`}
-                    >
+                <div className={`get-app__dialog ${isMobile ? 'mobile' : ''}`}>
+                    <div>
                         {this.renderGraphic()}
                     </div>
                     {this.renderDialogBody()}

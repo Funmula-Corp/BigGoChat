@@ -311,6 +311,10 @@ button {
         }
     }
 
+    &.btn-hovered {
+        background-color: #1a51c8;
+    }
+
     &.btn-danger {
         background: var(--error-text);
         color: $white;
