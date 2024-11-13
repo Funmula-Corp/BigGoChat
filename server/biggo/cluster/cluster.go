@@ -80,7 +80,11 @@ func (p *BiggoCluster) StartInterNodeCommunication() {
 		if err := p.GossipServer.Start(uint16(p.ClusterDiscoveryService.GossipPort)); err == nil {
 			p.ClusterDiscoveryService.Start()
 			if p.KubeConfig, err = p.getKubeConfig(); err == nil {
-				go p.JoinVote(p.GetClusterId(), "biggochat-leader", "default")
+				namespace := os.Getenv("NAMESPACE")
+				if namespace == "" {
+					namespace = "default"
+				}
+				go p.JoinVote(p.GetClusterId(), "biggochat-leader", namespace)
 			} else {
 				p.Leader.Swap(true)
 			}
