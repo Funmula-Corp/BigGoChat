@@ -127,7 +127,7 @@ export class SelectTeamItem extends React.PureComponent<Props, State> {
                                 {this.props.intl.formatMessage({id: 'select_team.joined', defaultMessage: 'You are already a team member'})}
                             </span>
                         }
-                        {/* 邀請碼輸入欄位 -> 私人群組 && 非使用邀請碼搜尋 && 未加入 */}
+                        {/* invite code input -> private team && not use invite code search && not joined */}
                         {!team.allow_open_invite && !this.props.isInviteIdValid && !this.props.teamJoined && (
                             <div className={`signup-team-invite-code ${this.state.inviteIdError ? 'error' : ''}`}>
                                 <input
@@ -145,7 +145,7 @@ export class SelectTeamItem extends React.PureComponent<Props, State> {
                         }
                     </div>
                 </div>
-                {/* 加入or前往按鈕 -> 使用邀請碼搜尋(不需再輸入邀請碼可直接加入) || 未加入 || 已經加入(前往) */}
+                {/* join or go to button -> use invite code search (no need to re-enter invite code can join directly) || not joined || already joined (go to) */}
                 {(this.props.isInviteIdValid || canJoin) && (
                     <a
                         href='#'
