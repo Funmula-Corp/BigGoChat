@@ -56,30 +56,46 @@ describe('Header', () => {
     });
 
     it('verified user should be able to post after verified', () => {
-        cy.apiLogout();
-        cy.uiLogin(testUser).then(() => {
-            cy.visit(`/${testTeam.name}/channels/town-square`)
-                .get('.AdvancedTextEditor__verified-button').should('be.visible')
-                .visit(`/${testTeam.name}/channels/${dm.name}`)
-                .get('.AdvancedTextEditor__verified-button').should('be.visible')
-                .visit(`/${testTeam.name}/channels/${testChannel.name}`)
-                .get('.AdvancedTextEditor__verified-button').should('be.visible')
-                .externalPatchUserRoles(testUser.id, ['system_user', 'system_verified']);
-            // server sends a websocket event to the frontend to update the verified state
-            // it always failed when the user is in town-square channel
-            cy.get('.AdvancedTextEditor__verified-button').should('not.exist');
-            cy.postMessage('i can post now');
-        });
+        // ensure the user is logged out
+        cy.apiLogout()
+        // login the testuser
+        .uiLogin(testUser)
+        // check if the input field is blocked
+        .get('.AdvancedTextEditor__verified-button').should('be.visible')
+        // navigate to the public channel (USER HAS NO POST PERMISSION ON THIS CHANNEL)
+        .visit(`/${testTeam.name}/channels/${testChannel.name}`)
+        // check if the input field is blocked
+        .get('.AdvancedTextEditor__verified-button').should('be.visible')
+        // navigate to the direct channel (USER HAS POST PERMISSION ON THIS CHANNEL)
+        .visit(`/${testTeam.name}/channels/${dm.name}`)
+        // check if the input field is blocked
+        .get('.AdvancedTextEditor__verified-button').should('be.visible')
+        // update user permission from unverified to verified
+        .externalPatchUserRoles(testUser.id, ['system_user', 'system_verified'])
+        // check that the input field is no longer blocked
+        .get('.AdvancedTextEditor__verified-button').should('not.exist')
+        // post success message and celebrate
+        .postMessage('i can post now');
     });
 
     it('test user2 click the invite link after verified', () => {
-        cy.apiLogout();
-        cy.uiLogin(testUser2).visit(`/${testTeam.name}/channels/town-square`)
-            .get('#channelHeaderTitle').should('be.visible')
-        cy.get('.AdvancedTextEditor__verified-button').should('be.visible');
-        cy.externalPatchUserRoles(testUser2.id, ['system_user', 'system_verified'])
-        cy.visit(permalink2).get('#channelHeaderTitle').should('be.visible')
-            .get('.AdvancedTextEditor__verified-button').should('not.exist');
-        cy.goToDm(adminUser.username).postMessage('testuser2 can post to DMnow')
+        // ensure the user is logged out
+        cy.apiLogout()
+        // login the testuser
+        .uiLogin(testUser2)
+        // check if the input field is blocked
+        .get('.AdvancedTextEditor__verified-button').should('be.visible')
+        // "click" on the invite link
+        .visit(permalink2)
+        // check that the channel header is visible
+        .get('#channelHeaderTitle').should('be.visible')
+        // update user permission from unverified to verified
+        .externalPatchUserRoles(testUser2.id, ['system_user', 'system_verified'])
+        // search for the user to send direct message
+        .goToDm(adminUser.username)
+        // check that the input field is no longer blocked
+        .get('.AdvancedTextEditor__verified-button').should('not.exist')
+        // post success message and celebrate
+        .postMessage('testuser2 can post to DMnow')
     });
 });

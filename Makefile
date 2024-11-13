@@ -58,9 +58,15 @@ restart-client:
 run-docker:
 	docker run -it --rm -v ./server/config/config.json:/mattermost/config/config.json ${DOCKER_HOST}/${DOCKER_PROJECT}/${DOCKER_IMAGE}:${DOCKER_TAG}
 
-build-full: build-server build-package build-docker
+build-full: build-server build-package build-docker publish-docker
+
+publish-docker:
 	docker push ${DOCKER_HOST}/${DOCKER_PROJECT}/${DOCKER_IMAGE}:${DOCKER_TAG}
 
 build-drone-docker-image:
 	docker build --tag docker.cloud.biggo.com/droneio/mattermost-funmula-build:latest --file ./Dockerfile.drone .
 	docker push docker.cloud.biggo.com/droneio/mattermost-funmula-build:latest
+
+# https://git.biggo.com/Funmula/BigGoChat/wiki/Write-e2e-test-for-frontend-update
+run-cypress:
+	@cd ./e2e-tests/cypress && npx cypress open
