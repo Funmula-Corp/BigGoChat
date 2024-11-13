@@ -475,39 +475,14 @@ func createDirectChannel(c *Context, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if !allowed && !c.App.SessionHasPermissionTo(*c.AppContext.Session(), model.PermissionManageSystem) {
+		c.SetPermissionError(model.PermissionManageSystem)
+		return
+	}
+
 	otherUserId := userIds[0]
 	if c.AppContext.Session().UserId == otherUserId {
 		otherUserId = userIds[1]
-	}
-
-	user, uErr := c.App.GetUser(c.AppContext.Session().UserId)
-	if uErr != nil {
-		c.Err = uErr
-		return
-	}
-
-	// check other user is accepts unverififed user message
-	acceptsDM := false
-	if !user.IsBot && !user.IsVerified() && userIds[0] != userIds[1] {
-		pref, prefErr := c.App.GetPreferenceByCategoryAndNameForUser(c.AppContext, otherUserId, model.PreferenceCategoryPrivacySettings, model.PreferenceNameAllowUnverifiedMessage)
-		if prefErr == nil {
-			if parseErr := json.Unmarshal([]byte(pref.Value), &acceptsDM); parseErr != nil {
-				c.Err = model.NewAppError("createDirectChannel", "api.unmarshal_error", nil, "", http.StatusBadRequest).Wrap(parseErr)
-				return
-			}
-		}
-		allowed = acceptsDM
-	} else {
-		acceptsDM = true
-	}
-
-	if !allowed && !c.App.SessionHasPermissionTo(*c.AppContext.Session(), model.PermissionManageSystem) {
-		if !acceptsDM {
-			c.Err = model.NewAppError("createDirectChannel", "api.channel.create_channel.direct_channel.user_restricted_error", nil, "", http.StatusForbidden)
-			return
-		}
-		c.SetPermissionError(model.PermissionManageSystem)
-		return
 	}
 
 	audit.AddEventParameter(auditRec, "user_id", otherUserId)
