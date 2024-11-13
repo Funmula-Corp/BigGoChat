@@ -703,6 +703,17 @@ func TestCreateDirectChannel(t *testing.T) {
 	_, resp, err = client.CreateDirectChannel(context.Background(), model.NewId(), user2.Id)
 	require.Error(t, err)
 	CheckUnauthorizedStatus(t, resp)
+
+	_, _, err = client.Login(context.Background(), user4.Email, user4.Password)
+	require.NoError(t, err)
+	// unverified user can DM himself
+	_, resp, err = client.CreateDirectChannel(context.Background(), user4.Id, user4.Id)
+	require.NoError(t, err)
+	CheckCreatedStatus(t, resp)
+	// unverified User can create DM
+	_, resp, err = client.CreateDirectChannel(context.Background(), user4.Id, user1.Id)
+	require.NoError(t, err)
+	CheckCreatedStatus(t, resp)
 }
 
 func TestCreateDirectChannelAsGuest(t *testing.T) {
