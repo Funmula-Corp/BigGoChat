@@ -166,3 +166,8 @@ services:
     command: -config.file=/etc/promtail/docker-config.yaml
     networks:
       - mm-test
+  rabbitmq:
+    image: "rabbitmq:4.0.3"
+    restart: always
+    networks:
+      - mm-test
