@@ -16,7 +16,7 @@ import {getSortedListableTeams, getTeamMemberships} from 'mattermost-redux/selec
 import {getCurrentUser} from 'mattermost-redux/selectors/entities/users';
 import {isGuest} from 'mattermost-redux/utils/user_utils';
 
-import {addUserToTeam} from 'actions/team_actions';
+import {addUserToTeam, addUserToTeamFromInvite} from 'actions/team_actions';
 
 import withUseGetUsageDelta from 'components/common/hocs/cloud/with_use_get_usage_deltas';
 
@@ -40,6 +40,7 @@ function mapStateToProps(state: GlobalState) {
         currentUserId: currentUser.id,
         currentUserRoles: currentUser.roles || '',
         currentUserIsGuest: isGuest(currentUser.roles),
+        currentUserEmail: currentUser.email,
         customDescriptionText: config.CustomDescriptionText,
         isMemberOfTeam: myTeamMemberships && myTeamMemberships.length > 0,
         listableTeams: getSortedListableTeams(state, currentUser.locale),
@@ -61,6 +62,7 @@ function mapDispatchToProps(dispatch: Dispatch) {
             getTeams,
             loadRolesIfNeeded,
             addUserToTeam,
+            addUserToTeamFromInvite,
         }, dispatch),
     };
 }

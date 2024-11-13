@@ -1,18 +1,230 @@
+.row {
+    &.footer {
+        display: none;
+    }
+}
+
 .SelectTeam__sub-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-top: 10px;
-    margin-bottom: 24px;
 
     >h4 {
         margin: 0;
 
         span {
             display: inline-flex;
-            font-size: 20px;
-            font-weight: 600;
-            line-height: 28px;
+            font-size: 16px;
+            font-weight: 700;
+            line-height: 16px;
         }
+    }
+}
+
+.SelectTeam__search-input {
+    display: flex;
+    flex-direction: column;
+    margin-top: 6px;
+    gap: 6px;
+
+    > span {
+        font-size: 13px;
+        font-weight: 400;
+        line-height: 18px;
+        color: var(--sys-denim-center-channel-text-rgb);
+        opacity: 0.64;
+    }
+
+    input {
+        width: 100%;
+        padding: 5px 12px;
+        border-radius: 4px;
+        border: 1px solid var(--center-channel-color);
+    }
+
+    .search-form__container {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 6px;
+        background: none;
+
+        input {
+            color: #3F4350;
+            height: 46px;
+            padding: 5px 24px 5px 12px;
+            border: 1px solid #3F435029;
+
+            &:focus {
+                border: 2px solid #1C58D9
+            }
+        }
+
+        &.error input {
+            border: 1px solid #D24B4E
+        }
+
+        &:focus-within {
+            background: none;
+        }
+
+        .input-clear {
+            height: 46px;
+        }
+
+        .input-clear-x {
+            color: rgba(63, 67, 80, 0.56);
+        }
+
+        .search-form__error_text {
+            color: var(--error-color);
+        }
+    }
+}
+
+.signup-team-all{
+    margin: 12px 0 0;
+
+    .signup-team-dir {
+        display: flex;
+        padding: 5px 10px;
+        background-color: transparent;
+        padding: 16px;
+        height: fit-content;
+
+        .signup-team-dir__content {
+            display: flex;
+            align-items: flex-start;
+            height: 100%;
+            flex: 1;
+            gap: 12px;
+
+            .team-picture-section__team-icon {
+                color: #1f2228;
+                background-color: #ebecef;
+                width: 36px;
+                height: 36px;
+                border-radius: 36px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 14px;
+                font-weight: 600;
+            }
+
+            .signup-team-dir__info {
+                display: flex;
+                flex-direction: column;
+
+                .signup-team-dir__name {
+                    width: 100px;
+                    font-size: 15px;
+                    font-weight: 700;
+                    line-height: 22px;
+                }
+
+                .signup-team-desc {
+                    width: 150px;
+                    display: -webkit-box;
+                    -webkit-line-clamp: 1;
+                    -webkit-box-orient: vertical;
+                    overflow: hidden;
+                    margin-top: 4px;
+                }
+
+                .signup-team-text {
+                    margin-top: 8px;
+
+                    .icon {
+                        margin: 0 2px 0 0;
+                        opacity: 1;
+
+                        &::before {
+                            margin: 0;
+                        }
+                    }
+
+                    &.private {
+                        color: #CC8F00;
+
+                        .icon-lock-outline {
+                            color: #CC8F00;
+                        }
+                    }
+
+                    &.joined {
+                        .icon-check {
+                            color: #3DB887;
+                        }
+                    }
+                }
+            }
+        }
+
+        .signup-team-dir__link {
+            flex: unset;
+            font-size: unset;
+            height: 40px;
+            padding: 12px 20px 12px 20px;
+            border-radius: 4px;
+            background-color: rgba(28, 88, 217, 1);
+            font-size: 14px;
+            font-weight: 600;
+            line-height: 14px;
+            color: #FFFFFF;
+        }
+
+        .signup-team-invite-code {
+            display: flex;
+            gap: 6px;
+            flex-direction: column;
+
+            input {
+                width: 300px;
+                height: 40px;
+                margin-top: 12px;
+                padding: 10px 16px;
+                border-radius: 4px;
+                border: 1px solid rgba(63, 67, 80, 0.16);
+                color: #3F4350;
+            }
+
+            &.error {
+                color: #D24B4E;
+
+                input {
+                    border-color: #D24B4E;
+                    color: #D24B4E;
+                }
+            }
+        }
+    }
+
+        .signup-team-dir__content_private {
+            padding: 16px;
+            color: #3F4350;
+        }
+}
+
+.select-team__container {
+    padding: 80px 0 0;
+
+    .signup__content {
+        margin-top: 36px;
+    }
+
+    #site_name {
+        font-size: 40px;
+        font-weight: 700;
+        margin: 0;
+    }
+
+    #site_description {
+        font-size: 16px;
+        font-weight: 500;
+        line-height: 22px;
+        margin: 0;
+        margin-top: 16px;
     }
 }
