@@ -39,11 +39,11 @@ const OpenInvite = ({isGroupConstrained, allowOpenInvite, setAllowOpenInvite}: P
                 className='access-invite-domains-section'
                 title={formatMessage({
                     id: 'general_tab.openInviteText',
-                    defaultMessage: 'Users on this server',
+                    defaultMessage: 'Any user can join the team',
                 })}
                 description={formatMessage({
                     id: 'general_tab.openInviteDesc',
-                    defaultMessage: 'When enabled, a link to this team will be included on the landing page allowing anyone with an account to join this team. Changing this setting will create a new invitation link and invalidate the previous link.',
+                    defaultMessage: 'When checked, any user can join the team on their own. If unchecked, it will become a private team requiring an invitation code or invite link to join. Previous invitation codes and links will become invalid after the update and cannot be used.',
                 })}
                 descriptionAboveContent={true}
                 content={groupConstrainedContent}
@@ -57,7 +57,7 @@ const OpenInvite = ({isGroupConstrained, allowOpenInvite, setAllowOpenInvite}: P
             inputFieldTitle={
                 <FormattedMessage
                     id='general_tab.openInviteTitle'
-                    defaultMessage='Allow only users with a specific email domain to join this team'
+                    defaultMessage='Allow any user to join the team'
                 />
             }
             inputFieldData={{name: 'name'}}
@@ -65,11 +65,11 @@ const OpenInvite = ({isGroupConstrained, allowOpenInvite, setAllowOpenInvite}: P
             handleChange={setAllowOpenInvite}
             title={formatMessage({
                 id: 'general_tab.openInviteText',
-                defaultMessage: 'Users on this server',
+                defaultMessage: 'Any user can join the team',
             })}
             description={formatMessage({
                 id: 'general_tab.openInviteDesc',
-                defaultMessage: 'When enabled, a link to this team will be included on the landing page allowing anyone with an account to join this team. Changing this setting will create a new invitation link and invalidate the previous link.',
+                defaultMessage: 'When checked, any user can join the team on their own. If unchecked, it will become a private team requiring an invitation code or invite link to join. Previous invitation codes and links will become invalid after the update and cannot be used.',
             })}
             descriptionAboveContent={true}
         />
