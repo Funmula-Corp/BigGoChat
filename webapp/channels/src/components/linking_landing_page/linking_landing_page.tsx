@@ -180,6 +180,8 @@ export default class LinkingLandingPage extends PureComponent<Props, State> {
                 }}
                 onClick={() => {
                     this.setPreference(LandingPreferenceTypes.MATTERMOSTAPP, true);
+
+                    // this state will change the view to redirect page
                     // this.setState({redirectPage: true, navigating: true});
                     if (UserAgent.isMobile()) {
                         if (UserAgent.isAndroidWeb()) {
