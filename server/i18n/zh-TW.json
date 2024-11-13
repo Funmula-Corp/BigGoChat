@@ -7182,5 +7182,9 @@
     {
         "id": "api.templates.invite_body_footer.title",
         "translation": "什麼是 BigGo Chat ?"
+    },
+    {
+        "id": "api.templates.email_footer_v2",
+        "translation": "© 2024 BigGo Chat"
     }
 ]
