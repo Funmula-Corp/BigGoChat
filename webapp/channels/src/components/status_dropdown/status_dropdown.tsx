@@ -41,6 +41,7 @@ import type {ModalData} from 'types/actions';
 import type {Menu as MenuType} from 'types/store/plugins';
 
 import './status_dropdown.scss';
+import ProductMenuList from './product_menu_list';
 
 type Props = {
     intl: IntlShape;
@@ -677,6 +678,10 @@ export class StatusDropdown extends React.PureComponent<Props, State> {
                             )}
                         </Menu.ItemAction>
                     </Menu.Group>
+                    <ProductMenuList
+                        isMessaging={false}
+                        handleVisitConsoleClick={() => {}}
+                    />
                     <Menu.Group>
                         <span className={'logout__icon'}>
                             <Menu.ItemAction

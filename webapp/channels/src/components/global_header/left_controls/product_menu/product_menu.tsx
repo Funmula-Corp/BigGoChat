@@ -2,15 +2,13 @@
 // See LICENSE.txt for license information.
 
 import React, {useRef} from 'react';
-import {useIntl} from 'react-intl';
 import {useDispatch, useSelector} from 'react-redux';
 import styled from 'styled-components';
 
 import IconButton from '@mattermost/compass-components/components/icon-button'; // eslint-disable-line no-restricted-imports
+import glyphMap from '@mattermost/compass-icons/components';
 
-import {getConfig, getLicense} from 'mattermost-redux/selectors/entities/general';
 import {getInt} from 'mattermost-redux/selectors/entities/preferences';
-import {getCurrentUserId} from 'mattermost-redux/selectors/entities/users';
 
 import {setProductMenuSwitcherOpen} from 'actions/views/product_menu';
 import {isSwitcherOpen} from 'selectors/views/product_menu';
@@ -19,24 +17,10 @@ import {
     GenericTaskSteps,
     OnboardingTaskCategory,
     OnboardingTasksName,
-    TaskNameMapToSteps,
-    useHandleOnBoardingTaskData,
 } from 'components/onboarding_tasks';
-import {FINISHED, TutorialTourName} from 'components/tours';
-import {PlaybooksTourTip} from 'components/tours/onboarding_explore_tools_tour';
-import Menu from 'components/widgets/menu/menu';
-import MenuWrapper from 'components/widgets/menu/menu_wrapper';
-
-import {useGetPluginsActivationState} from 'plugins/useGetPluginsActivationState';
-import {ExploreOtherToolsTourSteps, suitePluginIds} from 'utils/constants';
-import {useCurrentProductId, useProducts, isChannels} from 'utils/products';
+import {FINISHED} from 'components/tours';
 
 import type {GlobalState} from 'types/store';
-
-import ProductBranding from './product_branding';
-import ProductBrandingTeamEdition from './product_branding_team_edition';
-import ProductMenuItem from './product_menu_item';
-import ProductMenuList from './product_menu_list';
 
 import {useClickOutsideRef} from '../../hooks';
 
@@ -69,34 +53,12 @@ export const ProductMenuButton = styled(IconButton).attrs(() => ({
 `;
 
 const ProductMenu = (): JSX.Element => {
-    const {formatMessage} = useIntl();
-    const products = useProducts();
     const dispatch = useDispatch();
     const switcherOpen = useSelector(isSwitcherOpen);
     const menuRef = useRef<HTMLDivElement>(null);
-    const currentProductID = useCurrentProductId();
-    const license = useSelector(getLicense);
 
-    const enableTutorial = useSelector(getConfig).EnableTutorial === 'true';
-    const currentUserId = useSelector(getCurrentUserId);
-    const tutorialStep = useSelector((state: GlobalState) => getInt(state, TutorialTourName.EXPLORE_OTHER_TOOLS, currentUserId, 0));
     const triggerStep = useSelector((state: GlobalState) => getInt(state, OnboardingTaskCategory, OnboardingTasksName.EXPLORE_OTHER_TOOLS, FINISHED));
     const exploreToolsTourTriggered = triggerStep === GenericTaskSteps.STARTED;
-
-    const {playbooksPlugin} = useGetPluginsActivationState();
-
-    const showPlaybooksTour = enableTutorial && tutorialStep === ExploreOtherToolsTourSteps.PLAYBOOKS_TOUR && exploreToolsTourTriggered && playbooksPlugin;
-
-    const handleClick = () => dispatch(setProductMenuSwitcherOpen(!switcherOpen));
-
-    const handleOnBoardingTaskData = useHandleOnBoardingTaskData();
-
-    const visitSystemConsoleTaskName = OnboardingTasksName.VISIT_SYSTEM_CONSOLE;
-    const handleVisitConsoleClick = () => {
-        const steps = TaskNameMapToSteps[visitSystemConsoleTaskName];
-        handleOnBoardingTaskData(visitSystemConsoleTaskName, steps.FINISHED, true, 'finish');
-        localStorage.setItem(OnboardingTaskCategory, 'true');
-    };
 
     useClickOutsideRef(menuRef, () => {
         if (exploreToolsTourTriggered || !switcherOpen) {
@@ -105,70 +67,42 @@ const ProductMenu = (): JSX.Element => {
         dispatch(setProductMenuSwitcherOpen(false));
     });
 
-    const productItems = products?.map((product) => {
-        let tourTip;
-
-        // playbooks
-        if (product.pluginId === suitePluginIds.playbooks && showPlaybooksTour) {
-            tourTip = (<PlaybooksTourTip singleTip={true}/>);
+    const MenuItem = styled.div`
+        && {
+            text-decoration: none;
+            color: inherit;
         }
 
-        return (
-            <ProductMenuItem
-                key={product.id}
-                destination={product.switcherLinkURL}
-                icon={product.switcherIcon}
-                text={product.switcherText}
-                active={product.id === currentProductID}
-                onClick={handleClick}
-                tourTip={tourTip}
-                id={`product-menu-item-${product.pluginId || product.id}`}
-            />
-        );
-    });
+        height: 40px;
+        width: 270px;
+        padding-left: 16px;
+        padding-right: 20px;
+        display: flex;
+        align-items: center;
+        position: relative;
+
+        button {
+            padding: 0 6px;
+        }
+    `;
+    const ProductIcon = glyphMap['product-channels'];
+    const MenuItemTextContainer = styled.div`
+        margin-left: 8px;
+        flex-grow: 1;
+        font-weight: 600;
+        font-size: 14px;
+        line-height: 20px;
+    `;
 
     return (
-        <div ref={menuRef}>
-            <MenuWrapper
-                open={switcherOpen}
-            >
-                <ProductMenuContainer onClick={handleClick}>
-                    <ProductMenuButton
-                        active={switcherOpen}
-                        aria-expanded={switcherOpen}
-                        aria-label={formatMessage({id: 'global_header.productSwitchMenu', defaultMessage: 'Product switch menu'})}
-                        aria-controls='product-switcher-menu'
-                    />
-                    {license.IsLicensed === 'false' && <ProductBrandingTeamEdition/>}
-                    {license.IsLicensed === 'true' && <ProductBranding/>}
-                </ProductMenuContainer>
-                <Menu
-                    listId={'product-switcher-menu-dropdown'}
-                    className={'product-switcher-menu'}
-                    id={'product-switcher-menu'}
-                    ariaLabel={'switcherOpen'}
-                >
-                    <ProductMenuItem
-                        destination={'/'}
-                        icon={'product-channels'}
-                        text={'Channels'}
-                        active={isChannels(currentProductID)}
-                        onClick={handleClick}
-                    />
-                    {productItems}
-                    <ProductMenuList
-                        isMessaging={isChannels(currentProductID)}
-                        onClick={handleClick}
-                        handleVisitConsoleClick={handleVisitConsoleClick}
-                    />
-                    <Menu.Group>
-                        <Menu.StartTrial
-                            id='startTrial'
-                        />
-                    </Menu.Group>
-                </Menu>
-            </MenuWrapper>
-        </div>
+        <MenuItem>
+            <ProductIcon
+                size={24}
+            />
+            <MenuItemTextContainer>
+                {'Channels'}
+            </MenuItemTextContainer>
+        </MenuItem>
     );
 };
 
