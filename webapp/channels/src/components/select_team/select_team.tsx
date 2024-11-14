@@ -2,13 +2,14 @@
 // See LICENSE.txt for license information.
 
 import React from 'react';
-import type {ReactNode, MouseEvent} from 'react';
-import {FormattedMessage} from 'react-intl';
+import type {ReactNode, MouseEvent, ChangeEvent} from 'react';
+import {FormattedMessage, injectIntl, IntlShape} from 'react-intl';
 import {Link} from 'react-router-dom';
 
 import type {CloudUsage} from '@mattermost/types/cloud';
 import type {Team} from '@mattermost/types/teams';
 
+import {Client4} from 'mattermost-redux/client';
 import {Permissions} from 'mattermost-redux/constants';
 
 import {emitUserLoggedOutEvent} from 'actions/global_actions';
@@ -20,14 +21,15 @@ import InfiniteScroll from 'components/common/infinite_scroll';
 import SiteNameAndDescription from 'components/common/site_name_and_description';
 import FormattedMarkdownMessage from 'components/formatted_markdown_message';
 import LoadingScreen from 'components/loading_screen';
-import LearnAboutTeamsLink from 'components/main_menu/learn_about_teams_link';
 import SystemPermissionGate from 'components/permissions_gates/system_permission_gate';
 import LogoutIcon from 'components/widgets/icons/fa_logout_icon';
 
 import logoImage from 'images/logo.png';
 import Constants from 'utils/constants';
 import * as UserAgent from 'utils/user_agent';
+import {imageURLForTeam} from 'utils/utils';
 
+import SearchBar from './components/search_bar';
 import SelectTeamItem from './components/select_team_item';
 import './select_team.scss';
 
@@ -38,12 +40,14 @@ type Actions = {
     getTeams: (page?: number, perPage?: number, includeTotalCount?: boolean) => any;
     loadRolesIfNeeded: (roles: Iterable<string>) => any;
     addUserToTeam: (teamId: string, userId?: string) => any;
+    addUserToTeamFromInvite: (token: string, inviteId: string) => any;
 }
 
 type Props = {
     currentUserId: string;
     currentUserRoles: string;
     currentUserIsGuest?: boolean;
+    currentUserEmail: string;
     customDescriptionText?: string;
     isMemberOfTeam: boolean;
     listableTeams: Team[];
@@ -59,6 +63,7 @@ type Props = {
     isCloud: boolean;
     isFreeTrial: boolean;
     usageDeltas: CloudUsage;
+    intl: IntlShape;
 };
 
 type State = {
@@ -66,10 +71,13 @@ type State = {
     error: any;
     endofTeamsData: boolean;
     currentPage: number;
-    currentListableTeams: Team[];
+    currentListableTeams: Team | undefined;
+    teamJoined: boolean;
+    inviteId: string;
+    isInviteIdValid: boolean;
 }
 
-export default class SelectTeam extends React.PureComponent<Props, State> {
+export class SelectTeam extends React.PureComponent<Props, State> {
     constructor(props: Props) {
         super(props);
 
@@ -78,16 +86,14 @@ export default class SelectTeam extends React.PureComponent<Props, State> {
             error: null,
             endofTeamsData: false,
             currentPage: 0,
-            currentListableTeams: [],
+            currentListableTeams: undefined,
+            teamJoined: false,
+            inviteId: '',
+            isInviteIdValid: false,
         };
     }
 
     static getDerivedStateFromProps(props: Props, state: State) {
-        if (props.listableTeams.length !== state.currentListableTeams.length) {
-            return {
-                currentListableTeams: props.listableTeams.slice(0, TEAMS_PER_PAGE * state.currentPage),
-            };
-        }
         return null;
     }
 
@@ -116,11 +122,20 @@ export default class SelectTeam extends React.PureComponent<Props, State> {
         }
     };
 
-    handleTeamClick = async (team: Team) => {
+    handleTeamClick = async (team: Team, inviteId: string) => {
         const {siteURL, currentUserRoles} = this.props;
         this.setState({loadingTeamId: team.id});
+        let data;
+        let error;
 
-        const {data, error} = await this.props.actions.addUserToTeam(team.id, this.props.currentUserId);
+        if (this.state.teamJoined) {
+            this.props.history.push(`/${team.name}/channels/${Constants.DEFAULT_CHANNEL}`);
+            return;
+        } else if (inviteId.length > 0) {
+            ({data, error} = await this.props.actions.addUserToTeamFromInvite('', inviteId));
+        } else {
+            ({data, error} = await this.props.actions.addUserToTeam(team.id, this.props.currentUserId));
+        }
         if (data && this.props.history !== undefined) {
             this.props.history.push(`/${team.name}/channels/${Constants.DEFAULT_CHANNEL}`);
         } else if (error) {
@@ -166,8 +181,82 @@ export default class SelectTeam extends React.PureComponent<Props, State> {
         });
     };
 
+    handleClear = () => {
+        this.setState({
+            currentListableTeams: undefined,
+            teamJoined: false,
+            inviteId: '',
+            isInviteIdValid: false,
+        });
+    };
+
+    handleSearchInputChange = async (event: ChangeEvent<HTMLInputElement>) => {
+        const inputValue = event.target.value;
+        if (inputValue === '') {
+            return;
+        }
+
+        let inviteId = '';
+        try {
+            const url = new URL(inputValue);
+            inviteId = url.searchParams.get('id') || '';
+        } catch {
+            inviteId = inputValue;
+        }
+
+        if (inviteId) {
+            const myTeams = await Client4.getMyTeams();
+            this.setState({
+                currentListableTeams: undefined,
+                teamJoined: false,
+                inviteId: '',
+                isInviteIdValid: false,
+            });
+            try {
+                // 用inviteId找
+                const data = await Client4.getTeamInviteInfo(inviteId);
+                if (data) {
+                    const team = await Client4.getTeamByName(data.name);
+                    if (team) {
+                        this.setState({
+                            currentListableTeams: team,
+                            teamJoined: myTeams.some((t) => t.id === team.id),
+                            inviteId,
+                            isInviteIdValid: true,
+                        });
+                    }
+                } else {
+                    // inviteId找不到 改用 name
+                    const team = await Client4.getTeamByName(inviteId);
+                    if (team) {
+                        this.setState({
+                            currentListableTeams: team,
+                            teamJoined: myTeams.some((t) => t.id === team.id),
+                            inviteId: '',
+                            isInviteIdValid: false,
+                        });
+                    }
+                }
+            } catch (error) {
+                try {
+                    // inviteId找不到 改用 name
+                    const team = await Client4.getTeamByName(inviteId);
+                    if (team) {
+                        this.setState({
+                            currentListableTeams: team,
+                            teamJoined: myTeams.some((t) => t.id === team.id),
+                            inviteId: '',
+                            isInviteIdValid: false,
+                        });
+                    }
+                } catch (error) {}
+            }
+        }
+    };
+
     render(): ReactNode {
-        const {currentPage, currentListableTeams} = this.state;
+        const {currentPage, currentListableTeams, teamJoined, isInviteIdValid} = this.state;
+        const {formatMessage} = this.props.intl;
         const {
             currentUserIsGuest,
             canManageSystem,
@@ -215,62 +304,40 @@ export default class SelectTeam extends React.PureComponent<Props, State> {
                 </div>
             );
         } else {
-            let joinableTeamContents: any = [];
-            currentListableTeams.forEach((listableTeam) => {
-                if ((listableTeam.allow_open_invite && canJoinPublicTeams) || (!listableTeam.allow_open_invite && canJoinPrivateTeams)) {
-                    joinableTeamContents.push(
+            let joinableTeamContents;
+            if (currentListableTeams) {
+                if (currentListableTeams.allowed_domains !== '' && !currentListableTeams.allowed_domains.includes(this.props.currentUserEmail)) {
+                    joinableTeamContents = (
+                        <div className='signup-team-dir__content_private'>
+                            <FormattedMessage
+                                id='signup_team.join_search_private_team'
+                                defaultMessage={'This is a <a></a>Private Team, and you do not meet the criteria to join!'}
+                                values={{
+                                    a: (msg: React.ReactNode) => (
+                                        <i className='icon icon-lock-outline'>{msg}</i>
+                                    ),
+                                }}
+                            />
+                        </div>
+                    );
+                } else {
+                    joinableTeamContents = (
                         <SelectTeamItem
-                            key={'team_' + listableTeam.name}
-                            team={listableTeam}
+                            teamIcon={imageURLForTeam(currentListableTeams)}
+                            key={'team_' + currentListableTeams.name}
+                            team={currentListableTeams}
                             onTeamClick={this.handleTeamClick}
-                            loading={this.state.loadingTeamId === listableTeam.id}
+                            loading={this.state.loadingTeamId === currentListableTeams.id}
                             canJoinPublicTeams={canJoinPublicTeams}
                             canJoinPrivateTeams={canJoinPrivateTeams}
-                        />,
+                            teamJoined={teamJoined}
+                            inviteId={this.state.inviteId}
+                            isInviteIdValid={isInviteIdValid}
+                        />
                     );
                 }
-            });
-
-            if (joinableTeamContents.length === 0 && (canCreateTeams || canManageSystem)) {
-                joinableTeamContents = (
-                    <div className='signup-team-dir-err'>
-                        <div>
-                            {createTeamRestricted ? (
-                                <FormattedMessage
-                                    id='signup_team.no_open_teams'
-                                    defaultMessage='No teams are available to join. Please ask your administrator for an invite.'
-                                />
-                            ) : (
-                                <FormattedMessage
-                                    id='signup_team.no_open_teams_canCreate'
-                                    defaultMessage='No teams are available to join. Please create a new team or ask your administrator for an invite.'
-                                />
-                            )}
-                        </div>
-                    </div>
-                );
-            } else if (joinableTeamContents.length === 0) {
-                joinableTeamContents = (
-                    <div className='signup-team-dir-err'>
-                        <div>
-                            <SystemPermissionGate permissions={[Permissions.CREATE_TEAM]}>
-                                <FormattedMessage
-                                    id='signup_team.no_open_teams_canCreate'
-                                    defaultMessage='No teams are available to join. Please create a new team or ask your administrator for an invite.'
-                                />
-                            </SystemPermissionGate>
-                            <SystemPermissionGate
-                                permissions={[Permissions.CREATE_TEAM]}
-                                invert={true}
-                            >
-                                <FormattedMessage
-                                    id='signup_team.no_open_teams'
-                                    defaultMessage='No teams are available to join. Please ask your administrator for an invite.'
-                                />
-                            </SystemPermissionGate>
-                        </div>
-                    </div>
-                );
+            } else {
+                joinableTeamContents = '';
             }
 
             openContent = (
@@ -281,23 +348,31 @@ export default class SelectTeam extends React.PureComponent<Props, State> {
                     <div className='SelectTeam__sub-header'>
                         <h4>
                             <FormattedMessage
-                                id='signup_team.join_open'
-                                defaultMessage='Teams you can join: '
+                                id='signup_team.join_search'
+                                defaultMessage={'Search Team'}
                             />
                         </h4>
-                        <LearnAboutTeamsLink/>
                     </div>
-                    <InfiniteScroll
-                        callBack={this.fetchMoreTeams}
-                        styleClass='signup-team-all'
-                        totalItems={totalTeamsCount}
-                        itemsPerPage={TEAMS_PER_PAGE}
-                        bufferValue={280}
-                        pageNumber={currentPage}
-                        loaderStyle={{padding: '0px', height: '40px'}}
-                    >
-                        {joinableTeamContents}
-                    </InfiniteScroll>
+                    <div className='SelectTeam__search-input'>
+                        <SearchBar
+                            handleChange={this.handleSearchInputChange}
+                            handleClear={this.handleClear}
+                            isError={!this.state.currentListableTeams}
+                        />
+                    </div>
+                    {joinableTeamContents &&
+                        <InfiniteScroll
+                            callBack={this.fetchMoreTeams}
+                            styleClass='signup-team-all'
+                            totalItems={totalTeamsCount}
+                            itemsPerPage={TEAMS_PER_PAGE}
+                            bufferValue={280}
+                            pageNumber={currentPage}
+                            loaderStyle={{padding: '0px', height: '40px'}}
+                        >
+                            {joinableTeamContents}
+                        </InfiniteScroll>
+                    }
                 </div>
             );
         }
@@ -306,7 +381,7 @@ export default class SelectTeam extends React.PureComponent<Props, State> {
             <SystemPermissionGate permissions={[Permissions.CREATE_TEAM]}>
                 <div
                     className='margin--extra'
-                    style={{marginTop: '0.5em'}}
+                    style={{marginTop: '115px'}}
                 >
                     <Link
                         id='createNewTeamLink'
@@ -318,6 +393,7 @@ export default class SelectTeam extends React.PureComponent<Props, State> {
                             id='login.createTeam'
                             defaultMessage='Create a team'
                         />
+                        <i className='icon icon-chevron-right'/>
                     </Link>
                 </div>
             </SystemPermissionGate>
@@ -379,8 +455,8 @@ export default class SelectTeam extends React.PureComponent<Props, State> {
                             src={logoImage}
                         />
                         <SiteNameAndDescription
-                            customDescriptionText={customDescriptionText}
-                            siteName={siteName}
+                            customDescriptionText={formatMessage({id: 'signup_team.join_search-input-description', defaultMessage: 'Team members can communicate and collaborate in real-time anytime, anywhere, making it easy to accomplish both big and small tasks.'})}
+                            siteName={formatMessage({id: 'signup_team.join_search-input-title', defaultMessage: 'Join Team'})}
                         />
                         {openContent}
                         {teamSignUp}
@@ -391,3 +467,5 @@ export default class SelectTeam extends React.PureComponent<Props, State> {
         );
     }
 }
+
+export default injectIntl(SelectTeam);

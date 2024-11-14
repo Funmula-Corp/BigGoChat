@@ -43,6 +43,7 @@ func main() {
 		"loki":               3100,
 		"promtail":           3180,
 		"mysql-read-replica": 3306, // FIXME: not recognizing the successfully running service on port 3307.
+		"rabbitmq":           5672,
 	}
 	command := []string{}
 	for _, arg := range os.Args[1:] {

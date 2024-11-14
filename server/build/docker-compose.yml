@@ -68,6 +68,10 @@ services:
     extends:
         file: docker-compose.common.yml
         service: promtail
+  rabbitmq:
+    extends:
+        file: docker-compose.common.yml
+        service: rabbitmq
 
   start_dependencies:
     image: mattermost/mattermost-wait-for-dep:latest
@@ -84,7 +88,8 @@ services:
       - elasticsearch8
       - searchengine
       - searchindexer
-    command: postgres:5432 mysql:3306 minio:9000 inbucket:9001 openldap:389 elasticsearch:9200 neo4j:7474 elasticsearch8:9201 searchindexer:2112 searchengine:2112
+      - rabbitmq
+    command: postgres:5432 mysql:3306 minio:9000 inbucket:9001 openldap:389 elasticsearch:9200 neo4j:7474 elasticsearch8:9201 searchindexer:2112 searchengine:2112 rabbitmq:5672
 
 networks:
   mm-test:

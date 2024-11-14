@@ -25,7 +25,7 @@ export default defineConfig({
         dbClient: 'postgres',
         dbConnection: 'postgres://mmuser:mostest@localhost/mattermost_test?sslmode=disable&connect_timeout=10',
         elasticsearchConnectionURL: 'http://localhost:9200',
-        firstTest: false,
+        firstTest: true,
         keycloakAppName: 'mattermost',
         keycloakBaseUrl: 'http://localhost:8484',
         keycloakUsername: 'mmuser',

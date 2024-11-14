@@ -46,6 +46,11 @@
     width: 1280px;
     justify-content: center;
     margin: 80px auto;
+
+    &.mobile {
+        margin: auto;
+        height: 100%;
+    }
 }
 
 .get-app__graphic {
@@ -54,11 +59,18 @@
 
     &.mobile {
         flex: 0 1 300px;
+        background-color: transparent;
     }
 
     > img {
         max-width: 100%;
     }
+}
+
+.get-app__graphic-logo {
+    display: flex;
+    justify-content: center;
+    margin-top: 28px;
 }
 
 .get-app__dialog-body {
@@ -76,7 +88,8 @@
     opacity: 0.8;
 }
 
-.get-app__alternative {
+.get-app__alternative,
+.get-app__alternative_mobile {
     margin-top: 8px;
 
     span {
@@ -102,6 +115,19 @@
         > br.mobile-only {
             display: none;
         }
+    }
+}
+
+.get-app__alternative_mobile {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 120px;
+
+    span, a {
+        opacity: 1;
+        font-size: 15px;
+        line-height: 22px;
     }
 }
 
@@ -184,7 +210,7 @@
 
 @media only screen and (max-width: 1082px) {
     .get-app__dialog {
-        flex-direction: column-reverse;
+        flex-direction: column;
         padding: 0;
         margin: 40px 0 0 0;
         text-align: center;
@@ -251,7 +277,7 @@
 
     .get-app__dialog {
         height: auto;
-        flex-direction: column-reverse;
+        flex-direction: column;
         margin: 32px auto;
     }
 
@@ -290,6 +316,14 @@
     .get-app__buttons {
         margin-top: 25px;
         margin-bottom: 25px;
+
+        &.mobile {
+            margin-top: 101px;
+
+            .btn {
+                gap: 8px;
+            }
+        }
     }
 
     .get-app__preference {

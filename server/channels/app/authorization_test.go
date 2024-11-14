@@ -164,6 +164,11 @@ func TestSessionHasPermissionToChannel(t *testing.T) {
 		mockStore.On("User").Return(th.App.Srv().Store().User())
 		mockStore.On("Webhook").Return(th.App.Srv().Store().Webhook())
 		mockStore.On("Close").Return(nil)
+
+		clusterMockStore := &mocks.ClusterDiscoveryStore{}
+		clusterMockStore.On("GetAll", mock.AnythingOfType("string"), mock.AnythingOfType("string")).Return([]*model.ClusterDiscovery{}, nil)
+		mockStore.On("ClusterDiscovery").Return(clusterMockStore)
+
 		th.App.Srv().SetStore(&mockStore)
 
 		// If there's an error returned from the GetChannel call the code should continue to cascade and since there
@@ -226,6 +231,11 @@ func TestSessionHasPermissionToChannels(t *testing.T) {
 		mockStore.On("User").Return(th.App.Srv().Store().User())
 		mockStore.On("Webhook").Return(th.App.Srv().Store().Webhook())
 		mockStore.On("Close").Return(nil)
+
+		clusterMockStore := &mocks.ClusterDiscoveryStore{}
+		clusterMockStore.On("GetAll", mock.AnythingOfType("string"), mock.AnythingOfType("string")).Return([]*model.ClusterDiscovery{}, nil)
+		mockStore.On("ClusterDiscovery").Return(clusterMockStore)
+
 		th.App.Srv().SetStore(&mockStore)
 
 		// If there's an error returned from the GetChannel call the code should continue to cascade and since there

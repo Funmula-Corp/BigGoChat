@@ -211,3 +211,8 @@ services:
       xpack.security.enabled: "false"
       discovery.type: "single-node"
       ELASTIC_PASSWORD: "elasticsearch"
+  rabbitmq:
+    image: "rabbitmq:4.0.3"
+    restart: always
+    networks:
+      - mm-test

@@ -2153,6 +2153,10 @@ func TestGetFlaggedPostsForUser(t *testing.T) {
 	pluginStore.On("List", mock.Anything, mock.Anything, mock.Anything).Return([]string{}, nil)
 	mockStore.On("Plugin").Return(&pluginStore)
 
+	clusterMockStore := &mocks.ClusterDiscoveryStore{}
+	clusterMockStore.On("GetAll", mock.AnythingOfType("string"), mock.AnythingOfType("string")).Return([]*model.ClusterDiscovery{}, nil)
+	mockStore.On("ClusterDiscovery").Return(clusterMockStore)
+
 	th.App.Srv().SetStore(&mockStore)
 
 	_, resp, err = th.SystemAdminClient.GetFlaggedPostsForUser(context.Background(), user.Id, 0, 10)
@@ -2860,7 +2864,7 @@ func TestDeletePost(t *testing.T) {
 	client.Logout(context.Background())
 	th.LoginBasic2()
 	post2 := th.CreatePost()
-	
+
 	client.Logout(context.Background())
 	th.LoginBasic()
 
@@ -4448,7 +4452,7 @@ func TestDirectChannelDeletePost(t *testing.T) {
 	th := Setup(t).InitBasic()
 	defer th.TearDown()
 	client := th.Client
-	
+
 	channel, _, err := client.CreateDirectChannel(context.Background(), th.BasicUser.Id, th.BasicUser2.Id)
 	require.NoError(t, err)
 
@@ -4472,7 +4476,7 @@ func TestDirectChannelDeletePost(t *testing.T) {
 	_, appErr := th.App.UpdateUserRoles(th.Context, th.BasicUser2.Id, model.SystemAdminRoleId, false)
 	require.Nil(t, appErr)
 
-	// system_admin 
+	// system_admin
 	resp, err = client.DeletePost(context.Background(), rpost.Id)
 	require.Error(t, err)
 	CheckForbiddenStatus(t, resp)

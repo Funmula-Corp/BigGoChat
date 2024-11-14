@@ -52,6 +52,7 @@ func (p *BiggoCluster) JoinVote(id, lockName, lockNamespace string) (err error) 
 		RetryPeriod:     5 * time.Second,
 		Callbacks: leaderelection.LeaderCallbacks{
 			OnStartedLeading: func(ctx context.Context) {
+				mlog.Info("I am the leader")
 				p.Leader.Swap(true)
 				p.UpdateService()
 			},
@@ -59,6 +60,7 @@ func (p *BiggoCluster) JoinVote(id, lockName, lockNamespace string) (err error) 
 				p.Leader.Swap(false)
 			},
 			OnNewLeader: func(identity string) {
+				mlog.Info("cluster.leader.new", mlog.String("identity", identity))
 			},
 		},
 	})
@@ -71,6 +73,7 @@ func (p *BiggoCluster) UpdateService() {
 	hostname, _ := os.Hostname()
 	namespace := os.Getenv("NAMESPACE")
 	serviceLabel := os.Getenv("LEADER_SERVICE_LABEL")
+	mlog.Info("cluster.leader.service.update", mlog.String("namespace", namespace), mlog.String("serviceLabel", serviceLabel))
 	if namespace == "" || serviceLabel == "" {
 		return
 	}
@@ -83,9 +86,12 @@ func (p *BiggoCluster) UpdateService() {
 		return
 	}
 
+	serviceNames := []string{}
+
 	for idx := range services.Items {
 		for key := range services.Items[idx].Spec.Selector {
 			if strings.Contains(key, "pod-name") {
+				serviceNames = append(serviceNames, services.Items[idx].ObjectMeta.Name)
 				services.Items[idx].Spec.Selector[key] = hostname
 				if _, err = p.KubeClient.CoreV1().Services(namespace).Update(ctx, &services.Items[idx], metav1.UpdateOptions{}); err != nil {
 					mlog.Error("cluster.leader.service.update", mlog.Err(err))
@@ -93,4 +99,5 @@ func (p *BiggoCluster) UpdateService() {
 			}
 		}
 	}
+	mlog.Info("cluster.leader.service.update.done", mlog.String("selector", serviceLabel), mlog.String("services", strings.Join(serviceNames, ",")))
 }
