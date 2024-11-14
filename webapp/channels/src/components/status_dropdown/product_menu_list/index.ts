@@ -39,7 +39,7 @@ function mapStateToProps(state: GlobalState) {
     const currentTeam = getCurrentTeam(state);
     const currentUser = getCurrentUser(state);
 
-    const appDownloadLink = config.AppDownloadLink || '';
+    const appDownloadLink = '/download';
     const enableCommands = config.EnableCommands === 'true';
     const siteName = config.SiteName || 'Mattermost';
     const enableIncomingWebhooks = config.EnableIncomingWebhooks === 'true';
