@@ -30,18 +30,12 @@
         align-items: center;
         justify-content: center;
 
-        .login-body-message-subtitle {
-            color: rgba(var(--center-channel-color-rgb), 0.75);
-            font-size: 18px;
-            font-weight: 400;
-            line-height: 28px;
-        }
-
         .login-body-message {
             display: flex;
-            width: 540px;
             flex-flow: column;
             align-self: flex-start;
+            justify-content: space-between;
+            min-height: 467px;
 
             .login-body-message-title {
                 padding-right: 24px;
@@ -51,19 +45,6 @@
                 font-weight: 600;
                 letter-spacing: -0.01em;
                 line-height: 88px;
-            }
-
-            .login-body-message-svg {
-                position: relative;
-                align-self: flex-end;
-
-                svg {
-                    position: absolute;
-                    z-index: 2;
-                    bottom: -210px;
-                    left: -178px;
-                    display: block;
-                }
             }
 
             &.custom-branding {
@@ -89,16 +70,118 @@
             &.with-alternate-link {
                 margin-top: 40px;
             }
+
+            .login-body-message-top {
+                display: flex;
+                height: 414px;
+                gap: 40px;
+
+                .login-body-message-left {
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: center;
+                    width: 482px;
+
+                    .login-body-message-subtitle {
+                        color: rgba(var(--center-channel-color-rgb), 0.75);
+                        font-size: 18px;
+                        font-weight: 400;
+                        line-height: 28px;
+                        margin: 12px 0 0 0;
+                    }
+
+                    .login-body-message-desltop-link-wrap {
+                        display: flex;
+                        margin-top: 52px;
+                        width: fit-content;
+                        gap: 16px;
+                    }
+                }
+
+                .login-body-message-svg {
+                    display: flex;
+                    align-items: center;
+                    gap: 16px;
+
+                    div {
+                        display: flex;
+                        flex-direction: column;
+                        align-items: center;
+                        padding: 14.5px 17.5px;
+                        gap: 12px;
+                        width: 150px;
+                        height: 176px;
+                        background-color: #FFFFFF;
+                        border-radius: 8px;
+                        font-weight: 600;
+                    }
+                }
+            }
+
+            .login-body-message-bottom {
+                display: flex;
+                gap: 24px;
+                flex-direction: column;
+                align-items: center;
+
+                .login-body-message-link-wrap {
+                    display: flex;
+                    gap: 12px;
+                    align-items: center;
+                    font-size: 13px;
+
+                    .link-wrap{
+                        display: flex;
+                        gap: 16.5px;
+
+                        .login-body-download-link {
+                            display: flex;
+                            gap: 8px;
+                            color: rgba(63, 67, 80, 0.72);
+
+                            .login-body-download-main {
+                                display: flex;
+                                flex-direction: column;
+                                align-items: flex-start;
+                                justify-content: center;
+                                gap: 2px;
+                                font-size: 13px;
+                                font-weight: 600;
+                                line-height: 14.3px;
+                            }
+
+                            .login-body-download-link-wrap {
+                                display: flex;
+                                gap: 2px;
+                                font-size: 12px;
+                                font-weight: 400;
+                                line-height: 13.2px;
+
+                                a {
+                                    display: flex;
+                                    flex-direction: column;
+                                    align-items: center;
+                                    gap: 8px;
+                                    text-decoration: underline;
+                                    color: rgba(63, 67, 80, 0.72);
+
+                                    &:hover {
+                                        color: rgba(63, 67, 80, 1);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         .login-body-card {
-            width: 540px;
+            display: flex;
+            width: 370px;
             box-sizing: border-box;
-            border: 1px solid rgba(var(--center-channel-color-rgb), 0.08);
-            border-radius: 8px;
             margin-left: 60px;
-            background-color: var(--center-channel-bg);
-            box-shadow: var(--elevation-5);
+            justify-content: space-between;
 
             &.with-error {
                 @include shake-horizontally;
@@ -108,7 +191,6 @@
                 display: flex;
                 flex: 1;
                 flex-flow: column;
-                padding: 48px 56px;
                 border: none;
                 box-shadow: none;
 
@@ -131,17 +213,66 @@
                 }
 
                 .login-body-card-form {
+                    .Input_container .Input_wrapper {
+                        padding: 0;
+                        margin: 0;
+
+                        input {
+                            padding: 0 16px;
+                        }
+                    }
+
                     .login-body-card-form-input {
-                        margin-top: 22px;
+                        margin-top: 16px;
+                    }
+
+                    .login-body-card-form-input,
+                    .login-body-card-form-password-input {
+                        border-radius: 4px;
+                        margin: 0;
+                        background-color: var(--center-channel-bg);
+
+                        .Input_legend {
+                            display: none;
+                        }
+
+                        .password-input-with-toggle input{
+                            padding-right: 37px;
+                        }
+
+                        .password-input-toggle {
+                            margin: 0;
+                            position: absolute;
+                            right: 0;
+                            top: 50%;
+                            transform: translate(0, -50%);
+                            background-color: transparent;
+                        }
                     }
 
                     .login-body-card-form-password-input {
-                        margin-top: 24px;
+                        margin-top: 12px;
+                    }
+
+                    .login-body-card-form-register{
+                        display: inline-flex;
+                        padding: 15px 0;
+                        gap: 5px;
+                        width: 100%;
+                        justify-content: flex-end;
+
+                        a {
+                            display: inline-flex;
+                            gap: 3px;
+                            align-items: center;
+                        }
                     }
 
                     .login-body-card-form-link {
                         display: inline-flex;
-                        margin-top: 17px;
+                        margin-top: 28px;
+                        width: 100%;
+                        justify-content: flex-end;
 
                         a {
                             @include link;
@@ -153,8 +284,14 @@
                         @include button-large;
 
                         width: 100%;
-                        margin-top: 30px;
+                        margin-top: 12px;
                     }
+                }
+
+                .login-body-card-form-login-rule {
+                    display: inline-flex;
+                    margin-top: 10px;
+                    color: rgba(var(--center-channel-color-rgb), 0.75);
                 }
 
                 .login-body-card-form-divider {
@@ -222,13 +359,47 @@
     }
 }
 
+#thread-tooltip {
+    .tooltip-title {
+        text-align: left;
+        color: #1C58D9;
+    }
+
+    .tooltip-arrow {
+        border-bottom-color: #FFFFFF;
+
+        &::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(28, 88, 217, 0.08);
+            margin-left: -5px;
+            width: 10px;
+            height: 5px;
+        }
+    }
+
+    .tooltip-inner {
+        position: relative;
+        background: #FFFFFF;
+
+        &::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(28, 88, 217, 0.08);
+        }
+    }
+}
+
 @media screen and (min-width: 1680px) {
     .login-body .login-body-content {
-        .login-body-message,
-        .login-body-card {
-            width: 610px;
-        }
-
         .login-body-message .login-body-message-title {
             padding-right: 80px;
             margin-top: 48px;
@@ -245,11 +416,6 @@
         .login-body-content {
             flex-direction: column;
 
-            .login-body-message,
-            .login-body-card {
-                width: 640px;
-            }
-
             .login-body-message {
                 align-self: center;
                 padding: 24px;
@@ -262,14 +428,6 @@
 
                 .login-body-message-subtitle {
                     margin: 0;
-                }
-
-                .login-body-message-svg {
-                    display: none;
-                }
-
-                &.custom-branding {
-                    display: none;
                 }
             }
 

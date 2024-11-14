@@ -28,7 +28,15 @@ import LocalStorageStore from 'stores/local_storage_store';
 import AlertBanner from 'components/alert_banner';
 import type {ModeType, AlertBannerProps} from 'components/alert_banner';
 import type {SubmitOptions} from 'components/claim/components/email_to_ldap';
-import WomanWithChatsSVG from 'components/common/svg_images_components/woman_with_chats_svg';
+import AppStorePNG from 'components/common/png_images_components/app_store_png';
+import OSLinuxPNG from 'components/common/png_images_components/os_linux_png';
+import OSMacPNG from 'components/common/png_images_components/os_mac_png';
+import OSWindowsPNG from 'components/common/png_images_components/os_windows_png';
+import PlayStorePNG from 'components/common/png_images_components/play_store_png';
+import BiggoChatLogoSVG from 'components/common/svg_images_components/biggo_chat_logo_svg';
+import LoginMessageChannelSVG from 'components/common/svg_images_components/login_message_channel_svg';
+import LoginMessageTeamSVG from 'components/common/svg_images_components/login_message_team_svg';
+import LoginMessageThreadSVG from 'components/common/svg_images_components/login_message_thread_svg';
 import DesktopAuthToken from 'components/desktop_auth_token';
 import ExternalLink from 'components/external_link';
 import ExternalLoginButton from 'components/external_login_button/external_login_button';
@@ -46,6 +54,7 @@ import LoginOffice365Icon from 'components/widgets/icons/login_office_365_icon';
 import LoginOpenIDIcon from 'components/widgets/icons/login_openid_icon';
 import Input, {SIZE} from 'components/widgets/inputs/input/input';
 import PasswordInput from 'components/widgets/inputs/password_input/password_input';
+import WithTooltip from 'components/with_tooltip';
 
 import Constants from 'utils/constants';
 import DesktopApp from 'utils/desktop_api';
@@ -734,20 +743,9 @@ const Login = ({onCustomizeHeader}: LoginProps) => {
     };
 
     const getMessageSubtitle = () => {
-        if (enableCustomBrand) {
-            return CustomBrandText ? (
-                <div className='login-body-custom-branding-markdown'>
-                    <Markdown
-                        message={CustomBrandText}
-                        options={{mentionHighlight: false}}
-                    />
-                </div>
-            ) : null;
-        }
-
         return (
             <p className='login-body-message-subtitle'>
-                {formatMessage({id: 'login.subtitle', defaultMessage: 'Collaborate with your team in real-time'})}
+                {formatMessage({id: 'login.subtitle', defaultMessage: 'Brave Connections, Eternal Memories. In the journey of life, communication and memories should not be forgotten. With BigGo Chat, extend precious moments and make life meaningful.'})}
             </p>
         );
     };
@@ -781,6 +779,142 @@ const Login = ({onCustomizeHeader}: LoginProps) => {
         }
 
         return null;
+    };
+
+    const getDesktopAppLink = () => {
+        const location = window.location.href.replace('/landing#', '');
+        return location.replace(/^(https|http)/, 'mattermost');
+    };
+
+    const getBrowserLink = () => {
+        return `${Client4.getOAuthRoute()}/biggo/login${search}`;
+    };
+
+    const getWindowsInstallLink = () => {
+        return (
+            <div className='login-body-download-link'>
+                <OSWindowsPNG
+                    width={32}
+                    height={32}
+                />
+                <div className='login-body-download-main'>
+                    <span>{'Windows'}</span>
+                    <div className='login-body-download-link-wrap'>
+                        <ExternalLink
+                            location='login_page'
+                            href='https://img.bgo.one/biggo-chat-download/biggo-chat-setup-5.9.0-win.exe'
+                        >
+                            {'64bit'}
+                        </ExternalLink>
+                        {'/'}
+                        <ExternalLink
+                            location='login_page'
+                            href='https://img.bgo.one/biggo-chat-download/biggo-chat-setup-5.9.1-win.exe'
+                        >
+                            {'ARM 64bit'}
+                        </ExternalLink>
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
+    const getLinuxInstallLink = () => {
+        return (
+            <div className='login-body-download-link'>
+                <OSLinuxPNG
+                    width={32}
+                    height={32}
+                />
+                <div className='login-body-download-main'>
+                    <span>{'Linux'}</span>
+                    <div className='login-body-download-link-wrap'>
+                        <ExternalLink
+                            location='login_page'
+                            href='https://img.bgo.one/biggo-chat-download/biggo-chat_5.9.0-1_amd64.deb'
+                        >
+                            {'DEB'}
+                        </ExternalLink>
+                        {'/'}
+                        <ExternalLink
+                            location='login_page'
+                            href='https://img.bgo.one/biggo-chat-download/biggo-chat-5.9.0-linux-x86_64.rpm'
+                        >
+                            {'RPM'}
+                        </ExternalLink>
+                        {'/'}
+                        <ExternalLink
+                            location='login_page'
+                            href='https://img.bgo.one/biggo-chat-download/biggo-chat-5.9.0-linux-x86_64.AppImage'
+                        >
+                            {'APPIMAGE'}
+                        </ExternalLink>
+                        {'/'}
+                        <ExternalLink
+                            location='login_page'
+                            href='https://img.bgo.one/biggo-chat-download/biggo-chat-5.9.1-linux-x64.tar.gz'
+                        >
+                            {'TAR.GZ'}
+                        </ExternalLink>
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
+    const getMacInstallLink = () => {
+        return (
+            <div className='login-body-download-link'>
+                <OSMacPNG
+                    width={32}
+                    height={32}
+                />
+                <div className='login-body-download-main'>
+                    <span>{'MacOS'}</span>
+                    <div className='login-body-download-link-wrap'>
+                        <ExternalLink
+                            location='login_page'
+                            href='https://img.bgo.one/biggo-chat-download/biggo-chat-5.9.0-mac-arm64.dmg'
+                        >
+                            {'ARM'}
+                        </ExternalLink>
+                        {'/'}
+                        <ExternalLink
+                            location='login_page'
+                            href='https://img.bgo.one/biggo-chat-download/biggo-chat-5.9.0-mac-x64.dmg'
+                        >
+                            {'Intel'}
+                        </ExternalLink>
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
+    const getIosInstallLink = () => {
+        return (
+            <div className='login-body-card-ios-link'>
+                <ExternalLink
+                    location='login_page'
+                    href=''
+                >
+                    <AppStorePNG/>
+                </ExternalLink>
+            </div>
+        );
+    };
+
+    const getAndroidInstallLink = () => {
+        return (
+            <div className='login-body-card-ios-link'>
+                <ExternalLink
+                    location='login_page'
+                    href=''
+                >
+                    <PlayStorePNG/>
+                </ExternalLink>
+            </div>
+        );
     };
 
     const getContent = () => {
@@ -829,102 +963,87 @@ const Login = ({onCustomizeHeader}: LoginProps) => {
                         },
                     )}
                 >
-                    {enableCustomBrand && !brandImageError ? (
-                        <img
-                            className={classNames('login-body-custom-branding-image')}
-                            alt='brand image'
-                            src={Client4.getBrandImageUrl('0')}
-                            onError={handleBrandImageError}
-                        />
-                    ) : (
-                        <h1 className='login-body-message-title'>
-                            {formatMessage({id: 'login.title', defaultMessage: 'Log in to your account'})}
-                        </h1>
-                    )}
-                    {getMessageSubtitle()}
-                    {!enableCustomBrand && (
-                        <div className='login-body-message-svg'>
-                            <WomanWithChatsSVG width={270}/>
-                        </div>
-                    )}
-                </div>
-                <div className='login-body-action'>
-                    {!isMobileView && enableOpenServer && getAlternateLink()}
-                    <div className={classNames('login-body-card', {'custom-branding': enableCustomBrand, 'with-error': hasError})}>
-                        <div
-                            className='login-body-card-content'
-                            tabIndex={0}
-                        >
-                            <p className='login-body-card-title'>
-                                {getCardTitle()}
-                            </p>
-                            {enableCustomBrand && getMessageSubtitle()}
-                            {alertBanner && (
-                                <AlertBanner
-                                    className='login-body-card-banner'
-                                    mode={alertBanner.mode}
-                                    title={alertBanner.title}
-                                    onDismiss={alertBanner.onDismiss ?? dismissAlert}
-                                />
-                            )}
-                            {enableBaseLogin && (
-                                <form
-                                    onSubmit={(event: FormEvent<HTMLFormElement>) => {
-                                        preSubmit(event as unknown as React.MouseEvent);
-                                    }}
+                    <div className='login-body-message-top'>
+                        <div className='login-body-message-left'>
+                            <BiggoChatLogoSVG
+                                width={313}
+                                fill='#3F4350'
+                            />
+                            {getMessageSubtitle()}
+                            {/* {!enableCustomBrand && (
+                                <div className='login-body-message-svg'>
+                                    <WomanWithChatsSVG width={270}/>
+                                </div>
+                            )} */}
+                            <div className='login-body-message-desltop-link-wrap'>
+                                <a
+                                    href={getDesktopAppLink()}
                                 >
-                                    <div className='login-body-card-form'>
-                                        <Input
-                                            ref={loginIdInput}
-                                            name='loginId'
-                                            containerClassName='login-body-card-form-input'
-                                            type='text'
-                                            inputSize={SIZE.LARGE}
-                                            value={loginId}
-                                            onChange={handleInputOnChange}
-                                            hasError={hasError}
-                                            placeholder={getInputPlaceholder()}
-                                            disabled={isWaiting}
-                                            autoFocus={true}
-                                        />
-                                        <PasswordInput
-                                            ref={passwordInput}
-                                            className='login-body-card-form-password-input'
-                                            value={password}
-                                            inputSize={SIZE.LARGE}
-                                            onChange={handlePasswordInputOnChange}
-                                            hasError={hasError}
-                                            disabled={isWaiting}
-                                        />
-                                        {getResetPasswordLink()}
-                                        <SaveButton
-                                            extraClasses='login-body-card-form-button-submit large'
-                                            saving={isWaiting}
-                                            onClick={preSubmit}
-                                            defaultMessage={formatMessage({id: 'login.logIn', defaultMessage: 'Log in'})}
-                                            savingMessage={formatMessage({id: 'login.logingIn', defaultMessage: 'Logging in…'})}
-                                        />
-                                    </div>
-                                </form>
-                            )}
-                            {enableBaseLogin && enableExternalSignup && (
-                                <div className='login-body-card-form-divider'>
-                                    <span className='login-body-card-form-divider-label'>
-                                        {formatMessage({id: 'login.or', defaultMessage: 'or log in with'})}
-                                    </span>
+                                    <SaveButton
+                                        extraClasses='login-body-message-desltop-link'
+                                        saving={false}
+                                        // onClick={}
+                                        defaultMessage={formatMessage({id: 'get_app.systemDialogMessage', defaultMessage: 'View in Desktop App'})}
+                                    />
+                                </a>
+                                <a
+                                    href={getBrowserLink()}
+                                >
+                                    <SaveButton
+                                        extraClasses='login-body-message-desltop-link'
+                                        btnClass='btn-secondary'
+                                        saving={false}
+                                        // onClick={}
+                                        defaultMessage={formatMessage({id: 'get_app.continueToBrowser', defaultMessage: 'View in Browser'})}
+                                    />
+                                </a>
+                            </div>
+                        </div>
+                        <div className='login-body-message-svg'>
+                            <div>
+                                <LoginMessageTeamSVG
+                                    height={115}
+                                    width={115}
+                                />
+                                <span>{formatMessage({id: 'login.card1', defaultMessage: 'Team'})}</span>
+                            </div>
+                            <div>
+                                <LoginMessageChannelSVG
+                                    height={115}
+                                    width={115}
+                                />
+                                <span>{formatMessage({id: 'login.card2', defaultMessage: 'Channel'})}</span>
+                            </div>
+                            <WithTooltip
+                                id='thread-tooltip'
+                                placement='bottom'
+                                title={formatMessage({id: 'login.threadInfo', defaultMessage: 'Threads are conversations that unfold within a channel on specific messages, allowing members to dive deep into a topic without disrupting the main conversation flow. By using Threads, the Channel remains clear and organized, with each conversation easily accessible for future reference.'})}
+                            >
+                                <div>
+                                    <LoginMessageThreadSVG
+                                        height={115}
+                                        width={115}
+                                    />
+                                    <span>{formatMessage({id: 'login.card3', defaultMessage: 'Threads'})}</span>
                                 </div>
-                            )}
-                            {enableExternalSignup && (
-                                <div className={classNames('login-body-card-form-login-options', {column: !enableBaseLogin})}>
-                                    {getExternalLoginOptions().map((option) => (
-                                        <ExternalLoginButton
-                                            key={option.id}
-                                            direction={enableBaseLogin ? undefined : 'column'}
-                                            {...option}
-                                        />
-                                    ))}
-                                </div>
-                            )}
+                            </WithTooltip>
+                        </div>
+                    </div>
+                    <div className={classNames('login-body-message-bottom')}>
+                        <div className='login-body-message-link-wrap'>
+                            {formatMessage({id: 'login.installPC', defaultMessage: 'Install now'})}
+                            <div className='link-wrap'>
+                                {getWindowsInstallLink()}
+                                {getLinuxInstallLink()}
+                                {getMacInstallLink()}
+                            </div>
+                        </div>
+                        <div className='login-body-message-link-wrap'>
+                            {formatMessage({id: 'login.installApp', defaultMessage: 'Use Mobile App'})}
+                            <div className='link-wrap'>
+                                {getIosInstallLink()}
+                                {getAndroidInstallLink()}
+                            </div>
                         </div>
                     </div>
                 </div>

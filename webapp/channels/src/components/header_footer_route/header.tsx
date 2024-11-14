@@ -39,6 +39,8 @@ const Header = ({alternateLink, backButtonURL, onBackButtonClick}: HeaderProps) 
         }
     }
 
+    return null;
+
     return (
         <div className={classNames('hfroute-header', {'has-free-banner': freeBanner, 'has-custom-site-name': title})}>
             <div className='header-main'>
