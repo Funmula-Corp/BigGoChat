@@ -15,8 +15,6 @@ const Footer = () => {
 
     const {AboutLink, PrivacyPolicyLink, TermsOfServiceLink, HelpLink} = useSelector(getConfig);
 
-    return null;
-
     return (
         <div className='hfroute-footer'>
             <span

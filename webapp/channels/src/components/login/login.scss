@@ -2,6 +2,11 @@
 // See LICENSE.txt for license information.
 
 @import 'utils/mixins';
+#root {
+    background-image: url("images/biggo-chat-background.jpg");
+    background-size: cover;
+}
+
 
 .login-body {
     display: flex;
