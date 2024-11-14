@@ -896,7 +896,7 @@ const Login = ({onCustomizeHeader}: LoginProps) => {
             <div className='login-body-card-ios-link'>
                 <ExternalLink
                     location='login_page'
-                    href=''
+                    href='#'
                 >
                     <AppStorePNG/>
                 </ExternalLink>
@@ -909,7 +909,7 @@ const Login = ({onCustomizeHeader}: LoginProps) => {
             <div className='login-body-card-ios-link'>
                 <ExternalLink
                     location='login_page'
-                    href=''
+                    href='#'
                 >
                     <PlayStorePNG/>
                 </ExternalLink>
