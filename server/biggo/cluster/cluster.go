@@ -84,7 +84,10 @@ func (p *BiggoCluster) StartInterNodeCommunication() {
 				if namespace == "" {
 					namespace = "default"
 				}
-				go p.JoinVote(p.GetClusterId(), "biggochat-leader", namespace)
+				hostname, _ := os.Hostname()
+				identity := hostname + "-" + p.GetClusterId()
+				leaseName := "biggochat-leader-" + p.ClusterDiscoveryService.ClusterName
+				go p.JoinVote(identity, leaseName, namespace)
 			} else {
 				p.Leader.Swap(true)
 			}
