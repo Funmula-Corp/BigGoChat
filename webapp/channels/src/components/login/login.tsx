@@ -1000,20 +1000,32 @@ const Login = ({onCustomizeHeader}: LoginProps) => {
                             </div>
                         </div>
                         <div className='login-body-message-svg'>
-                            <div>
-                                <LoginMessageTeamSVG
-                                    height={115}
-                                    width={115}
-                                />
-                                <span>{formatMessage({id: 'login.card1', defaultMessage: 'Team'})}</span>
-                            </div>
-                            <div>
-                                <LoginMessageChannelSVG
-                                    height={115}
-                                    width={115}
-                                />
-                                <span>{formatMessage({id: 'login.card2', defaultMessage: 'Channel'})}</span>
-                            </div>
+                            <WithTooltip
+                                id='thread-tooltip'
+                                placement='bottom'
+                                title={formatMessage({id: 'login.teamInfo', defaultMessage: 'Team is a digital space for your friends, company, department, or project teams, with multiple channels and members to facilitate communication and collaboration on a single platform. Through centralized management, members can quickly find the necessary information, documents, and tools, enhancing work efficiency.'})}
+                            >
+                                <div>
+                                    <LoginMessageTeamSVG
+                                        height={115}
+                                        width={115}
+                                    />
+                                    <span>{formatMessage({id: 'login.card1', defaultMessage: 'Team'})}</span>
+                                </div>
+                            </WithTooltip>
+                            <WithTooltip
+                                id='thread-tooltip'
+                                placement='bottom'
+                                title={formatMessage({id: 'login.channelInfo', defaultMessage: 'A channel is a sub-unit of a Team, designed for specific topics, projects, or groups. In Chat, each channel serves as a discussion space where members can converse on various topics. Channels can be set to Public, allowing all Team members to join, or Private, restricted to invited members only. They help organize communication, making information easier to find and track.'})}
+                            >
+                                <div>
+                                    <LoginMessageChannelSVG
+                                        height={115}
+                                        width={115}
+                                    />
+                                    <span>{formatMessage({id: 'login.card2', defaultMessage: 'Channel'})}</span>
+                                </div>
+                            </WithTooltip>
                             <WithTooltip
                                 id='thread-tooltip'
                                 placement='bottom'
