@@ -8,10 +8,12 @@ import Img from './image/transfer_page_head.png';
 type PngProps = {
     width?: number;
     height?: number;
+    className?: string;
 }
 
 const Png = (props: PngProps) => (
     <img
+        {...props}
         width={props.width ?? '96'}
         height={props.height ?? '96'}
         src={Img}

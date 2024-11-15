@@ -8,11 +8,7 @@ import Mentions from './image/mentions.png';
 export function MentionsPNG(props: React.HTMLAttributes<HTMLSpanElement>) {
     return (
         <span {...props}>
-            <img
-                width={17}
-                height={17}
-                src={Mentions}
-            />
+            <img src={Mentions}/>
         </span>
     );
 }

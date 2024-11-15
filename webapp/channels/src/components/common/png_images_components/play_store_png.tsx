@@ -8,10 +8,12 @@ import PlayStore from './image/play_store.png';
 type PngProps = {
     width?: number;
     height?: number;
+    className?: string;
 }
 
 const Png = (props: PngProps) => (
     <img
+        {...props}
         width={props.width ?? '107'}
         height={props.height ?? '32'}
         src={PlayStore}

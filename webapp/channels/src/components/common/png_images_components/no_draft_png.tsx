@@ -3,7 +3,7 @@
 
 import React from 'react';
 
-import AppStore from './image/app_store.png';
+import noDraft from './image/no_draft.png';
 
 type PngProps = {
     width?: number;
@@ -14,9 +14,9 @@ type PngProps = {
 const PNG = (props: PngProps) => (
     <img
         {...props}
-        width={props.width ?? '95'}
-        height={props.height ?? '32'}
-        src={AppStore}
+        width={props.width ?? 250}
+        height={props.height ?? 250}
+        src={noDraft}
     />
 );
 

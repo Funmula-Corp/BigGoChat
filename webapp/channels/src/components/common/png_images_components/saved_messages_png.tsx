@@ -8,11 +8,7 @@ import SavedMessages from './image/saved_messages.png';
 export function SavedMessagesPNG(props: React.HTMLAttributes<HTMLSpanElement>) {
     return (
         <span {...props}>
-            <img
-                width={17}
-                height={17}
-                src={SavedMessages}
-            />
+            <img src={SavedMessages}/>
         </span>
     );
 }

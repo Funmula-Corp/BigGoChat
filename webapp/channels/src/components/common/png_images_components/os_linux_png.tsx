@@ -8,10 +8,12 @@ import OSLinux from './image/os_linux.png';
 type PngProps = {
     width?: number;
     height?: number;
+    className?: string;
 }
 
 const Png = (props: PngProps) => (
     <img
+        {...props}
         width={props.width ?? '48'}
         height={props.height ?? '48'}
         src={OSLinux}

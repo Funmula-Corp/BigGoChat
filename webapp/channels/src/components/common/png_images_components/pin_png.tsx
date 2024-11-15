@@ -8,11 +8,7 @@ import Pin from './image/pin.png';
 export function PinPNG(props: React.HTMLAttributes<HTMLSpanElement>) {
     return (
         <span {...props}>
-            <img
-                width={17}
-                height={17}
-                src={Pin}
-            />
+            <img src={Pin}/>
         </span>
     );
 }

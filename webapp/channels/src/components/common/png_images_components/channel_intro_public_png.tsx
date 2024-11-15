@@ -8,12 +8,14 @@ import channelIntroPublic from './image/channel_intro_public.png';
 type PngProps = {
     width?: number;
     height?: number;
+    className?: string;
 }
 
 const Png = (props: PngProps) => (
     <img
-        width={props.width ?? '151'}
-        height={props.height ?? '149'}
+        {...props}
+        width={props.width ?? '250'}
+        height={props.height ?? '250'}
         src={channelIntroPublic}
     />
 );
