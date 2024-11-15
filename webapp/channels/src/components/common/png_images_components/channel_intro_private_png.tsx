@@ -5,13 +5,7 @@ import React from 'react';
 
 import channelIntroPrivate from './image/channel_intro_private.png';
 
-type PngProps = {
-    width?: number;
-    height?: number;
-    className?: string;
-}
-
-const Png = (props: PngProps) => (
+const PNG = (props: Partial<React.ImgHTMLAttributes<HTMLImageElement>>) => (
     <img
         {...props}
         width={props.width ?? '250'}
@@ -20,4 +14,4 @@ const Png = (props: PngProps) => (
     />
 );
 
-export default Png;
+export default PNG;

@@ -5,13 +5,7 @@ import React from 'react';
 
 import AppStore from './image/app_store.png';
 
-type PngProps = {
-    width?: number;
-    height?: number;
-    className?: string;
-}
-
-const PNG = (props: PngProps) => (
+const PNG = (props: Partial<React.ImgHTMLAttributes<HTMLImageElement>>) => (
     <img
         {...props}
         width={props.width ?? '95'}

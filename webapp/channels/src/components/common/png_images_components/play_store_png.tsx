@@ -5,13 +5,7 @@ import React from 'react';
 
 import PlayStore from './image/play_store.png';
 
-type PngProps = {
-    width?: number;
-    height?: number;
-    className?: string;
-}
-
-const Png = (props: PngProps) => (
+const PNG = (props: Partial<React.ImgHTMLAttributes<HTMLImageElement>>) => (
     <img
         {...props}
         width={props.width ?? '107'}
@@ -20,4 +14,4 @@ const Png = (props: PngProps) => (
     />
 );
 
-export default Png;
+export default PNG;

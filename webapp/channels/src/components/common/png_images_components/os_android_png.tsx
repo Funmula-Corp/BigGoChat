@@ -5,13 +5,7 @@ import React from 'react';
 
 import OSAndroid from './image/os_android.png';
 
-type PngProps = {
-    width?: number;
-    height?: number;
-    className?: string;
-}
-
-const Png = (props: PngProps) => (
+const PNG = (props: Partial<React.ImgHTMLAttributes<HTMLImageElement>>) => (
     <img
         {...props}
         width={props.width ?? '48'}
@@ -20,4 +14,4 @@ const Png = (props: PngProps) => (
     />
 );
 
-export default Png;
+export default PNG;
