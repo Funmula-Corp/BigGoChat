@@ -3,8 +3,22 @@
 
 @import 'utils/mixins';
 #root {
-    background-image: url("images/biggo-chat-background.jpg");
+    position: relative;
+}
+#root::before {
+    content: "";
+    display: block;
     background-size: cover;
+    background-image: url("images/biggo-chat-background.jpg");
+    width: 100%;
+    opacity: 0.6;
+    position: absolute;
+    /* 偏移值皆設為 0，讓僞元素跟父元素一樣大小 */
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: -1;
 }
 
 
