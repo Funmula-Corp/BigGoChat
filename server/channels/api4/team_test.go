@@ -3952,6 +3952,22 @@ func TestGetTeamIcon(t *testing.T) {
 	_, resp, err = client.GetTeamIcon(context.Background(), team.Id, "")
 	require.Error(t, err)
 	CheckUnauthorizedStatus(t, resp)
+
+	team, resp, err = th.SystemAdminClient.CreateTeam(context.Background(), &model.Team{
+		DisplayName:     "Test Team",
+		Name:            "test-team-" + model.NewId(),
+		Email:           "test-team-" + model.NewId() + "@example.com",
+		Type:            model.TeamOpen,
+		AllowOpenInvite: false,
+	})
+	require.NoError(t, err)
+	CheckCreatedStatus(t, resp)
+
+	client.Login(context.Background(), th.BasicUser.Email, th.BasicUser.Password)
+
+	_, resp, err = client.GetTeamIcon(context.Background(), team.Id, "")
+	require.Error(t, err)
+	CheckNotFoundStatus(t, resp)
 }
 
 func TestRemoveTeamIcon(t *testing.T) {
