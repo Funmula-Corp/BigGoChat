@@ -5854,5 +5854,8 @@
   "select_team.joined": "You are already a team member",
   "select_team.invite_code": "Enter invitation code...",
   "select_team.invite_code_error": "Incorrect invitation code, please re-enter",
-  "create_post.blocked": "You cannot send or receive messages with a blocked user."
+  "create_post.blocked": "You cannot send or receive messages with a blocked user.",
+  "next_steps_view.welcomeToBigGoChat": "Welcome to BigGo Chat",
+  "login.teamInfo": "Team is a digital space for your friends, company, department, or project teams, with multiple channels and members to facilitate communication and collaboration on a single platform. Through centralized management, members can quickly find the necessary information, documents, and tools, enhancing work efficiency.",
+  "login.channelInfo": "A channel is a sub-unit of a Team, designed for specific topics, projects, or groups. In Chat, each channel serves as a discussion space where members can converse on various topics. Channels can be set to Public, allowing all Team members to join, or Private, restricted to invited members only. They help organize communication, making information easier to find and track."
 }
