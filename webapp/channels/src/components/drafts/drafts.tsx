@@ -11,13 +11,13 @@ import {selectLhsItem} from 'actions/views/lhs';
 import {suppressRHS, unsuppressRHS} from 'actions/views/rhs';
 import type {Draft} from 'selectors/drafts';
 
+import NoDraftPNG from 'components/common/png_images_components/no_draft_png';
 import NoResultsIndicator from 'components/no_results_indicator';
 import Header from 'components/widgets/header';
 
 import {LhsItemType, LhsPage} from 'types/store/lhs';
 
 import DraftRow from './draft_row';
-import DraftsIllustration from './drafts_illustration';
 
 import './drafts.scss';
 
@@ -79,7 +79,7 @@ function Drafts({
                 {drafts.length === 0 && (
                     <NoResultsIndicator
                         expanded={true}
-                        iconGraphic={DraftsIllustration}
+                        iconGraphic={<NoDraftPNG/>}
                         title={formatMessage({
                             id: 'drafts.empty.title',
                             defaultMessage: 'No drafts at the moment',
