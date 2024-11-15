@@ -63,6 +63,7 @@ import 'plugins/export.js';
 
 const LazyErrorPage = React.lazy(() => import('components/error_page'));
 const LazyLogin = React.lazy(() => import('components/login/login'));
+const LazyDownload = React.lazy(() => import('components/download'));
 const LazyAdminConsole = React.lazy(() => import('components/admin_console'));
 const LazyLoggedIn = React.lazy(() => import('components/logged_in'));
 const LazyPasswordResetSendLink = React.lazy(() => import('components/password_reset_send_link'));
@@ -85,6 +86,7 @@ const CreateTeam = makeAsyncComponent('CreateTeam', LazyCreateTeam);
 const ErrorPage = makeAsyncComponent('ErrorPage', LazyErrorPage);
 const TermsOfService = makeAsyncComponent('TermsOfService', LazyTermsOfService);
 const Login = makeAsyncComponent('LoginController', LazyLogin);
+const Download = makeAsyncComponent('DownloadController', LazyDownload);
 const AdminConsole = makeAsyncComponent('AdminConsole', LazyAdminConsole);
 const LoggedIn = makeAsyncComponent('LoggedIn', LazyLoggedIn);
 const PasswordResetSendLink = makeAsyncComponent('PasswordResedSendLink', LazyPasswordResetSendLink);
@@ -457,6 +459,10 @@ export default class Root extends React.PureComponent<Props, State> {
                     <Route
                         path={'/login'}
                         component={Login}
+                    />
+                    <Route
+                        path={'/download'}
+                        component={Download}
                     />
                     <HFRoute
                         path={'/access_problem'}
