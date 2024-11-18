@@ -3813,7 +3813,7 @@
     "globalThreads.searchGuidance.title": "已顯示全部內容",
     "globalThreads.sidebarLink": "討論串",
     "globalThreads.threadList.noUnreadThreads": "沒有未讀的討論串",
-    "globalThreads.threadPane.unreadMessageLink": "你有 {numUnread, plural, =0 {沒有未讀的討論串} =1 {<link>{numUnread} 個討論串</link>} other {<link>{numUnread} 個討論串</link>}} {numUnread, plural, =0 {} other {含有未讀訊息}}",
+    "globalThreads.threadPane.unreadMessageLink": "{numUnread, plural, =0 {已無未讀的討論串} =1 {你有 <link>{numUnread} 個討論串</link>} other {你有 <link>{numUnread} 個討論串</link>}} {numUnread, plural, =0 {} other {含有未讀訊息}}",
     "globalThreads.threadPane.unselectedTitle": "{numUnread, plural, =0 {看來你已經全部看完了} other {趕快查看你的討論串吧}}",
     "globalThreads.title": "{prefix}討論串 - {displayName} {siteName}",
     "group_list_modal.addGroupButton": "新增群組",
