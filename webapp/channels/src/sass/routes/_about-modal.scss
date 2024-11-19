@@ -121,7 +121,7 @@
                 height: 125px;
             }
 
-            path {
+            path:not([fill]) {
                 fill: inherit;
             }
         }
