@@ -28,6 +28,9 @@ build-webapp:
 clean-docker:
 	cd server && $(MAKE) clean-docker
 
+gen-all:
+	cd server && $(MAKE) pluginapi plugin-mocks generated gen-serialized
+
 run: run-server run-client
 
 run-client:
