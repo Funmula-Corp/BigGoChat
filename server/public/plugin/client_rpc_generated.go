@@ -1777,6 +1777,36 @@ func (s *apiRPCServer) GetUser(args *Z_GetUserArgs, returns *Z_GetUserReturns) e
 	return nil
 }
 
+type Z_GetUserByAuthDataArgs struct {
+	A string
+	B string
+}
+
+type Z_GetUserByAuthDataReturns struct {
+	A *model.User
+	B *model.AppError
+}
+
+func (g *apiRPCClient) GetUserByAuthData(authData, authService string) (*model.User, *model.AppError) {
+	_args := &Z_GetUserByAuthDataArgs{authData, authService}
+	_returns := &Z_GetUserByAuthDataReturns{}
+	if err := g.client.Call("Plugin.GetUserByAuthData", _args, _returns); err != nil {
+		log.Printf("RPC call to GetUserByAuthData API failed: %s", err.Error())
+	}
+	return _returns.A, _returns.B
+}
+
+func (s *apiRPCServer) GetUserByAuthData(args *Z_GetUserByAuthDataArgs, returns *Z_GetUserByAuthDataReturns) error {
+	if hook, ok := s.impl.(interface {
+		GetUserByAuthData(authData, authService string) (*model.User, *model.AppError)
+	}); ok {
+		returns.A, returns.B = hook.GetUserByAuthData(args.A, args.B)
+	} else {
+		return encodableError(fmt.Errorf("API GetUserByAuthData called but not implemented."))
+	}
+	return nil
+}
+
 type Z_GetUserByEmailArgs struct {
 	A string
 }
@@ -2124,6 +2154,34 @@ func (s *apiRPCServer) RevokeSession(args *Z_RevokeSessionArgs, returns *Z_Revok
 		returns.A = hook.RevokeSession(args.A)
 	} else {
 		return encodableError(fmt.Errorf("API RevokeSession called but not implemented."))
+	}
+	return nil
+}
+
+type Z_RevokeAllSessionsArgs struct {
+	A string
+}
+
+type Z_RevokeAllSessionsReturns struct {
+	A *model.AppError
+}
+
+func (g *apiRPCClient) RevokeAllSessions(userID string) *model.AppError {
+	_args := &Z_RevokeAllSessionsArgs{userID}
+	_returns := &Z_RevokeAllSessionsReturns{}
+	if err := g.client.Call("Plugin.RevokeAllSessions", _args, _returns); err != nil {
+		log.Printf("RPC call to RevokeAllSessions API failed: %s", err.Error())
+	}
+	return _returns.A
+}
+
+func (s *apiRPCServer) RevokeAllSessions(args *Z_RevokeAllSessionsArgs, returns *Z_RevokeAllSessionsReturns) error {
+	if hook, ok := s.impl.(interface {
+		RevokeAllSessions(userID string) *model.AppError
+	}); ok {
+		returns.A = hook.RevokeAllSessions(args.A)
+	} else {
+		return encodableError(fmt.Errorf("API RevokeAllSessions called but not implemented."))
 	}
 	return nil
 }

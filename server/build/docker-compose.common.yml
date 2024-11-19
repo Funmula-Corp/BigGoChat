@@ -167,7 +167,7 @@ services:
     networks:
       - mm-test
   rabbitmq:
-    image: "rabbitmq:4.0.3"
+    image: "rabbitmq:management-alpine"
     restart: always
     networks:
       - mm-test
