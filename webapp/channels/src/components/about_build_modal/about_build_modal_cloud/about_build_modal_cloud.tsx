@@ -8,7 +8,7 @@ import {FormattedMessage} from 'react-intl';
 import {useSelector} from 'react-redux';
 
 import ExternalLink from 'components/external_link';
-import MattermostLogo from 'components/widgets/icons/mattermost_logo';
+import BigGoChatLogo from 'components/widgets/icons/biggochat_logo';
 
 import type {GlobalState} from 'types/store';
 
@@ -81,7 +81,7 @@ export default function AboutBuildModalCloud(props: Props) {
             <Modal.Body>
                 <div className='about-modal__content'>
                     <div className='about-modal__logo'>
-                        <MattermostLogo/>
+                        <BigGoChatLogo/>
                     </div>
                     <div>
                         <h3 className='about-modal__title'>

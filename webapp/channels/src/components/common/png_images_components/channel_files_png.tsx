@@ -8,11 +8,7 @@ import channelFiles from './image/channel_files.png';
 export function ChannelFilesPNG(props: React.HTMLAttributes<HTMLSpanElement>) {
     return (
         <span {...props}>
-            <img
-                width={17}
-                height={17}
-                src={channelFiles}
-            />
+            <img src={channelFiles}/>
         </span>
     );
 }

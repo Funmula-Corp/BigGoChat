@@ -7,7 +7,7 @@ import type {Post} from '@mattermost/types/posts';
 import type {UserProfile} from '@mattermost/types/users';
 
 import ProfilePicture from 'components/profile_picture';
-import MattermostLogo from 'components/widgets/icons/mattermost_logo';
+import BigGoChatLogo from 'components/widgets/icons/biggochat_logo';
 
 import Constants, {UserStatuses} from 'utils/constants';
 import * as PostUtils from 'utils/post_utils';
@@ -88,7 +88,7 @@ export default class PostProfilePicture extends React.PureComponent<Props> {
         const fromWebhook = PostUtils.isFromWebhook(post);
 
         if (isSystemMessage && !compactDisplay && !fromWebhook && !isBot) {
-            return <MattermostLogo className='icon'/>;
+            return <BigGoChatLogo className='icon'/>;
         }
         const fromAutoResponder = PostUtils.fromAutoResponder(post);
 

@@ -1,0 +1,118 @@
+@import 'utils/mixins';
+
+.get-app-body {
+		display: flex;
+		flex-direction: column;
+    height: 100vh;
+
+    .get-app-top {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 32px;
+      padding: 10rem 0;
+      background-color: #1e325c;
+      color: #fff;
+      height: 480px;
+
+      .get-app-title {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 32px;
+        font-size: 36px;
+        font-weight: 500;
+        line-height: 36px;
+      }
+
+    }
+
+    .get-app-bottom {
+      display: flex;
+      flex: 1;
+      background-color: #EBEBEE;
+
+      .get-app-card-wrap{
+        display: flex;
+        gap: 16px;
+        justify-content: center;
+        position: relative;
+        top: -100px;
+        width: 100%;
+
+        .get-app-card {
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+          align-items: center;
+          width: 220px;
+          height: 300px;
+          padding: 36px 32px 32px 32px;
+          gap: 26px;
+          border-radius: 12px;
+          background: #fff;
+          box-shadow: 0px 12px 32px 0px rgba(0, 0, 0, 0.12);
+
+          .get-app-card-desc {
+            display: flex;
+            flex-direction: column;
+            text-align: center;
+            align-items: center;
+
+            .get-app-card-desc-title-wrap {
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              justify-content: space-between;
+              height: 64px;
+              margin-top: 32px;
+            }
+
+            .get-app-card-desc-title {
+              font-size: 18px;
+              font-weight: 700;
+              line-height: 19.8px;
+            }
+
+            .get-app-card-desc-subtitle {
+              font-size: 12px;
+              font-weight: 400;
+              line-height: 14px;
+              color: #3F4350B8;
+            }
+          }
+
+          .get-app-link-wrap {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+          }
+
+          .get-app-link-title {
+            font-size: 12px;
+            font-weight: 600;
+            line-height: 9.5px;
+            color: #3F4350B8;
+          }
+
+          .get-app-link-btn-wrap {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            justify-content: center;
+
+            .get-app-link-btn {
+              font-size: 11px;
+              font-weight: 600;
+              line-height: 10px;
+              height: fit-content;
+              border-radius: 100px;
+              padding: 6px 10px;
+              background: rgba(28, 88, 217, 0.08);
+            }
+          }
+        }
+      }
+    }
+}

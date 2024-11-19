@@ -5,17 +5,13 @@ import React from 'react';
 
 import OSWindows from './image/os_windows.png';
 
-type PngProps = {
-    width?: number;
-    height?: number;
-}
-
-const Png = (props: PngProps) => (
+const PNG = (props: Partial<React.ImgHTMLAttributes<HTMLImageElement>>) => (
     <img
+        {...props}
         width={props.width ?? '48'}
         height={props.height ?? '48'}
         src={OSWindows}
     />
 );
 
-export default Png;
+export default PNG;

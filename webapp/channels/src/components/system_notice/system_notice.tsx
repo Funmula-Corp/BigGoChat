@@ -10,7 +10,7 @@ import type {ClientConfig, ClientLicense} from '@mattermost/types/config';
 import type {PreferenceType} from '@mattermost/types/preferences';
 
 import type {Notice} from 'components/system_notice/types';
-import MattermostLogo from 'components/widgets/icons/mattermost_logo';
+import BigGoChatLogo from 'components/widgets/icons/biggochat_logo';
 
 import {Preferences} from 'utils/constants';
 
@@ -124,7 +124,7 @@ export class SystemNotice extends React.PureComponent<Props> {
             );
         }
 
-        const icon = notice.icon || <MattermostLogo/>;
+        const icon = notice.icon || <BigGoChatLogo/>;
 
         return (
             <div

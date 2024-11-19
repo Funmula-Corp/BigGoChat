@@ -319,8 +319,8 @@ const OnBoardingTaskList = (): JSX.Element | null => {
                         <>
                             <h1>
                                 <FormattedMessage
-                                    id='next_steps_view.welcomeToMattermost'
-                                    defaultMessage='Welcome to Mattermost'
+                                    id='next_steps_view.welcomeToBigGoChat'
+                                    defaultMessage='Welcome to BigGo Chat'
                                 />
                             </h1>
                             <p>
@@ -329,22 +329,6 @@ const OnBoardingTaskList = (): JSX.Element | null => {
                                     defaultMessage="Let's get up and running."
                                 />
                             </p>
-                            <Skeleton>
-                                <img
-                                    src={checklistImg}
-                                    alt={'On Boarding video'}
-                                    style={{display: 'block', margin: '1rem auto', borderRadius: '4px'}}
-                                />
-                                <PlayButton
-                                    onClick={openVideoModal}
-                                >
-                                    <PlayIcon size={18}/>
-                                    <FormattedMessage
-                                        id='onboardingTask.checklist.video_title'
-                                        defaultMessage='Watch overview'
-                                    />
-                                </PlayButton>
-                            </Skeleton>
                             {tasksList.map((task) => (
                                 <Task
                                     key={OnboardingTaskCategory + task.name}
