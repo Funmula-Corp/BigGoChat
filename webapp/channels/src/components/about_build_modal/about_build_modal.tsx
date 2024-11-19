@@ -9,7 +9,7 @@ import type {ClientConfig, ClientLicense} from '@mattermost/types/config';
 
 import ExternalLink from 'components/external_link';
 import Nbsp from 'components/html_entities/nbsp';
-import MattermostLogo from 'components/widgets/icons/mattermost_logo';
+import BigGoChatLogo from 'components/widgets/icons/biggochat_logo';
 
 import {AboutLinks} from 'utils/constants';
 
@@ -159,7 +159,7 @@ export default class AboutBuildModal extends React.PureComponent<Props, State> {
                 <Modal.Body>
                     <div className='about-modal__content'>
                         <div className='about-modal__logo'>
-                            <MattermostLogo/>
+                            <BigGoChatLogo/>
                         </div>
                         <div>
                             <h3 className='about-modal__title'>
