@@ -976,7 +976,8 @@ const Login = ({onCustomizeHeader}: LoginProps) => {
                                 </div>
                             )} */}
                             <div className='login-body-message-desltop-link-wrap'>
-                                <a
+                                <ExternalLink
+                                    location='login_page'
                                     href={getDesktopAppLink()}
                                 >
                                     <SaveButton
@@ -985,8 +986,9 @@ const Login = ({onCustomizeHeader}: LoginProps) => {
                                         // onClick={}
                                         defaultMessage={formatMessage({id: 'get_app.systemDialogMessage', defaultMessage: 'View in Desktop App'})}
                                     />
-                                </a>
-                                <a
+                                </ExternalLink>
+                                <ExternalLink
+                                    location='login_page'
                                     href={getBrowserLink()}
                                 >
                                     <SaveButton
@@ -996,7 +998,7 @@ const Login = ({onCustomizeHeader}: LoginProps) => {
                                         // onClick={}
                                         defaultMessage={formatMessage({id: 'get_app.continueToBrowser', defaultMessage: 'View in Browser'})}
                                     />
-                                </a>
+                                </ExternalLink>
                             </div>
                         </div>
                         <div className='login-body-message-svg'>
