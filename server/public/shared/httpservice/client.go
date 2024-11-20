@@ -105,7 +105,7 @@ func init() {
 		}
 		reservedIPRanges = append(reservedIPRanges, parsed)
 	}
-	defaultUserAgent = "Mattermost-Bot/1.1"
+	defaultUserAgent = "BigGoChat-Bot/1.1"
 }
 
 type DialContextFunction func(ctx context.Context, network, addr string) (net.Conn, error)
