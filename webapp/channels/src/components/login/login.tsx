@@ -975,15 +975,14 @@ const Login = ({onCustomizeHeader}: LoginProps) => {
                                     <WomanWithChatsSVG width={270}/>
                                 </div>
                             )} */}
-                            <div className='login-body-message-desltop-link-wrap'>
+                            <div className='login-body-message-desktop-link-wrap'>
                                 <ExternalLink
                                     location='login_page'
-                                    href={getDesktopAppLink()}
+                                    href={!isDesktopApp() ? getDesktopAppLink() : getBrowserLink()}
                                 >
                                     <SaveButton
-                                        extraClasses='login-body-message-desltop-link'
+                                        extraClasses='login-body-message-desktop-link'
                                         saving={false}
-                                        // onClick={}
                                         defaultMessage={isDesktopApp() ? formatMessage({id: 'login.logIn', defaultMessage: 'Log in'}) : formatMessage({id: 'get_app.systemDialogMessage', defaultMessage: 'View in Desktop App'})}
                                     />
                                 </ExternalLink>
@@ -993,10 +992,9 @@ const Login = ({onCustomizeHeader}: LoginProps) => {
                                         href={getBrowserLink()}
                                     >
                                         <SaveButton
-                                            extraClasses='login-body-message-desltop-link'
+                                            extraClasses='login-body-message-desktop-link'
                                             btnClass='btn-secondary'
                                             saving={false}
-                                            // onClick={}
                                             defaultMessage={formatMessage({id: 'get_app.continueToBrowser', defaultMessage: 'View in Browser'})}
                                         />
                                     </ExternalLink>
