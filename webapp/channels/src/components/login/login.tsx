@@ -984,21 +984,23 @@ const Login = ({onCustomizeHeader}: LoginProps) => {
                                         extraClasses='login-body-message-desltop-link'
                                         saving={false}
                                         // onClick={}
-                                        defaultMessage={formatMessage({id: 'get_app.systemDialogMessage', defaultMessage: 'View in Desktop App'})}
+                                        defaultMessage={isDesktopApp() ? formatMessage({id: 'login.logIn', defaultMessage: 'Log in'}) : formatMessage({id: 'get_app.systemDialogMessage', defaultMessage: 'View in Desktop App'})}
                                     />
                                 </ExternalLink>
-                                <ExternalLink
-                                    location='login_page'
-                                    href={getBrowserLink()}
-                                >
-                                    <SaveButton
-                                        extraClasses='login-body-message-desltop-link'
-                                        btnClass='btn-secondary'
-                                        saving={false}
-                                        // onClick={}
-                                        defaultMessage={formatMessage({id: 'get_app.continueToBrowser', defaultMessage: 'View in Browser'})}
-                                    />
-                                </ExternalLink>
+                                {!isDesktopApp() && (
+                                    <ExternalLink
+                                        location='login_page'
+                                        href={getBrowserLink()}
+                                    >
+                                        <SaveButton
+                                            extraClasses='login-body-message-desltop-link'
+                                            btnClass='btn-secondary'
+                                            saving={false}
+                                            // onClick={}
+                                            defaultMessage={formatMessage({id: 'get_app.continueToBrowser', defaultMessage: 'View in Browser'})}
+                                        />
+                                    </ExternalLink>
+                                )}
                             </div>
                         </div>
                         <div className='login-body-message-svg'>
@@ -1044,14 +1046,16 @@ const Login = ({onCustomizeHeader}: LoginProps) => {
                         </div>
                     </div>
                     <div className={classNames('login-body-message-bottom')}>
-                        <div className='login-body-message-link-wrap'>
-                            {formatMessage({id: 'login.installPC', defaultMessage: 'Install now'})}
-                            <div className='link-wrap'>
-                                {getWindowsInstallLink()}
-                                {getLinuxInstallLink()}
-                                {getMacInstallLink()}
+                        {!isDesktopApp() && (
+                            <div className='login-body-message-link-wrap'>
+                                {formatMessage({id: 'login.installPC', defaultMessage: 'Install now'})}
+                                <div className='link-wrap'>
+                                    {getWindowsInstallLink()}
+                                    {getLinuxInstallLink()}
+                                    {getMacInstallLink()}
+                                </div>
                             </div>
-                        </div>
+                        )}
                         <div className='login-body-message-link-wrap'>
                             {formatMessage({id: 'login.installApp', defaultMessage: 'Use Mobile App'})}
                             <div className='link-wrap'>
