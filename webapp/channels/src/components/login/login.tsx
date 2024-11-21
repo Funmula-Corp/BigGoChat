@@ -917,6 +917,26 @@ const Login = ({onCustomizeHeader}: LoginProps) => {
         );
     };
 
+    const LoginButton = () => {
+        const LinkComponent = isDesktopApp() ? ExternalLink : 'a';
+
+        return (
+            <LinkComponent
+                location='login_page'
+                href={isDesktopApp() ? getBrowserLink() : getDesktopAppLink()}
+            >
+                <SaveButton
+                    extraClasses='login-body-message-desktop-link'
+                    saving={false}
+                    defaultMessage={formatMessage({
+                        id: isDesktopApp() ? 'login.logIn' : 'get_app.systemDialogMessage',
+                        defaultMessage: isDesktopApp() ? 'Log in' : 'View in Desktop App',
+                    })}
+                />
+            </LinkComponent>
+        );
+    };
+
     const getContent = () => {
         if (showMfa) {
             return (
@@ -976,28 +996,19 @@ const Login = ({onCustomizeHeader}: LoginProps) => {
                                 </div>
                             )} */}
                             <div className='login-body-message-desktop-link-wrap'>
-                                <ExternalLink
-                                    location='login_page'
-                                    href={!isDesktopApp() ? getDesktopAppLink() : getBrowserLink()}
-                                >
-                                    <SaveButton
-                                        extraClasses='login-body-message-desktop-link'
-                                        saving={false}
-                                        defaultMessage={isDesktopApp() ? formatMessage({id: 'login.logIn', defaultMessage: 'Log in'}) : formatMessage({id: 'get_app.systemDialogMessage', defaultMessage: 'View in Desktop App'})}
-                                    />
-                                </ExternalLink>
+                                <LoginButton/>
                                 {!isDesktopApp() && (
-                                    <ExternalLink
-                                        location='login_page'
-                                        href={getBrowserLink()}
-                                    >
+                                    <a href={getBrowserLink()}>
                                         <SaveButton
-                                            extraClasses='login-body-message-desktop-link'
-                                            btnClass='btn-secondary'
                                             saving={false}
-                                            defaultMessage={formatMessage({id: 'get_app.continueToBrowser', defaultMessage: 'View in Browser'})}
+                                            btnClass={'btn-secondary'}
+                                            extraClasses='login-body-message-desktop-link'
+                                            defaultMessage={formatMessage({
+                                                id: 'get_app.continueToBrowser',
+                                                defaultMessage: 'View in Browser',
+                                            })}
                                         />
-                                    </ExternalLink>
+                                    </a>
                                 )}
                             </div>
                         </div>
