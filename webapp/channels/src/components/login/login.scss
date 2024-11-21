@@ -114,6 +114,17 @@
                         margin-top: 52px;
                         width: fit-content;
                         gap: 16px;
+
+                        .login-body-message-desktop-link {
+                            height: fit-content;
+                            padding: 14px 24px;
+                            font-size: 16px;
+                            line-height: 18px;
+
+                            &.login {
+                                padding: 14px 40px;
+                            }
+                        }
                     }
                 }
 

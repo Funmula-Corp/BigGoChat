@@ -926,7 +926,7 @@ const Login = ({onCustomizeHeader}: LoginProps) => {
                 href={isDesktopApp() ? getBrowserLink() : getDesktopAppLink()}
             >
                 <SaveButton
-                    extraClasses='login-body-message-desktop-link'
+                    extraClasses={`login-body-message-desktop-link ${isDesktopApp() ? 'login' : ''}`}
                     saving={false}
                     defaultMessage={formatMessage({
                         id: isDesktopApp() ? 'login.logIn' : 'get_app.systemDialogMessage',
