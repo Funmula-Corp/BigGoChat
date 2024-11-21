@@ -109,11 +109,22 @@
                         margin: 12px 0 0 0;
                     }
 
-                    .login-body-message-desltop-link-wrap {
+                    .login-body-message-desktop-link-wrap {
                         display: flex;
                         margin-top: 52px;
                         width: fit-content;
                         gap: 16px;
+
+                        .login-body-message-desktop-link {
+                            height: fit-content;
+                            padding: 14px 24px;
+                            font-size: 16px;
+                            line-height: 18px;
+
+                            &.login {
+                                padding: 14px 40px;
+                            }
+                        }
                     }
                 }
 
