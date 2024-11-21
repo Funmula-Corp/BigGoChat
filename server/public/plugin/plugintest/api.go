@@ -2945,6 +2945,38 @@ func (_m *API) GetUser(userID string) (*model.User, *model.AppError) {
 	return r0, r1
 }
 
+// GetUserByAuthData provides a mock function with given fields: authData, authService
+func (_m *API) GetUserByAuthData(authData string, authService string) (*model.User, *model.AppError) {
+	ret := _m.Called(authData, authService)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetUserByAuthData")
+	}
+
+	var r0 *model.User
+	var r1 *model.AppError
+	if rf, ok := ret.Get(0).(func(string, string) (*model.User, *model.AppError)); ok {
+		return rf(authData, authService)
+	}
+	if rf, ok := ret.Get(0).(func(string, string) *model.User); ok {
+		r0 = rf(authData, authService)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.User)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(string, string) *model.AppError); ok {
+		r1 = rf(authData, authService)
+	} else {
+		if ret.Get(1) != nil {
+			r1 = ret.Get(1).(*model.AppError)
+		}
+	}
+
+	return r0, r1
+}
+
 // GetUserByEmail provides a mock function with given fields: email
 func (_m *API) GetUserByEmail(email string) (*model.User, *model.AppError) {
 	ret := _m.Called(email)
@@ -4121,6 +4153,26 @@ func (_m *API) RequestTrialLicense(requesterID string, users int, termsAccepted 
 	var r0 *model.AppError
 	if rf, ok := ret.Get(0).(func(string, int, bool, bool) *model.AppError); ok {
 		r0 = rf(requesterID, users, termsAccepted, receiveEmailsAccepted)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.AppError)
+		}
+	}
+
+	return r0
+}
+
+// RevokeAllSessions provides a mock function with given fields: userID
+func (_m *API) RevokeAllSessions(userID string) *model.AppError {
+	ret := _m.Called(userID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for RevokeAllSessions")
+	}
+
+	var r0 *model.AppError
+	if rf, ok := ret.Get(0).(func(string) *model.AppError); ok {
+		r0 = rf(userID)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*model.AppError)
