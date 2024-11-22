@@ -125,10 +125,11 @@
                 }
 
                 .signup-team-desc {
-                    width: 150px;
+                    max-width: 420px;
                     display: -webkit-box;
                     -webkit-line-clamp: 1;
                     -webkit-box-orient: vertical;
+                    word-break: break-word;
                     overflow: hidden;
                     margin-top: 4px;
                 }

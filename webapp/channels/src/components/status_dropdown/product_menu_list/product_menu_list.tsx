@@ -135,7 +135,7 @@ const ProductMenuList = (props: Props): JSX.Element | null => {
                 </SystemPermissionGate>
                 <Menu.ItemLink
                     id='integrations'
-                    show={isMessaging && showIntegrations}
+                    show={showIntegrations}
                     to={'/' + teamName + '/integrations'}
                     text={formatMessage({id: 'navbar_dropdown.integrations', defaultMessage: 'Integrations'})}
                     icon={<WebhookIncomingIcon size={18}/>}
