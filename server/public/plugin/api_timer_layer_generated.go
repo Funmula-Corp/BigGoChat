@@ -265,6 +265,13 @@ func (api *apiTimerLayer) CreateSession(session *model.Session) (*model.Session,
 	return _returnsA, _returnsB
 }
 
+func (api *apiTimerLayer) GetSessionsWithActiveDeviceIds(userID string) ([]*model.Session, error) {
+	startTime := timePkg.Now()
+	_returnsA, _returnsB := api.apiImpl.GetSessionsWithActiveDeviceIds(userID)
+	api.recordTime(startTime, "GetSessionsWithActiveDeviceIds", _returnsB == nil)
+	return _returnsA, _returnsB
+}
+
 func (api *apiTimerLayer) ExtendSessionExpiry(sessionID string, newExpiry int64) *model.AppError {
 	startTime := timePkg.Now()
 	_returnsA := api.apiImpl.ExtendSessionExpiry(sessionID, newExpiry)

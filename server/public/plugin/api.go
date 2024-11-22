@@ -231,6 +231,12 @@ type API interface {
 	// Minimum server version: 6.2
 	CreateSession(session *model.Session) (*model.Session, *model.AppError)
 
+	// GetSessionsWithActiveDeviceIds lists user sessions with active device id.
+	//
+	// @tag User
+	// Minimum server version: 6.2
+	GetSessionsWithActiveDeviceIds(userID string) ([]*model.Session, error)
+
 	// ExtendSessionExpiry extends the duration of an existing session.
 	//
 	// @tag User

@@ -7,6 +7,5 @@ import (
 )
 
 func Cluster(ps *platform.PlatformService) einterfaces.ClusterInterface {
-	InitPluginAPI(ps)
 	return cluster.New(ps)
 }

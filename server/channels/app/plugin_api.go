@@ -318,6 +318,10 @@ func (api *PluginAPI) CreateSession(session *model.Session) (*model.Session, *mo
 	return api.app.CreateSession(api.ctx, session)
 }
 
+func (api *PluginAPI) GetSessionsWithActiveDeviceIds(userID string) ([]*model.Session, error) {
+	return api.app.Srv().Store().Session().GetSessionsWithActiveDeviceIds(userID)
+}
+
 func (api *PluginAPI) ExtendSessionExpiry(sessionID string, expiresAt int64) *model.AppError {
 	session, err := api.app.ch.srv.platform.GetSessionByID(api.ctx, sessionID)
 	if err != nil {

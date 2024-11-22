@@ -2495,6 +2495,36 @@ func (_m *API) GetSession(sessionID string) (*model.Session, *model.AppError) {
 	return r0, r1
 }
 
+// GetSessionsWithActiveDeviceIds provides a mock function with given fields: userID
+func (_m *API) GetSessionsWithActiveDeviceIds(userID string) ([]*model.Session, error) {
+	ret := _m.Called(userID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetSessionsWithActiveDeviceIds")
+	}
+
+	var r0 []*model.Session
+	var r1 error
+	if rf, ok := ret.Get(0).(func(string) ([]*model.Session, error)); ok {
+		return rf(userID)
+	}
+	if rf, ok := ret.Get(0).(func(string) []*model.Session); ok {
+		r0 = rf(userID)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*model.Session)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(string) error); ok {
+		r1 = rf(userID)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // GetSystemInstallDate provides a mock function with given fields:
 func (_m *API) GetSystemInstallDate() (int64, *model.AppError) {
 	ret := _m.Called()
