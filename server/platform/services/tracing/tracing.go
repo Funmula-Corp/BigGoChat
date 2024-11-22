@@ -6,6 +6,7 @@ package tracing
 import (
 	"context"
 	"io"
+	"os"
 	"time"
 
 	opentracing "github.com/opentracing/opentracing-go"
@@ -38,6 +39,10 @@ func (LogrusAdapter) Infof(msg string, args ...any) {
 // New instantiates Jaeger opentracing client with default options
 // To override the defaults use environment variables listed here: https://github.com/jaegertracing/jaeger-client-go/blob/master/config/config.go
 func New() (*Tracer, error) {
+	jaegerEndpoint := os.Getenv("JAEGER_ENDPOINT")
+	if jaegerEndpoint == "" {
+		jaegerEndpoint = "http://localhost:14268/api/traces"
+	}
 	cfg := jaegercfg.Configuration{
 		Sampler: &jaegercfg.SamplerConfig{
 			Type:  jaeger.SamplerTypeConst,
@@ -45,6 +50,7 @@ func New() (*Tracer, error) {
 		},
 		Reporter: &jaegercfg.ReporterConfig{
 			LogSpans: true,
+			CollectorEndpoint: jaegerEndpoint, // "http://localhost:14268/api/traces"
 		},
 	}
 
@@ -83,5 +89,5 @@ func StartSpanWithParentByContext(ctx context.Context, operationName string) (op
 		return StartRootSpanByContext(ctx, operationName)
 	}
 
-	return opentracing.StartSpanFromContext(ctx, operationName, opentracing.ChildOf(parentSpan.Context()))
+	return opentracing.StartSpanFromContext(ctx, operationName)
 }
