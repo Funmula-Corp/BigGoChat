@@ -80,6 +80,11 @@ type Props = {
      * Set to hide the cancel button
      */
     hideCancel?: boolean;
+
+    /*
+     * Set to hide the close button
+     */
+    hideClose?: boolean;
 };
 
 type State = {
@@ -178,7 +183,7 @@ export default class ConfirmModal extends React.Component<Props, State> {
                 aria-labelledby='confirmModalLabel'
                 aria-describedby='confirmModalBody'
             >
-                <Modal.Header closeButton={true}>
+                <Modal.Header closeButton={!this.props.hideClose}>
                     <Modal.Title
                         componentClass='h1'
                         id='confirmModalLabel'

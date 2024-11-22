@@ -264,6 +264,10 @@ func (api *PluginAPI) GetUser(userID string) (*model.User, *model.AppError) {
 	return api.app.GetUser(userID)
 }
 
+func (api *PluginAPI) GetUserByAuthData(authData, authService string) (*model.User, *model.AppError) {
+	return api.app.GetUserByAuth(&authData, authService)
+}
+
 func (api *PluginAPI) GetUserByEmail(email string) (*model.User, *model.AppError) {
 	return api.app.GetUserByEmail(email)
 }
@@ -314,6 +318,10 @@ func (api *PluginAPI) CreateSession(session *model.Session) (*model.Session, *mo
 	return api.app.CreateSession(api.ctx, session)
 }
 
+func (api *PluginAPI) GetSessionsWithActiveDeviceIds(userID string) ([]*model.Session, error) {
+	return api.app.Srv().Store().Session().GetSessionsWithActiveDeviceIds(userID)
+}
+
 func (api *PluginAPI) ExtendSessionExpiry(sessionID string, expiresAt int64) *model.AppError {
 	session, err := api.app.ch.srv.platform.GetSessionByID(api.ctx, sessionID)
 	if err != nil {
@@ -331,6 +339,10 @@ func (api *PluginAPI) RevokeSession(sessionID string) *model.AppError {
 	return api.app.RevokeSessionById(api.ctx, sessionID)
 }
 
+func (api *PluginAPI) RevokeAllSessions(userID string) *model.AppError {
+	return api.app.RevokeAllSessions(api.ctx, userID)
+}
+
 func (api *PluginAPI) CreateUserAccessToken(token *model.UserAccessToken) (*model.UserAccessToken, *model.AppError) {
 	return api.app.CreateUserAccessToken(api.ctx, token)
 }
@@ -345,7 +357,7 @@ func (api *PluginAPI) RevokeUserAccessToken(tokenID string) *model.AppError {
 }
 
 func (api *PluginAPI) UpdateUser(user *model.User) (*model.User, *model.AppError) {
-	return api.app.UpdateUser(api.ctx, user, true)
+	return api.app.UpdateUser(api.ctx, user, user.DeleteAt == 0)
 }
 
 func (api *PluginAPI) UpdateUserAuth(userID string, userAuth *model.UserAuth) (*model.UserAuth, *model.AppError) {
@@ -443,7 +455,7 @@ func (api *PluginAPI) GetLDAPUserAttributes(userID string, attributes []string) 
 	return map[string]string{}, nil
 }
 
-func (api *PluginAPI) MarkUserVerified (userID string) *model.AppError {
+func (api *PluginAPI) MarkUserVerified(userID string) *model.AppError {
 	return api.app.MarkUserVerified(api.ctx, userID)
 }
 

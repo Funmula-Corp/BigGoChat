@@ -31,6 +31,9 @@ clean-docker:
 debug-headless:
 	cd server && $(MAKE) debug-server-headless
 
+gen-all:
+	cd server && $(MAKE) pluginapi plugin-mocks generated gen-serialized
+
 run: run-server run-client
 
 run-client:

@@ -159,6 +159,12 @@ type API interface {
 	// Minimum server version: 5.2
 	GetUser(userID string) (*model.User, *model.AppError)
 
+	// GetUser gets a user.
+	//
+	// @tag User
+	// Minimum server version: 5.2
+	GetUserByAuthData(authData, authService string) (*model.User, *model.AppError)
+
 	// GetUserByEmail gets a user by their email address.
 	//
 	// @tag User
@@ -225,6 +231,12 @@ type API interface {
 	// Minimum server version: 6.2
 	CreateSession(session *model.Session) (*model.Session, *model.AppError)
 
+	// GetSessionsWithActiveDeviceIds lists user sessions with active device id.
+	//
+	// @tag User
+	// Minimum server version: 6.2
+	GetSessionsWithActiveDeviceIds(userID string) ([]*model.Session, error)
+
 	// ExtendSessionExpiry extends the duration of an existing session.
 	//
 	// @tag User
@@ -236,6 +248,12 @@ type API interface {
 	// @tag User
 	// Minimum server version: 6.2
 	RevokeSession(sessionID string) *model.AppError
+
+	// RevokeSession revokes an existing user session.
+	//
+	// @tag User
+	// Minimum server version: 6.2
+	RevokeAllSessions(userID string) *model.AppError
 
 	// CreateUserAccessToken creates a new access token.
 	// @tag User

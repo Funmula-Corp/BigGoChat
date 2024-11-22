@@ -80,7 +80,7 @@ export default class AboutBuildModal extends React.PureComponent<Props, State> {
         );
 
         const learnMore = (
-            <div>
+            <div className='about-modal__learn-more'>
                 <FormattedMessage
                     id='about.teamEditionLearn'
                     defaultMessage='BigGo is the open-source software under AGPL 3.0. '

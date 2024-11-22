@@ -14,10 +14,6 @@ filippo.io/edwards25519 v1.1.0/go.mod h1:BxyFTGdWcka3PhytdK4V28tE5sGfRvvvRV7EaN4
 git.apache.org/thrift.git v0.0.0-20180902110319-2566ecd5d999/go.mod h1:fPE2ZNJGynbRyZ4dJvy6G277gSllfV2HJqblrnkyeyg=
 git.biggo.com/Funmula/BigGoChat/server/public v0.0.0-20241021111751-7ebfd4fcb462 h1:oiytGFjUJxwIiI3fT2bIsbSXXBrlKICygGOXYdu5HlE=
 git.biggo.com/Funmula/BigGoChat/server/public v0.0.0-20241021111751-7ebfd4fcb462/go.mod h1:uK6BYpdG2/0uB99As2hsfXG62XE2vDJMIo3upJR2j1Q=
-git.biggo.com/Funmula/mattermost-packages/grpc v0.0.0-20240531034050-3d22f388694c h1:ViRm7hwtPzfOxqy9mHP7wGapD19pxtqn3hZtf+/iIww=
-git.biggo.com/Funmula/mattermost-packages/grpc v0.0.0-20240531034050-3d22f388694c/go.mod h1:Bohs77XZTkET/iPhNx73q+R3MkaFaqrr0RcZ4oqhkog=
-git.biggo.com/Funmula/mattermost-packages/pluginAPI v0.0.0-20240531034050-3d22f388694c h1:byiID4ltH40grqvmV2vCANObksWLkZI5eYLJRAE3mJI=
-git.biggo.com/Funmula/mattermost-packages/pluginAPI v0.0.0-20240531034050-3d22f388694c/go.mod h1:EuiXF+Q06ywwmFkLCYPWE4tpFRDldOQDxFGrzRXihw0=
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
 github.com/BurntSushi/xgb v0.0.0-20160522181843-27f122750802/go.mod h1:IVnqGOEym/WlBOVXweHU+Q+/VP0lqqI8lqeDx9IjBqo=
 github.com/DataDog/datadog-go v3.2.0+incompatible/go.mod h1:LButxg5PwREeZtORoXG3tL4fMGNddJ+vMq1mwgfaqoQ=

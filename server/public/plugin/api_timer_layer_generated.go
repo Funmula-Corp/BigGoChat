@@ -188,6 +188,13 @@ func (api *apiTimerLayer) GetUser(userID string) (*model.User, *model.AppError) 
 	return _returnsA, _returnsB
 }
 
+func (api *apiTimerLayer) GetUserByAuthData(authData, authService string) (*model.User, *model.AppError) {
+	startTime := timePkg.Now()
+	_returnsA, _returnsB := api.apiImpl.GetUserByAuthData(authData, authService)
+	api.recordTime(startTime, "GetUserByAuthData", _returnsB == nil)
+	return _returnsA, _returnsB
+}
+
 func (api *apiTimerLayer) GetUserByEmail(email string) (*model.User, *model.AppError) {
 	startTime := timePkg.Now()
 	_returnsA, _returnsB := api.apiImpl.GetUserByEmail(email)
@@ -258,6 +265,13 @@ func (api *apiTimerLayer) CreateSession(session *model.Session) (*model.Session,
 	return _returnsA, _returnsB
 }
 
+func (api *apiTimerLayer) GetSessionsWithActiveDeviceIds(userID string) ([]*model.Session, error) {
+	startTime := timePkg.Now()
+	_returnsA, _returnsB := api.apiImpl.GetSessionsWithActiveDeviceIds(userID)
+	api.recordTime(startTime, "GetSessionsWithActiveDeviceIds", _returnsB == nil)
+	return _returnsA, _returnsB
+}
+
 func (api *apiTimerLayer) ExtendSessionExpiry(sessionID string, newExpiry int64) *model.AppError {
 	startTime := timePkg.Now()
 	_returnsA := api.apiImpl.ExtendSessionExpiry(sessionID, newExpiry)
@@ -269,6 +283,13 @@ func (api *apiTimerLayer) RevokeSession(sessionID string) *model.AppError {
 	startTime := timePkg.Now()
 	_returnsA := api.apiImpl.RevokeSession(sessionID)
 	api.recordTime(startTime, "RevokeSession", _returnsA == nil)
+	return _returnsA
+}
+
+func (api *apiTimerLayer) RevokeAllSessions(userID string) *model.AppError {
+	startTime := timePkg.Now()
+	_returnsA := api.apiImpl.RevokeAllSessions(userID)
+	api.recordTime(startTime, "RevokeAllSessions", _returnsA == nil)
 	return _returnsA
 }
 

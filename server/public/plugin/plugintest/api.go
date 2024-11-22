@@ -2495,6 +2495,36 @@ func (_m *API) GetSession(sessionID string) (*model.Session, *model.AppError) {
 	return r0, r1
 }
 
+// GetSessionsWithActiveDeviceIds provides a mock function with given fields: userID
+func (_m *API) GetSessionsWithActiveDeviceIds(userID string) ([]*model.Session, error) {
+	ret := _m.Called(userID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetSessionsWithActiveDeviceIds")
+	}
+
+	var r0 []*model.Session
+	var r1 error
+	if rf, ok := ret.Get(0).(func(string) ([]*model.Session, error)); ok {
+		return rf(userID)
+	}
+	if rf, ok := ret.Get(0).(func(string) []*model.Session); ok {
+		r0 = rf(userID)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*model.Session)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(string) error); ok {
+		r1 = rf(userID)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // GetSystemInstallDate provides a mock function with given fields:
 func (_m *API) GetSystemInstallDate() (int64, *model.AppError) {
 	ret := _m.Called()
@@ -2936,6 +2966,38 @@ func (_m *API) GetUser(userID string) (*model.User, *model.AppError) {
 
 	if rf, ok := ret.Get(1).(func(string) *model.AppError); ok {
 		r1 = rf(userID)
+	} else {
+		if ret.Get(1) != nil {
+			r1 = ret.Get(1).(*model.AppError)
+		}
+	}
+
+	return r0, r1
+}
+
+// GetUserByAuthData provides a mock function with given fields: authData, authService
+func (_m *API) GetUserByAuthData(authData string, authService string) (*model.User, *model.AppError) {
+	ret := _m.Called(authData, authService)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetUserByAuthData")
+	}
+
+	var r0 *model.User
+	var r1 *model.AppError
+	if rf, ok := ret.Get(0).(func(string, string) (*model.User, *model.AppError)); ok {
+		return rf(authData, authService)
+	}
+	if rf, ok := ret.Get(0).(func(string, string) *model.User); ok {
+		r0 = rf(authData, authService)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.User)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(string, string) *model.AppError); ok {
+		r1 = rf(authData, authService)
 	} else {
 		if ret.Get(1) != nil {
 			r1 = ret.Get(1).(*model.AppError)
@@ -4121,6 +4183,26 @@ func (_m *API) RequestTrialLicense(requesterID string, users int, termsAccepted 
 	var r0 *model.AppError
 	if rf, ok := ret.Get(0).(func(string, int, bool, bool) *model.AppError); ok {
 		r0 = rf(requesterID, users, termsAccepted, receiveEmailsAccepted)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*model.AppError)
+		}
+	}
+
+	return r0
+}
+
+// RevokeAllSessions provides a mock function with given fields: userID
+func (_m *API) RevokeAllSessions(userID string) *model.AppError {
+	ret := _m.Called(userID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for RevokeAllSessions")
+	}
+
+	var r0 *model.AppError
+	if rf, ok := ret.Get(0).(func(string) *model.AppError); ok {
+		r0 = rf(userID)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*model.AppError)

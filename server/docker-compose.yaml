@@ -134,6 +134,7 @@ services:
     container_name: mattermost-rabbitmq
     ports:
       - "5672:5672"
+      - "15672:15672"
     extends:
         file: build/docker-compose.common.yml
         service: rabbitmq

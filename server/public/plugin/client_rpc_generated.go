@@ -1777,6 +1777,36 @@ func (s *apiRPCServer) GetUser(args *Z_GetUserArgs, returns *Z_GetUserReturns) e
 	return nil
 }
 
+type Z_GetUserByAuthDataArgs struct {
+	A string
+	B string
+}
+
+type Z_GetUserByAuthDataReturns struct {
+	A *model.User
+	B *model.AppError
+}
+
+func (g *apiRPCClient) GetUserByAuthData(authData, authService string) (*model.User, *model.AppError) {
+	_args := &Z_GetUserByAuthDataArgs{authData, authService}
+	_returns := &Z_GetUserByAuthDataReturns{}
+	if err := g.client.Call("Plugin.GetUserByAuthData", _args, _returns); err != nil {
+		log.Printf("RPC call to GetUserByAuthData API failed: %s", err.Error())
+	}
+	return _returns.A, _returns.B
+}
+
+func (s *apiRPCServer) GetUserByAuthData(args *Z_GetUserByAuthDataArgs, returns *Z_GetUserByAuthDataReturns) error {
+	if hook, ok := s.impl.(interface {
+		GetUserByAuthData(authData, authService string) (*model.User, *model.AppError)
+	}); ok {
+		returns.A, returns.B = hook.GetUserByAuthData(args.A, args.B)
+	} else {
+		return encodableError(fmt.Errorf("API GetUserByAuthData called but not implemented."))
+	}
+	return nil
+}
+
 type Z_GetUserByEmailArgs struct {
 	A string
 }
@@ -2071,6 +2101,36 @@ func (s *apiRPCServer) CreateSession(args *Z_CreateSessionArgs, returns *Z_Creat
 	return nil
 }
 
+type Z_GetSessionsWithActiveDeviceIdsArgs struct {
+	A string
+}
+
+type Z_GetSessionsWithActiveDeviceIdsReturns struct {
+	A []*model.Session
+	B error
+}
+
+func (g *apiRPCClient) GetSessionsWithActiveDeviceIds(userID string) ([]*model.Session, error) {
+	_args := &Z_GetSessionsWithActiveDeviceIdsArgs{userID}
+	_returns := &Z_GetSessionsWithActiveDeviceIdsReturns{}
+	if err := g.client.Call("Plugin.GetSessionsWithActiveDeviceIds", _args, _returns); err != nil {
+		log.Printf("RPC call to GetSessionsWithActiveDeviceIds API failed: %s", err.Error())
+	}
+	return _returns.A, _returns.B
+}
+
+func (s *apiRPCServer) GetSessionsWithActiveDeviceIds(args *Z_GetSessionsWithActiveDeviceIdsArgs, returns *Z_GetSessionsWithActiveDeviceIdsReturns) error {
+	if hook, ok := s.impl.(interface {
+		GetSessionsWithActiveDeviceIds(userID string) ([]*model.Session, error)
+	}); ok {
+		returns.A, returns.B = hook.GetSessionsWithActiveDeviceIds(args.A)
+		returns.B = encodableError(returns.B)
+	} else {
+		return encodableError(fmt.Errorf("API GetSessionsWithActiveDeviceIds called but not implemented."))
+	}
+	return nil
+}
+
 type Z_ExtendSessionExpiryArgs struct {
 	A string
 	B int64
@@ -2124,6 +2184,34 @@ func (s *apiRPCServer) RevokeSession(args *Z_RevokeSessionArgs, returns *Z_Revok
 		returns.A = hook.RevokeSession(args.A)
 	} else {
 		return encodableError(fmt.Errorf("API RevokeSession called but not implemented."))
+	}
+	return nil
+}
+
+type Z_RevokeAllSessionsArgs struct {
+	A string
+}
+
+type Z_RevokeAllSessionsReturns struct {
+	A *model.AppError
+}
+
+func (g *apiRPCClient) RevokeAllSessions(userID string) *model.AppError {
+	_args := &Z_RevokeAllSessionsArgs{userID}
+	_returns := &Z_RevokeAllSessionsReturns{}
+	if err := g.client.Call("Plugin.RevokeAllSessions", _args, _returns); err != nil {
+		log.Printf("RPC call to RevokeAllSessions API failed: %s", err.Error())
+	}
+	return _returns.A
+}
+
+func (s *apiRPCServer) RevokeAllSessions(args *Z_RevokeAllSessionsArgs, returns *Z_RevokeAllSessionsReturns) error {
+	if hook, ok := s.impl.(interface {
+		RevokeAllSessions(userID string) *model.AppError
+	}); ok {
+		returns.A = hook.RevokeAllSessions(args.A)
+	} else {
+		return encodableError(fmt.Errorf("API RevokeAllSessions called but not implemented."))
 	}
 	return nil
 }

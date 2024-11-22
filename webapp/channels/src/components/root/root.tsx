@@ -50,6 +50,7 @@ import {EmojiIndicesByAlias} from 'utils/emoji';
 import {TEAM_NAME_PATH_PATTERN} from 'utils/path';
 import {getSiteURL} from 'utils/url';
 import * as UserAgent from 'utils/user_agent';
+import {isMobile} from 'utils/user_agent';
 import * as Utils from 'utils/utils';
 
 import type {ProductComponent, PluginComponent} from 'types/store/plugins';
@@ -458,7 +459,7 @@ export default class Root extends React.PureComponent<Props, State> {
                     />
                     <Route
                         path={'/login'}
-                        component={Login}
+                        component={isMobile() ? LinkingLandingPage : Login}
                     />
                     <Route
                         path={'/download'}
@@ -476,9 +477,9 @@ export default class Root extends React.PureComponent<Props, State> {
                         path={'/reset_password_complete'}
                         component={PasswordResetForm}
                     />
-                    <HFRoute
+                    <Route
                         path={'/signup_user_complete'}
-                        component={Signup}
+                        component={isMobile() ? LinkingLandingPage : Login}
                     />
                     <HFRoute
                         path={'/should_verify_email'}
@@ -498,7 +499,7 @@ export default class Root extends React.PureComponent<Props, State> {
                     />
                     <Route
                         path={'/landing'}
-                        component={LinkingLandingPage}
+                        component={isMobile() ? LinkingLandingPage : Login}
                     />
                     <Route
                         path={'/admin_console'}

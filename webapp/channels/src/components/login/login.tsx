@@ -917,6 +917,26 @@ const Login = ({onCustomizeHeader}: LoginProps) => {
         );
     };
 
+    const LoginButton = () => {
+        const LinkComponent = isDesktopApp() ? ExternalLink : 'a';
+
+        return (
+            <LinkComponent
+                location='login_page'
+                href={isDesktopApp() ? getBrowserLink() : getDesktopAppLink()}
+            >
+                <SaveButton
+                    extraClasses={`login-body-message-desktop-link ${isDesktopApp() ? 'login' : ''}`}
+                    saving={false}
+                    defaultMessage={formatMessage({
+                        id: isDesktopApp() ? 'login.logIn' : 'get_app.systemDialogMessage',
+                        defaultMessage: isDesktopApp() ? 'Log in' : 'View in Desktop App',
+                    })}
+                />
+            </LinkComponent>
+        );
+    };
+
     const getContent = () => {
         if (showMfa) {
             return (
@@ -975,28 +995,21 @@ const Login = ({onCustomizeHeader}: LoginProps) => {
                                     <WomanWithChatsSVG width={270}/>
                                 </div>
                             )} */}
-                            <div className='login-body-message-desltop-link-wrap'>
-                                <a
-                                    href={getDesktopAppLink()}
-                                >
-                                    <SaveButton
-                                        extraClasses='login-body-message-desltop-link'
-                                        saving={false}
-                                        // onClick={}
-                                        defaultMessage={formatMessage({id: 'get_app.systemDialogMessage', defaultMessage: 'View in Desktop App'})}
-                                    />
-                                </a>
-                                <a
-                                    href={getBrowserLink()}
-                                >
-                                    <SaveButton
-                                        extraClasses='login-body-message-desltop-link'
-                                        btnClass='btn-secondary'
-                                        saving={false}
-                                        // onClick={}
-                                        defaultMessage={formatMessage({id: 'get_app.continueToBrowser', defaultMessage: 'View in Browser'})}
-                                    />
-                                </a>
+                            <div className='login-body-message-desktop-link-wrap'>
+                                <LoginButton/>
+                                {!isDesktopApp() && (
+                                    <a href={getBrowserLink()}>
+                                        <SaveButton
+                                            saving={false}
+                                            btnClass={'btn-secondary'}
+                                            extraClasses='login-body-message-desktop-link'
+                                            defaultMessage={formatMessage({
+                                                id: 'get_app.continueToBrowser',
+                                                defaultMessage: 'View in Browser',
+                                            })}
+                                        />
+                                    </a>
+                                )}
                             </div>
                         </div>
                         <div className='login-body-message-svg'>
@@ -1042,14 +1055,16 @@ const Login = ({onCustomizeHeader}: LoginProps) => {
                         </div>
                     </div>
                     <div className={classNames('login-body-message-bottom')}>
-                        <div className='login-body-message-link-wrap'>
-                            {formatMessage({id: 'login.installPC', defaultMessage: 'Install now'})}
-                            <div className='link-wrap'>
-                                {getWindowsInstallLink()}
-                                {getLinuxInstallLink()}
-                                {getMacInstallLink()}
+                        {!isDesktopApp() && (
+                            <div className='login-body-message-link-wrap'>
+                                {formatMessage({id: 'login.installPC', defaultMessage: 'Install now'})}
+                                <div className='link-wrap'>
+                                    {getWindowsInstallLink()}
+                                    {getLinuxInstallLink()}
+                                    {getMacInstallLink()}
+                                </div>
                             </div>
-                        </div>
+                        )}
                         <div className='login-body-message-link-wrap'>
                             {formatMessage({id: 'login.installApp', defaultMessage: 'Use Mobile App'})}
                             <div className='link-wrap'>

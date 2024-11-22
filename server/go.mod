@@ -7,8 +7,6 @@ toolchain go1.22.7
 require (
 	code.sajari.com/docconv/v2 v2.0.0-pre.4
 	git.biggo.com/Funmula/BigGoChat/server/public v0.0.0-20241021111751-7ebfd4fcb462
-	git.biggo.com/Funmula/mattermost-packages/grpc v0.0.0-20240531034050-3d22f388694c
-	git.biggo.com/Funmula/mattermost-packages/pluginAPI v0.0.0-20240531034050-3d22f388694c
 	github.com/Masterminds/semver/v3 v3.2.1
 	github.com/avct/uasurfer v0.0.0-20191028135549-26b5daa857f1
 	github.com/aws/aws-sdk-go v1.50.27
