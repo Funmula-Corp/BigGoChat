@@ -500,6 +500,18 @@ export default class LinkingLandingPage extends PureComponent<Props, State> {
     render() {
         const isMobile = UserAgent.isMobile();
 
+        if (UserAgent.isMobile()) {
+            if (UserAgent.isAndroidWeb()) {
+                const timeout = setTimeout(() => {
+                    window.location.replace(this.getDownloadLink()!);
+                }, 2000);
+                window.addEventListener('blur', () => {
+                    clearTimeout(timeout);
+                });
+            }
+            window.location.replace(this.state.nativeLocation);
+        }
+
         if (this.checkLandingPreferenceBrowser() || this.isEmbedded()) {
             this.openInBrowser();
             return null;
