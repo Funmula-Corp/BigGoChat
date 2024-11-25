@@ -85,10 +85,16 @@ type Props = {
      * Set to hide the close button
      */
     hideClose?: boolean;
+
+    /*
+     * Set to allow hide
+     */
+    allowHide?: boolean;
 };
 
 type State = {
     checked: boolean;
+    show: boolean;
 }
 
 export default class ConfirmModal extends React.Component<Props, State> {
@@ -105,6 +111,7 @@ export default class ConfirmModal extends React.Component<Props, State> {
 
         this.state = {
             checked: false,
+            show: true,
         };
     }
 
@@ -121,10 +128,16 @@ export default class ConfirmModal extends React.Component<Props, State> {
 
     handleConfirm = () => {
         this.props.onConfirm?.(this.state.checked);
+        if (this.props.allowHide) {
+            this.setState({show: false});
+        }
     };
 
     handleCancel = () => {
         this.props.onCancel?.(this.state.checked);
+        if (this.props.allowHide) {
+            this.setState({show: false});
+        }
     };
 
     render() {
@@ -175,7 +188,7 @@ export default class ConfirmModal extends React.Component<Props, State> {
                 id={classNames('confirmModal', this.props.id)}
                 className={'modal-confirm ' + this.props.modalClass}
                 dialogClassName='a11y__modal'
-                show={this.props.show}
+                show={this.props.show && this.state.show}
                 onHide={this.handleCancel}
                 onExited={this.props.onExited}
                 role='dialog'
