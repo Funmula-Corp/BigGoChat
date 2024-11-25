@@ -118,7 +118,8 @@ export default class ConfirmModal extends React.Component<Props, State> {
     shouldComponentUpdate(nextProps: Props, nextState: State) {
         return (
             nextProps.show !== this.props.show ||
-            nextState.checked !== this.state.checked
+            nextState.checked !== this.state.checked ||
+            nextState.show !== this.state.show
         );
     }
 
