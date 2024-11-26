@@ -55,6 +55,10 @@ export function sendDesktopNotification(post, msgProps) {
         const state = getState();
         const currentUserId = getCurrentUserId(state);
 
+        if (post.type === 'custom_llmbot') {
+            return {status: 'not_sent', reason: 'llmbot_post'};
+        }
+
         if ((currentUserId === post.user_id && post.props.from_webhook !== 'true')) {
             return {status: 'not_sent', reason: 'own_post'};
         }
