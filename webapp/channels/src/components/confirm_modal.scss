@@ -2,11 +2,16 @@
     margin-right: auto;
 }
 
-.modal.in.modal-confirm.biggo {
+.modal.modal-confirm.biggo {
+    &.in {
+        .modal-dialog {
+            transform: translate(0, -50%);
+        }
+    }
+
     .modal-dialog {
         margin: 0 auto;
         top: 50%;
-        transform: translate(0, -50%);
 
         .modal-content {
             padding: 8px 16px 32px 16px;
