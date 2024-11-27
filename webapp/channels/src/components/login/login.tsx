@@ -917,13 +917,23 @@ const Login = ({onCustomizeHeader}: LoginProps) => {
         );
     };
 
+    const handleLogin = (e: React.MouseEvent) => {
+        e.preventDefault();
+        if (isDesktopApp()) {
+            desktopExternalAuth(getBrowserLink())(e);
+        } else {
+            window.location.href = getDesktopAppLink();
+        }
+    };
+
     const LoginButton = () => {
         const LinkComponent = isDesktopApp() ? ExternalLink : 'a';
 
         return (
             <LinkComponent
                 location='login_page'
-                href={isDesktopApp() ? getBrowserLink() : getDesktopAppLink()}
+                href='#'
+                onClick={handleLogin}
             >
                 <SaveButton
                     extraClasses={`login-body-message-desktop-link ${isDesktopApp() ? 'login' : ''}`}
