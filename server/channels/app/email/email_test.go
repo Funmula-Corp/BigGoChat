@@ -9,8 +9,9 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"git.biggo.com/Funmula/BigGoChat/server/v8/platform/shared/mail"
 	"git.biggo.com/Funmula/BigGoChat/server/public/model"
+	"git.biggo.com/Funmula/BigGoChat/server/public/shared/i18n"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/platform/shared/mail"
 )
 
 func TestCondenseSiteURL(t *testing.T) {
@@ -75,7 +76,7 @@ func TestSendInviteEmails(t *testing.T) {
 	t.Run("SendInviteEmails", func(t *testing.T) {
 		mail.DeleteMailBox(emailTo)
 
-		err := th.service.SendInviteEmails(th.BasicTeam, "test-user", th.BasicUser.Id, []string{emailTo}, "http://testserver", nil, false, false, false)
+		err := th.service.SendInviteEmails(th.BasicTeam, "test-user", th.BasicUser.Id, []string{emailTo}, "http://testserver", nil, false, false, false, "")
 		require.NoError(t, err)
 
 		verifyMailbox(t)
@@ -92,10 +93,10 @@ func TestSendInviteEmails(t *testing.T) {
 			*cfg.EmailSettings.SMTPPort = originalPort
 		})
 
-		err := th.service.SendInviteEmails(th.BasicTeam, "test-user", th.BasicUser.Id, []string{emailTo}, "http://testserver", nil, true, false, false)
+		err := th.service.SendInviteEmails(th.BasicTeam, "test-user", th.BasicUser.Id, []string{emailTo}, "http://testserver", nil, true, false, false, "")
 		require.Error(t, err)
 
-		err = th.service.SendInviteEmails(th.BasicTeam, "test-user", th.BasicUser.Id, []string{emailTo}, "http://testserver", nil, false, false, false)
+		err = th.service.SendInviteEmails(th.BasicTeam, "test-user", th.BasicUser.Id, []string{emailTo}, "http://testserver", nil, false, false, false, "")
 		require.NoError(t, err)
 	})
 
@@ -200,6 +201,7 @@ func TestSendInviteEmails(t *testing.T) {
 			false,
 			false,
 			false,
+			"",
 		)
 		require.NoError(t, err)
 
@@ -220,6 +222,7 @@ func TestSendInviteEmails(t *testing.T) {
 			false,
 			true,
 			false,
+			"",
 		)
 		require.NoError(t, err)
 
@@ -240,11 +243,33 @@ func TestSendInviteEmails(t *testing.T) {
 			false,
 			true,
 			true,
+			"",
 		)
 		require.NoError(t, err)
 
 		email := retrieveEmail(t)
 		require.Contains(t, email.Body.HTML, "&amp;sbr=fa")
+	})
+
+	t.Run("SendInviteEmails should use locale", func(t *testing.T) {
+		mail.DeleteMailBox(emailTo)
+
+		err := th.service.SendInviteEmails(th.BasicTeam,
+			"test-user",
+			th.BasicUser.Id,
+			[]string{emailTo},
+			"http://testserver",
+			nil,
+			false,
+			false,
+			false,
+			"zh-TW",
+		)
+		require.NoError(t, err)
+
+		email := retrieveEmail(t)
+		T := i18n.GetUserTranslations("zh-TW")
+		require.Contains(t, email.Body.HTML, T("api.templates.invite_body.title", map[string]any{"SenderName": "test-user", "TeamDisplayName": th.BasicTeam.DisplayName}))
 	})
 }
 

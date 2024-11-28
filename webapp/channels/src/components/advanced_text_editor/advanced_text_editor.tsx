@@ -25,6 +25,7 @@ import KeyboardShortcutSequence, {KEYBOARD_SHORTCUTS} from 'components/keyboard_
 import MessageSubmitError from 'components/message_submit_error';
 import MsgTyping from 'components/msg_typing';
 import OverlayTrigger from 'components/overlay_trigger';
+import SaveButton from 'components/save_button';
 import RhsSuggestionList from 'components/suggestion/rhs_suggestion_list';
 import SuggestionList from 'components/suggestion/suggestion_list';
 import Textbox from 'components/textbox';
@@ -50,7 +51,6 @@ import SendButton from './send_button';
 import ShowFormat from './show_formatting';
 import TexteditorActions from './texteditor_actions';
 import ToggleFormattingBar from './toggle_formatting_bar';
-import SaveButton from 'components/save_button';
 
 import './advanced_text_editor.scss';
 
@@ -122,6 +122,7 @@ type Props = {
     caretPosition: number;
     placeholder?: string;
     isPhoneVerified: boolean;
+    isBot?: boolean;
 }
 
 const AdvanceTextEditor = ({
@@ -186,6 +187,7 @@ const AdvanceTextEditor = ({
     caretPosition,
     placeholder,
     isPhoneVerified: isVerified,
+    isBot,
 }: Props) => {
     const readOnlyChannel = !canPost;
     const {formatMessage} = useIntl();
@@ -230,7 +232,7 @@ const AdvanceTextEditor = ({
 
     // TODO i18n
     let verifiedButton = null;
-    if (!isVerified) {
+    if (!isVerified && !isBot) {
         const onClick = () => window.location.href = "https://account.biggo.com/setting/phone";
         verifiedButton = (
             <div className={classNames('AdvancedTextEditor__verified-button')}>
@@ -360,7 +362,7 @@ const AdvanceTextEditor = ({
             },
             {channelDisplayName: currentChannel.display_name},
         );
-    } else if (!isVerified) {
+    } else if (!isVerified && !isBot) {
         // TODO i18n
         createMessage = '為確保傳送訊息的安全性, 請先完成身份認證, 才能傳送訊息。';
     } else if (readOnlyChannel) {
@@ -679,7 +681,7 @@ const AdvanceTextEditor = ({
                     'AdvancedTextEditor__attachment-disabled': !canUploadFiles,
                     scroll: renderScrollbar,
                     'formatting-bar': showFormattingBar,
-                    'not-verified': !isVerified,
+                    'not-verified': !isVerified && !isBot,
                 })}
             >
                 {!wasNotifiedOfLogIn && (
@@ -695,7 +697,7 @@ const AdvanceTextEditor = ({
                 )}
                 <div
                     className={'AdvancedTextEditor__body'}
-                    disabled={readOnlyChannel && isVerified}
+                    disabled={readOnlyChannel && (isVerified || isBot)}
                 >
                     <div
                         ref={editorBodyRef}
@@ -726,7 +728,7 @@ const AdvanceTextEditor = ({
                             channelId={channelId}
                             id={textboxId}
                             ref={textboxRef!}
-                            disabled={readOnlyChannel || !isVerified}
+                            disabled={readOnlyChannel || (!isVerified && !isBot)}
                             characterLimit={maxPostSize}
                             preview={shouldShowPreview}
                             badConnection={badConnection}
@@ -744,7 +746,7 @@ const AdvanceTextEditor = ({
                                 {showFormatJSX}
                             </TexteditorActions>
                         )}
-                        {isVerified && (showFormattingSpacer || shouldShowPreview || attachmentPreview || isRHS) ? (
+                        {(isVerified || isBot) && (showFormattingSpacer || shouldShowPreview || attachmentPreview || isRHS) ? (
                             <FormattingBarSpacer>
                                 {formattingBar}
                             </FormattingBarSpacer>
