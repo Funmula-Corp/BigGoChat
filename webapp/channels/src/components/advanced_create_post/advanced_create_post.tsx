@@ -163,6 +163,8 @@ export type Props = {
 
     isPhoneVerified: boolean;
 
+    isBot?: boolean;
+
     actions: {
 
         //Set show preview for textbox
@@ -1444,6 +1446,7 @@ class AdvancedCreatePost extends React.PureComponent<Props, State> {
                     maxPostSize={this.props.maxPostSize}
                     canPost={canPost}
                     isPhoneVerified={this.props.isPhoneVerified}
+                    isBot={this.props.isBot}
                     applyMarkdown={this.applyMarkdown}
                     useChannelMentions={this.props.useChannelMentions}
                     badConnection={this.props.badConnection}

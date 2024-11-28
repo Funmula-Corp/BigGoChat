@@ -22,6 +22,7 @@ const ExportedCreatePost = (props: Partial<Props>) => {
             onMoveHistoryIndexForward={() => null}
             onEditLatestPost={() => ({data: true})}
             isPlugin={true}
+            isBot={props.isBot}
             {...props}
         />
     );

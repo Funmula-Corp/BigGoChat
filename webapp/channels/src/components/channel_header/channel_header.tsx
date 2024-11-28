@@ -639,7 +639,9 @@ class ChannelHeader extends React.PureComponent<Props, State> {
                         channel={channel}
                         channelMember={channelMember}
                     />
-                    <CallButton/>
+                    {!dmUser?.is_bot && (
+                        <CallButton/>
+                    )}
                     <ChannelInfoButton channel={channel}/>
                 </div>
             </div>
