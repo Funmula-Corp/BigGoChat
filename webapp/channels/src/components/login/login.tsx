@@ -151,6 +151,18 @@ const Login = ({onCustomizeHeader}: LoginProps) => {
     const enableSignUpWithSaml = isLicensed && enableSaml;
     const siteName = SiteName ?? '';
 
+    const downloadLinks = {
+        window64Link: 'https://img.bgo.one/biggo-chat-download/biggo-chat-setup-5.10.0-win.exe',
+        macARMLink: 'https://img.bgo.one/biggo-chat-download/biggo-chat-5.10.0-mac-arm64.dmg',
+        macIntelLink: 'https://img.bgo.one/biggo-chat-download/biggo-chat-5.10.0-mac-x64.dmg',
+        linuxDEBLink: 'https://img.bgo.one/biggo-chat-download/biggo-chat_5.10.0_amd64.deb',
+        linuxRPMLink: 'https://img.bgo.one/biggo-chat-download/biggo-chat-5.10.0-linux-x86_64.rpm',
+        linuxAPPIMAGELink: 'https://img.bgo.one/biggo-chat-download/biggo-chat-5.10.0-linux-x86_64.AppImage',
+        linuxTARGZLink: 'https://img.bgo.one/biggo-chat-download/biggo-chat-5.10.0-linux-x64.tar.gz',
+        iosAppLink: '#',
+        androidAppLink: '#',
+    };
+
     const enableBaseLogin = enableSignInWithEmail || enableSignInWithUsername || ldapEnabled;
     const enableExternalSignup = enableSignUpWithGitLab || enableSignUpWithOffice365 || enableSignUpWithGoogle || enableSignUpWithBiggo || enableSignUpWithOpenId || enableSignUpWithSaml;
     const showSignup = enableOpenServer && (enableExternalSignup || enableSignUpWithEmail || enableLdap);
@@ -802,16 +814,9 @@ const Login = ({onCustomizeHeader}: LoginProps) => {
                     <div className='login-body-download-link-wrap'>
                         <ExternalLink
                             location='login_page'
-                            href='https://img.bgo.one/biggo-chat-download/biggo-chat-setup-5.9.0-win.exe'
+                            href={downloadLinks.window64Link}
                         >
-                            {'64bit'}
-                        </ExternalLink>
-                        {'/'}
-                        <ExternalLink
-                            location='login_page'
-                            href='https://img.bgo.one/biggo-chat-download/biggo-chat-setup-5.9.1-win.exe'
-                        >
-                            {'ARM 64bit'}
+                            {'64bit/ARM 64bit'}
                         </ExternalLink>
                     </div>
                 </div>
@@ -831,28 +836,28 @@ const Login = ({onCustomizeHeader}: LoginProps) => {
                     <div className='login-body-download-link-wrap'>
                         <ExternalLink
                             location='login_page'
-                            href='https://img.bgo.one/biggo-chat-download/biggo-chat_5.9.0-1_amd64.deb'
+                            href={downloadLinks.linuxDEBLink}
                         >
                             {'DEB'}
                         </ExternalLink>
                         {'/'}
                         <ExternalLink
                             location='login_page'
-                            href='https://img.bgo.one/biggo-chat-download/biggo-chat-5.9.0-linux-x86_64.rpm'
+                            href={downloadLinks.linuxRPMLink}
                         >
                             {'RPM'}
                         </ExternalLink>
                         {'/'}
                         <ExternalLink
                             location='login_page'
-                            href='https://img.bgo.one/biggo-chat-download/biggo-chat-5.9.0-linux-x86_64.AppImage'
+                            href={downloadLinks.linuxAPPIMAGELink}
                         >
                             {'APPIMAGE'}
                         </ExternalLink>
                         {'/'}
                         <ExternalLink
                             location='login_page'
-                            href='https://img.bgo.one/biggo-chat-download/biggo-chat-5.9.1-linux-x64.tar.gz'
+                            href={downloadLinks.linuxTARGZLink}
                         >
                             {'TAR.GZ'}
                         </ExternalLink>
@@ -874,14 +879,14 @@ const Login = ({onCustomizeHeader}: LoginProps) => {
                     <div className='login-body-download-link-wrap'>
                         <ExternalLink
                             location='login_page'
-                            href='https://img.bgo.one/biggo-chat-download/biggo-chat-5.9.0-mac-arm64.dmg'
+                            href={downloadLinks.macARMLink}
                         >
                             {'ARM'}
                         </ExternalLink>
                         {'/'}
                         <ExternalLink
                             location='login_page'
-                            href='https://img.bgo.one/biggo-chat-download/biggo-chat-5.9.0-mac-x64.dmg'
+                            href={downloadLinks.macIntelLink}
                         >
                             {'Intel'}
                         </ExternalLink>
@@ -896,7 +901,7 @@ const Login = ({onCustomizeHeader}: LoginProps) => {
             <div className='login-body-card-ios-link'>
                 <ExternalLink
                     location='login_page'
-                    href='#'
+                    href={downloadLinks.iosAppLink}
                 >
                     <AppStorePNG/>
                 </ExternalLink>
@@ -909,7 +914,7 @@ const Login = ({onCustomizeHeader}: LoginProps) => {
             <div className='login-body-card-ios-link'>
                 <ExternalLink
                     location='login_page'
-                    href='#'
+                    href={downloadLinks.androidAppLink}
                 >
                     <PlayStorePNG/>
                 </ExternalLink>
