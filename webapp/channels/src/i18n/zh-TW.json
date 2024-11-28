@@ -3517,7 +3517,7 @@
     "edit_post.action_buttons.save": "儲存",
     "edit_post.editPost": "編輯貼文...",
     "edit_post.helper_text": "<strong>{key}ENTER</strong> 以儲存，<strong>ESC</strong> 以取消",
-    "edit_post.no_notification_trigger_on_mention": "",
+    "edit_post.no_notification_trigger_on_mention": "使用「@提及」編輯此訊息將不會通知收件人。",
     "edit_post.time_limit_button.for_n_seconds": "{n} 秒內",
     "edit_post.time_limit_button.no_limit": "任何時候",
     "edit_post.time_limit_modal.description": "設定時間限制將**套用於所有使用者**，只要他們在任何權限方案中具有「編輯貼文」權限。",
@@ -5857,5 +5857,6 @@
     "create_post.blocked": "您無法與已封鎖的用戶互相傳送訊息。",
     "next_steps_view.welcomeToBigGoChat": "歡迎使用 BigGo Chat",
     "login.teamInfo": "Team 是為您的好友、公司、部門或專案團隊設置的數位空間，包含多個 Channel 和成員，方便大家在同一平台上溝通合作。透過集中管理，成員可以快速找到所需的資訊、文件和工具，提升工作效率。",
-    "login.channelInfo": "Channel 是 Team 的子單元，專為特定話題、專案或團隊設定。在 Chat 中，每個 Channel 都是討論空間，讓成員就不同議題進行對話。Channel 可設為公開 (Public)，讓所有 Team 成員加入，或私密 (Private)，僅限邀請成員參與。它們有助於分類溝通，使資訊更易於查找和追蹤。"
+    "login.channelInfo": "Channel 是 Team 的子單元，專為特定話題、專案或團隊設定。在 Chat 中，每個 Channel 都是討論空間，讓成員就不同議題進行對話。Channel 可設為公開 (Public)，讓所有 Team 成員加入，或私密 (Private)，僅限邀請成員參與。它們有助於分類溝通，使資訊更易於查找和追蹤。",
+    "generic_icons.biggochat": "BigGo Chat 標誌"
 }
