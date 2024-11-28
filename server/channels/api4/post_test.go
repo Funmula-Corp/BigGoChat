@@ -4481,3 +4481,79 @@ func TestDirectChannelDeletePost(t *testing.T) {
 	require.Error(t, err)
 	CheckForbiddenStatus(t, resp)
 }
+
+func TestCreatePostUserRestricted(t *testing.T) {
+	th := Setup(t).InitBasic()
+	defer th.TearDown()
+	client := th.Client
+
+	unverifiedUser := th.CreateUser()
+	require.False(t, unverifiedUser.IsVerified())
+	channel, _, err := client.CreateDirectChannel(context.Background(), th.BasicUser.Id, unverifiedUser.Id)
+	require.NoError(t, err)
+
+	// post with verified user
+	post := &model.Post{
+		ChannelId: channel.Id,
+		Message:   "should post this message",
+		UserId:    th.BasicUser.Id,
+	}
+	_, resp, err := client.CreatePost(context.Background(), post)
+	require.NoError(t, err)
+	CheckCreatedStatus(t, resp)
+
+	// login as unverified user
+	client.Login(context.Background(), unverifiedUser.Email, unverifiedUser.Password)
+
+	// post with unverified user
+	post = &model.Post{
+		ChannelId: channel.Id,
+		Message:   "should not post this message",
+		UserId:    unverifiedUser.Id,
+	}
+	_, resp, err = client.CreatePost(context.Background(), post)
+	require.Error(t, err)
+	CheckForbiddenStatus(t, resp)
+
+	// allow unverified messages
+	pref := model.Preference{
+		UserId: th.BasicUser.Id,
+		Category: model.PreferenceCategoryPrivacySettings,
+		Name: model.PreferenceNameAllowUnverifiedMessage,
+		Value: "true",
+	}
+	appErr := th.App.UpdatePreferences(th.Context, th.BasicUser.Id, model.Preferences{pref})
+	require.Nil(t, appErr)
+
+	// post with unverified user
+	_, resp, err = client.CreatePost(context.Background(), post)
+	require.NoError(t, err)
+	CheckCreatedStatus(t, resp)
+
+	// create bot user
+	bot := &model.Bot{
+		Username:    "testbot",
+		DisplayName: "Test Bot",
+		OwnerId:     th.BasicUser.Id,
+	}
+	bot, appErr = th.App.CreateBot(th.Context, bot)
+	require.Nil(t, appErr)
+
+	// convert bot to user
+	botUser, appErr := th.App.GetUser(bot.UserId)
+	require.Nil(t, appErr)
+
+	// create DM channel between unverified user and bot
+	channel, _, err = client.CreateDirectChannel(context.Background(), unverifiedUser.Id, botUser.Id)
+	require.NoError(t, err)
+
+	// post with unverified user to bot DM
+	post = &model.Post{
+		ChannelId: channel.Id,
+		Message:   "should post this message to bot",
+		UserId:    unverifiedUser.Id,
+	}
+	_, resp, err = client.CreatePost(context.Background(), post)
+	require.NoError(t, err)
+	CheckCreatedStatus(t, resp)
+}
