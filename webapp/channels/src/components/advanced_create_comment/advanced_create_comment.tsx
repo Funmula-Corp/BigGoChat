@@ -173,6 +173,8 @@ export type Props = {
     // phone verified
     isPhoneVerified: boolean;
 
+    isBot?: boolean;
+
     // Group member mention
     getChannelMemberCountsByGroup: (channelID: string) => void;
     groupsWithAllowReference: Map<string, Group> | null;
@@ -1125,6 +1127,7 @@ class AdvancedCreateComment extends React.PureComponent<Props, State> {
                     caretPosition={this.state.caretPosition}
                     placeholder={this.props.placeholder}
                     isPhoneVerified={this.props.isPhoneVerified}
+                    isBot={this.props.isBot}
                 />
             </form>
         );

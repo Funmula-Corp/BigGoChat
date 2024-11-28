@@ -101,6 +101,7 @@ const CreateComment = forwardRef<HTMLDivElement, Props>(({
                 rootDeleted={rootDeleted}
                 rootId={threadId}
                 isThreadView={isThreadView}
+                isBot={teammate?.is_bot}
             />
         </div>
     );

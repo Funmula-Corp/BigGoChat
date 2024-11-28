@@ -8,7 +8,7 @@ import type {Dispatch} from 'redux';
 import {getChannelTimezones, getChannelMemberCountsByGroup} from 'mattermost-redux/actions/channels';
 import {moveHistoryIndexBack, moveHistoryIndexForward, resetCreatePostRequest, resetHistoryIndex} from 'mattermost-redux/actions/posts';
 import {savePreferences} from 'mattermost-redux/actions/preferences';
-import {Permissions, Preferences, Posts, General} from 'mattermost-redux/constants';
+import {Permissions, Preferences, Posts} from 'mattermost-redux/constants';
 import {getAllChannelStats, getChannelMemberCountsByGroup as selectChannelMemberCountsByGroup} from 'mattermost-redux/selectors/entities/channels';
 import {getCurrentUserId} from 'mattermost-redux/selectors/entities/common';
 import {getConfig, getLicense} from 'mattermost-redux/selectors/entities/general';
@@ -16,7 +16,10 @@ import {getAssociatedGroupsForReferenceByMention} from 'mattermost-redux/selecto
 import {makeGetMessageInHistoryItem} from 'mattermost-redux/selectors/entities/posts';
 import {getBool, isCustomGroupsEnabled} from 'mattermost-redux/selectors/entities/preferences';
 import {haveIChannelPermission} from 'mattermost-redux/selectors/entities/roles';
+import {haveIVerified} from 'mattermost-redux/selectors/entities/roles_helpers';
 import {getCurrentTeamId} from 'mattermost-redux/selectors/entities/teams';
+import {getThread} from 'mattermost-redux/selectors/entities/threads';
+import {getUser} from 'mattermost-redux/selectors/entities/users';
 
 import {emitShortcutReactToLastPostFrom} from 'actions/post_actions';
 import {
@@ -42,13 +45,13 @@ import type {PostDraft} from 'types/store/draft';
 import type {GlobalState} from 'types/store/index.js';
 
 import AdvancedCreateComment from './advanced_create_comment';
-import { haveIVerified } from 'mattermost-redux/selectors/entities/roles_helpers';
 
 type OwnProps = {
     rootId: string;
     channelId: string;
     latestPostId: string;
     isPlugin?: boolean;
+    isBot?: boolean;
 };
 
 function makeMapStateToProps() {
@@ -68,6 +71,7 @@ function makeMapStateToProps() {
         const config = getConfig(state);
         const license = getLicense(state);
         const isPhoneVerified = haveIVerified(state);
+        const isBot = ownProps.isBot || false;
         const currentUserId = getCurrentUserId(state);
         const enableConfirmNotificationsToChannel = config.EnableConfirmNotificationsToChannel === 'true';
         const enableEmojiPicker = config.EnableEmojiPicker === 'true';
@@ -115,6 +119,7 @@ function makeMapStateToProps() {
             postEditorActions,
             shouldFocusRHS,
             isPhoneVerified,
+            isBot,
         };
     };
 }

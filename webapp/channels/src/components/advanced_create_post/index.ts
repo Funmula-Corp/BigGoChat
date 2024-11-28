@@ -28,6 +28,7 @@ import {
 } from 'mattermost-redux/selectors/entities/posts';
 import {get, getInt, getBool, isCustomGroupsEnabled} from 'mattermost-redux/selectors/entities/preferences';
 import {haveICurrentChannelPermission} from 'mattermost-redux/selectors/entities/roles';
+import {haveIVerified} from 'mattermost-redux/selectors/entities/roles_helpers';
 import {getCurrentTeamId} from 'mattermost-redux/selectors/entities/teams';
 import {getCurrentUserId, getStatusForUserId, getUser, isCurrentUserGuestUser} from 'mattermost-redux/selectors/entities/users';
 import type {ActionFuncAsync} from 'mattermost-redux/types/actions.js';
@@ -57,18 +58,23 @@ import type {PostDraft} from 'types/store/draft';
 import type {GlobalState} from 'types/store/index.js';
 
 import AdvancedCreatePost from './advanced_create_post';
-import { haveIVerified } from 'mattermost-redux/selectors/entities/roles_helpers';
+
+type OwnProps = {
+    isBot?: boolean;
+};
 
 function makeMapStateToProps() {
     const getMessageInHistoryItem = makeGetMessageInHistoryItem(Posts.MESSAGE_TYPES.POST as any);
     const getChannelDraft = makeGetChannelDraft();
 
-    return (state: GlobalState) => {
+    return (state: GlobalState, ownProps: OwnProps) => {
         const config = getConfig(state);
         const license = getLicense(state);
         const isPhoneVerified = haveIVerified(state);
         const currentChannel = getCurrentChannel(state);
-        const currentChannelTeammateUsername = currentChannel ? getUser(state, currentChannel.teammate_id || '')?.username : undefined;
+        const currentChannelTeammate = currentChannel ? getUser(state, currentChannel.teammate_id || '') : undefined;
+        const isBot = Boolean(currentChannelTeammate && currentChannelTeammate.is_bot) || ownProps.isBot;
+        const currentChannelTeammateUsername = currentChannelTeammate ? currentChannelTeammate.username : undefined;
         const draft = getChannelDraft(state, currentChannel?.id || '');
         const isRemoteDraft = (currentChannel && state.views.drafts.remotes[`${StoragePrefixes.DRAFT}${currentChannel.id}`]) || false;
         const latestReplyablePostId = getLatestReplyablePostId(state);
@@ -137,6 +143,7 @@ function makeMapStateToProps() {
             isPostPriorityEnabled: isPostPriorityEnabled(state),
             postEditorActions,
             isPhoneVerified,
+            isBot,
         };
     };
 }
