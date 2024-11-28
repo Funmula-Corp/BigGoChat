@@ -1325,7 +1325,7 @@ func (a *App) UpdateUser(c request.CTX, user *model.User, sendNotifications bool
 		}
 	}
 
-	if sendNotifications {
+	if sendNotifications && prev.DeleteAt == 0 && newUser.DeleteAt == 0 && userUpdate.Old.DeleteAt == 0 {
 		if newUser.Email != userUpdate.Old.Email || newEmail != "" {
 			if *a.Config().EmailSettings.RequireEmailVerification {
 				a.Srv().Go(func() {
@@ -2927,7 +2927,7 @@ func (a *App) MarkUserVerified(c request.CTX, id string) *model.AppError {
 	if err != nil {
 		return model.NewAppError("AddVerifiedRoleToUser", "app.user.get.app_error", nil, "", http.StatusInternalServerError).Wrap(err)
 	}
-	if user.AddRole(model.SystemVerifiedRoleId){
+	if user.AddRole(model.SystemVerifiedRoleId) {
 		uu, err := a.Srv().Store().User().Update(c, user, true)
 		if err != nil {
 			return model.NewAppError("AddVerifiedRoleToUser", "app.user.update_role.app_error", nil, "", http.StatusInternalServerError).Wrap(err)
@@ -2981,8 +2981,7 @@ func (a *App) getAllSystemAdmins() ([]*model.User, *model.AppError) {
 	return a.GetUsersFromProfiles(userOptions)
 }
 
-
-func (a * App) RefreshScheme(rctx request.CTX, user *model.User) *model.AppError {
+func (a *App) RefreshScheme(rctx request.CTX, user *model.User) *model.AppError {
 	err := a.Srv().Store().User().UpdateMemberVerifiedStatus(rctx, user)
 	if err != nil {
 		return model.NewAppError("RefreshScheme", "app.user.refresh_scheme.app_error", nil, "", http.StatusInternalServerError).Wrap(err)

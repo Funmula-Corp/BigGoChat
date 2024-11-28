@@ -29,6 +29,7 @@ const (
 	NotificationReasonChannelMuted                       NotificationReason = "channel_muted"
 	NotificationReasonSystemMessage                      NotificationReason = "system_message"
 	NotificationReasonLevelSetToNone                     NotificationReason = "notify_level_none"
+	NotificationReasonDontSendNotifications              NotificationReason = "dont_send_notifications"
 	NotificationReasonNotMentioned                       NotificationReason = "not_mentioned"
 	NotificationReasonUserStatus                         NotificationReason = "user_status"
 	NotificationReasonUserIsActive                       NotificationReason = "user_is_active"

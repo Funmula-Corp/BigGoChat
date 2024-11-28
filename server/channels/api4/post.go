@@ -102,14 +102,25 @@ func createPost(c *Context, w http.ResponseWriter, r *http.Request) {
 						break
 					}
 				}
-				pref, prefErr := c.App.GetPreferenceByCategoryAndNameForUser(c.AppContext, otherMember.UserId, model.PreferenceCategoryPrivacySettings, model.PreferenceNameAllowUnverifiedMessage)
+				otherUser, err := c.App.GetUser(otherMember.UserId)
+				if err != nil {
+					c.Err = err
+					return
+				}
+
 				acceptsDM := false
-				if prefErr == nil {
-					if parseErr := json.Unmarshal([]byte(pref.Value), &acceptsDM); parseErr != nil {
-						c.Err = model.NewAppError("createPost", "api.unmarshal_error", nil, "", http.StatusBadRequest).Wrap(parseErr)
-						return
+				if otherUser.IsBot {
+					acceptsDM = true
+				} else {
+					pref, prefErr := c.App.GetPreferenceByCategoryAndNameForUser(c.AppContext, otherMember.UserId, model.PreferenceCategoryPrivacySettings, model.PreferenceNameAllowUnverifiedMessage)
+					if prefErr == nil {
+						if parseErr := json.Unmarshal([]byte(pref.Value), &acceptsDM); parseErr != nil {
+							c.Err = model.NewAppError("createPost", "api.unmarshal_error", nil, "", http.StatusBadRequest).Wrap(parseErr)
+							return
+						}
 					}
 				}
+
 				if !acceptsDM {
 					c.Err = model.NewAppError("createPost", "api.channel.create_post.direct_channel.user_restricted_error", nil, "", http.StatusForbidden)
 					return
