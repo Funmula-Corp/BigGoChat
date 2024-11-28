@@ -1468,6 +1468,7 @@ func TestInviteNewUsersToTeamGracefully(t *testing.T) {
 			true,
 			false,
 			false,
+			mock.AnythingOfType("string"),
 		).Once().Return(nil)
 		emailServiceMock.On("Stop").Once().Return()
 		th.App.Srv().EmailService = &emailServiceMock
@@ -1493,6 +1494,7 @@ func TestInviteNewUsersToTeamGracefully(t *testing.T) {
 			true,
 			false,
 			false,
+			mock.AnythingOfType("string"),
 		).Once().Return(email.SendMailError)
 		emailServiceMock.On("Stop").Once().Return()
 		th.App.Srv().EmailService = &emailServiceMock
@@ -1522,6 +1524,7 @@ func TestInviteNewUsersToTeamGracefully(t *testing.T) {
 			true,
 			false,
 			false,
+			mock.AnythingOfType("string"),
 		).Once().Return([]*model.EmailInviteWithError{}, nil)
 		emailServiceMock.On("Stop").Once().Return()
 		th.App.Srv().EmailService = &emailServiceMock
@@ -1547,6 +1550,7 @@ func TestInviteNewUsersToTeamGracefully(t *testing.T) {
 			true,
 			false,
 			false,
+			mock.AnythingOfType("string"),
 		).Once().Return(nil)
 		emailServiceMock.On("Stop").Once().Return()
 		th.App.Srv().EmailService = &emailServiceMock

@@ -15,11 +15,11 @@ import (
 
 	"github.com/pkg/errors"
 
-	"git.biggo.com/Funmula/BigGoChat/server/v8/platform/shared/mail"
-	"git.biggo.com/Funmula/BigGoChat/server/v8/platform/shared/templates"
 	"git.biggo.com/Funmula/BigGoChat/server/public/model"
 	"git.biggo.com/Funmula/BigGoChat/server/public/shared/i18n"
 	"git.biggo.com/Funmula/BigGoChat/server/public/shared/mlog"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/platform/shared/mail"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/platform/shared/templates"
 
 	"github.com/microcosm-cc/bluemonday"
 )
@@ -400,7 +400,9 @@ func (es *Service) SendInviteEmails(
 	errorWhenNotSent bool,
 	isSystemAdmin bool,
 	isFirstAdmin bool,
+	locale string,
 ) error {
+	T := i18n.GetUserTranslations(locale)
 	if es.perHourEmailRateLimiter == nil {
 		return NoRateLimiterError
 	}
@@ -417,19 +419,19 @@ func (es *Service) SendInviteEmails(
 
 	for _, invite := range invites {
 		if invite != "" {
-			subject := i18n.T("api.templates.invite_subject",
+			subject := T("api.templates.invite_subject",
 				map[string]any{"SenderName": senderName,
 					"TeamDisplayName": team.DisplayName,
 					"SiteName":        es.config().TeamSettings.SiteName})
 
-			data := es.NewEmailTemplateData("")
+			data := es.NewEmailTemplateData(locale)
 			data.Props["SiteURL"] = siteURL
-			data.Props["SubTitle"] = i18n.T("api.templates.invite_body.subTitle")
-			data.Props["Button"] = i18n.T("api.templates.invite_body.button")
+			data.Props["SubTitle"] = T("api.templates.invite_body.subTitle")
+			data.Props["Button"] = T("api.templates.invite_body.button")
 			data.Props["SenderName"] = senderName
-			data.Props["InviteFooterTitle"] = i18n.T("api.templates.invite_body_footer.title")
-			data.Props["InviteFooterInfo"] = i18n.T("api.templates.invite_body_footer.info")
-			data.Props["InviteFooterLearnMore"] = i18n.T("api.templates.invite_body_footer.learn_more")
+			data.Props["InviteFooterTitle"] = T("api.templates.invite_body_footer.title")
+			data.Props["InviteFooterInfo"] = T("api.templates.invite_body_footer.info")
+			data.Props["InviteFooterLearnMore"] = T("api.templates.invite_body_footer.learn_more")
 
 			token := model.NewToken(
 				TokenTypeTeamInvitation,
@@ -441,9 +443,9 @@ func (es *Service) SendInviteEmails(
 			tokenProps["display_name"] = team.DisplayName
 			tokenProps["name"] = team.Name
 
-			title := i18n.T("api.templates.invite_body.title", map[string]any{"SenderName": senderName, "TeamDisplayName": team.DisplayName})
+			title := T("api.templates.invite_body.title", map[string]any{"SenderName": senderName, "TeamDisplayName": team.DisplayName})
 			if reminderData != nil {
-				reminder := i18n.T("api.templates.invite_body.title.reminder")
+				reminder := T("api.templates.invite_body.title.reminder")
 				title = fmt.Sprintf("%s: %s", reminder, title)
 				tokenProps["reminder_interval"] = reminderData.Interval
 			}
@@ -609,7 +611,9 @@ func (es *Service) SendInviteEmailsToTeamAndChannels(
 	errorWhenNotSent bool,
 	isSystemAdmin bool,
 	isFirstAdmin bool,
+	locale string,
 ) ([]*model.EmailInviteWithError, error) {
+	T := i18n.GetUserTranslations(locale)
 	if es.perHourEmailRateLimiter == nil {
 		return nil, NoRateLimiterError
 	}
@@ -626,13 +630,13 @@ func (es *Service) SendInviteEmailsToTeamAndChannels(
 
 	channelsLen := len(channels)
 
-	subject := i18n.T("api.templates.invite_team_and_channels_subject", map[string]any{
+	subject := T("api.templates.invite_team_and_channels_subject", map[string]any{
 		"SenderName":      senderName,
 		"TeamDisplayName": team.DisplayName,
 		"ChannelsLen":     channelsLen,
 		"SiteName":        es.config().TeamSettings.SiteName})
 
-	title := i18n.T("api.templates.invite_team_and_channels_body.title", map[string]any{
+	title := T("api.templates.invite_team_and_channels_body.title", map[string]any{
 		"SenderName":      senderName,
 		"ChannelsLen":     channelsLen,
 		"TeamDisplayName": team.DisplayName})
@@ -640,14 +644,14 @@ func (es *Service) SendInviteEmailsToTeamAndChannels(
 	if channelsLen == 1 {
 		channelName := channels[0].DisplayName
 
-		subject = i18n.T("api.templates.invite_team_and_channel_subject",
+		subject = T("api.templates.invite_team_and_channel_subject",
 			map[string]any{"SenderName": senderName,
 				"TeamDisplayName": team.DisplayName,
 				"ChannelName":     channelName,
 				"SiteName":        es.config().TeamSettings.SiteName},
 		)
 
-		title = i18n.T("api.templates.invite_team_and_channel_body.title", map[string]any{
+		title = T("api.templates.invite_team_and_channel_body.title", map[string]any{
 			"SenderName":      senderName,
 			"ChannelName":     channelName,
 			"TeamDisplayName": team.DisplayName,
@@ -664,14 +668,14 @@ func (es *Service) SendInviteEmailsToTeamAndChannels(
 			channelIDs = append(channelIDs, channel.Id)
 		}
 
-		data := es.NewEmailTemplateData("")
+		data := es.NewEmailTemplateData(locale)
 		data.Props["SiteURL"] = siteURL
-		data.Props["SubTitle"] = i18n.T("api.templates.invite_body.subTitle")
-		data.Props["Button"] = i18n.T("api.templates.invite_body.button")
+		data.Props["SubTitle"] = T("api.templates.invite_body.subTitle")
+		data.Props["Button"] = T("api.templates.invite_body.button")
 		data.Props["SenderName"] = senderName
-		data.Props["InviteFooterTitle"] = i18n.T("api.templates.invite_body_footer.title")
-		data.Props["InviteFooterInfo"] = i18n.T("api.templates.invite_body_footer.info")
-		data.Props["InviteFooterLearnMore"] = i18n.T("api.templates.invite_body_footer.learn_more")
+		data.Props["InviteFooterTitle"] = T("api.templates.invite_body_footer.title")
+		data.Props["InviteFooterInfo"] = T("api.templates.invite_body_footer.info")
+		data.Props["InviteFooterLearnMore"] = T("api.templates.invite_body_footer.learn_more")
 
 		if message != "" {
 			message = bluemonday.NewPolicy().Sanitize(message)
@@ -694,7 +698,7 @@ func (es *Service) SendInviteEmailsToTeamAndChannels(
 		tokenProps["name"] = team.Name
 
 		if reminderData != nil {
-			reminder := i18n.T("api.templates.invite_body.title.reminder")
+			reminder := T("api.templates.invite_body.title.reminder")
 			title = fmt.Sprintf("%s: %s", reminder, title)
 			tokenProps["reminder_interval"] = reminderData.Interval
 		}

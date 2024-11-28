@@ -290,17 +290,17 @@ func (_m *ServiceInterface) SendIPFiltersChangedEmail(_a0 string, userWhoChanged
 	return r0
 }
 
-// SendInviteEmails provides a mock function with given fields: team, senderName, senderUserId, invites, siteURL, reminderData, errorWhenNotSent, isSystemAdmin, isFirstAdmin
-func (_m *ServiceInterface) SendInviteEmails(team *model.Team, senderName string, senderUserId string, invites []string, siteURL string, reminderData *model.TeamInviteReminderData, errorWhenNotSent bool, isSystemAdmin bool, isFirstAdmin bool) error {
-	ret := _m.Called(team, senderName, senderUserId, invites, siteURL, reminderData, errorWhenNotSent, isSystemAdmin, isFirstAdmin)
+// SendInviteEmails provides a mock function with given fields: team, senderName, senderUserId, invites, siteURL, reminderData, errorWhenNotSent, isSystemAdmin, isFirstAdmin, locale
+func (_m *ServiceInterface) SendInviteEmails(team *model.Team, senderName string, senderUserId string, invites []string, siteURL string, reminderData *model.TeamInviteReminderData, errorWhenNotSent bool, isSystemAdmin bool, isFirstAdmin bool, locale string) error {
+	ret := _m.Called(team, senderName, senderUserId, invites, siteURL, reminderData, errorWhenNotSent, isSystemAdmin, isFirstAdmin, locale)
 
 	if len(ret) == 0 {
 		panic("no return value specified for SendInviteEmails")
 	}
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(*model.Team, string, string, []string, string, *model.TeamInviteReminderData, bool, bool, bool) error); ok {
-		r0 = rf(team, senderName, senderUserId, invites, siteURL, reminderData, errorWhenNotSent, isSystemAdmin, isFirstAdmin)
+	if rf, ok := ret.Get(0).(func(*model.Team, string, string, []string, string, *model.TeamInviteReminderData, bool, bool, bool, string) error); ok {
+		r0 = rf(team, senderName, senderUserId, invites, siteURL, reminderData, errorWhenNotSent, isSystemAdmin, isFirstAdmin, locale)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -308,9 +308,9 @@ func (_m *ServiceInterface) SendInviteEmails(team *model.Team, senderName string
 	return r0
 }
 
-// SendInviteEmailsToTeamAndChannels provides a mock function with given fields: team, channels, senderName, senderUserId, senderProfileImage, invites, siteURL, reminderData, message, errorWhenNotSent, isSystemAdmin, isFirstAdmin
-func (_m *ServiceInterface) SendInviteEmailsToTeamAndChannels(team *model.Team, channels []*model.Channel, senderName string, senderUserId string, senderProfileImage []byte, invites []string, siteURL string, reminderData *model.TeamInviteReminderData, message string, errorWhenNotSent bool, isSystemAdmin bool, isFirstAdmin bool) ([]*model.EmailInviteWithError, error) {
-	ret := _m.Called(team, channels, senderName, senderUserId, senderProfileImage, invites, siteURL, reminderData, message, errorWhenNotSent, isSystemAdmin, isFirstAdmin)
+// SendInviteEmailsToTeamAndChannels provides a mock function with given fields: team, channels, senderName, senderUserId, senderProfileImage, invites, siteURL, reminderData, message, errorWhenNotSent, isSystemAdmin, isFirstAdmin, locale
+func (_m *ServiceInterface) SendInviteEmailsToTeamAndChannels(team *model.Team, channels []*model.Channel, senderName string, senderUserId string, senderProfileImage []byte, invites []string, siteURL string, reminderData *model.TeamInviteReminderData, message string, errorWhenNotSent bool, isSystemAdmin bool, isFirstAdmin bool, locale string) ([]*model.EmailInviteWithError, error) {
+	ret := _m.Called(team, channels, senderName, senderUserId, senderProfileImage, invites, siteURL, reminderData, message, errorWhenNotSent, isSystemAdmin, isFirstAdmin, locale)
 
 	if len(ret) == 0 {
 		panic("no return value specified for SendInviteEmailsToTeamAndChannels")
@@ -318,19 +318,19 @@ func (_m *ServiceInterface) SendInviteEmailsToTeamAndChannels(team *model.Team, 
 
 	var r0 []*model.EmailInviteWithError
 	var r1 error
-	if rf, ok := ret.Get(0).(func(*model.Team, []*model.Channel, string, string, []byte, []string, string, *model.TeamInviteReminderData, string, bool, bool, bool) ([]*model.EmailInviteWithError, error)); ok {
-		return rf(team, channels, senderName, senderUserId, senderProfileImage, invites, siteURL, reminderData, message, errorWhenNotSent, isSystemAdmin, isFirstAdmin)
+	if rf, ok := ret.Get(0).(func(*model.Team, []*model.Channel, string, string, []byte, []string, string, *model.TeamInviteReminderData, string, bool, bool, bool, string) ([]*model.EmailInviteWithError, error)); ok {
+		return rf(team, channels, senderName, senderUserId, senderProfileImage, invites, siteURL, reminderData, message, errorWhenNotSent, isSystemAdmin, isFirstAdmin, locale)
 	}
-	if rf, ok := ret.Get(0).(func(*model.Team, []*model.Channel, string, string, []byte, []string, string, *model.TeamInviteReminderData, string, bool, bool, bool) []*model.EmailInviteWithError); ok {
-		r0 = rf(team, channels, senderName, senderUserId, senderProfileImage, invites, siteURL, reminderData, message, errorWhenNotSent, isSystemAdmin, isFirstAdmin)
+	if rf, ok := ret.Get(0).(func(*model.Team, []*model.Channel, string, string, []byte, []string, string, *model.TeamInviteReminderData, string, bool, bool, bool, string) []*model.EmailInviteWithError); ok {
+		r0 = rf(team, channels, senderName, senderUserId, senderProfileImage, invites, siteURL, reminderData, message, errorWhenNotSent, isSystemAdmin, isFirstAdmin, locale)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]*model.EmailInviteWithError)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(*model.Team, []*model.Channel, string, string, []byte, []string, string, *model.TeamInviteReminderData, string, bool, bool, bool) error); ok {
-		r1 = rf(team, channels, senderName, senderUserId, senderProfileImage, invites, siteURL, reminderData, message, errorWhenNotSent, isSystemAdmin, isFirstAdmin)
+	if rf, ok := ret.Get(1).(func(*model.Team, []*model.Channel, string, string, []byte, []string, string, *model.TeamInviteReminderData, string, bool, bool, bool, string) error); ok {
+		r1 = rf(team, channels, senderName, senderUserId, senderProfileImage, invites, siteURL, reminderData, message, errorWhenNotSent, isSystemAdmin, isFirstAdmin, locale)
 	} else {
 		r1 = ret.Error(1)
 	}
