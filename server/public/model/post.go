@@ -80,6 +80,8 @@ const (
 	PostPriorityLow                  = "low"
 	PostPropsRequestedAck            = "requested_ack"
 	PostPropsPersistentNotifications = "persistent_notifications"
+
+	PostPropsDontSendNotifications = "dont_send_notifications"
 )
 
 type Post struct {
