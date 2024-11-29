@@ -43,6 +43,18 @@ func (a *App) canSendPushNotifications() bool {
 	return true
 }
 
+func (a *App) canPostSendPushNotification(post *model.Post) bool {
+	if post.GetProp(model.PostPropsDontSendNotifications) != nil {
+		a.NotificationsLog().Warn("Notification aborted by post dont_send_notifications prop",
+			mlog.String("post_id", post.Id),
+			mlog.String("status", model.NotificationStatusNotSent),
+			mlog.String("reason", model.NotificationReasonDontSendNotifications),
+		)
+		return false
+	}
+	return true
+}
+
 func (a *App) SendNotifications(c request.CTX, post *model.Post, team *model.Team, channel *model.Channel, sender *model.User, parentPostList *model.PostList, setOnline bool) ([]string, error) {
 	// Do not send notifications in archived channels
 	if channel.DeleteAt > 0 {
@@ -495,15 +507,7 @@ func (a *App) SendNotifications(c request.CTX, post *model.Post, team *model.Tea
 		}
 	}
 
-	if a.canSendPushNotifications() {
-		if post.GetProp(model.PostPropsDontSendNotifications) != nil {
-			a.NotificationsLog().Warn("Notification aborted by post dont_send_notifications prop",
-				mlog.String("post_id", post.Id),
-				mlog.String("status", model.NotificationStatusNotSent),
-				mlog.String("reason", model.NotificationReasonDontSendNotifications),
-			)
-			return []string{}, nil
-		}
+	if a.canSendPushNotifications() && a.canPostSendPushNotification(post) {
 		a.NotificationsLog().Trace("Begin sending push notifications",
 			mlog.String("type", model.NotificationTypePush),
 			mlog.String("sender_id", sender.Id),
