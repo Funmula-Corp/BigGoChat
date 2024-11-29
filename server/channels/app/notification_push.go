@@ -658,10 +658,6 @@ func DoesNotifyPropsAllowPushNotification(user *model.User, channelNotifyProps m
 		return model.NotificationReasonSystemMessage
 	}
 
-	if post.GetProp(model.PostPropsDontSendNotifications) != nil {
-		return model.NotificationReasonDontSendNotifications
-	}
-
 	if notify == model.ChannelNotifyNone {
 		return model.NotificationReasonLevelSetToNone
 	}
