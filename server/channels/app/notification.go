@@ -13,12 +13,12 @@ import (
 
 	"github.com/pkg/errors"
 
-	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/store"
 	"git.biggo.com/Funmula/BigGoChat/server/public/model"
 	"git.biggo.com/Funmula/BigGoChat/server/public/shared/i18n"
 	"git.biggo.com/Funmula/BigGoChat/server/public/shared/markdown"
 	"git.biggo.com/Funmula/BigGoChat/server/public/shared/mlog"
 	"git.biggo.com/Funmula/BigGoChat/server/public/shared/request"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/store"
 )
 
 func (a *App) canSendPushNotifications() bool {
@@ -46,15 +46,6 @@ func (a *App) canSendPushNotifications() bool {
 func (a *App) SendNotifications(c request.CTX, post *model.Post, team *model.Team, channel *model.Channel, sender *model.User, parentPostList *model.PostList, setOnline bool) ([]string, error) {
 	// Do not send notifications in archived channels
 	if channel.DeleteAt > 0 {
-		return []string{}, nil
-	}
-
-	if post.GetProp(model.PostPropsDontSendNotifications) != nil {
-		a.NotificationsLog().Warn("Notification aborted by post dont_send_notifications prop",
-			mlog.String("post_id", post.Id),
-			mlog.String("status", model.NotificationStatusNotSent),
-			mlog.String("reason", model.NotificationReasonDontSendNotifications),
-		)
 		return []string{}, nil
 	}
 
@@ -505,6 +496,14 @@ func (a *App) SendNotifications(c request.CTX, post *model.Post, team *model.Tea
 	}
 
 	if a.canSendPushNotifications() {
+		if post.GetProp(model.PostPropsDontSendNotifications) != nil {
+			a.NotificationsLog().Warn("Notification aborted by post dont_send_notifications prop",
+				mlog.String("post_id", post.Id),
+				mlog.String("status", model.NotificationStatusNotSent),
+				mlog.String("reason", model.NotificationReasonDontSendNotifications),
+			)
+			return []string{}, nil
+		}
 		a.NotificationsLog().Trace("Begin sending push notifications",
 			mlog.String("type", model.NotificationTypePush),
 			mlog.String("sender_id", sender.Id),
