@@ -20,7 +20,6 @@ import './download.scss';
 
 type Props = {
     window64Link: string;
-    windowARM64Link: string;
     macARMLink: string;
     macIntelLink: string;
     linuxDEBLink: string;
@@ -261,16 +260,7 @@ export default class DownloadPage extends PureComponent<Props, State> {
                             href={this.props.window64Link}
                         >
                             <div className='btn get-app-link-btn'>
-                                {'64bit'}
-                            </div>
-                        </ExternalLink>
-                        <ExternalLink
-                            className='get-app-link'
-                            location='app_download_modal'
-                            href={this.props.windowARM64Link}
-                        >
-                            <div className='btn get-app-link-btn'>
-                                {'ARM 64bit'}
+                                {'64bit/ARM 64bit'}
                             </div>
                         </ExternalLink>
                     </div>
