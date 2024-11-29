@@ -79,7 +79,7 @@ class UserGuideDropdown extends React.PureComponent<Props, State> {
 
         return (
             <Menu.Group>
-                <Menu.ItemExternalLink
+                {/* <Menu.ItemExternalLink
                     id='mattermostUserGuideLink'
                     iconClassName='icon-file-text-outline'
                     url={mattermostUserGuideLink}
@@ -109,7 +109,7 @@ class UserGuideDropdown extends React.PureComponent<Props, State> {
                         url={this.props.reportAProblemLink}
                         text={intl.formatMessage({id: 'userGuideHelp.reportAProblem', defaultMessage: 'Report a problem'})}
                     />
-                )}
+                )} */}
                 <Menu.ItemAction
                     id='keyboardShortcuts'
                     iconClassName='icon-keyboard-return'

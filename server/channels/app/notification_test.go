@@ -217,16 +217,19 @@ func TestSendNotifications(t *testing.T) {
 	})
 
 	t.Run("dont send notifications prop", func(t *testing.T) {
+		channel := th.CreateChannel(th.Context, th.BasicTeam)
+		th.App.AddUserToChannel(th.Context, th.BasicUser, channel, false)
+		th.App.AddUserToChannel(th.Context, th.BasicUser2, channel, false)
 		post := &model.Post{
 			UserId:    th.BasicUser.Id,
-			ChannelId: th.BasicChannel.Id,
+			ChannelId: channel.Id,
 			Message:   "dont send notifications",
 			Props:     model.StringInterface{model.PostPropsDontSendNotifications: "true"},
 		}
 		_, appErr := th.App.CreatePostMissingChannel(th.Context, post, false, true)
 		require.Nil(t, appErr)
 
-		mentions, err := th.App.SendNotifications(th.Context, post, th.BasicTeam, th.BasicChannel, th.BasicUser, nil, true)
+		mentions, err := th.App.SendNotifications(th.Context, post, th.BasicTeam, channel, th.BasicUser, nil, true)
 		require.NoError(t, err)
 		require.Empty(t, mentions)
 	})
