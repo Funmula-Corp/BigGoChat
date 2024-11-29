@@ -49,6 +49,15 @@ func (a *App) SendNotifications(c request.CTX, post *model.Post, team *model.Tea
 		return []string{}, nil
 	}
 
+	if post.GetProp(model.PostPropsDontSendNotifications) != nil {
+		a.NotificationsLog().Warn("Notification aborted by post dont_send_notifications prop",
+			mlog.String("post_id", post.Id),
+			mlog.String("status", model.NotificationStatusNotSent),
+			mlog.String("reason", model.NotificationReasonDontSendNotifications),
+		)
+		return []string{}, nil
+	}
+
 	isCRTAllowed := *a.Config().ServiceSettings.CollapsedThreads != model.CollapsedThreadsDisabled
 
 	pchan := make(chan store.StoreResult[map[string]*model.User], 1)
