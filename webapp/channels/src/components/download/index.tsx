@@ -15,14 +15,13 @@ function mapStateToProps(state: GlobalState) {
     const config = getConfig(state);
 
     return {
-        window64Link: 'https://img.bgo.one/biggo-chat-download/biggo-chat-setup-5.9.0-win.exe',
-        windowARM64Link: 'https://img.bgo.one/biggo-chat-download/biggo-chat-setup-5.9.1-win.exe',
-        macARMLink: 'https://img.bgo.one/biggo-chat-download/biggo-chat-5.9.0-mac-arm64.dmg',
-        macIntelLink: 'https://img.bgo.one/biggo-chat-download/biggo-chat-5.9.0-mac-x64.dmg',
-        linuxDEBLink: 'https://img.bgo.one/biggo-chat-download/biggo-chat_5.9.0-1_amd64.deb',
-        linuxRPMLink: 'https://img.bgo.one/biggo-chat-download/biggo-chat-5.9.0-linux-x86_64.rpm',
-        linuxAPPIMAGELink: 'https://img.bgo.one/biggo-chat-download/biggo-chat-5.9.0-linux-x86_64.AppImage',
-        linuxTARGZLink: 'https://img.bgo.one/biggo-chat-download/biggo-chat-5.9.1-linux-x64.tar.gz',
+        window64Link: 'https://img.bgo.one/biggo-chat-download/biggo-chat-setup-5.10.0-win.exe',
+        macARMLink: 'https://img.bgo.one/biggo-chat-download/biggo-chat-5.10.0-mac-arm64.dmg',
+        macIntelLink: 'https://img.bgo.one/biggo-chat-download/biggo-chat-5.10.0-mac-x64.dmg',
+        linuxDEBLink: 'https://img.bgo.one/biggo-chat-download/biggo-chat_5.10.0_amd64.deb',
+        linuxRPMLink: 'https://img.bgo.one/biggo-chat-download/biggo-chat-5.10.0-linux-x86_64.rpm',
+        linuxAPPIMAGELink: 'https://img.bgo.one/biggo-chat-download/biggo-chat-5.10.0-linux-x86_64.AppImage',
+        linuxTARGZLink: 'https://img.bgo.one/biggo-chat-download/biggo-chat-5.10.0-linux-x64.tar.gz',
         iosAppLink: '#',
         androidAppLink: '#',
         defaultTheme: getTheme(state),
