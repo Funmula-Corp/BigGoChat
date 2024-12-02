@@ -227,6 +227,7 @@ func GenerateClientConfig(c *model.Config, telemetryID string, license *model.Li
 			props["PostAcknowledgements"] = "true"
 		}
 	}
+	// props["UserProfileUrl"] =
 
 	return props
 }
@@ -256,6 +257,8 @@ func GenerateLimitedClientConfig(c *model.Config, telemetryID string, license *m
 	props["EnableUserCreation"] = strconv.FormatBool(*c.TeamSettings.EnableUserCreation)
 	props["EnableOpenServer"] = strconv.FormatBool(*c.TeamSettings.EnableOpenServer)
 	props["EnableJoinLeaveMessageByDefault"] = strconv.FormatBool(*c.TeamSettings.EnableJoinLeaveMessageByDefault)
+	props["UserProfileURL"] = *c.ServiceSettings.UserProfileURL
+	props["UserVerifyPhoneURL"] = *c.ServiceSettings.UserVerifyPhoneURL
 
 	props["AndroidLatestVersion"] = c.ClientRequirements.AndroidLatestVersion
 	props["AndroidMinVersion"] = c.ClientRequirements.AndroidMinVersion
