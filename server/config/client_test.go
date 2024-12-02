@@ -365,6 +365,8 @@ func TestGetLimitedClientConfig(t *testing.T) {
 					WebsocketURL:        model.NewString("ws://mattermost.example.com:8065"),
 					WebsocketPort:       model.NewInt(80),
 					WebsocketSecurePort: model.NewInt(443),
+					UserProfileURL:      model.NewString("https://example.com/setting/user"),
+					UserVerifyPhoneURL:  model.NewString("https://example.com/setting/phone"),
 				},
 			},
 			"",
@@ -375,6 +377,8 @@ func TestGetLimitedClientConfig(t *testing.T) {
 				"WebsocketURL":                     "ws://mattermost.example.com:8065",
 				"WebsocketPort":                    "80",
 				"WebsocketSecurePort":              "443",
+				"UserProfileURL":                   "https://example.com/setting/user",
+				"UserVerifyPhoneURL":               "https://example.com/setting/phone",
 			},
 		},
 		{

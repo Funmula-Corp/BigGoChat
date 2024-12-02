@@ -417,6 +417,8 @@ type ServiceSettings struct {
 	UniqueEmojiReactionLimitPerPost                   *int    `access:"site_posts"`
 	RefreshPostStatsRunTime                           *string `access:"site_users_and_teams"`
 	MaximumPayloadSizeBytes                           *int64  `access:"environment_file_storage,write_restrictable,cloud_restrictable"`
+	UserProfileURL                                    *string `access:"environment_web_server"`
+	UserVerifyPhoneURL                                *string `access:"environment_web_server"`
 }
 
 var MattermostGiphySdkKey string
@@ -931,6 +933,14 @@ func (s *ServiceSettings) SetDefaults(isUpdate bool) {
 
 	if s.MaximumPayloadSizeBytes == nil {
 		s.MaximumPayloadSizeBytes = NewInt64(300000)
+	}
+
+	if s.UserProfileURL == nil {
+		s.UserProfileURL = NewString("")
+	}
+
+	if s.UserVerifyPhoneURL == nil {
+		s.UserVerifyPhoneURL = NewString("https://account.biggo.com/setting/phone")
 	}
 }
 
