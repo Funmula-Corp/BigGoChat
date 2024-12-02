@@ -3,19 +3,19 @@
 
 import React from 'react';
 import {Modal} from 'react-bootstrap';
-import {FormattedMessage} from 'react-intl';
+import {FormattedMessage, injectIntl} from 'react-intl';
+import type {IntlShape} from 'react-intl';
 
 import {General} from 'mattermost-redux/constants';
 
 import {trackEvent} from 'actions/telemetry_actions.jsx';
-
-import FormattedMarkdownMessage from 'components/formatted_markdown_message';
 
 import Constants from 'utils/constants';
 
 type Props = {
     channelDisplayName: string;
     channelId: string;
+    intl: IntlShape;
 
     /**
      * Function injected by ModalController to be called when the modal can be unmounted
@@ -32,7 +32,7 @@ type State = {
     confirmDisplayName: string;
 }
 
-export default class ConvertChannelModal extends React.PureComponent<Props, State> {
+export class ConvertChannelModal extends React.PureComponent<Props, State> {
     constructor(props: Props) {
         super(props);
 
@@ -43,7 +43,7 @@ export default class ConvertChannelModal extends React.PureComponent<Props, Stat
     }
 
     canConvert = () => {
-        return this.state.confirmDisplayName == this.props.channelDisplayName;
+        return this.state.confirmDisplayName === this.props.channelDisplayName;
     };
 
     handleConvert = () => {
@@ -57,10 +57,10 @@ export default class ConvertChannelModal extends React.PureComponent<Props, Stat
         this.onHide();
     };
 
-    onUpdateConfirmName = (event: any) => {
+    onUpdateConfirmName = (event: React.ChangeEvent<HTMLInputElement>) => {
         this.setState({
             confirmDisplayName: event.target.value,
-        })
+        });
     };
 
     onHide = () => {
@@ -68,6 +68,7 @@ export default class ConvertChannelModal extends React.PureComponent<Props, Stat
     };
 
     render() {
+        const formatMessage = this.props.intl.formatMessage;
         const {
             channelDisplayName,
             onExited,
@@ -98,24 +99,29 @@ export default class ConvertChannelModal extends React.PureComponent<Props, Stat
                 </Modal.Header>
                 <Modal.Body>
                     <p>
-                        <FormattedMarkdownMessage
+                        <FormattedMessage
                             id='convert_channel.question1'
                             defaultMessage='When you convert **{display_name}** to a private channel, history and membership are preserved. Publicly shared files remain accessible to anyone with the link. Membership in a private channel is by invitation only.'
+                            values={{
+                                display_name: channelDisplayName,
+                            }}
                         />
                     </p>
-                    {/* todo i18n */}
-                    <p style={{ marginTop: '25px' }}>
+                    <p style={{marginTop: '25px'}}>
                         <div className='Input_wrapper'>
                             <input
                                 className='Input form-control medium new-channel-modal-name-input channel-name-input-field'
-                                placeholder='Enter channel name'
+                                placeholder={formatMessage({id: 'convert_channel.confirm_name', defaultMessage: 'Enter channel name'})}
                                 onChange={this.onUpdateConfirmName}
-                                autoFocus
+                                autoFocus={true}
                             />
                         </div>
                     </p>
-                    <p style={{ fontSize: '12px', color: 'rgba(63, 67 89, 0.75)' }}>
-                        Please enter this channel's name to confirm the change
+                    <p style={{fontSize: '12px', color: 'rgba(63, 67 89, 0.75)'}}>
+                        <FormattedMessage
+                            id='change_to_private_channel_modal.input.hint'
+                            defaultMessage="Please enter this channel's name to confirm the change"
+                        />
                     </p>
                 </Modal.Body>
                 <Modal.Footer>
@@ -148,3 +154,5 @@ export default class ConvertChannelModal extends React.PureComponent<Props, Stat
         );
     }
 }
+
+export default injectIntl(ConvertChannelModal);
