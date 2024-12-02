@@ -25,8 +25,10 @@ export default class YoutubeVideo extends React.PureComponent<Props, State> {
     constructor(props: Props) {
         super(props);
 
+        // if default is false, the embed youtube video need click twice to play
+        // so set default as true
         this.state = {
-            playing: false,
+            playing: true,
         };
     }
 
