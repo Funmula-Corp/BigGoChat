@@ -27,6 +27,7 @@ export type Props = {
     onErrorStateChange?: (isError: boolean) => void;
     team?: Team;
     urlError?: string;
+    disabled?: boolean;
 }
 
 import './channel_name_form_field.scss';
@@ -63,6 +64,8 @@ const ChannelNameFormField = (props: Props): JSX.Element => {
 
     const currentTeamName = useSelector(getCurrentTeam)?.name;
     const teamName = props.team ? props.team.name : currentTeamName;
+    // todo i18n
+    const label = props.disabled ? '請先完成身份認證, 才能建立頻道' : formatMessage({id: 'channel_modal.name.label', defaultMessage: 'Channel name'});
 
     const handleOnDisplayNameChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
         e.preventDefault();
@@ -116,7 +119,7 @@ const ChannelNameFormField = (props: Props): JSX.Element => {
     }, [displayNameError, urlError]);
 
     return (
-        <React.Fragment>
+        <>
             <Input
                 type='text'
                 autoComplete='off'
@@ -125,13 +128,14 @@ const ChannelNameFormField = (props: Props): JSX.Element => {
                 name={props.name}
                 containerClassName={`${props.name}-container`}
                 inputClassName={`${props.name}-input channel-name-input-field`}
-                label={formatMessage({id: 'channel_modal.name.label', defaultMessage: 'Channel name'})}
+                label={label}
                 placeholder={props.placeholder}
                 limit={Constants.MAX_CHANNELNAME_LENGTH}
                 value={props.value}
                 customMessage={inputCustomMessage}
                 onChange={handleOnDisplayNameChange}
                 onBlur={handleOnDisplayNameBlur}
+                disabled={props.disabled}
             />
             <URLInput
                 className='new-channel-modal__url'
@@ -143,7 +147,7 @@ const ChannelNameFormField = (props: Props): JSX.Element => {
                 error={urlError || props.urlError}
                 onChange={handleOnURLChange}
             />
-        </React.Fragment>
+        </>
     );
 };
 

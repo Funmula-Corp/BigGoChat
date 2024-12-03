@@ -137,11 +137,12 @@ export class StatusDropdown extends React.PureComponent<Props, State> {
     }
 
     openProfileModal = (): void => {
-        this.props.actions.openModal({
-            modalId: ModalIdentifiers.USER_SETTINGS,
-            dialogType: UserSettingsModal,
-            dialogProps: {isContentProductSettings: false},
-        });
+        // this.props.actions.openModal({
+        //     modalId: ModalIdentifiers.USER_SETTINGS,
+        //     dialogType: UserSettingsModal,
+        //     dialogProps: {isContentProductSettings: false},
+        // });
+        globalThis.open('https://account.biggo.com/', '_blank');
     };
 
     setStatus = (status: string, dndEndTime?: number): void => {

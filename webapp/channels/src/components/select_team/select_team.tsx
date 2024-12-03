@@ -377,8 +377,8 @@ export class SelectTeam extends React.PureComponent<Props, State> {
             );
         }
 
-        const teamSignUp = !createTeamRestricted && (
-            <SystemPermissionGate permissions={[Permissions.CREATE_TEAM]}>
+        const teamSignUp = (
+            <>
                 <div
                     className='margin--extra'
                     style={{marginTop: '115px'}}
@@ -396,7 +396,7 @@ export class SelectTeam extends React.PureComponent<Props, State> {
                         <i className='icon icon-chevron-right'/>
                     </Link>
                 </div>
-            </SystemPermissionGate>
+            </>
         );
 
         let adminConsoleLink;

@@ -246,6 +246,21 @@ export default class TeamSidebar extends React.PureComponent<Props, State> {
             />
         );
 
+        // joinableTeams.push(
+        //     <TeamButton
+        //         btnClass='team-btn__add'
+        //         url='/create_team'
+        //         tip={
+        //             <FormattedMessage
+        //                 id='navbar_dropdown.create'
+        //                 defaultMessage='Create a Team'
+        //             />
+        //         }
+        //         content={plusIcon}
+        //         switchTeam={this.props.actions.switchTeam}
+        //     />
+        // );
+
         if (this.props.moreTeamsToJoin && !this.props.experimentalPrimaryTeam) {
             joinableTeams.push(
                 <TeamButton
@@ -261,26 +276,6 @@ export default class TeamSidebar extends React.PureComponent<Props, State> {
                     content={plusIcon}
                     switchTeam={this.props.actions.switchTeam}
                 />,
-            );
-        } else {
-            joinableTeams.push(
-                <SystemPermissionGate
-                    permissions={[Permissions.CREATE_TEAM]}
-                    key='more_teams'
-                >
-                    <TeamButton
-                        btnClass='team-btn__add'
-                        url='/create_team'
-                        tip={
-                            <FormattedMessage
-                                id='navbar_dropdown.create'
-                                defaultMessage='Create a Team'
-                            />
-                        }
-                        content={plusIcon}
-                        switchTeam={this.props.actions.switchTeam}
-                    />
-                </SystemPermissionGate>,
             );
         }
 

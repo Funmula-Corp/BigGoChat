@@ -187,7 +187,7 @@ const AdvanceTextEditor = ({
     replyToLastPost,
     caretPosition,
     placeholder,
-    isPhoneVerified: isVerified,
+    isPhoneVerified,
     isBot,
 }: Props) => {
     const readOnlyChannel = !canPost;
@@ -234,7 +234,7 @@ const AdvanceTextEditor = ({
 
     // TODO i18n
     let verifiedButton = null;
-    if (!isVerified && !isBot) {
+    if (!isPhoneVerified && !isBot) {
         const onClick = () => window.location.href = (UserVerifyPhoneURL && UserVerifyPhoneURL.length > 0) ? UserVerifyPhoneURL : "https://account.biggo.com/setting/phone";
         verifiedButton = (
             <div className={classNames('AdvancedTextEditor__verified-button')}>
@@ -354,9 +354,17 @@ const AdvanceTextEditor = ({
     );
 
     let createMessage;
-    if (placeholder) {
+    if (!isPhoneVerified) {
+        // TODO i18n
+        createMessage = '為確保傳送訊息的安全性, 請先完成身份認證, 才能傳送訊息。';
+    }else if (placeholder) {
         createMessage = placeholder;
-    } else if (currentChannel && !readOnlyChannel) {
+    } else if (readOnlyChannel) {
+        createMessage = Utils.localizeMessage(
+            'create_post.read_only',
+            'This channel is read-only. Only members with permission can post here.',
+        );
+    } else if (currentChannel) {
         createMessage = formatMessage(
             {
                 id: 'create_post.write',
@@ -364,7 +372,7 @@ const AdvanceTextEditor = ({
             },
             {channelDisplayName: currentChannel.display_name},
         );
-    } else if (!isVerified && !isBot) {
+    } else if (!isPhoneVerified && !isBot) {
         // TODO i18n
         createMessage = '為確保傳送訊息的安全性, 請先完成身份認證, 才能傳送訊息。';
     } else if (readOnlyChannel) {
@@ -376,7 +384,7 @@ const AdvanceTextEditor = ({
         createMessage = Utils.localizeMessage('create_comment.addComment', 'Reply to this thread...');
     }
 
-    const messageValue = readOnlyChannel ? '' : message;
+    const messageValue = readOnlyChannel || !isPhoneVerified ? '' : message;
 
     /**
      * by getting the value directly from the textbox we eliminate all unnecessary
@@ -683,7 +691,7 @@ const AdvanceTextEditor = ({
                     'AdvancedTextEditor__attachment-disabled': !canUploadFiles,
                     scroll: renderScrollbar,
                     'formatting-bar': showFormattingBar,
-                    'not-verified': !isVerified && !isBot,
+                    'not-verified': !isPhoneVerified && !isBot,
                 })}
             >
                 {!wasNotifiedOfLogIn && (
@@ -699,7 +707,7 @@ const AdvanceTextEditor = ({
                 )}
                 <div
                     className={'AdvancedTextEditor__body'}
-                    disabled={readOnlyChannel && (isVerified || isBot)}
+                    disabled={readOnlyChannel && (isPhoneVerified || isBot)}
                 >
                     <div
                         ref={editorBodyRef}
@@ -730,7 +738,7 @@ const AdvanceTextEditor = ({
                             channelId={channelId}
                             id={textboxId}
                             ref={textboxRef!}
-                            disabled={readOnlyChannel || (!isVerified && !isBot)}
+                            disabled={readOnlyChannel || (!isPhoneVerified && !isBot)}
                             characterLimit={maxPostSize}
                             preview={shouldShowPreview}
                             badConnection={badConnection}
@@ -748,12 +756,12 @@ const AdvanceTextEditor = ({
                                 {showFormatJSX}
                             </TexteditorActions>
                         )}
-                        {(isVerified || isBot) && (showFormattingSpacer || shouldShowPreview || attachmentPreview || isRHS) ? (
+                        {(isPhoneVerified || isBot) && (showFormattingSpacer || shouldShowPreview || attachmentPreview || isRHS) ? (
                             <FormattingBarSpacer>
                                 {formattingBar}
                             </FormattingBarSpacer>
                         ) : formattingBar}
-                        {!readOnlyChannel && (
+                        {!readOnlyChannel && isPhoneVerified && (
                             <TexteditorActions
                                 ref={editorActionsRef}
                                 placement='bottom'

@@ -36,12 +36,13 @@ const ProfilePopoverSelfUserRow = ({
 
     const handleEditAccountSettings = useCallback(() => {
         hide?.();
-        dispatch(openModal({
-            modalId: ModalIdentifiers.USER_SETTINGS,
-            dialogType: UserSettingsModal,
-            dialogProps: {isContentProductSettings: false, onExited: returnFocus},
-        }));
-        handleCloseModals();
+        window.open('https://account.biggo.com/', '_blank');
+        // dispatch(openModal({
+        //     modalId: ModalIdentifiers.USER_SETTINGS,
+        //     dialogType: UserSettingsModal,
+        //     dialogProps: {isContentProductSettings: false, onExited: returnFocus},
+        // }));
+        // handleCloseModals();
     }, [hide, returnFocus, handleCloseModals]);
 
     if (userId !== currentUserId || haveOverrideProp) {

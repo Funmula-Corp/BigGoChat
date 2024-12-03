@@ -66,5 +66,12 @@ export function haveIVerified(state: GlobalState) {
     return getCurrentUser(state)
         .roles
         .split(' ')
-        .some(role => role == General.SYSTEM_ADMIN_ROLE || role == General.SYSTEM_VERIFIED_ROLE);
+        .some(role =>
+            role == General.SYSTEM_ADMIN_ROLE ||
+            role == General.TEAM_ADMIN_ROLE ||
+            role == General.CHANNEL_ADMIN_ROLE ||
+            role == General.SYSTEM_VERIFIED_ROLE ||
+            role == General.TEAM_VERIFIED_ROLE ||
+            role == General.CHANNEL_VERIFIED_ROLE
+        );
 }

@@ -109,7 +109,7 @@ export default class AtMentionProvider extends Provider {
             return [];
         }
 
-        return ['here', 'channel', 'all'].filter((item) =>
+        return ['here', 'channel'].filter((item) =>
             item.startsWith(this.latestPrefix),
         ).map((name) => ({
             username: name,
