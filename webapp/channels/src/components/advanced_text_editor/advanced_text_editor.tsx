@@ -235,7 +235,7 @@ const AdvanceTextEditor = ({
     // TODO i18n
     let verifiedButton = null;
     if (!isVerified && !isBot) {
-        const onClick = () => window.location.href = UserVerifyPhoneURL ?? "";
+        const onClick = () => window.location.href = (UserVerifyPhoneURL && UserVerifyPhoneURL.length > 0) ? UserVerifyPhoneURL : "https://account.biggo.com/setting/phone";
         verifiedButton = (
             <div className={classNames('AdvancedTextEditor__verified-button')}>
                 <SaveButton
