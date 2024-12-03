@@ -2872,7 +2872,7 @@ func (a *App) UpdateThreadReadForUser(c request.CTX, currentSessionId, userID, t
 		return nil, model.NewAppError("UpdateThreadReadForUser", "app.user.update_thread_read_for_user.app_error", nil, "", http.StatusInternalServerError).Wrap(nErr)
 	}
 
-	post, err := a.GetSinglePost(c, threadID, false)
+	post, err := a.GetSinglePost(c, threadID, true)
 	if err != nil {
 		return nil, err
 	}
