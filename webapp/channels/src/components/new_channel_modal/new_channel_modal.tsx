@@ -34,6 +34,7 @@ import type {GlobalState} from 'types/store';
 
 import './new_channel_modal.scss';
 import { haveIVerified } from 'mattermost-redux/selectors/entities/roles_helpers';
+import { isDesktopApp } from 'utils/user_agent';
 
 export function getChannelTypeFromPermissions(canCreatePublicChannel: boolean, canCreatePrivateChannel: boolean) {
     let channelType = Constants.OPEN_CHANNEL;
@@ -84,12 +85,33 @@ const NewChannelModal = () => {
     const [canCreateFromPluggable, setCanCreateFromPluggable] = useState(true);
     const [actionFromPluggable, setActionFromPluggable] = useState<((currentTeamId: string, channelId: string) => Promise<Board>) | undefined>(undefined);
 
+    // todo i18n
+    const modalPurposeInfo = isVerified
+        ? formatMessage({id: 'channel_modal.purpose.info', defaultMessage: 'This will be displayed when browsing for channels.'})
+        : '為確保傳送訊息的安全性, 請先完成身份認證, 才能建立頻道';
+    const confirmButtonText = isVerified
+        ? formatMessage({id: 'channel_modal.createNew', defaultMessage: 'Create channel'})
+        : '前往驗證';
+
     const handleURLChange = useCallback((newURL: string) => {
         setURL(newURL);
         setURLError('');
     }, []);
 
+    const handleNotVerify = () => {
+        const url = 'https://account.biggo.com/setting/phone';
+        if (isDesktopApp()) {
+            window.open(url, '_blank');
+        } else {
+            globalThis.open(url, '_blank');
+        }
+    }
+
     const handleOnModalConfirm = async () => {
+        if (!isVerified) {
+            return handleNotVerify();
+        }
+
         if (!canCreate || !currentTeamId) {
             return;
         }
@@ -254,10 +276,10 @@ const NewChannelModal = () => {
             id='new-channel-modal'
             className='new-channel-modal'
             modalHeaderText={formatMessage({id: 'channel_modal.modalTitle', defaultMessage: 'Create a new channel'})}
-            confirmButtonText={formatMessage({id: 'channel_modal.createNew', defaultMessage: 'Create channel'})}
+            confirmButtonText={confirmButtonText}
             cancelButtonText={formatMessage({id: 'channel_modal.cancel', defaultMessage: 'Cancel'})}
             errorText={serverError}
-            isConfirmDisabled={!canCreate}
+            isConfirmDisabled={isVerified && !canCreate}
             autoCloseOnConfirmButton={false}
             compassDesign={true}
             handleConfirm={handleOnModalConfirm}
@@ -274,6 +296,7 @@ const NewChannelModal = () => {
                     onURLChange={handleURLChange}
                     onErrorStateChange={setChannelInputError}
                     urlError={urlError}
+                    disabled={!isVerified}
                 />
                 <PublicPrivateSelector
                     className='new-channel-modal-type-selector'
@@ -301,6 +324,7 @@ const NewChannelModal = () => {
                         value={purpose}
                         onChange={handleOnPurposeChange}
                         onKeyDown={handleOnPurposeKeyDown}
+                        disabled={!isVerified}
                     />
                     {purposeError ? (
                         <div className='new-channel-modal-purpose-error'>
@@ -309,9 +333,7 @@ const NewChannelModal = () => {
                         </div>
                     ) : (
                         <div className='new-channel-modal-purpose-info'>
-                            <span>
-                                {formatMessage({id: 'channel_modal.purpose.info', defaultMessage: 'This will be displayed when browsing for channels.'})}
-                            </span>
+                            <span>{modalPurposeInfo}</span>
                         </div>
                     )}
                     {createBoardFromChannelPlugin &&
