@@ -17,6 +17,7 @@ import {openModal} from 'actions/views/modals';
 import {setStatusDropdown} from 'actions/views/status_dropdown';
 import {makeGetCustomStatus, isCustomStatusEnabled, showStatusDropdownPulsatingDot, isCustomStatusExpired} from 'selectors/views/custom_status';
 import {isStatusDropdownOpen} from 'selectors/views/status_dropdown';
+import {getConfig} from 'mattermost-redux/selectors/entities/general';
 
 import {
     OnboardingTaskCategory,
@@ -33,6 +34,8 @@ function makeMapStateToProps() {
 
     return function mapStateToProps(state: GlobalState) {
         const currentUser = getCurrentUser(state);
+        const config = getConfig(state);
+        const {UserProfileURL} = config;
 
         const userId = currentUser?.id;
         const customStatus = getCustomStatus(state, userId);
@@ -54,6 +57,7 @@ function makeMapStateToProps() {
             showCompleteYourProfileTour,
             timezone: getCurrentTimezone(state),
             dndEndTime: getDndEndTimeForUserId(state, userId),
+            UserProfileURL,
         };
     };
 }

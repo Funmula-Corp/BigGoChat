@@ -66,6 +66,7 @@ type Props = {
     showCustomStatusPulsatingDot: boolean;
     timezone?: string;
     dndEndTime?: number;
+    UserProfileURL: string;
 }
 
 type State = {
@@ -248,7 +249,7 @@ export class StatusDropdown extends React.PureComponent<Props, State> {
     };
 
     goToBigGoAccount = () => {
-        window.open("https://account.biggo.com");
+        window.open((this.props.UserProfileURL && this.props.UserProfileURL.length > 0) ? this.props.UserProfileURL : "https://account.biggo.com");
     };
 
     handleCompleteYourProfileTask = (): void => {
