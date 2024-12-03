@@ -213,6 +213,8 @@ export type ClientConfig = {
     ServiceEnvironment: string;
     UniqueEmojiReactionLimitPerPost: string;
     UsersStatusAndProfileFetchingPollIntervalMilliseconds: string;
+    UserProfileURL: string;
+    UserVerifyPhoneURL: string;
 };
 
 export type License = {

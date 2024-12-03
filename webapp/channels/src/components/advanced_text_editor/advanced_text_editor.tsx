@@ -4,7 +4,7 @@
 import classNames from 'classnames';
 import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {FormattedMessage, useIntl} from 'react-intl';
-import {useDispatch} from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
 
 import {EmoticonHappyOutlineIcon} from '@mattermost/compass-icons/components';
 import type {Channel} from '@mattermost/types/channels';
@@ -51,6 +51,7 @@ import SendButton from './send_button';
 import ShowFormat from './show_formatting';
 import TexteditorActions from './texteditor_actions';
 import ToggleFormattingBar from './toggle_formatting_bar';
+import {getConfig} from 'mattermost-redux/selectors/entities/general';
 
 import './advanced_text_editor.scss';
 
@@ -191,6 +192,7 @@ const AdvanceTextEditor = ({
 }: Props) => {
     const readOnlyChannel = !canPost;
     const {formatMessage} = useIntl();
+    const {UserVerifyPhoneURL} = useSelector(getConfig);
     const ariaLabelMessageInput = Utils.localizeMessage(
         'accessibility.sections.centerFooter',
         'message input complimentary region',
@@ -233,7 +235,7 @@ const AdvanceTextEditor = ({
     // TODO i18n
     let verifiedButton = null;
     if (!isVerified && !isBot) {
-        const onClick = () => window.location.href = "https://account.biggo.com/setting/phone";
+        const onClick = () => window.location.href = UserVerifyPhoneURL ?? "";
         verifiedButton = (
             <div className={classNames('AdvancedTextEditor__verified-button')}>
                 <SaveButton
