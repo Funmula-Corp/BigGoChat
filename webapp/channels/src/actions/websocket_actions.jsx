@@ -90,7 +90,7 @@ import {
     getRelativeTeamUrl,
 } from 'mattermost-redux/selectors/entities/teams';
 import {getNewestThreadInTeam, getThread, getThreads} from 'mattermost-redux/selectors/entities/threads';
-import {getCurrentUser, getCurrentUserId, getUser, getIsManualStatusForUserId, isCurrentUserSystemAdmin} from 'mattermost-redux/selectors/entities/users';
+import {getCurrentUser, getCurrentUserId, getUser, getIsManualStatusForUserId, isCurrentUserSystemAdmin, getCurrentUserRoles} from 'mattermost-redux/selectors/entities/users';
 import {isGuest} from 'mattermost-redux/utils/user_utils';
 
 import {loadChannelsForCurrentUser} from 'actions/channel_actions';
@@ -116,6 +116,7 @@ import store from 'stores/redux_store';
 
 import InteractiveDialog from 'components/interactive_dialog';
 import RemovedFromChannelModal from 'components/removed_from_channel_modal';
+import PopupToast from 'components/popup_toast/popup_toast';
 
 import WebSocketClient from 'client/web_websocket_client';
 import {loadPlugin, loadPluginsIfNecessary, removePlugin} from 'plugins';
@@ -810,6 +811,7 @@ async function handlePostDeleteEvent(msg) {
         }
     }));
 
+
     // update thread when a comment is deleted and CRT is on
     if (post.root_id && collapsedThreads) {
         const thread = getThread(state, post.root_id);
@@ -1183,7 +1185,22 @@ export async function handleUserUpdatedEvent(msg) {
 }
 
 function handleRoleAddedEvent(msg) {
+    const state = getState();
+    const roles = getCurrentUserRoles(state);
     const role = JSON.parse(msg.data.role);
+
+    // todo i18n
+    if (!roles.includes(General.SYSTEM_VERIFIED_ROLE) && role?.permissions?.includes(General.SYSTEM_VERIFIED_ROLE)) {
+        dispatch(openModal({
+            modalId: ModalIdentifiers.POPUP_TOAST,
+            dialogType: PopupToast,
+            dialogProps: {
+                content: {
+                    message: 'Verification Completed.',
+                },
+            },
+        }))
+    }
 
     dispatch({
         type: RoleTypes.RECEIVED_ROLE,
@@ -1205,7 +1222,22 @@ function handleChannelSchemeUpdatedEvent(msg) {
 }
 
 function handleRoleUpdatedEvent(msg) {
+    const state = getState();
+    const roles = getCurrentUserRoles(state);
     const role = JSON.parse(msg.data.role);
+
+    // todo i18n
+    if (!roles.includes(General.SYSTEM_VERIFIED_ROLE) && role?.permissions?.includes(General.SYSTEM_VERIFIED_ROLE)) {
+        dispatch(openModal({
+            modalId: ModalIdentifiers.POPUP_TOAST,
+            dialogType: PopupToast,
+            dialogProps: {
+                content: {
+                    message: 'Verification Completed.',
+                },
+            },
+        }))
+    }
 
     dispatch({
         type: RoleTypes.RECEIVED_ROLE,

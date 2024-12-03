@@ -66,6 +66,7 @@ type Props = {
     showCustomStatusPulsatingDot: boolean;
     timezone?: string;
     dndEndTime?: number;
+    UserProfileURL: string;
 }
 
 type State = {
@@ -136,11 +137,12 @@ export class StatusDropdown extends React.PureComponent<Props, State> {
     }
 
     openProfileModal = (): void => {
-        this.props.actions.openModal({
-            modalId: ModalIdentifiers.USER_SETTINGS,
-            dialogType: UserSettingsModal,
-            dialogProps: {isContentProductSettings: false},
-        });
+        // this.props.actions.openModal({
+        //     modalId: ModalIdentifiers.USER_SETTINGS,
+        //     dialogType: UserSettingsModal,
+        //     dialogProps: {isContentProductSettings: false},
+        // });
+        globalThis.open('https://account.biggo.com/', '_blank');
     };
 
     setStatus = (status: string, dndEndTime?: number): void => {
@@ -248,7 +250,7 @@ export class StatusDropdown extends React.PureComponent<Props, State> {
     };
 
     goToBigGoAccount = () => {
-        window.open("https://account.biggo.com");
+        window.open((this.props.UserProfileURL && this.props.UserProfileURL.length > 0) ? this.props.UserProfileURL : "https://account.biggo.com");
     };
 
     handleCompleteYourProfileTask = (): void => {

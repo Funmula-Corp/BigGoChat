@@ -4,7 +4,7 @@
 import classNames from 'classnames';
 import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {FormattedMessage, useIntl} from 'react-intl';
-import {useDispatch} from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
 
 import {EmoticonHappyOutlineIcon} from '@mattermost/compass-icons/components';
 import type {Channel} from '@mattermost/types/channels';
@@ -51,6 +51,7 @@ import SendButton from './send_button';
 import ShowFormat from './show_formatting';
 import TexteditorActions from './texteditor_actions';
 import ToggleFormattingBar from './toggle_formatting_bar';
+import {getConfig} from 'mattermost-redux/selectors/entities/general';
 
 import './advanced_text_editor.scss';
 
@@ -186,11 +187,12 @@ const AdvanceTextEditor = ({
     replyToLastPost,
     caretPosition,
     placeholder,
-    isPhoneVerified: isVerified,
+    isPhoneVerified,
     isBot,
 }: Props) => {
     const readOnlyChannel = !canPost;
     const {formatMessage} = useIntl();
+    const {UserVerifyPhoneURL} = useSelector(getConfig);
     const ariaLabelMessageInput = Utils.localizeMessage(
         'accessibility.sections.centerFooter',
         'message input complimentary region',
@@ -232,8 +234,8 @@ const AdvanceTextEditor = ({
 
     // TODO i18n
     let verifiedButton = null;
-    if (!isVerified && !isBot) {
-        const onClick = () => window.location.href = "https://account.biggo.com/setting/phone";
+    if (!isPhoneVerified && !isBot) {
+        const onClick = () => window.location.href = (UserVerifyPhoneURL && UserVerifyPhoneURL.length > 0) ? UserVerifyPhoneURL : "https://account.biggo.com/setting/phone";
         verifiedButton = (
             <div className={classNames('AdvancedTextEditor__verified-button')}>
                 <SaveButton
@@ -352,9 +354,17 @@ const AdvanceTextEditor = ({
     );
 
     let createMessage;
-    if (placeholder) {
+    if (!isPhoneVerified) {
+        // TODO i18n
+        createMessage = '為確保傳送訊息的安全性, 請先完成身份認證, 才能傳送訊息。';
+    }else if (placeholder) {
         createMessage = placeholder;
-    } else if (currentChannel && !readOnlyChannel) {
+    } else if (readOnlyChannel) {
+        createMessage = Utils.localizeMessage(
+            'create_post.read_only',
+            'This channel is read-only. Only members with permission can post here.',
+        );
+    } else if (currentChannel) {
         createMessage = formatMessage(
             {
                 id: 'create_post.write',
@@ -362,7 +372,7 @@ const AdvanceTextEditor = ({
             },
             {channelDisplayName: currentChannel.display_name},
         );
-    } else if (!isVerified && !isBot) {
+    } else if (!isPhoneVerified && !isBot) {
         // TODO i18n
         createMessage = '為確保傳送訊息的安全性, 請先完成身份認證, 才能傳送訊息。';
     } else if (readOnlyChannel) {
@@ -374,7 +384,7 @@ const AdvanceTextEditor = ({
         createMessage = Utils.localizeMessage('create_comment.addComment', 'Reply to this thread...');
     }
 
-    const messageValue = readOnlyChannel ? '' : message;
+    const messageValue = readOnlyChannel || !isPhoneVerified ? '' : message;
 
     /**
      * by getting the value directly from the textbox we eliminate all unnecessary
@@ -681,7 +691,7 @@ const AdvanceTextEditor = ({
                     'AdvancedTextEditor__attachment-disabled': !canUploadFiles,
                     scroll: renderScrollbar,
                     'formatting-bar': showFormattingBar,
-                    'not-verified': !isVerified && !isBot,
+                    'not-verified': !isPhoneVerified && !isBot,
                 })}
             >
                 {!wasNotifiedOfLogIn && (
@@ -697,7 +707,7 @@ const AdvanceTextEditor = ({
                 )}
                 <div
                     className={'AdvancedTextEditor__body'}
-                    disabled={readOnlyChannel && (isVerified || isBot)}
+                    disabled={readOnlyChannel && (isPhoneVerified || isBot)}
                 >
                     <div
                         ref={editorBodyRef}
@@ -728,7 +738,7 @@ const AdvanceTextEditor = ({
                             channelId={channelId}
                             id={textboxId}
                             ref={textboxRef!}
-                            disabled={readOnlyChannel || (!isVerified && !isBot)}
+                            disabled={readOnlyChannel || (!isPhoneVerified && !isBot)}
                             characterLimit={maxPostSize}
                             preview={shouldShowPreview}
                             badConnection={badConnection}
@@ -746,12 +756,12 @@ const AdvanceTextEditor = ({
                                 {showFormatJSX}
                             </TexteditorActions>
                         )}
-                        {(isVerified || isBot) && (showFormattingSpacer || shouldShowPreview || attachmentPreview || isRHS) ? (
+                        {(isPhoneVerified || isBot) && (showFormattingSpacer || shouldShowPreview || attachmentPreview || isRHS) ? (
                             <FormattingBarSpacer>
                                 {formattingBar}
                             </FormattingBarSpacer>
                         ) : formattingBar}
-                        {!readOnlyChannel && (
+                        {!readOnlyChannel && isPhoneVerified && (
                             <TexteditorActions
                                 ref={editorActionsRef}
                                 placement='bottom'

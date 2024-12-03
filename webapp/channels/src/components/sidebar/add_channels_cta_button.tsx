@@ -81,9 +81,7 @@ const AddChannelsCtaButton = (): JSX.Element | null => {
             );
         }
 
-        let createChannel;
-        if (canCreateChannel) {
-            createChannel = (
+        let createChannel = (
                 <Menu.ItemAction
                     id='showNewChannel'
                     onClick={showNewChannelModal}
@@ -91,7 +89,6 @@ const AddChannelsCtaButton = (): JSX.Element | null => {
                     text={intl.formatMessage({id: 'sidebar_left.add_channel_dropdown.createNewChannel', defaultMessage: 'Create new channel'})}
                 />
             );
-        }
 
         return (
             <>

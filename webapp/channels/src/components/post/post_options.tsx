@@ -219,16 +219,17 @@ const PostOptions = (props: Props): JSX.Element => {
     // Build post options
     let options: ReactNode;
     if (isEphemeral) {
-        options = (
-            <div className='col col__remove'>
-                <button
-                    className='post__remove theme color--link style--none'
-                    onClick={removePost}
-                >
-                    {'×'}
-                </button>
-            </div>
-        );
+        options = null;
+        // options = (
+        //     <div className='col col__remove'>
+        //         <button
+        //             className='post__remove theme color--link style--none'
+        //             onClick={removePost}
+        //         >
+        //             {'×'}
+        //         </button>
+        //     </div>
+        // );
     } else if (isPostDeleted || (systemMessage && !props.canDelete)) {
         options = null;
     } else if (props.location === Locations.SEARCH) {
