@@ -45,6 +45,15 @@ func TestValidateDesktopToken(t *testing.T) {
 	require.Nil(t, err)
 	require.NotNil(t, badUserServerToken)
 
+	biggoUser := th.CreateUser()
+	biggoUser.AuthService = model.ServiceBiggo
+	biggoUser.AuthData = model.NewString("biggo_user_id")
+	biggoUser, err = th.App.UpdateUser(th.Context, biggoUser, true)
+	require.Nil(t, err)
+	biggoUserServerToken, err := th.App.GenerateAndSaveDesktopToken(time.Now().Unix(), biggoUser)
+	require.Nil(t, err)
+	require.NotNil(t, biggoUserServerToken)
+
 	t.Run("validate token", func(t *testing.T) {
 		user, err := th.App.ValidateDesktopToken(*authenticatedServerToken, time.Now().Add(-TTL).Unix())
 		assert.Nil(t, err)
@@ -71,5 +80,13 @@ func TestValidateDesktopToken(t *testing.T) {
 		assert.NotNil(t, err)
 		assert.Nil(t, user)
 		assert.Equal(t, "app.desktop_token.validate.no_user", err.Id)
+	})
+
+	t.Run("validate token - biggo user", func(t *testing.T) {
+		user, err := th.App.ValidateDesktopToken(*biggoUserServerToken, time.Now().Add(-TTL).Unix())
+		assert.Nil(t, err)
+		assert.NotNil(t, user)
+		assert.Equal(t, biggoUser.Id, user.Id)
+		assert.Equal(t, user.AuthService, biggoUser.AuthService)
 	})
 }
