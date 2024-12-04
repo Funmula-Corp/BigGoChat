@@ -442,3 +442,20 @@ Cypress.Commands.add('apiDisableTutorials', (userId) => {
 
     return cy.apiSaveUserPreference(preferences, userId);
 });
+
+
+/**
+ * Saves the preference on whether to allow unverified users to send messages
+ * This API assume that the user is logged in and has cookie to access
+ * @param {boolean} enable - Either true (default) or false
+ */
+Cypress.Commands.add('apiSaveAllowUnverifiedMessage', (userId, enable = true) => {
+    const preference = {
+        user_id: userId,
+        category: 'privacy_settings',
+        name: 'allow_unverified_message',
+        value: enable.toString(),
+    };
+
+    return cy.apiSaveUserPreference([preference], userId);
+});

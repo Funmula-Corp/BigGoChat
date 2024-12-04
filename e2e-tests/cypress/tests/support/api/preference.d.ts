@@ -173,5 +173,12 @@ declare namespace Cypress {
          *   cy.apiBoardsWelcomePageViewed('user-id');
          */
         apiBoardsWelcomePageViewed(userId: string): Chainable<Response>;
+
+        /**
+         * Save allow unverified message preference.
+         * @param {string} userId - User ID
+         * @param {boolean} enable - true (default) or false
+         */
+        apiSaveAllowUnverifiedMessage(userId: string, enable: boolean): Chainable<Response>;
     }
 }
