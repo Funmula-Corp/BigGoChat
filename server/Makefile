@@ -34,7 +34,7 @@ BUILD_NUMBER ?= $(BUILD_NUMBER:)
 BUILD_DATE = $(shell date -u)
 BUILD_HASH = $(shell git rev-parse HEAD)
 BUILD_TAGS =
-
+BUILD_ARCH ?= amd64
 
 # Docker
 export COMPOSE_PROJECT_NAME=mattermost-server

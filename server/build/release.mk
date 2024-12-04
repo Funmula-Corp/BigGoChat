@@ -1,6 +1,6 @@
 dist: | check-style test package
 
-build-linux: build-linux-amd64 build-linux-arm64
+build-linux: $(if $(filter all,$(BUILD_ARCH)),build-linux-amd64 build-linux-arm64,build-linux-$(BUILD_ARCH))
 
 build-linux-amd64:
 	@echo Build Linux amd64
@@ -204,7 +204,7 @@ package-linux-arm64: package-prep
 	@# Cleanup
 	rm -rf $(DIST_ROOT)/linux_arm64
 
-package-linux: package-linux-amd64 package-linux-arm64
+package-linux: $(if $(filter all,$(BUILD_ARCH)),package-linux-amd64 package-linux-arm64,package-linux-$(BUILD_ARCH))
 
 package-windows: package-prep
 	DIST_PATH_GENERIC=$(DIST_PATH_WIN) CURRENT_PACKAGE_ARCH=windows_amd64 MM_BIN_NAME=mattermost.exe MMCTL_BIN_NAME=mmctl.exe $(MAKE) package-general
