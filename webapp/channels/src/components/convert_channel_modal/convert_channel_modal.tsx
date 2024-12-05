@@ -11,6 +11,7 @@ import {General} from 'mattermost-redux/constants';
 import {trackEvent} from 'actions/telemetry_actions.jsx';
 
 import Constants from 'utils/constants';
+import Markdown from 'components/markdown';
 
 type Props = {
     channelDisplayName: string;
@@ -99,12 +100,13 @@ export class ConvertChannelModal extends React.PureComponent<Props, State> {
                 </Modal.Header>
                 <Modal.Body>
                     <p>
-                        <FormattedMessage
-                            id='convert_channel.question1'
-                            defaultMessage='When you convert **{display_name}** to a private channel, history and membership are preserved. Publicly shared files remain accessible to anyone with the link. Membership in a private channel is by invitation only.'
-                            values={{
+                        <Markdown
+                            message={formatMessage({
+                                id: 'convert_channel.question1',
+                                defaultMessage: 'When you convert **{display_name}** to a private channel, history and membership are preserved. Publicly shared files remain accessible to anyone with the link. Membership in a private channel is by invitation only.',
+                            }, {
                                 display_name: channelDisplayName,
-                            }}
+                            })}
                         />
                     </p>
                     <p style={{marginTop: '25px'}}>
