@@ -3,6 +3,7 @@ package api4
 import (
 	"encoding/json"
 	"net/http"
+	"slices"
 
 	"git.biggo.com/Funmula/BigGoChat/server/public/model"
 	"git.biggo.com/Funmula/BigGoChat/server/public/shared/mlog"
@@ -68,14 +69,15 @@ func listUserBlockUsers(c *Context, w http.ResponseWriter, r *http.Request) {
 	if c.Err != nil {
 		return
 	}
-	if !c.App.SessionHasPermissionToUserOrBot(c.AppContext, *c.AppContext.Session(), c.Params.UserId) {
-		c.SetPermissionError(model.PermissionEditOtherUsers)
-		return
-	}
 	blockList, err := c.App.ListUserBlockUsers(c.AppContext, c.Params.UserId)
 	if err != nil {
 		c.Err = err
 		return
+	}
+	if !c.App.SessionHasPermissionToUserOrBot(c.AppContext, *c.AppContext.Session(), c.Params.UserId) {
+		*blockList = slices.DeleteFunc(*blockList, func(u *model.UserBlockUser) bool {
+			return u.BlockedId != c.AppContext.Session().UserId
+		})
 	}
 	if err := json.NewEncoder(w).Encode(blockList); err != nil {
 		c.Logger.Warn("Error while writing response", mlog.Err(err))
@@ -191,16 +193,15 @@ func getChannelBlockUsers(c *Context, w http.ResponseWriter, r *http.Request) {
 		c.Err = err
 		return
 	}
+	justMe := false
 	switch channel.Type {
 	case model.ChannelTypePrivate:
 		if !c.App.SessionHasPermissionToChannel(c.AppContext, *c.AppContext.Session(), channel.Id, model.PermissionManagePrivateChannelMembers) {
-			c.SetPermissionError(model.PermissionManagePrivateChannelMembers)
-			return
+			justMe = true
 		}
 	case model.ChannelTypeOpen:
 		if !c.App.SessionHasPermissionToChannel(c.AppContext, *c.AppContext.Session(), channel.Id, model.PermissionManagePublicChannelMembers) {
-			c.SetPermissionError(model.PermissionManagePublicChannelMembers)
-			return
+			justMe = true
 		}
 	case model.ChannelTypeDirect:
 		c.Err = model.NewAppError("getChannelBlockUsers", "api.channel.get_blocklist.channel_type_direct.app_error", nil, "", http.StatusBadRequest)
@@ -222,6 +223,13 @@ func getChannelBlockUsers(c *Context, w http.ResponseWriter, r *http.Request) {
 		c.Err = errApp
 		return
 	}
+
+	if justMe {
+		*cBUL = slices.DeleteFunc(*cBUL, func(u *model.ChannelBlockUser) bool {
+			return u.BlockedId != userId
+		})
+	}
+
 	if err := json.NewEncoder(w).Encode(cBUL); err != nil {
 		c.Logger.Warn("Error while writing response", mlog.Err(err))
 	}
@@ -299,11 +307,6 @@ func getTeamBlockUsers(c *Context, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if !c.App.SessionHasPermissionToTeam(*c.AppContext.Session(), team.Id, model.PermissionRemoveUserFromTeam) {
-		c.SetPermissionError(model.PermissionManageTeamRoles)
-		return
-	}
-
 	var cBUL *model.TeamBlockUserList
 	var errApp *model.AppError
 
@@ -311,6 +314,13 @@ func getTeamBlockUsers(c *Context, w http.ResponseWriter, r *http.Request) {
 		c.Err = errApp
 		return
 	}
+
+	if !c.App.SessionHasPermissionToTeam(*c.AppContext.Session(), team.Id, model.PermissionRemoveUserFromTeam) {
+		*cBUL = slices.DeleteFunc(*cBUL, func(u *model.TeamBlockUser) bool {
+			return u.BlockedId != c.AppContext.Session().UserId
+		})
+	}
+
 	if err := json.NewEncoder(w).Encode(cBUL); err != nil {
 		c.Logger.Warn("Error while writing response", mlog.Err(err))
 	}
