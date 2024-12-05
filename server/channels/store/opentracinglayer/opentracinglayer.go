@@ -553,7 +553,7 @@ func (s *OpenTracingLayerBlocklistStore) DeleteChannelBlockUser(channelId string
 	return err
 }
 
-func (s *OpenTracingLayerBlocklistStore) DeleteTeamBlockUser(channelId string, userId string) error {
+func (s *OpenTracingLayerBlocklistStore) DeleteTeamBlockUser(teamId string, userId string) error {
 	origCtx := s.Root.Store.Context()
 	span, newCtx := tracing.StartSpanWithParentByContext(s.Root.Store.Context(), "BlocklistStore.DeleteTeamBlockUser")
 	s.Root.Store.SetContext(newCtx)
@@ -562,7 +562,7 @@ func (s *OpenTracingLayerBlocklistStore) DeleteTeamBlockUser(channelId string, u
 	}()
 
 	defer span.Finish()
-	err := s.BlocklistStore.DeleteTeamBlockUser(channelId, userId)
+	err := s.BlocklistStore.DeleteTeamBlockUser(teamId, userId)
 	if err != nil {
 		span.LogFields(spanlog.Error(err))
 		ext.Error.Set(span, true)
@@ -625,7 +625,7 @@ func (s *OpenTracingLayerBlocklistStore) GetChannelBlockUserByEmail(channelId st
 	return result, err
 }
 
-func (s *OpenTracingLayerBlocklistStore) GetTeamBlockUser(channelId string, userId string) (*model.TeamBlockUser, error) {
+func (s *OpenTracingLayerBlocklistStore) GetTeamBlockUser(teamId string, userId string) (*model.TeamBlockUser, error) {
 	origCtx := s.Root.Store.Context()
 	span, newCtx := tracing.StartSpanWithParentByContext(s.Root.Store.Context(), "BlocklistStore.GetTeamBlockUser")
 	s.Root.Store.SetContext(newCtx)
@@ -634,7 +634,7 @@ func (s *OpenTracingLayerBlocklistStore) GetTeamBlockUser(channelId string, user
 	}()
 
 	defer span.Finish()
-	result, err := s.BlocklistStore.GetTeamBlockUser(channelId, userId)
+	result, err := s.BlocklistStore.GetTeamBlockUser(teamId, userId)
 	if err != nil {
 		span.LogFields(spanlog.Error(err))
 		ext.Error.Set(span, true)
@@ -679,6 +679,45 @@ func (s *OpenTracingLayerBlocklistStore) GetUserBlockUser(userId string, blocked
 	return result, err
 }
 
+func (s *OpenTracingLayerBlocklistStore) InvalidateCacheForChannel(channelId string) {
+	origCtx := s.Root.Store.Context()
+	span, newCtx := tracing.StartSpanWithParentByContext(s.Root.Store.Context(), "BlocklistStore.InvalidateCacheForChannel")
+	s.Root.Store.SetContext(newCtx)
+	defer func() {
+		s.Root.Store.SetContext(origCtx)
+	}()
+
+	defer span.Finish()
+	s.BlocklistStore.InvalidateCacheForChannel(channelId)
+
+}
+
+func (s *OpenTracingLayerBlocklistStore) InvalidateCacheForTeam(teamId string) {
+	origCtx := s.Root.Store.Context()
+	span, newCtx := tracing.StartSpanWithParentByContext(s.Root.Store.Context(), "BlocklistStore.InvalidateCacheForTeam")
+	s.Root.Store.SetContext(newCtx)
+	defer func() {
+		s.Root.Store.SetContext(origCtx)
+	}()
+
+	defer span.Finish()
+	s.BlocklistStore.InvalidateCacheForTeam(teamId)
+
+}
+
+func (s *OpenTracingLayerBlocklistStore) InvalidateCacheForUser(userId string) {
+	origCtx := s.Root.Store.Context()
+	span, newCtx := tracing.StartSpanWithParentByContext(s.Root.Store.Context(), "BlocklistStore.InvalidateCacheForUser")
+	s.Root.Store.SetContext(newCtx)
+	defer func() {
+		s.Root.Store.SetContext(origCtx)
+	}()
+
+	defer span.Finish()
+	s.BlocklistStore.InvalidateCacheForUser(userId)
+
+}
+
 func (s *OpenTracingLayerBlocklistStore) ListChannelBlockUsers(channelId string) (*model.ChannelBlockUserList, error) {
 	origCtx := s.Root.Store.Context()
 	span, newCtx := tracing.StartSpanWithParentByContext(s.Root.Store.Context(), "BlocklistStore.ListChannelBlockUsers")
@@ -715,7 +754,7 @@ func (s *OpenTracingLayerBlocklistStore) ListChannelBlockUsersByBlockedUser(bloc
 	return result, err
 }
 
-func (s *OpenTracingLayerBlocklistStore) ListTeamBlockUsers(channelId string) (*model.TeamBlockUserList, error) {
+func (s *OpenTracingLayerBlocklistStore) ListTeamBlockUsers(teamId string) (*model.TeamBlockUserList, error) {
 	origCtx := s.Root.Store.Context()
 	span, newCtx := tracing.StartSpanWithParentByContext(s.Root.Store.Context(), "BlocklistStore.ListTeamBlockUsers")
 	s.Root.Store.SetContext(newCtx)
@@ -724,7 +763,7 @@ func (s *OpenTracingLayerBlocklistStore) ListTeamBlockUsers(channelId string) (*
 	}()
 
 	defer span.Finish()
-	result, err := s.BlocklistStore.ListTeamBlockUsers(channelId)
+	result, err := s.BlocklistStore.ListTeamBlockUsers(teamId)
 	if err != nil {
 		span.LogFields(spanlog.Error(err))
 		ext.Error.Set(span, true)

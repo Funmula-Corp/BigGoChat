@@ -585,11 +585,11 @@ func (s *RetryLayerBlocklistStore) DeleteChannelBlockUser(channelId string, user
 
 }
 
-func (s *RetryLayerBlocklistStore) DeleteTeamBlockUser(channelId string, userId string) error {
+func (s *RetryLayerBlocklistStore) DeleteTeamBlockUser(teamId string, userId string) error {
 
 	tries := 0
 	for {
-		err := s.BlocklistStore.DeleteTeamBlockUser(channelId, userId)
+		err := s.BlocklistStore.DeleteTeamBlockUser(teamId, userId)
 		if err == nil {
 			return nil
 		}
@@ -669,11 +669,11 @@ func (s *RetryLayerBlocklistStore) GetChannelBlockUserByEmail(channelId string, 
 
 }
 
-func (s *RetryLayerBlocklistStore) GetTeamBlockUser(channelId string, userId string) (*model.TeamBlockUser, error) {
+func (s *RetryLayerBlocklistStore) GetTeamBlockUser(teamId string, userId string) (*model.TeamBlockUser, error) {
 
 	tries := 0
 	for {
-		result, err := s.BlocklistStore.GetTeamBlockUser(channelId, userId)
+		result, err := s.BlocklistStore.GetTeamBlockUser(teamId, userId)
 		if err == nil {
 			return result, nil
 		}
@@ -732,6 +732,24 @@ func (s *RetryLayerBlocklistStore) GetUserBlockUser(userId string, blockedId str
 
 }
 
+func (s *RetryLayerBlocklistStore) InvalidateCacheForChannel(channelId string) {
+
+	s.BlocklistStore.InvalidateCacheForChannel(channelId)
+
+}
+
+func (s *RetryLayerBlocklistStore) InvalidateCacheForTeam(teamId string) {
+
+	s.BlocklistStore.InvalidateCacheForTeam(teamId)
+
+}
+
+func (s *RetryLayerBlocklistStore) InvalidateCacheForUser(userId string) {
+
+	s.BlocklistStore.InvalidateCacheForUser(userId)
+
+}
+
 func (s *RetryLayerBlocklistStore) ListChannelBlockUsers(channelId string) (*model.ChannelBlockUserList, error) {
 
 	tries := 0
@@ -774,11 +792,11 @@ func (s *RetryLayerBlocklistStore) ListChannelBlockUsersByBlockedUser(blockedId 
 
 }
 
-func (s *RetryLayerBlocklistStore) ListTeamBlockUsers(channelId string) (*model.TeamBlockUserList, error) {
+func (s *RetryLayerBlocklistStore) ListTeamBlockUsers(teamId string) (*model.TeamBlockUserList, error) {
 
 	tries := 0
 	for {
-		result, err := s.BlocklistStore.ListTeamBlockUsers(channelId)
+		result, err := s.BlocklistStore.ListTeamBlockUsers(teamId)
 		if err == nil {
 			return result, nil
 		}

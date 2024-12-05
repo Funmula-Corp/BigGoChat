@@ -32,9 +32,9 @@ func (_m *BlocklistStore) DeleteChannelBlockUser(channelId string, userId string
 	return r0
 }
 
-// DeleteTeamBlockUser provides a mock function with given fields: channelId, userId
-func (_m *BlocklistStore) DeleteTeamBlockUser(channelId string, userId string) error {
-	ret := _m.Called(channelId, userId)
+// DeleteTeamBlockUser provides a mock function with given fields: teamId, userId
+func (_m *BlocklistStore) DeleteTeamBlockUser(teamId string, userId string) error {
+	ret := _m.Called(teamId, userId)
 
 	if len(ret) == 0 {
 		panic("no return value specified for DeleteTeamBlockUser")
@@ -42,7 +42,7 @@ func (_m *BlocklistStore) DeleteTeamBlockUser(channelId string, userId string) e
 
 	var r0 error
 	if rf, ok := ret.Get(0).(func(string, string) error); ok {
-		r0 = rf(channelId, userId)
+		r0 = rf(teamId, userId)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -128,9 +128,9 @@ func (_m *BlocklistStore) GetChannelBlockUserByEmail(channelId string, email str
 	return r0, r1
 }
 
-// GetTeamBlockUser provides a mock function with given fields: channelId, userId
-func (_m *BlocklistStore) GetTeamBlockUser(channelId string, userId string) (*model.TeamBlockUser, error) {
-	ret := _m.Called(channelId, userId)
+// GetTeamBlockUser provides a mock function with given fields: teamId, userId
+func (_m *BlocklistStore) GetTeamBlockUser(teamId string, userId string) (*model.TeamBlockUser, error) {
+	ret := _m.Called(teamId, userId)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetTeamBlockUser")
@@ -139,10 +139,10 @@ func (_m *BlocklistStore) GetTeamBlockUser(channelId string, userId string) (*mo
 	var r0 *model.TeamBlockUser
 	var r1 error
 	if rf, ok := ret.Get(0).(func(string, string) (*model.TeamBlockUser, error)); ok {
-		return rf(channelId, userId)
+		return rf(teamId, userId)
 	}
 	if rf, ok := ret.Get(0).(func(string, string) *model.TeamBlockUser); ok {
-		r0 = rf(channelId, userId)
+		r0 = rf(teamId, userId)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*model.TeamBlockUser)
@@ -150,7 +150,7 @@ func (_m *BlocklistStore) GetTeamBlockUser(channelId string, userId string) (*mo
 	}
 
 	if rf, ok := ret.Get(1).(func(string, string) error); ok {
-		r1 = rf(channelId, userId)
+		r1 = rf(teamId, userId)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -218,6 +218,21 @@ func (_m *BlocklistStore) GetUserBlockUser(userId string, blockedId string) (*mo
 	return r0, r1
 }
 
+// InvalidateCacheForChannel provides a mock function with given fields: channelId
+func (_m *BlocklistStore) InvalidateCacheForChannel(channelId string) {
+	_m.Called(channelId)
+}
+
+// InvalidateCacheForTeam provides a mock function with given fields: teamId
+func (_m *BlocklistStore) InvalidateCacheForTeam(teamId string) {
+	_m.Called(teamId)
+}
+
+// InvalidateCacheForUser provides a mock function with given fields: userId
+func (_m *BlocklistStore) InvalidateCacheForUser(userId string) {
+	_m.Called(userId)
+}
+
 // ListChannelBlockUsers provides a mock function with given fields: channelId
 func (_m *BlocklistStore) ListChannelBlockUsers(channelId string) (*model.ChannelBlockUserList, error) {
 	ret := _m.Called(channelId)
@@ -278,9 +293,9 @@ func (_m *BlocklistStore) ListChannelBlockUsersByBlockedUser(blockedId string) (
 	return r0, r1
 }
 
-// ListTeamBlockUsers provides a mock function with given fields: channelId
-func (_m *BlocklistStore) ListTeamBlockUsers(channelId string) (*model.TeamBlockUserList, error) {
-	ret := _m.Called(channelId)
+// ListTeamBlockUsers provides a mock function with given fields: teamId
+func (_m *BlocklistStore) ListTeamBlockUsers(teamId string) (*model.TeamBlockUserList, error) {
+	ret := _m.Called(teamId)
 
 	if len(ret) == 0 {
 		panic("no return value specified for ListTeamBlockUsers")
@@ -289,10 +304,10 @@ func (_m *BlocklistStore) ListTeamBlockUsers(channelId string) (*model.TeamBlock
 	var r0 *model.TeamBlockUserList
 	var r1 error
 	if rf, ok := ret.Get(0).(func(string) (*model.TeamBlockUserList, error)); ok {
-		return rf(channelId)
+		return rf(teamId)
 	}
 	if rf, ok := ret.Get(0).(func(string) *model.TeamBlockUserList); ok {
-		r0 = rf(channelId)
+		r0 = rf(teamId)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*model.TeamBlockUserList)
@@ -300,7 +315,7 @@ func (_m *BlocklistStore) ListTeamBlockUsers(channelId string) (*model.TeamBlock
 	}
 
 	if rf, ok := ret.Get(1).(func(string) error); ok {
-		r1 = rf(channelId)
+		r1 = rf(teamId)
 	} else {
 		r1 = ret.Error(1)
 	}

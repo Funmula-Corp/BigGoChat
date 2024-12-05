@@ -7,10 +7,10 @@ import (
 	"runtime"
 	"time"
 
+	"git.biggo.com/Funmula/BigGoChat/server/public/model"
 	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/store"
 	"git.biggo.com/Funmula/BigGoChat/server/v8/einterfaces"
 	"git.biggo.com/Funmula/BigGoChat/server/v8/platform/services/cache"
-	"git.biggo.com/Funmula/BigGoChat/server/public/model"
 )
 
 const (
@@ -121,6 +121,11 @@ type LocalCacheStore struct {
 
 	termsOfService      LocalCacheTermsOfServiceStore
 	termsOfServiceCache cache.Cache
+
+	blocklist             LocalCacheBlocklistStore
+	channelBlocklistCache cache.Cache
+	userBlocklistCache    cache.Cache
+	teamBlocklistCache    cache.Cache
 }
 
 func NewLocalCacheLayer(baseStore store.Store, metrics einterfaces.MetricsInterface, cluster einterfaces.ClusterInterface, cacheProvider cache.Provider) (localCacheStore LocalCacheStore, err error) {
@@ -359,6 +364,33 @@ func NewLocalCacheLayer(baseStore store.Store, metrics einterfaces.MetricsInterf
 	}
 	localCacheStore.team = LocalCacheTeamStore{TeamStore: baseStore.Team(), rootStore: &localCacheStore}
 
+	// blocklist
+	if localCacheStore.channelBlocklistCache, err = cacheProvider.NewCache(&cache.CacheOptions{
+		Size:                   model.BlocklistCacheSize,
+		Name:                   "ChannelBlocklist",
+		DefaultExpiry:          ChannelCacheDuration,
+		InvalidateClusterEvent: model.ClusterEventInvalidateCacheForChannelBlocklist,
+	}); err != nil {
+		return
+	}
+	if localCacheStore.userBlocklistCache, err = cacheProvider.NewCache(&cache.CacheOptions{
+		Size:                   model.BlocklistCacheSize,
+		Name:                   "UserBlocklist",
+		DefaultExpiry:          ChannelCacheDuration,
+		InvalidateClusterEvent: model.ClusterEventInvalidateCacheForUserBlocklist,
+	}); err != nil {
+		return
+	}
+	if localCacheStore.teamBlocklistCache, err = cacheProvider.NewCache(&cache.CacheOptions{
+		Size:                   model.BlocklistCacheSize,
+		Name:                   "TeamBlocklist",
+		DefaultExpiry:          ChannelCacheDuration,
+		InvalidateClusterEvent: model.ClusterEventInvalidateCacheForTeamBlocklist,
+	}); err != nil {
+		return
+	}
+	localCacheStore.blocklist = LocalCacheBlocklistStore{BlocklistStore: baseStore.Blocklist(), rootStore: &localCacheStore}
+
 	if cluster != nil {
 		cluster.RegisterClusterMessageHandler(model.ClusterEventInvalidateCacheForReactions, localCacheStore.reaction.handleClusterInvalidateReaction)
 		cluster.RegisterClusterMessageHandler(model.ClusterEventInvalidateCacheForRoles, localCacheStore.role.handleClusterInvalidateRole)
@@ -383,6 +415,9 @@ func NewLocalCacheLayer(baseStore store.Store, metrics einterfaces.MetricsInterf
 		cluster.RegisterClusterMessageHandler(model.ClusterEventInvalidateCacheForProfileInChannel, localCacheStore.user.handleClusterInvalidateProfilesInChannel)
 		cluster.RegisterClusterMessageHandler(model.ClusterEventInvalidateCacheForAllProfiles, localCacheStore.user.handleClusterInvalidateAllProfiles)
 		cluster.RegisterClusterMessageHandler(model.ClusterEventInvalidateCacheForTeams, localCacheStore.team.handleClusterInvalidateTeam)
+		cluster.RegisterClusterMessageHandler(model.ClusterEventInvalidateCacheForChannelBlocklist, localCacheStore.blocklist.handleClusterInvalidateChannel)
+		cluster.RegisterClusterMessageHandler(model.ClusterEventInvalidateCacheForUserBlocklist, localCacheStore.blocklist.handleClusterInvalidateUser)
+		cluster.RegisterClusterMessageHandler(model.ClusterEventInvalidateCacheForTeamBlocklist, localCacheStore.blocklist.handleClusterInvalidateTeam)
 	}
 	return
 }
@@ -436,6 +471,10 @@ func (s LocalCacheStore) User() store.UserStore {
 
 func (s LocalCacheStore) Team() store.TeamStore {
 	return s.team
+}
+
+func (s LocalCacheStore) Blocklist() store.BlocklistStore {
+	return s.blocklist
 }
 
 func (s LocalCacheStore) DropAllTables() {
@@ -511,4 +550,7 @@ func (s *LocalCacheStore) Invalidate() {
 	s.doClearCacheCluster(s.profilesInChannelCache)
 	s.doClearCacheCluster(s.teamAllTeamIdsForUserCache)
 	s.doClearCacheCluster(s.rolePermissionsCache)
+	s.doClearCacheCluster(s.channelBlocklistCache)
+	s.doClearCacheCluster(s.userBlocklistCache)
+	s.doClearCacheCluster(s.teamBlocklistCache)
 }

@@ -179,6 +179,27 @@ func getMockStore(t *testing.T) *mocks.Store {
 	mockTeamStore.On("GetUserTeamIds", "123", false).Return(fakeUserTeamIds, nil)
 	mockStore.On("Team").Return(&mockTeamStore)
 
+	mockBlocklistStore := mocks.BlocklistStore{}
+	mockBlocklistStore.On("ListChannelBlockUsers", "channel1").Return(&model.ChannelBlockUserList{
+		{
+			ChannelId: "channel1",
+			BlockedId: "user1",
+		},
+	}, nil)
+	mockBlocklistStore.On("ListTeamBlockUsers", "team1").Return(&model.TeamBlockUserList{
+		{
+			TeamId:    "team1",
+			BlockedId: "user1",
+		},
+	}, nil)
+	mockBlocklistStore.On("ListUserBlockUsers", "user1").Return(&model.UserBlockUserList{
+		{
+			UserId:    "user1",
+			BlockedId: "user2",
+		},
+	}, nil)
+	mockStore.On("Blocklist").Return(&mockBlocklistStore)
+
 	return &mockStore
 }
 

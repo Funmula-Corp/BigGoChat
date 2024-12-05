@@ -521,3 +521,12 @@ func (s *SqlBlocklistStore) SaveUserBlockUser(userBlockUser *model.UserBlockUser
 	}
 	return userBlockUser, nil
 }
+
+func (s *SqlBlocklistStore) InvalidateCacheForChannel(channelId string) {
+}
+
+func (s *SqlBlocklistStore) InvalidateCacheForUser(userId string) {
+}
+
+func (s *SqlBlocklistStore) InvalidateCacheForTeam(teamId string) {
+}

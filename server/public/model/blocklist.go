@@ -1,5 +1,9 @@
 package model
 
+const (
+	BlocklistCacheSize = 250000
+)
+
 type TeamBlockUser struct {
 	TeamId string `json:"channel_id"`
 	BlockedId string `json:"blocked_id"`
