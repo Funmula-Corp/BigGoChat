@@ -76,6 +76,7 @@ export default class YoutubeVideo extends React.PureComponent<Props, State> {
                     width='480px'
                     height='360px'
                     frameBorder='0'
+                    referrerPolicy='strict-origin-when-cross-origin'
                     allowFullScreen={true}
                 />
             );
