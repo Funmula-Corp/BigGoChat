@@ -14,6 +14,8 @@ func TestUserBlockUser(t *testing.T) {
 	th := Setup(t).InitBasic()
 	defer th.TearDown()
 	client := th.Client
+	user3 := th.CreateUser()
+	client2 := th.CreateClient()
 	ubul0, resp0, err0 := client.ListUserBlockUsers(context.Background(), th.BasicUser.Id)
 	require.NoError(t, err0)
 	CheckOKStatus(t, resp0)
@@ -35,11 +37,33 @@ func TestUserBlockUser(t *testing.T) {
 	assert.Len(t, *ubul2, 1)
 	assert.Equal(t, *(*ubul2)[0], *ubu1)
 
+	_, _, lErr := client2.Login(context.Background(), th.BasicUser2.Username, th.BasicUser2.Password)
+	require.NoError(t, lErr)
+	ubul2, resp2, err2 = client2.ListUserBlockUsers(context.Background(), th.BasicUser.Id)
+	require.NoError(t, err2)
+	CheckOKStatus(t, resp2)
+	assert.Len(t, *ubul2, 1)
+	assert.Equal(t, *(*ubul2)[0], *ubu1)
+
+	_, _, lErr = client2.Login(context.Background(), user3.Username, user3.Password)
+	require.NoError(t, lErr)
+	ubul2, resp2, err2 = client2.ListUserBlockUsers(context.Background(), th.BasicUser.Id)
+	require.NoError(t, err2)
+	CheckOKStatus(t, resp2)
+	assert.Len(t, *ubul2, 0)
+
 	_, resp3, err3 := client.DeleteUserBlockUser(context.Background(), th.BasicUser.Id, th.BasicUser2.Id)
 	require.NoError(t, err3)
 	CheckOKStatus(t, resp3)
 
 	ubul4, resp4, err4 := client.ListUserBlockUsers(context.Background(), th.BasicUser.Id)
+	require.NoError(t, err4)
+	CheckOKStatus(t, resp4)
+	assert.Len(t, *ubul4, 0)
+
+	_, _, lErr = client2.Login(context.Background(), th.BasicUser2.Username, th.BasicUser2.Password)
+	require.NoError(t, lErr)
+	ubul4, resp4, err4 = client2.ListUserBlockUsers(context.Background(), th.BasicUser.Id)
 	require.NoError(t, err4)
 	CheckOKStatus(t, resp4)
 	assert.Len(t, *ubul4, 0)
@@ -53,8 +77,8 @@ func TestUserBlockUser(t *testing.T) {
 	CheckForbiddenStatus(t, resp6)
 
 	_, resp7, err7 := client.ListUserBlockUsers(context.Background(), th.BasicUser2.Id)
-	require.Error(t, err7)
-	CheckForbiddenStatus(t, resp7)
+	require.NoError(t, err7)
+	CheckOKStatus(t, resp7)
 
 	// test invalid user id
 	_, resp8, err8 := client.AddUserBlockUser(context.Background(), th.BasicUser.Id, model.NewId())
@@ -215,8 +239,8 @@ func TestChannelBlockUser(t *testing.T) {
 	CheckForbiddenStatus(t, resp6)
 
 	_, resp7, err7 := otherClient.ListUserBlockUsers(context.Background(), th.BasicChannel.Id)
-	require.Error(t, err7)
-	CheckForbiddenStatus(t, resp7)
+	require.NoError(t, err7)
+	CheckOKStatus(t, resp7)
 }
 
 func TestChannelBlockUserPost(t *testing.T) {
@@ -345,8 +369,8 @@ func TestTeamBlockUserAddRemove(t *testing.T) {
 	CheckForbiddenStatus(t, resp7)
 
 	_, resp8, err8 := otherClient.ListUserBlockUsers(context.Background(), th.BasicTeam.Id)
-	require.Error(t, err8)
-	CheckForbiddenStatus(t, resp8)
+	require.NoError(t, err8)
+	CheckOKStatus(t, resp8)
 
 	// Cannot block other team admin/team moderator
 	teamAdmin := th.CreateUser()

@@ -1063,17 +1063,20 @@ type BlocklistStore interface {
 	ListChannelBlockUsersByBlockedUser(blockedId string) (*model.ChannelBlockUserList, error)
 	DeleteChannelBlockUser(channelId string, userId string) error
 	SaveChannelBlockUser(blockUser *model.ChannelBlockUser) (*model.ChannelBlockUser, error)
-	GetTeamBlockUser(channelId string, userId string) (*model.TeamBlockUser, error)
+	GetTeamBlockUser(teamId string, userId string) (*model.TeamBlockUser, error)
 	GetTeamBlockUserByEmail(teamId string, email string) (*model.TeamBlockUser, error)
-	ListTeamBlockUsers(channelId string) (*model.TeamBlockUserList, error)
+	ListTeamBlockUsers(teamId string) (*model.TeamBlockUserList, error)
 	ListTeamBlockUsersByBlockedUser(blockedId string) (*model.TeamBlockUserList, error)
-	DeleteTeamBlockUser(channelId string, userId string) error
+	DeleteTeamBlockUser(teamId string, userId string) error
 	SaveTeamBlockUser(blockUser *model.TeamBlockUser) (*model.TeamBlockUser, error)
 	GetUserBlockUser(userId string, blockedId string) (*model.UserBlockUser, error)
 	ListUserBlockUsers(userId string) (*model.UserBlockUserList, error)
 	ListUserBlockUsersByBlockedUser(blockedId string) (*model.UserBlockUserList, error)
 	DeleteUserBlockUser(userId, blockedId string, userIsVerified, blockedIsVerified bool) error
 	SaveUserBlockUser(userBlockUser *model.UserBlockUser) (*model.UserBlockUser, error)
+	InvalidateCacheForChannel(channelId string)
+	InvalidateCacheForUser(userId string)
+	InvalidateCacheForTeam(teamId string)
 }
 
 // ChannelSearchOpts contains options for searching channels.
