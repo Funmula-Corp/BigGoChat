@@ -66,6 +66,7 @@ const (
 	UserTimezoneMaxRunes  = 256
 	UserRolesMaxLength    = 256
 	UserExcludePermissionsMaxLength = 256
+	UserDescriptionMaxRunes = 300
 
 	DesktopTokenTTL = time.Minute * 3
 )
@@ -112,6 +113,7 @@ type User struct {
 	LastLogin              int64       `json:"last_login,omitempty"`
 	Mobilephone            *string     `json:"mobilephone"`
 	MfaUsedTimestamps      StringArray `json:"mfa_used_timestamps,omitempty"`
+	Description            string      `json:"description,omitempty"`
 }
 
 func (u *User) Auditable() map[string]interface{} {
@@ -196,6 +198,7 @@ type UserPatch struct {
 	Timezone    StringMap `json:"timezone"`
 	RemoteId    *string   `json:"remote_id"`
 	Mobilephone *string   `json:"mobilephone"`
+	Description *string   `json:"description"`
 }
 
 func (u *UserPatch) Auditable() map[string]interface{} {
@@ -395,6 +398,10 @@ func (u *User) IsValid() *AppError {
 		return InvalidUserError("last_name", u.Id, u.LastName)
 	}
 
+	if utf8.RuneCountInString(u.Description) > UserDescriptionMaxRunes {
+		return InvalidUserError("description", u.Id, u.Description)
+	}
+
 	if u.AuthData != nil && len(*u.AuthData) > UserAuthDataMaxLength {
 		return InvalidUserError("auth_data", u.Id, u.AuthData)
 	}
@@ -542,6 +549,7 @@ func (u *User) PreUpdate() {
 	u.LastName = SanitizeUnicode(u.LastName)
 	u.Nickname = SanitizeUnicode(u.Nickname)
 	u.BotDescription = SanitizeUnicode(u.BotDescription)
+	u.Description = SanitizeUnicode(u.Description)
 
 	if u.AuthData != nil && *u.AuthData == "" {
 		u.AuthData = nil
@@ -663,6 +671,10 @@ func (u *User) Patch(patch *UserPatch) {
 
 	if patch.Mobilephone != nil {
 		u.Mobilephone = patch.Mobilephone
+	}
+
+	if patch.Description != nil {
+		u.Description = *patch.Description
 	}
 }
 
@@ -999,6 +1011,8 @@ func (u *UserPatch) SetField(fieldName string, fieldValue string) {
 		u.Username = &fieldValue
 	case "Mobilephone":
 		u.Mobilephone = &fieldValue
+	case "Description":
+		u.Description = &fieldValue
 	}
 }
 

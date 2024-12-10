@@ -21,6 +21,7 @@ import (
 
 	"git.biggo.com/Funmula/BigGoChat/server/public/model"
 	"git.biggo.com/Funmula/BigGoChat/server/public/shared/request"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/biggo/oauth"
 	oauthgitlab "git.biggo.com/Funmula/BigGoChat/server/v8/channels/app/oauthproviders/gitlab"
 	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/app/users"
 	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/store"
@@ -36,6 +37,7 @@ func TestCreateOAuthUser(t *testing.T) {
 
 	th.App.UpdateConfig(func(cfg *model.Config) {
 		*cfg.GitLabSettings.Enable = true
+		*cfg.BiggoSettings.Enable = true
 	})
 
 	t.Run("create user successfully", func(t *testing.T) {
@@ -83,6 +85,26 @@ func TestCreateOAuthUser(t *testing.T) {
 		*th.App.Config().TeamSettings.EnableUserCreation = false
 		_, err := th.App.CreateOAuthUser(th.Context, model.UserAuthServiceGitlab, strings.NewReader("{}"), th.BasicTeam.Id, nil)
 		require.NotNil(t, err, "should have failed - user creation disabled")
+	})
+
+	t.Run("create user from biggo successfully", func(t *testing.T) {
+		bgUser := oauth.BiggoUser{
+			Id: "123456",
+			Email: model.NewId() + "@test.funmula.com", 
+			UserId: "u" + model.NewId(),
+			Name: "Test User",
+			Description: "Test Description",
+		}
+		js, jsonErr := json.Marshal(bgUser)
+		require.NoError(t, jsonErr)
+
+		user, err := th.App.CreateOAuthUser(th.Context, oauth.UserAuthServiceBiggo, bytes.NewReader(js), th.BasicTeam.Id, nil)
+		require.Nil(t, err)
+
+		require.Equal(t, bgUser.UserId, user.Username, "usernames didn't match")
+		require.Equal(t, bgUser.Description, user.Description, "descriptions didn't match")
+
+		th.App.PermanentDeleteUser(th.Context, user)
 	})
 }
 
@@ -224,6 +246,15 @@ func TestUpdateUser(t *testing.T) {
 		require.Nil(t, errUpdateUser)
 		require.NotNil(t, updatedUser)
 		require.Equal(t, updatedUser.LastPictureUpdate, iLastPictureUpdate)
+	})
+
+	t.Run("update user description", func(t *testing.T) {
+		originalDesc := user.Description
+		user.Description = "newdescription"
+		updatedUser, err := th.App.UpdateUser(th.Context, user, false)
+		require.Nil(t, err)
+		require.NotEqual(t, originalDesc, updatedUser.Description)
+		require.Equal(t, "newdescription", updatedUser.Description)
 	})
 }
 
