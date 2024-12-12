@@ -81,12 +81,6 @@ func TestCreateOAuthUser(t *testing.T) {
 		assert.Equal(t, "e7110007-64be-43d8-9840-4a7e9c26b710", *u.AuthData)
 	})
 
-	t.Run("user creation disabled", func(t *testing.T) {
-		*th.App.Config().TeamSettings.EnableUserCreation = false
-		_, err := th.App.CreateOAuthUser(th.Context, model.UserAuthServiceGitlab, strings.NewReader("{}"), th.BasicTeam.Id, nil)
-		require.NotNil(t, err, "should have failed - user creation disabled")
-	})
-
 	t.Run("create user from biggo successfully", func(t *testing.T) {
 		bgUser := oauth.BiggoUser{
 			Id: "123456",
@@ -105,6 +99,12 @@ func TestCreateOAuthUser(t *testing.T) {
 		require.Equal(t, bgUser.Description, user.Description, "descriptions didn't match")
 
 		th.App.PermanentDeleteUser(th.Context, user)
+	})
+
+	t.Run("user creation disabled", func(t *testing.T) {
+		*th.App.Config().TeamSettings.EnableUserCreation = false
+		_, err := th.App.CreateOAuthUser(th.Context, model.UserAuthServiceGitlab, strings.NewReader("{}"), th.BasicTeam.Id, nil)
+		require.NotNil(t, err, "should have failed - user creation disabled")
 	})
 }
 

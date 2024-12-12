@@ -5,6 +5,6 @@ BEGIN
         WHERE table_name = 'users'
         AND column_name = 'description'
     ) THEN
-        ALTER TABLE Users ADD COLUMN Description varchar(300) DEFAULT NULL;
+        ALTER TABLE Users ADD COLUMN Description text DEFAULT NULL;
     END IF;
 END $$; 

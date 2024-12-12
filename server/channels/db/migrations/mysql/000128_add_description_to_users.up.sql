@@ -6,7 +6,7 @@ SET @preparedStatement = (SELECT IF(
         AND column_name = 'Description'
     ) > 0,
     'SELECT 1',
-    'ALTER TABLE Users ADD Description varchar(300) DEFAULT NULL;'
+    'ALTER TABLE Users ADD Description text DEFAULT NULL;'
 ));
 
 PREPARE alterIfNotExists FROM @preparedStatement;
