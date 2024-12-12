@@ -9,6 +9,7 @@ import ExternalImage from 'components/external_image';
 import ExternalLink from 'components/external_link';
 
 import {getVideoId, ytRegex, handleYoutubeTime} from 'utils/youtube';
+import { isDesktopApp } from 'utils/user_agent';
 
 type Props = {
     postId: string;
@@ -25,10 +26,10 @@ export default class YoutubeVideo extends React.PureComponent<Props, State> {
     constructor(props: Props) {
         super(props);
 
-        // if default is false, the embed youtube video need click twice to play
-        // so set default as true
+        // if default is false, the embed youtube video in Browser need click twice to play
+        // so set default as true in Browser
         this.state = {
-            playing: true,
+            playing: !isDesktopApp(),
         };
     }
 
