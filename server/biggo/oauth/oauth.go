@@ -6,10 +6,10 @@ import (
 	"io"
 	"strings"
 
-	"git.biggo.com/Funmula/BigGoChat/server/v8/einterfaces"
 	"git.biggo.com/Funmula/BigGoChat/server/public/model"
 	"git.biggo.com/Funmula/BigGoChat/server/public/shared/mlog"
 	"git.biggo.com/Funmula/BigGoChat/server/public/shared/request"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/einterfaces"
 )
 
 const UserAuthServiceBiggo = "biggo"
@@ -18,10 +18,11 @@ type BiggoProvider struct {
 }
 
 type BiggoUser struct {
-	Id     string `json:"userid"`
-	Email  string `json:"email"`
-	UserId string `json:"at_userid"`
-	Name   string `json:"name"`
+	Id          string `json:"userid"`
+	Email       string `json:"email"`
+	UserId      string `json:"at_userid"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
 }
 
 func init() {
@@ -44,7 +45,7 @@ func userFromBiggoUser(logger mlog.LoggerIFace, glu *BiggoUser) *model.User {
 	user.Email = strings.ToLower(glu.Email)
 	user.AuthData = &glu.Id
 	user.AuthService = UserAuthServiceBiggo
-
+	user.Description = glu.Description
 	return user
 }
 

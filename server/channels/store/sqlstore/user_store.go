@@ -58,7 +58,7 @@ func newSqlUserStore(sqlStore *SqlStore, metrics einterfaces.MetricsInterface) s
 	// note: we are providing field names explicitly here to maintain order of columns (needed when using raw queries)
 	us.usersQuery = us.getQueryBuilder().
 		Select("u.Id", "u.CreateAt", "u.UpdateAt", "u.DeleteAt", "u.Username", "u.Password", "u.AuthData", "u.AuthService", "u.Email", "u.EmailVerified", "u.Nickname", "u.FirstName", "u.LastName", "u.Position", "u.Roles", "u.AllowMarketing", "u.Props", "u.NotifyProps", "u.LastPasswordUpdate", "u.LastPictureUpdate", "u.FailedAttempts", "u.Locale", "u.Timezone", "u.MfaActive", "u.MfaSecret", "u.MfaUsedTimestamps",
-			"b.UserId IS NOT NULL AS IsBot", "COALESCE(b.Description, '') AS BotDescription", "COALESCE(b.LastIconUpdate, 0) AS BotLastIconUpdate", "u.RemoteId", "u.LastLogin", "u.Mobilephone").
+			"b.UserId IS NOT NULL AS IsBot", "COALESCE(b.Description, '') AS BotDescription", "COALESCE(b.LastIconUpdate, 0) AS BotLastIconUpdate", "u.RemoteId", "u.LastLogin", "u.Mobilephone", "u.Description").
 		From("Users u").
 		LeftJoin("Bots b ON ( b.UserId = u.Id )")
 
@@ -87,12 +87,12 @@ func (us SqlUserStore) insert(user *model.User) (sql.Result, error) {
 		(Id, CreateAt, UpdateAt, DeleteAt, Username, Password, AuthData, AuthService,
 			Email, EmailVerified, Nickname, FirstName, LastName, Position, Roles, AllowMarketing,
 			Props, NotifyProps, LastPasswordUpdate, LastPictureUpdate, FailedAttempts,
-			Locale, Timezone, MfaActive, MfaSecret, RemoteId, Mobilephone, MfaUsedTimestamps)
+			Locale, Timezone, MfaActive, MfaSecret, RemoteId, Mobilephone, MfaUsedTimestamps, Description)
 		VALUES
 		(:Id, :CreateAt, :UpdateAt, :DeleteAt, :Username, :Password, :AuthData, :AuthService,
 			:Email, :EmailVerified, :Nickname, :FirstName, :LastName, :Position, :Roles, :AllowMarketing,
 			:Props, :NotifyProps, :LastPasswordUpdate, :LastPictureUpdate, :FailedAttempts,
-			:Locale, :Timezone, :MfaActive, :MfaSecret, :RemoteId, :Mobilephone, :MfaUsedTimestamps)`
+			:Locale, :Timezone, :MfaActive, :MfaSecret, :RemoteId, :Mobilephone, :MfaUsedTimestamps, :Description)`
 
 	user.Props = wrapBinaryParamStringMap(us.IsBinaryParamEnabled(), user.Props)
 	return us.GetMasterX().NamedExec(query, user)
@@ -233,7 +233,7 @@ func (us SqlUserStore) Update(rctx request.CTX, user *model.User, trustedUpdateD
 				AllowMarketing=:AllowMarketing, Props=:Props, NotifyProps=:NotifyProps,
 				LastPasswordUpdate=:LastPasswordUpdate, LastPictureUpdate=:LastPictureUpdate,
 				FailedAttempts=:FailedAttempts,Locale=:Locale, Timezone=:Timezone, MfaActive=:MfaActive,
-				MfaSecret=:MfaSecret, RemoteId=:RemoteId, LastLogin=:LastLogin, Mobilephone=:Mobilephone, MfaUsedTimestamps=:MfaUsedTimestamps
+				MfaSecret=:MfaSecret, RemoteId=:RemoteId, LastLogin=:LastLogin, Mobilephone=:Mobilephone, MfaUsedTimestamps=:MfaUsedTimestamps, Description=:Description
 			WHERE Id=:Id`
 
 	user.Props = wrapBinaryParamStringMap(us.IsBinaryParamEnabled(), user.Props)
@@ -513,7 +513,7 @@ func (us SqlUserStore) Get(ctx context.Context, id string) (*model.User, error) 
 		&user.Nickname, &user.FirstName, &user.LastName, &user.Position, &user.Roles,
 		&user.AllowMarketing, &props, &notifyProps, &user.LastPasswordUpdate, &user.LastPictureUpdate,
 		&user.FailedAttempts, &user.Locale, &timezone, &user.MfaActive, &user.MfaSecret, &user.MfaUsedTimestamps,
-		&user.IsBot, &user.BotDescription, &user.BotLastIconUpdate, &user.RemoteId, &user.LastLogin, &user.Mobilephone)
+		&user.IsBot, &user.BotDescription, &user.BotLastIconUpdate, &user.RemoteId, &user.LastLogin, &user.Mobilephone, &user.Description)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, store.NewErrNotFound("User", id)
@@ -807,8 +807,6 @@ func (us SqlUserStore) GetProfilesInChannel(options *model.UserGetOptions) ([]*m
 	query = applyMultiRoleFilters(query, options.Roles, options.TeamRoles, options.ChannelRoles, us.DriverName() == model.DatabaseDriverPostgres)
 
 	queryString, args, err := query.ToSql()
-	fmt.Println(queryString)
-	fmt.Printf("%v\n", args)
 	if err != nil {
 		return nil, errors.Wrap(err, "get_profiles_in_channel_tosql")
 	}
@@ -923,7 +921,7 @@ func (us SqlUserStore) GetAllProfilesInChannel(ctx context.Context, channelID st
 			&user.FirstName, &user.LastName, &user.Position, &user.Roles, &user.AllowMarketing,
 			&props, &notifyProps, &user.LastPasswordUpdate, &user.LastPictureUpdate, &user.FailedAttempts,
 			&user.Locale, &timezone, &user.MfaActive, &user.MfaSecret, &user.MfaUsedTimestamps, &user.IsBot, &user.BotDescription,
-			&user.BotLastIconUpdate, &user.RemoteId, &user.LastLogin, &user.Mobilephone,
+			&user.BotLastIconUpdate, &user.RemoteId, &user.LastLogin, &user.Mobilephone, &user.Description,
 		); err != nil {
 			return nil, errors.Wrap(err, "failed to scan values from rows into User entity")
 		}
