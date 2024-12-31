@@ -3374,6 +3374,7 @@
     "create_post.send_message": "傳送訊息",
     "create_post.shortcutsNotSupported": "您的裝置不支援鍵盤快捷鍵。",
     "create_post.write": "傳送訊息至 {channelDisplayName}",
+    "create_post.placeholder.verify": "為確保傳送訊息的安全性, 請先完成身份認證, 才能傳送訊息。",
     "create_team.agreement": "繼續建立帳號並使用 {siteName} 即表示您同意我們的[使用條款]({TermsOfServiceLink})和[隱私權政策]({PrivacyPolicyLink})。如果您不同意，則無法使用 {siteName}。",
     "create_team.createTeamRestricted.message": "您的工作區方案已達到團隊數量上限。透過 30 天免費試用版即可建立無限團隊。請聯絡您的系統管理員。",
     "create_team.createTeamRestricted.title": "專業版功能",
