@@ -90,10 +90,10 @@ export class ConvertChannelModal extends React.PureComponent<Props, State> {
                         id='convertChannelModalLabel'
                     >
                         <FormattedMessage
-                            id='convert_channel.title'
-                            defaultMessage='Confirm changing {display_name} to a private channel?'
+                            id='admin.team_channel_settings.convertConfirmModal.toPrivateTitle'
+                            defaultMessage='Confirm changing {displayName} to a private channel?'
                             values={{
-                                display_name: channelDisplayName,
+                                displayName: channelDisplayName,
                             }}
                         />
                     </Modal.Title>
@@ -102,7 +102,7 @@ export class ConvertChannelModal extends React.PureComponent<Props, State> {
                     <p>
                         <Markdown
                             message={formatMessage({
-                                id: 'convert_channel.question1',
+                                id: 'change_to_private_channel_modal.desc',
                                 defaultMessage: 'When you convert **{display_name}** to a private channel, history and membership are preserved. Publicly shared files remain accessible to anyone with the link. Membership in a private channel is by invitation only.',
                             }, {
                                 display_name: channelDisplayName,
@@ -113,7 +113,7 @@ export class ConvertChannelModal extends React.PureComponent<Props, State> {
                         <div className='Input_wrapper'>
                             <input
                                 className='Input form-control medium new-channel-modal-name-input channel-name-input-field'
-                                placeholder={formatMessage({id: 'convert_channel.confirm_name', defaultMessage: 'Enter channel name'})}
+                                placeholder={formatMessage({id: 'change_to_private_channel_modal.input.placeholder', defaultMessage: 'Enter channel name'})}
                                 onChange={this.onUpdateConfirmName}
                                 autoFocus={true}
                             />
@@ -134,7 +134,7 @@ export class ConvertChannelModal extends React.PureComponent<Props, State> {
                     >
                         <FormattedMessage
                             id='convert_channel.cancel'
-                            defaultMessage='No, cancel'
+                            defaultMessage='Cancel'
                         />
                     </button>
                     <button
@@ -148,7 +148,7 @@ export class ConvertChannelModal extends React.PureComponent<Props, State> {
                     >
                         <FormattedMessage
                             id='convert_channel.confirm'
-                            defaultMessage='Yes, convert to private channel'
+                            defaultMessage='Confirm changing'
                         />
                     </button>
                 </Modal.Footer>

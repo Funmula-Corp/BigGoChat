@@ -54,8 +54,8 @@ export default class DownloadPage extends PureComponent<Props, State> {
             nativeLocation: location.replace(/^(https|http)/, 'mattermost'),
             brandImageError: false,
             navigating: false,
-            desktopVersion: '5.9.0',
-            appVersion: '5.9.0',
+            desktopVersion: '5.10.0',
+            appVersion: '2.23.0',
         };
 
         if (!BrowserStore.hasSeenLandingPage()) {

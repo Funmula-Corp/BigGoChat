@@ -354,10 +354,10 @@ const AdvanceTextEditor = ({
     );
 
     let createMessage;
-    if (!isPhoneVerified) {
+    if (!isPhoneVerified && !isBot) {
         // TODO i18n
-        createMessage = '為確保傳送訊息的安全性, 請先完成身份認證, 才能傳送訊息。';
-    }else if (placeholder) {
+        createMessage = formatMessage({id: 'create_post.placeholder.verify', defaultMessage: 'To ensure message security, please complete identity verification before sending messages.'});
+    } else if (placeholder) {
         createMessage = placeholder;
     } else if (readOnlyChannel) {
         createMessage = Utils.localizeMessage(
@@ -371,14 +371,6 @@ const AdvanceTextEditor = ({
                 defaultMessage: 'Write to {channelDisplayName}',
             },
             {channelDisplayName: currentChannel.display_name},
-        );
-    } else if (!isPhoneVerified && !isBot) {
-        // TODO i18n
-        createMessage = '為確保傳送訊息的安全性, 請先完成身份認證, 才能傳送訊息。';
-    } else if (readOnlyChannel) {
-        createMessage = Utils.localizeMessage(
-            'create_post.read_only',
-            'This channel is read-only. Only members with permission can post here.',
         );
     } else {
         createMessage = Utils.localizeMessage('create_comment.addComment', 'Reply to this thread...');
