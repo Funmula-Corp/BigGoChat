@@ -23,7 +23,7 @@ function mapStateToProps(state: GlobalState) {
         linuxAPPIMAGELink: 'https://img.bgo.one/biggo-chat-download/biggo-chat-5.10.0-linux-x86_64.AppImage',
         linuxTARGZLink: 'https://img.bgo.one/biggo-chat-download/biggo-chat-5.10.0-linux-x64.tar.gz',
         iosAppLink: '#',
-        androidAppLink: '#',
+        androidAppLink: 'https://play.google.com/store/apps/details?id=com.funmula.biggo.chat',
         defaultTheme: getTheme(state),
         siteUrl: config.SiteURL,
         siteName: config.SiteName,
