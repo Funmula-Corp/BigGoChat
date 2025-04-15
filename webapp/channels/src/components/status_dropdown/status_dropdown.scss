@@ -191,6 +191,8 @@ button.custom_status__row {
         right: -1px;
         left: inherit;
         width: 264px;
+        max-height: 90vh;
+        overflow-y: auto;
     }
 
     .custom_status__row > #custom_status__clear {

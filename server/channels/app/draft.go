@@ -9,10 +9,10 @@ import (
 	"errors"
 	"net/http"
 
-	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/store"
 	"git.biggo.com/Funmula/BigGoChat/server/public/model"
 	"git.biggo.com/Funmula/BigGoChat/server/public/shared/mlog"
 	"git.biggo.com/Funmula/BigGoChat/server/public/shared/request"
+	"git.biggo.com/Funmula/BigGoChat/server/v8/channels/store"
 )
 
 func (a *App) GetDraft(userID, channelID, rootID string) (*model.Draft, *model.AppError) {
@@ -35,6 +35,11 @@ func (a *App) GetDraft(userID, channelID, rootID string) (*model.Draft, *model.A
 }
 
 func (a *App) UpsertDraft(c request.CTX, draft *model.Draft, connectionID string) (*model.Draft, *model.AppError) {
+	// If the draft is empty, just delete it
+	if draft.Message == "" {
+		return nil, a.DeleteDraft(c, draft, connectionID)
+	}
+
 	if !*a.Config().ServiceSettings.AllowSyncedDrafts {
 		return nil, model.NewAppError("CreateDraft", "app.draft.feature_disabled", nil, "", http.StatusNotImplemented)
 	}
@@ -54,15 +59,6 @@ func (a *App) UpsertDraft(c request.CTX, draft *model.Draft, connectionID string
 	_, nErr := a.Srv().Store().User().Get(context.Background(), draft.UserId)
 	if nErr != nil {
 		return nil, model.NewAppError("CreateDraft", "app.user.get.app_error", nil, "", http.StatusInternalServerError).Wrap(nErr)
-	}
-
-	// If the draft is empty, just delete it
-	if draft.Message == "" {
-		deleteErr := a.Srv().Store().Draft().Delete(draft.UserId, draft.ChannelId, draft.RootId)
-		if deleteErr != nil {
-			return nil, model.NewAppError("CreateDraft", "app.draft.save.app_error", nil, "", http.StatusInternalServerError).Wrap(deleteErr)
-		}
-		return nil, nil
 	}
 
 	dt, nErr := a.Srv().Store().Draft().Upsert(draft)

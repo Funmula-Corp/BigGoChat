@@ -13,6 +13,7 @@ import {loginWithDesktopToken} from 'actions/views/login';
 import DesktopApp from 'utils/desktop_api';
 
 import './desktop_auth_token.scss';
+import {isDesktopApp} from 'utils/user_agent';
 
 const BOTTOM_MESSAGE_TIMEOUT = 10000;
 const DESKTOP_AUTH_PREFIX = 'desktop_auth_client_token';
@@ -43,6 +44,11 @@ const DesktopAuthToken: React.FC<Props> = ({href, onLogin}: Props) => {
     const [showBottomMessage, setShowBottomMessage] = useState<boolean>();
 
     const tryDesktopLogin = async () => {
+        if (!storedClientToken && isDesktopApp()) {
+            await onLogin();
+            return;
+        }
+
         if (!(serverToken && receivedClientToken === storedClientToken)) {
             setStatus(DesktopAuthStatus.Error);
             return;
@@ -96,7 +102,7 @@ const DesktopAuthToken: React.FC<Props> = ({href, onLogin}: Props) => {
 
     useEffect(() => {
         if (serverToken) {
-            if (storedClientToken) {
+            if (storedClientToken || isDesktopApp()) {
                 tryDesktopLogin();
             } else {
                 forwardToDesktopApp();
@@ -138,7 +144,7 @@ const DesktopAuthToken: React.FC<Props> = ({href, onLogin}: Props) => {
         subMessage = (
             <FormattedMessage
                 id='desktop_auth_token.complete.openMattermost'
-                defaultMessage='Click on <b>Open Mattermost</b> in the browser prompt to <a>launch the desktop app</a>'
+                defaultMessage='Click on <b>Open BigGo Chat</b> in the browser prompt to <a>launch the desktop app</a>'
                 values={{
                     a: (chunks: React.ReactNode) => {
                         return (
@@ -155,7 +161,7 @@ const DesktopAuthToken: React.FC<Props> = ({href, onLogin}: Props) => {
         bottomMessage = (
             <FormattedMessage
                 id='desktop_auth_token.complete.havingTrouble'
-                defaultMessage='Having trouble logging in? <a>Open Mattermost in your browser</a>'
+                defaultMessage='Having trouble logging in? <a>Open BigGo Chat in your browser</a>'
                 values={{
                     a: (chunks: React.ReactNode) => {
                         return (

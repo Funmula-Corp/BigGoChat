@@ -2,27 +2,11 @@
 // See LICENSE.txt for license information.
 
 @import 'utils/mixins';
-#root {
-    position: relative;
-}
-#root::before {
-    content: "";
-    display: block;
+.login-body {
+    height: 100%;
+    width: 100%;
     background-size: cover;
     background-image: url("images/biggo-chat-background.jpg");
-    width: 100%;
-    opacity: 0.6;
-    position: absolute;
-    /* 偏移值皆設為 0，讓僞元素跟父元素一樣大小 */
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    z-index: -1;
-}
-
-
-.login-body {
     display: flex;
     flex-direction: column;
     padding-bottom: 32px;
@@ -52,7 +36,7 @@
         .login-body-message {
             display: flex;
             flex-flow: column;
-            align-self: flex-start;
+            align-self: center;
             justify-content: space-between;
             min-height: 467px;
 
